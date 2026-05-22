@@ -1,0 +1,204 @@
+.about { background: var(--bg-secondary); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 100px;
+  align-items: center;
+  margin-bottom: 80px;
+}
+
+/* Visual side */
+.visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+}
+
+.avatarWrap { position: relative; }
+
+.avatar {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(200,240,67,0.15) 0%, rgba(0,229,204,0.1) 100%);
+  border: 1px solid var(--border-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 2;
+}
+
+.avatarInitials {
+  font-family: var(--font-display);
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--accent-lime);
+  letter-spacing: -0.03em;
+}
+
+.ring {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  border: 1px dashed rgba(200,240,67,0.2);
+  animation: spin-slow 20s linear infinite;
+  z-index: 1;
+}
+
+.ring2 {
+  position: absolute;
+  inset: -50px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0,229,204,0.1);
+  animation: spin-slow 30s linear infinite reverse;
+  z-index: 1;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Float cards */
+.floatCard {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 14px 18px;
+  z-index: 3;
+  animation: float 4s ease-in-out infinite;
+}
+
+.floatCard1 { top: 40px; right: 0; animation-delay: 0s; }
+.floatCard2 { bottom: 40px; left: 0; animation-delay: -2s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+.floatIcon { font-size: 24px; }
+
+.floatValue {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.floatLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+/* Text side */
+.text { display: flex; flex-direction: column; gap: 32px; }
+
+.italic { font-style: italic; color: var(--accent-lime); }
+
+.paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.85;
+}
+
+.paragraphs strong { color: var(--text-primary); font-weight: 500; }
+
+/* Info grid */
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.infoItem {
+  padding: 16px 20px;
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoItem:nth-child(2n) { border-right: none; }
+.infoItem:nth-last-child(-n+2) { border-bottom: none; }
+
+.infoLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.infoValue {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+/* Marquee */
+.marqueeWrap {
+  overflow: hidden;
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 20px 0;
+}
+
+.marquee { overflow: hidden; }
+
+.marqueeTrack {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marqueeItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 20px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0 20px;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.marqueeItem:hover { color: var(--accent-lime); }
+
+.marqueeDot { color: var(--accent-lime); font-size: 10px; }
+
+@media (max-width: 960px) {
+  .layout { grid-template-columns: 1fr; gap: 60px; }
+  .visual { min-height: 300px; }
+  .avatar { width: 180px; height: 180px; }
+  .avatarInitials { font-size: 42px; }
+  .floatCard1 { top: 0; right: 20px; }
+  .floatCard2 { bottom: 0; left: 20px; }
+}
+
+@media (max-width: 480px) {
+  .infoGrid { grid-template-columns: 1fr; }
+  .infoItem { border-right: none !important; }
+}

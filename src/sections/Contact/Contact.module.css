@@ -1,0 +1,196 @@
+.contact { background: var(--bg-secondary); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+.italic { font-style: italic; color: var(--accent-lime); }
+
+/* Contact items */
+.contactItems { display: flex; flex-direction: column; gap: 12px; margin-bottom: 36px; }
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.contactItem:hover {
+  border-color: var(--border-glow);
+  background: var(--bg-card-hover);
+}
+
+.contactIcon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(200,240,67,0.08);
+  border-radius: 10px;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.contactLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+
+.contactValue {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+}
+
+.copyHint {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--accent-lime);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.contactItem:hover .copyHint { opacity: 1; }
+
+/* Socials */
+.socialRow { display: flex; flex-direction: column; gap: 8px; }
+
+.socialLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  padding: 4px 0;
+}
+
+.socialLink:hover { color: var(--accent-lime); transform: translateX(6px); }
+
+.socialIcon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.socialLink:hover .socialIcon {
+  border-color: var(--accent-lime);
+  background: rgba(200,240,67,0.08);
+  color: var(--accent-lime);
+}
+
+/* Form card */
+.formCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 40px;
+}
+
+.formTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 32px;
+  letter-spacing: -0.02em;
+}
+
+.form { display: flex; flex-direction: column; gap: 20px; }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.field { display: flex; flex-direction: column; gap: 8px; }
+
+.label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.input,
+.textarea {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  resize: vertical;
+}
+
+.input::placeholder,
+.textarea::placeholder { color: var(--text-muted); }
+
+.input:focus,
+.textarea:focus {
+  border-color: rgba(200,240,67,0.4);
+  background: rgba(200,240,67,0.03);
+}
+
+.submitBtn { width: 100%; justify-content: center; }
+
+/* Success */
+.success {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  background: rgba(200,240,67,0.07);
+  border: 1px solid rgba(200,240,67,0.2);
+  border-radius: 12px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.successIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--accent-lime);
+  color: #0a0a0f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.success strong { display: block; color: var(--accent-lime); margin-bottom: 4px; font-family: var(--font-display); }
+.success p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; gap: 60px; }
+}
+
+@media (max-width: 480px) {
+  .row { grid-template-columns: 1fr; }
+  .formCard { padding: 24px; }
+}

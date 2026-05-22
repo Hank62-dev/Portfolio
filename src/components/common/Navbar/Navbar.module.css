@@ -1,0 +1,132 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 24px 0;
+  transition: all 0.4s ease;
+}
+
+.scrolled {
+  padding: 12px 0;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  gap: 1px;
+  color: var(--text-primary);
+  transition: color 0.2s;
+}
+
+.logo:hover { color: var(--accent-lime); }
+
+.logoMark {
+  color: var(--accent-lime);
+  font-family: var(--font-body);
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+}
+
+.link {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.link:hover, .link.active {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.05);
+}
+
+.link.active { color: var(--accent-lime); }
+
+.cta {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a0a0f;
+  background: var(--accent-lime);
+  border: none;
+  cursor: pointer;
+  padding: 8px 20px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  margin-left: 8px;
+}
+
+.cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+.burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.burger span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: var(--text-primary);
+  transition: all 0.3s;
+  transform-origin: center;
+}
+
+.burger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+.burger.open span:nth-child(2) { opacity: 0; }
+.burger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+@media (max-width: 768px) {
+  .burger { display: flex; }
+
+  .links {
+    position: fixed;
+    inset: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    background: var(--bg-primary);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: -1;
+  }
+
+  .links.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .link { font-size: 18px; padding: 12px 32px; }
+  .cta { font-size: 16px; padding: 14px 32px; margin: 8px 0 0; }
+}

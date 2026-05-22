@@ -1,0 +1,35 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(var(--badge-color, 200, 240, 67), 0.2);
+  color: var(--badge-color, var(--accent-lime));
+  background: rgba(var(--badge-color, 200, 240, 67), 0.07);
+  white-space: nowrap;
+}
+
+.default {
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.04);
+  border-color: var(--border-subtle);
+}
+
+.tech {
+  font-size: 11px;
+  padding: 3px 8px;
+  color: var(--text-secondary);
+  background: rgba(255,255,255,0.03);
+  border-color: var(--border-subtle);
+  transition: all 0.2s;
+}
+
+.tech:hover {
+  color: var(--accent-lime);
+  border-color: rgba(200, 240, 67, 0.3);
+  background: rgba(200, 240, 67, 0.06);
+}

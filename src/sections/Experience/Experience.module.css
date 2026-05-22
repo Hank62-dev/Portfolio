@@ -1,0 +1,210 @@
+.experience { background: var(--bg-primary); }
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+/* Sidebar */
+.sidebar {
+  position: sticky;
+  top: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  bottom: 14px;
+  width: 1px;
+  background: var(--border-subtle);
+  z-index: 0;
+}
+
+.tab {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 16px 20px 16px 0;
+  text-align: left;
+  position: relative;
+  z-index: 1;
+  transition: all 0.2s;
+  border-radius: 8px;
+}
+
+.tab:hover .tabText { opacity: 1; }
+
+.tabDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+  opacity: 0.4;
+  transition: opacity 0.2s, transform 0.2s;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  background: var(--text-muted) !important;
+}
+
+.activeTab .tabDot {
+  opacity: 1;
+  transform: scale(1.3);
+  background: var(--exp-color) !important;
+  box-shadow: 0 0 10px var(--exp-color);
+}
+
+.tabText { display: flex; flex-direction: column; gap: 2px; opacity: 0.5; transition: opacity 0.2s; }
+.activeTab .tabText { opacity: 1; }
+
+.tabRole {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.tabCompany { font-size: 12px; color: var(--text-muted); }
+
+/* Content */
+.content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 40px;
+  animation: fadeIn 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.role {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+
+.company {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.dot { color: var(--text-muted); }
+
+.period {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.periodBadge {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border-subtle);
+  padding: 4px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.type {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.description {
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.highlights { margin-bottom: 28px; }
+
+.highlightsTitle {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+.highlightList { display: flex; flex-direction: column; gap: 12px; list-style: none; }
+
+.highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.check {
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.techStack { display: flex; flex-wrap: wrap; gap: 8px; }
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar {
+    flex-direction: row;
+    overflow-x: auto;
+    position: static;
+    gap: 8px;
+    padding-bottom: 8px;
+  }
+  .timelineLine { display: none; }
+  .tab { padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px; white-space: nowrap; }
+  .activeTab { background: rgba(255,255,255,0.05); border-color: var(--exp-color, var(--accent-lime)); }
+  .tabDot { display: none; }
+  .tabText { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  .content { padding: 24px; }
+  .header { flex-direction: column; }
+  .period { align-items: flex-start; }
+}
