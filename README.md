@@ -1,22 +1,22 @@
-# 🚀 Portfolio Cá Nhân
+#  Portfolio Cá Nhân
 
 Portfolio cá nhân được xây dựng với **React + Vite**, thiết kế dark theme hiện đại với accent màu lime.
 
-## ✨ Tính năng
+##  Tính năng
 
-- 🎨 Dark theme với palette lime/cyan/purple
-- ✍️ Typing effect ở Hero section
-- 📊 Skills visualization với radar chart + animated bars
-- 🗂️ Projects với filter theo category + modal detail
-- 💼 Experience timeline interactive
-- 📬 Contact form
-- 💬 Testimonials
-- 🖱️ Custom cursor (desktop)
-- 📜 Scroll reveal animations
-- 📱 Fully responsive
-- ⚡ Custom hooks: useTypingEffect, useScrollAnimation, useDarkMode
+-  Dark theme với palette lime/cyan/purple
+-  Typing effect ở Hero section
+-  Skills visualization với radar chart + animated bars
+-  Projects với filter theo category + modal detail
+-  Experience timeline interactive
+-  Contact form
+-  Testimonials
+-  Custom cursor (desktop)
+-  Scroll reveal animations
+-  Fully responsive
+-  Custom hooks: useTypingEffect, useScrollAnimation, useDarkMode
 
-## 🛠️ Cài đặt & Chạy
+##  Cài đặt & Chạy
 
 ```bash
 # Cài dependencies
@@ -32,7 +32,7 @@ npm run build
 npm run preview
 ```
 
-## 📁 Cấu trúc
+##  Cấu trúc
 
 ```
 src/
@@ -59,7 +59,7 @@ src/
 └── utils/           # Helpers, constants
 ```
 
-## 🎨 Tuỳ chỉnh
+##  Tuỳ chỉnh
 
 Sửa thông tin cá nhân trong:
 - `src/data/socials.js` — Thông tin cá nhân, experience, education
@@ -67,7 +67,7 @@ Sửa thông tin cá nhân trong:
 - `src/data/skills.js` — Skills và tech stack
 - `src/styles/variables.css` — Design tokens (màu sắc, font...)
 
-## 🚀 Deploy
+##  Deploy
 
 ```bash
 # Build
