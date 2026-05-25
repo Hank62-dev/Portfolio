@@ -55,7 +55,7 @@
 }
 
 .close:hover {
-  background: rgba(200,240,67,0.1);
+  background: rgba(59,130,246,0.1);
   border-color: var(--accent-lime);
   color: var(--accent-lime);
 }

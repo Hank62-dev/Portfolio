@@ -33,7 +33,7 @@
   transition: transform 0.3s ease;
 }
 .primary:hover::before { transform: translateX(0); }
-.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(200,240,67,0.35); }
+.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(59, 130, 246, 0.35); }
 
 .secondary {
   background: transparent;
@@ -43,7 +43,7 @@
 .secondary:hover {
   border-color: var(--accent-lime);
   color: var(--accent-lime);
-  background: rgba(200,240,67,0.05);
+  background: rgba(59, 130, 246, 0.05);
 }
 
 .ghost {
@@ -60,7 +60,7 @@
   border: 1px solid var(--border-glow);
 }
 .outline:hover {
-  background: rgba(200,240,67,0.08);
+  background: rgba(59, 130, 246, 0.08);
   border-color: var(--accent-lime);
 }
 

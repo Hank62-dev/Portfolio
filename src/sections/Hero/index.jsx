@@ -3,7 +3,7 @@ import { personalInfo, socials } from '../../data/socials';
 import Button from '../../components/common/Button';
 import styles from './Hero.module.css';
 
-const ROLES = ['Fullstack Developer', 'UI Engineer', 'Consultant'];
+const ROLES = ['Fullstack Developer', 'UI Engineer', 'Consultant', 'Software Engineer'];
 
 const Hero = () => {
   const typed = useTypingEffect(ROLES, { typeSpeed: 75, deleteSpeed: 35, delayBetween: 2200 });

@@ -36,7 +36,7 @@
 .social:hover {
   border-color: var(--accent-lime);
   color: var(--accent-lime);
-  background: rgba(200,240,67,0.05);
+  background: rgba(59,130,246,0.05);
 }
 
 @media (max-width: 480px) {

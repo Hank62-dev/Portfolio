@@ -22,7 +22,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at top left, rgba(200,240,67,0.04) 0%, transparent 60%);
+  background: radial-gradient(ellipse at top left, rgba(59, 130, 246, 0.04) 0%, transparent 60%);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
