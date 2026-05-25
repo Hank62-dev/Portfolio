@@ -14,9 +14,13 @@ const ProjectCard = ({ project, onClick }) => (
   >
     {/* Thumbnail */}
     <div className={styles.thumb}>
-      <div className={styles.thumbPlaceholder}>
-        <span className={styles.thumbInitial}>{project.title[0]}</span>
-      </div>
+      {project.image ? (
+        <img src={project.image} alt={project.title} className={styles.thumbImage} />
+      ) : (
+        <div className={styles.thumbPlaceholder}>
+          <span className={styles.thumbInitial}>{project.title[0]}</span>
+        </div>
+      )}
       {project.featured && <span className={styles.featuredBadge}>Featured</span>}
       <div className={styles.overlay}>
         <span className={styles.viewBtn}>Xem chi tiết →</span>
@@ -48,7 +52,11 @@ const ProjectModal = ({ project, onClose }) => {
   return (
     <div className={styles.modalContent}>
       <div className={styles.modalThumb} style={{ '--card-color': project.color }}>
-        <span className={styles.thumbInitial} style={{ fontSize: 64 }}>{project.title[0]}</span>
+        {project.image ? (
+          <img src={project.image} alt={`${project.title} screenshot`} className={styles.modalImage} />
+        ) : (
+          <span className={styles.thumbInitial} style={{ fontSize: 64 }}>{project.title[0]}</span>
+        )}
       </div>
       <div className={styles.modalBody}>
         <div className={styles.modalMeta}>
