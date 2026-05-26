@@ -84,9 +84,9 @@ const getRecentDailyContributionData = (items = [], days = 28) => {
 };
 
 const ContributionWave = ({ points, labels }) => {
-  const width = 820;
-  const height = 180;
-  const labelArea = 38;
+  const width = 800;
+  const height = 280;
+  const labelArea = 32;
   const totalHeight = height + labelArea;
   const max = Math.max(...points, 1);
   const step = points.length > 1 ? width / (points.length - 1) : width;
@@ -185,7 +185,7 @@ const GithubDashboard = () => {
         <SectionTitle
           label="Đóng góp"
           title="Dashboard"
-          subtitle="Quan sát trạng thái đóng góp GitHub với biểu đồ gợn sóng và số liệu hoạt động mới nhất."
+          subtitle="Tổng quan về hoạt động trên GitHub của mình trong năm qua."
         />
 
         <div className={styles.grid}>
@@ -195,47 +195,47 @@ const GithubDashboard = () => {
               <span>{loading ? 'Đang tải...' : '28 ngày gần nhất'}</span>
             </div>
 
-            <div className={styles.chartBody}>
-              {loading ? (
-                <div className={styles.skeleton} />
-              ) : contributions ? (
-                <div className={styles.waveFrame}>
-                  <ContributionWave points={dailyPoints} labels={dailyLabels} />
-                </div>
-              ) : (
-                <div className={styles.fallbackBlock}>
-                  <p>{error || 'Không thể tải biểu đồ gợn sóng.'}</p>
-                  <img
-                    className={styles.fallbackImage}
-                    src="https://ghchart.rshah.org/Hank62-dev"
-                    alt="GitHub contributions"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
+            <div className={styles.chartContent}>
+              <div className={styles.chartBody}>
+                {loading ? (
+                  <div className={styles.skeleton} />
+                ) : contributions ? (
+                  <div className={styles.waveFrame}>
+                    <ContributionWave points={dailyPoints} labels={dailyLabels} />
+                  </div>
+                ) : (
+                  <div className={styles.fallbackBlock}>
+                    <p>{error || 'Không thể tải biểu đồ gợn sóng.'}</p>
+                    <img
+                      className={styles.fallbackImage}
+                      src="https://ghchart.rshah.org/Hank62-dev"
+                      alt="GitHub contributions"
+                    />
+                  </div>
+                )}
+              </div>
 
-          <div className={styles.statsCard}>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Tổng đóng góp năm</span>
-              <span className={styles.statValue}>{loading ? '---' : formatNumber(totalThisYear)}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Ngày có hoạt động</span>
-              <span className={styles.statValue}>{loading ? '---' : activeDays}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Streak hiện tại</span>
-              <span className={styles.statValue}>{loading ? '---' : current}</span>
-            </div>
-            <div className={styles.statItem}>
-              <span className={styles.statLabel}>Streak dài nhất</span>
-              <span className={styles.statValue}>{loading ? '---' : longest}</span>
-            </div>
-            <div className={styles.cardFooter}>
-              <a href="https://github.com/Hank62-dev" target="_blank" rel="noreferrer" className={styles.ctaButton}>
-                Xem hồ sơ GitHub
-              </a>
+              <div className={styles.floatingStats} aria-hidden={loading ? 'true' : 'false'}>
+                <div className={styles.statBubble} style={{ '--delay': '0s' }}>
+                  <div className={styles.statLabel}>Tổng đóng góp năm</div>
+                  <div className={styles.statValue}>{loading ? '---' : formatNumber(totalThisYear)}</div>
+                </div>
+
+                <div className={styles.statBubble} style={{ '--delay': '0.15s' }}>
+                  <div className={styles.statLabel}>Ngày có hoạt động</div>
+                  <div className={styles.statValue}>{loading ? '---' : activeDays}</div>
+                </div>
+
+                <div className={styles.statBubble} style={{ '--delay': '0.3s' }}>
+                  <div className={styles.statLabel}>Streak hiện tại</div>
+                  <div className={styles.statValue}>{loading ? '---' : current}</div>
+                </div>
+
+                <div className={styles.statBubble} style={{ '--delay': '0.45s' }}>
+                  <div className={styles.statLabel}>Streak dài nhất</div>
+                  <div className={styles.statValue}>{loading ? '---' : longest}</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
