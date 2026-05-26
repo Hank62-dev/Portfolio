@@ -54,29 +54,40 @@ const computeStreaks = (items = []) => {
   };
 };
 
-const getWeeklyContributionPoints = (items = [], maxWeeks = 52) => {
-  if (!items.length) return [];
+const formatLabelDate = (dateString) =>
+  new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(dateString));
 
-  const sorted = [...items].sort((a, b) => new Date(a.date) - new Date(b.date));
-  const firstDate = new Date(sorted[0].date);
-  const startOfWeek = new Date(firstDate);
-  startOfWeek.setHours(0, 0, 0, 0);
-  startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
-
-  const weeklyTotals = [];
-  sorted.forEach((item) => {
-    const date = new Date(item.date);
-    const weekIndex = Math.floor((date - startOfWeek) / 86400000 / 7);
-    weeklyTotals[weekIndex] = (weeklyTotals[weekIndex] ?? 0) + item.count;
+const getRecentDailyContributionData = (items = [], days = 28) => {
+  // Build a map from date (YYYY-MM-DD) to count for fast lookup
+  const map = new Map();
+  items.forEach((it) => {
+    map.set(it.date, it.count);
   });
 
-  const points = Array.from({ length: weeklyTotals.length }, (_, index) => weeklyTotals[index] ?? 0);
-  return points.slice(-maxWeeks);
+  const points = [];
+  const labels = [];
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const start = new Date(today);
+  start.setDate(start.getDate() - (days - 1));
+
+  for (let i = 0; i < days; i += 1) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const iso = d.toISOString().slice(0, 10);
+    labels.push(iso);
+    points.push(map.get(iso) ?? 0);
+  }
+
+  return { points, labels };
 };
 
-const ContributionWave = ({ points }) => {
-  const width = 560;
+const ContributionWave = ({ points, labels }) => {
+  const width = 820;
   const height = 180;
+  const labelArea = 38;
+  const totalHeight = height + labelArea;
   const max = Math.max(...points, 1);
   const step = points.length > 1 ? width / (points.length - 1) : width;
 
@@ -88,16 +99,34 @@ const ContributionWave = ({ points }) => {
     })
     .join(' ');
 
+  const labelStep = Math.ceil(points.length / 7);
+  const labelIndexes = points.map((_, index) => index).filter((index) => index % labelStep === 0 || index === points.length - 1);
+
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className={styles.waveSvg}>
+    <svg viewBox={`0 0 ${width} ${totalHeight}`} className={styles.waveSvg}>
       <defs>
         <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="rgba(90,176,255,0.45)" />
           <stop offset="100%" stopColor="rgba(90,176,255,0.08)" />
         </linearGradient>
       </defs>
+
       <path d={`${line} L ${width} ${height} L 0 ${height} Z`} fill="url(#waveGradient)" />
       <path d={line} fill="none" stroke="#5AB0FF" strokeWidth="3" strokeLinecap="round" />
+
+      <line x1="0" y1={height + 4} x2={width} y2={height + 4} className={styles.axisLine} />
+      {labelIndexes.map((index) => {
+        const x = Math.round(index * step);
+        const label = formatLabelDate(labels[index]);
+        return (
+          <g key={index}>
+            <line x1={x} y1={height + 4} x2={x} y2={height + 10} className={styles.tickLine} />
+            <text x={x} y={height + 28} className={styles.axisLabel}>
+              {label}
+            </text>
+          </g>
+        );
+      })}
     </svg>
   );
 };
@@ -126,15 +155,14 @@ const GithubDashboard = () => {
     };
   }, []);
 
-  const weeklyPoints = useMemo(
-    () => getWeeklyContributionPoints(contributions?.contributions ?? [], 52),
-    [contributions]
-  );
-
   const recentContributions = useMemo(
     () => contributions?.contributions.slice(-28) ?? [],
     [contributions]
   );
+
+  const { points: dailyPoints, labels: dailyLabels } = useMemo(() => {
+    return getRecentDailyContributionData(contributions?.contributions ?? [], 28);
+  }, [contributions]);
 
   const totalThisYear = useMemo(() => {
     if (!contributions) return 0;
@@ -155,8 +183,8 @@ const GithubDashboard = () => {
     <section id="github-dashboard" className={styles.githubDashboard}>
       <div className="container">
         <SectionTitle
-          label="GitHub"
-          title="Dashboard đóng góp"
+          label="Đóng góp"
+          title="Dashboard"
           subtitle="Quan sát trạng thái đóng góp GitHub với biểu đồ gợn sóng và số liệu hoạt động mới nhất."
         />
 
@@ -164,14 +192,16 @@ const GithubDashboard = () => {
           <div className={styles.chartCard}>
             <div className={styles.chartHeader}>
               <span>Contributor graph</span>
-              <span>{loading ? 'Đang tải...' : `${weeklyPoints.length} tuần gần nhất`}</span>
+              <span>{loading ? 'Đang tải...' : '28 ngày gần nhất'}</span>
             </div>
 
             <div className={styles.chartBody}>
               {loading ? (
                 <div className={styles.skeleton} />
               ) : contributions ? (
-                <ContributionWave points={weeklyPoints} />
+                <div className={styles.waveFrame}>
+                  <ContributionWave points={dailyPoints} labels={dailyLabels} />
+                </div>
               ) : (
                 <div className={styles.fallbackBlock}>
                   <p>{error || 'Không thể tải biểu đồ gợn sóng.'}</p>

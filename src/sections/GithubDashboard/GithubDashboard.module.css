@@ -14,6 +14,14 @@
   padding: 28px;
 }
 
+/* Remove the rectangular frame for the chart area so the wave can float */
+.chartCard {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 12px 0 0 0;
+}
+
 .chartHeader {
   display: flex;
   justify-content: space-between;
@@ -24,16 +32,44 @@
 }
 
 .chartBody {
-  min-height: 260px;
+  min-height: 320px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  overflow: visible;
+  padding: 0 18px 8px 18px;
+}
+
+.waveFrame {
+  width: calc(100% + 160px);
+  max-width: 1200px;
+  overflow: visible;
+  margin-left: -80px;
+  padding-bottom: 12px;
 }
 
 .waveSvg {
-  width: 100%;
+  width: 110%;
+  min-width: 760px;
   height: auto;
   overflow: visible;
+}
+
+.axisLine {
+  stroke: rgba(255,255,255,0.08);
+  stroke-width: 1;
+}
+
+.tickLine {
+  stroke: rgba(255,255,255,0.1);
+  stroke-width: 1;
+}
+
+.axisLabel {
+  fill: var(--text-muted);
+  font-size: 11px;
+  text-anchor: middle;
+  font-family: var(--font-body);
 }
 
 .fallbackBlock {
