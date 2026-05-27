@@ -91,13 +91,37 @@ const ContributionWave = ({ points, labels }) => {
   const max = Math.max(...points, 1);
   const step = points.length > 1 ? width / (points.length - 1) : width;
 
-  const line = points
-    .map((value, index) => {
-      const x = Math.round(index * step);
-      const y = Math.round(height - (value / max) * (height - 40) - 20);
-      return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-    })
-    .join(' ');
+  const coordinates = points.map((value, index) => {
+    const x = Math.round(index * step);
+    const y = Math.round(height - (value / max) * (height - 40) - 20);
+    return { x, y };
+  });
+
+  const getControlPoint = (current, previous, next, reverse = false) => {
+    const p = previous || current;
+    const n = next || current;
+    const smoothing = 0.22;
+    const o = {
+      x: (n.x - p.x) * smoothing,
+      y: (n.y - p.y) * smoothing,
+    };
+
+    return {
+      x: current.x + (reverse ? -o.x : o.x),
+      y: current.y + (reverse ? -o.y : o.y),
+    };
+  };
+
+  const line = coordinates.reduce((path, point, index, pts) => {
+    if (index === 0) return `M ${point.x} ${point.y}`;
+
+    const prev = pts[index - 1];
+    const next = pts[index + 1];
+    const cp1 = getControlPoint(prev, pts[index - 2], point, false);
+    const cp2 = getControlPoint(point, prev, next, true);
+
+    return `${path} C ${cp1.x} ${cp1.y} ${cp2.x} ${cp2.y} ${point.x} ${point.y}`;
+  }, '');
 
   const labelStep = Math.ceil(points.length / 7);
   const labelIndexes = points.map((_, index) => index).filter((index) => index % labelStep === 0 || index === points.length - 1);
