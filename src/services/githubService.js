@@ -15,7 +15,9 @@ export const fetchGithubStats = async () => {
 };
 
 export const fetchGithubContributions = async () => {
-  const res = await fetch(`${CONTRIBUTIONS_URL}/${GITHUB_USERNAME}`);
+  const res = await fetch(`${CONTRIBUTIONS_URL}/${GITHUB_USERNAME}?t=${Date.now()}`, {
+    cache: 'no-store',
+  });
   if (!res.ok) throw new Error('Failed to fetch GitHub contributions');
   return res.json();
 };

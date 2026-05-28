@@ -163,19 +163,31 @@ const GithubDashboard = () => {
   useEffect(() => {
     let canceled = false;
 
-    fetchGithubContributions()
-      .then((data) => {
-        if (!canceled) setContributions(data);
-      })
-      .catch((err) => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchGithubContributions();
+        if (!canceled) {
+          setContributions(data);
+          setError(null);
+        }
+      } catch (err) {
         if (!canceled) setError(err.message || 'Không thể tải dữ liệu đóng góp.');
-      })
-      .finally(() => {
+      } finally {
         if (!canceled) setLoading(false);
-      });
+      }
+    };
+
+    // Fetch immediately on mount
+    fetchData();
+
+    // Set up interval to refresh data every 30 seconds
+    const interval = setInterval(() => {
+      fetchData();
+    }, 30000);
 
     return () => {
       canceled = true;
+      clearInterval(interval);
     };
   }, []);
 
