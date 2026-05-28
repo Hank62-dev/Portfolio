@@ -45,7 +45,7 @@ const About = () => {
 
             <div className={styles.paragraphs}>
               <p>
-                Mình là <strong>{personalInfo.name}</strong>, một Fullstack Developer tại{' '}
+                Mình là <strong>{personalInfo.name}</strong>, một Software Engineer tại{' '}
                 <strong>{personalInfo.location}</strong>. Với hơn 1 năm trong nghề, mình đã xây dựng
                 nhiều sản phẩm từ startup MVP đến platform enterprise.
               </p>

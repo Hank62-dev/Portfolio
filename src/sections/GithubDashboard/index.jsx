@@ -84,8 +84,8 @@ const getRecentDailyContributionData = (items = [], days = 28) => {
 };
 
 const ContributionWave = ({ points, labels }) => {
-  const width = 800;
-  const height = 280;
+  const width = 1600;
+  const height = 400;
   const labelArea = 32;
   const totalHeight = height + labelArea;
   const max = Math.max(...points, 1);
@@ -212,6 +212,37 @@ const GithubDashboard = () => {
           subtitle="Tổng quan về hoạt động trên GitHub của mình trong năm qua."
         />
 
+        {/* Stats Cards Grid */}
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statCardLabel}>Tổng đóng góp năm</div>
+            <div className={styles.statCardValue}>
+              {loading ? '---' : formatNumber(totalThisYear)}
+            </div>
+          </div>
+
+          <div className={styles.statCard}>
+            <div className={styles.statCardLabel}>Ngày có hoạt động</div>
+            <div className={styles.statCardValue}>
+              {loading ? '---' : activeDays}
+            </div>
+          </div>
+
+          <div className={styles.statCard}>
+            <div className={styles.statCardLabel}>Streak hiện tại</div>
+            <div className={styles.statCardValue}>
+              {loading ? '---' : current}
+            </div>
+          </div>
+
+          <div className={styles.statCard}>
+            <div className={styles.statCardLabel}>Streak dài nhất</div>
+            <div className={styles.statCardValue}>
+              {loading ? '---' : longest}
+            </div>
+          </div>
+        </div>
+
         <div className={styles.grid}>
           <div className={styles.chartCard}>
             <div className={styles.chartHeader}>
@@ -239,27 +270,7 @@ const GithubDashboard = () => {
                 )}
               </div>
 
-              <div className={styles.floatingStats} aria-hidden={loading ? 'true' : 'false'}>
-                <div className={styles.statBubble} style={{ '--delay': '0s' }}>
-                  <div className={styles.statLabel}>Tổng đóng góp năm</div>
-                  <div className={styles.statValue}>{loading ? '---' : formatNumber(totalThisYear)}</div>
-                </div>
 
-                <div className={styles.statBubble} style={{ '--delay': '0.15s' }}>
-                  <div className={styles.statLabel}>Ngày có hoạt động</div>
-                  <div className={styles.statValue}>{loading ? '---' : activeDays}</div>
-                </div>
-
-                <div className={styles.statBubble} style={{ '--delay': '0.3s' }}>
-                  <div className={styles.statLabel}>Streak hiện tại</div>
-                  <div className={styles.statValue}>{loading ? '---' : current}</div>
-                </div>
-
-                <div className={styles.statBubble} style={{ '--delay': '0.45s' }}>
-                  <div className={styles.statLabel}>Streak dài nhất</div>
-                  <div className={styles.statValue}>{loading ? '---' : longest}</div>
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -25,7 +25,7 @@
 
 .chartContent {
   display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(220px, 320px);
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: start;
 }
@@ -40,17 +40,18 @@
 }
 
 .chartBody {
-  min-height: 240px;
+  min-height: 420px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
   overflow: visible;
   padding: 0 14px 10px 14px;
+  width: 100%;
 }
 
 .waveFrame {
   width: 100%;
-  max-width: 720px;
+  max-width: 100%;
   overflow: visible;
   margin-left: 0;
   padding-bottom: 10px;
@@ -197,7 +198,73 @@
   .grid { grid-template-columns: 1fr; }
 }
 
+/* Stats Cards Grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 48px;
+}
+
+.statCard {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.statCard:hover {
+  border-color: rgba(90, 176, 255, 0.5);
+  box-shadow: 0 8px 32px rgba(90, 176, 255, 0.15);
+  transform: translateY(-4px);
+}
+
+.statCardLabel {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  display: block;
+  text-transform: capitalize;
+}
+
+.statCardValue {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+@media (max-width: 900px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+
+  .floatingStats { position: static; flex-direction: row; gap: 12px; margin-top: 12px; }
+  .waveFrame { margin-left: 0; width: 100%; }
+  .statBubble { min-width: 100px; padding: 10px; }
+  .grid { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 560px) {
   .chartCard,
   .statsCard { padding: 22px; }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .statCard {
+    padding: 18px;
+  }
+
+  .statCardValue {
+    font-size: 28px;
+  }
 }
