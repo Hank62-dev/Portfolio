@@ -1,0 +1,304 @@
+@import 'tailwindcss';
+
+/* ───────────────────────── Design tokens ─────────────────────────
+   Everything the previous variables.css held now lives here, so each token
+   is also a utility: bg-ink-1, text-bone-dim, font-display, text-h2, px-gutter … */
+@theme {
+  /* Surfaces: warm near-black "ink", stepped by lightness */
+  --color-ink-0: #0b0c0e;
+  --color-ink-1: #101114;
+  --color-ink-2: #16181c;
+  --color-ink-3: #1e2127;
+
+  /* Text: bone, with two reduced steps that still pass AA on ink-0 */
+  --color-bone: #ece6da;
+  --color-bone-dim: #a8a396;
+  --color-bone-faint: #8a8579;
+
+  /* One accent: state, links and the occasional emphasis */
+  --color-signal: #ff5b2e;
+  --color-signal-soft: rgb(255 91 46 / 0.14);
+
+  --color-line: rgb(236 230 218 / 0.1);
+  --color-line-strong: rgb(236 230 218 / 0.22);
+
+  /* Type */
+  --font-display: 'Instrument Serif', 'Times New Roman', serif;
+  --font-body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --text-fine: clamp(0.78rem, 0.76rem + 0.1vw, 0.84rem);
+  --text-body: clamp(0.98rem, 0.95rem + 0.15vw, 1.06rem);
+  --text-lead: clamp(1.15rem, 1.08rem + 0.35vw, 1.35rem);
+  --text-h3: clamp(1.5rem, 1.3rem + 1vw, 2.1rem);
+  --text-h2: clamp(2.1rem, 1.6rem + 2.4vw, 3.6rem);
+  --text-display: clamp(2.8rem, 1.8rem + 5vw, 6.2rem);
+  --text-h2--line-height: 1.05;
+  --text-display--line-height: 0.98;
+
+  /* Layout */
+  --container-page: 1240px;
+  --spacing-gutter: clamp(20px, 4vw, 48px);
+  --spacing-section: clamp(80px, 11vw, 160px);
+  --spacing-header: 64px;
+
+  /* A printed-sheet look: small radii */
+  --radius-sm: 3px;
+  --radius-card: 6px;
+
+  /* Breakpoints the layout was designed around (min-width). `nav` is where the menu collapses. */
+  --breakpoint-xs: 560px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 760px;
+  --breakpoint-nav: 860px;
+  --breakpoint-lg: 1000px;
+  --breakpoint-xl: 1100px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Motion */
+  --animate-enter: enter 0.9s var(--ease-out-expo) both;
+  --animate-line-up: line-up 1.1s var(--ease-out-expo) both;
+  --animate-page-in: page-in 0.6s var(--ease-out-expo) both;
+  --animate-tech-in: tech-in 0.7s var(--ease-out-expo) both;
+  --animate-dot-in: dot-in 0.45s var(--ease-out-expo) both;
+  --animate-grow-y: grow-y 0.9s var(--ease-out-expo) both;
+  --animate-grow-x: grow-x 1.1s var(--ease-out-expo) both;
+  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
+  --animate-marquee: marquee 60s linear infinite;
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+  }
+  @keyframes line-up {
+    from {
+      transform: translateY(115%);
+    }
+  }
+  @keyframes page-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+  @keyframes tech-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+  @keyframes dot-in {
+    from {
+      opacity: 0;
+      transform: scale(0);
+    }
+  }
+  @keyframes grow-y {
+    from {
+      transform: scaleY(0);
+    }
+  }
+  @keyframes grow-x {
+    from {
+      transform: scaleX(0);
+    }
+  }
+  @keyframes pulse-ring {
+    0% {
+      box-shadow: 0 0 0 0 var(--color-signal-soft);
+    }
+    70%,
+    100% {
+      box-shadow: 0 0 0 10px transparent;
+    }
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* ───────────────────────── Custom variants ───────────────────────── */
+
+/* anywhere inside an element that scroll-reveal has marked `.in` */
+@custom-variant in (&:where(.in *));
+/* before that happens, but only when JS runs (content is never hidden without it) */
+@custom-variant unrevealed (&:where(.js *):not(:where(.in *)));
+/* a real mouse: used for pointer-follow effects */
+@custom-variant fine (@media (hover: hover) and (pointer: fine));
+
+/* ───────────────────────── Custom utilities ───────────────────────── */
+
+/* page-width column with the responsive gutter */
+@utility wrap {
+  width: 100%;
+  max-width: var(--container-page);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+/* small uppercase-mono label voice used for metadata */
+@utility mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-fine);
+  letter-spacing: 0.02em;
+}
+
+/* italic serif in the accent colour: the emphasised line of a headline */
+@utility serif-accent {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--color-signal);
+}
+
+/* Line mask: each line sits in an overflow-hidden box and slides up from beneath it.
+   The negative margin cancels the padding, which only exists so descenders aren't clipped. */
+@utility line-mask {
+  display: block;
+  overflow: hidden;
+  padding: 0.1em 0 0.16em;
+  margin: -0.1em 0 -0.16em;
+}
+
+@utility line-inner {
+  display: block;
+}
+
+/* Load-in choreography. `--d` is the delay in seconds, `--i` the line index. */
+@utility enter {
+  animation: var(--animate-enter);
+  animation-delay: calc(var(--d, 0) * 1s);
+}
+
+@utility enter-line {
+  animation: var(--animate-line-up);
+  animation-delay: calc(0.1s + var(--i, 0) * 0.11s);
+}
+
+@utility page-in {
+  animation: var(--animate-page-in);
+}
+
+/* ───────────────────────── Base ───────────────────────── */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: calc(var(--spacing-header) + 16px);
+    -webkit-text-size-adjust: 100%;
+    background: var(--color-ink-0);
+    color-scheme: dark;
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    color: var(--color-bone);
+    background: var(--color-ink-0);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 400;
+    line-height: 1.05;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Tailwind 4 buttons default to the arrow cursor */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  ::selection {
+    background: var(--color-signal);
+    color: var(--color-ink-0);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+/* ───────────────────────── Scroll reveal ─────────────────────────
+   Behaviour that depends on <html class="js"> and on state classes added at runtime
+   (see hooks/useReveal.js). Content is only hidden when JS is running. */
+@layer components {
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 0.9s var(--ease-out-expo),
+      transform 0.9s var(--ease-out-expo);
+    transition-delay: var(--reveal-delay, 0s);
+  }
+
+  .js [data-reveal].in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Section titles: the lines rise instead of the whole block fading */
+  .js [data-reveal='mask'] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .js [data-reveal='mask'] .line-inner {
+    transform: translateY(115%);
+    transition: transform 1s var(--ease-out-expo);
+    transition-delay: calc(var(--i, 0) * 0.1s);
+  }
+
+  .js [data-reveal='mask'].in .line-inner {
+    transform: none;
+  }
+}
+
+/* ───────────────────────── Reduced motion ───────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .js [data-reveal],
+  .js [data-reveal='mask'] .line-inner {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

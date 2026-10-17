@@ -1,81 +1,73 @@
-#  Portfolio Cá Nhân
+# Võ Gia Huy — Portfolio
 
-Portfolio cá nhân được xây dựng với **React + Vite**, thiết kế dark theme hiện đại với accent màu lime.
+Personal portfolio of [Hank62-dev](https://github.com/Hank62-dev). React 18 + Vite + React Router, styled with Tailwind CSS 4 (no UI library, no CSS files besides one).
+English and Vietnamese, switchable in the navbar.
 
-##  Tính năng
-
--  Dark theme với palette lime/cyan/purple
--  Typing effect ở Hero section
--  Skills visualization với radar chart + animated bars
--  Projects với filter theo category + modal detail
--  Experience timeline interactive
--  Contact form
--  Testimonials
--  Custom cursor (desktop)
--  Scroll reveal animations
--  Fully responsive
--  Custom hooks: useTypingEffect, useScrollAnimation, useDarkMode
-
-##  Cài đặt & Chạy
+## Run
 
 ```bash
-# Cài dependencies
 npm install
-
-# Chạy development
-npm run dev
-
-# Build production
-npm run build
-
-# Preview build
-npm run preview
+npm run dev       # http://localhost:5173
+npm run build     # production build → dist/
+npm run preview   # serve the build locally
 ```
 
-##  Cấu trúc
+Deploys as a static site (Vercel). `vercel.json` rewrites unknown paths to `index.html`, so deep links such as `/projects/smart-center` work.
+
+## Editing content
+
+All content is data; no component needs touching for routine updates.
+
+| To change…                         | Edit                                   |
+| ---------------------------------- | -------------------------------------- |
+| Profile facts, socials, email      | `src/data/profile.js`                  |
+| Projects, lab items, archive rows  | `src/data/projects.js`                 |
+| Headlines and interface text (EN/VI) | `src/data/copy.js`                   |
+| Colours, type scale, spacing, breakpoints, keyframes | `src/styles/index.css` (`@theme`) |
+
+A project is `{ slug, tier, name, year, kind, tagline, summary, role?, decisions[], layers, links[], cover }`.
+`tier` is `featured` (home list + case page), `lab` (Lab section + case page) or `archive` (table row).
+`layers` (`interface` / `service` / `data` / `delivery`) feeds the **Stack** section, which is generated, never hand-written —
+a technology only appears if a project lists it. Fields are optional where it makes sense (`role`, `decisions`, `cover`);
+leave out what you cannot verify. Old numeric ids (`/projects/1`) still resolve.
+
+## Structure
 
 ```
 src/
-├── assets/          # Ảnh, icon, font
-├── components/      # UI components dùng chung
-│   ├── common/      # Button, Navbar, Footer, SectionTitle
-│   ├── ui/          # Card, Modal, Badge
-│   └── animations/
-├── sections/        # Từng section portfolio
-│   ├── Hero/
-│   ├── About/
-│   ├── Skills/
-│   ├── Projects/
-│   ├── Experience/
-│   ├── Contact/
-│   └── Testimonials/
-├── pages/           # Route pages
-├── layouts/         # MainLayout
-├── routes/          # AppRoutes
-├── hooks/           # Custom hooks
-├── data/            # Static data
-├── services/        # API calls
-├── styles/          # Global CSS
-└── utils/           # Helpers, constants
+├── components/
+│   ├── common/    Navbar, Footer, Button, SectionTitle, LangToggle, ScrollProgress
+│   └── ui/        Tag, ProjectMark, Marquee, CountUp
+├── data/          profile, projects, copy                             (content, no JSX)
+├── hooks/         useGithub, useReveal, useActiveSection, usePageMeta, useMotion (pointer effects)
+├── layouts/       MainLayout (skip link, scroll management)
+├── lib/           i18n context, formatting, contribution maths, scroll helper
+├── pages/         Home, ProjectDetail, NotFound
+├── routes/        AppRoutes
+├── sections/      Hero, Work, Stack, Lab, About, Activity, Contact    (one folder per home section)
+├── services/      githubService                                       (the only network code)
+└── styles/        index.css (Tailwind entry: @theme tokens, custom variants/utilities, reveal + reduced-motion rules)
 ```
 
-##  Tuỳ chỉnh
+## GitHub data
 
-Sửa thông tin cá nhân trong:
-- `src/data/socials.js` — Thông tin cá nhân, experience, education
-- `src/data/projects.js` — Danh sách projects
-- `src/data/skills.js` — Skills và tech stack
-- `src/styles/variables.css` — Design tokens (màu sắc, font...)
+`services/githubService.js` reads the public GitHub REST API and the third-party
+[github-contributions-api](https://github-contributions-api.jogruber.de) once per visit, validates and trims the payloads,
+and caches the snapshot in `localStorage` for one hour (unauthenticated GitHub limit: 60 requests/hour/IP).
+If a source fails the page shows only what it has — it never fills in numbers.
 
-##  Deploy
+## Notes
 
-```bash
-# Build
-npm run build
+- `unused-assets/` holds images from the previous version that the site no longer references
+  (a SmartCenter banner containing invented statistics, a stock ad, older portraits). Delete when no longer needed.
+- Social preview image: `public/og.png` (1200×630). Canonical URL and sitemap assume `https://portfolio-vgh.vercel.app`.
 
-# Deploy lên Vercel
-vercel --prod
+## Styling
 
-# Hoặc Netlify
-netlify deploy --prod --dir=dist
-```
+Everything is Tailwind utility classes in the JSX; there are no CSS Modules. `src/styles/index.css` holds:
+
+- **`@theme`** — the design tokens as utilities: `bg-ink-1`, `text-bone-dim`, `text-signal`, `font-display`, `text-h2`, `px-gutter`, `py-section`, `ease-out-expo`, `animate-marquee` …
+- **Breakpoints** — `xs 560`, `sm 640`, `md 760`, `nav 860` (where the menu collapses), `lg 1000`, `xl 1100`. Note `md` is 760, not Tailwind's default 768.
+- **Custom variants** — `in:` (inside a scroll-revealed element), `unrevealed:` (JS running, not yet revealed), `fine:` (a real mouse).
+- **Custom utilities** — `wrap`, `mono`, `serif-accent`, `line-mask`, `enter`, `page-in`.
+- The few rules that need the `html.js` class or runtime state (`[data-reveal]`) and the `prefers-reduced-motion` block.
