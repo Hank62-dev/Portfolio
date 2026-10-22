@@ -28,6 +28,10 @@ const MainLayout = ({ children }) => {
   const { pathname } = useLocation();
   useReveal();
 
+  if (pathname === '/spacehank') {
+    return <>{children}</>;
+  }
+
   return (
     <>
       <ScrollManager />
