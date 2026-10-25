@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
 import { LangProvider } from './lib/i18n';
 import AppRoutes from './routes/AppRoutes';
+import './lib/spacehankI18n';
 
 const App = () => (
   <LangProvider>
