@@ -1,0 +1,338 @@
+{
+  "audit_time": "2026-04-12T09:37:09.616992",
+  "sources": {
+    "deliveries_csv": {
+      "type": "CSV",
+      "path": "/Users/an/Workspace/Hkt_AI_base/scripts/../SEAL SP2026 FOR STUDENTS/warehouse/WAREHOUSE/theo_doi_giao_noi_dia.csv",
+      "status": "PASS",
+      "errors": [],
+      "rows": 8664,
+      "columns": 19,
+      "fields": [
+        "delivery_id",
+        "tracking_code",
+        "order_code",
+        "customer_code",
+        "recipient_name",
+        "recipient_phone",
+        "province",
+        "district",
+        "full_address",
+        "carrier",
+        "carrier_tracking_code",
+        "domestic_warehouse",
+        "shipping_fee_vnd",
+        "cod_amount",
+        "delivery_status",
+        "attempt_count",
+        "scheduled_date",
+        "actual_delivery_date",
+        "delivery_note"
+      ],
+      "empty_by_column": {
+        "delivery_note": 1720
+      },
+      "size_kb": 1946,
+      "sample": {
+        "delivery_id": "DEL0000001",
+        "tracking_code": "TRK0000003",
+        "order_code": "ORD0000002",
+        "customer_code": "KH00006",
+        "recipient_name": "Bùi Yến Bảo",
+        "recipient_phone": "988718514",
+        "province": "Cần Thơ",
+        "district": "H.7",
+        "full_address": "488 Lê Lợi, Cần Thơ",
+        "carrier": "SPX Express",
+        "carrier_tracking_code": "VV4VG6TSJC7L",
+        "domestic_warehouse": "Kho Hà Nội Hoàng Mai",
+        "shipping_fee_vnd": "60000",
+        "cod_amount": "0",
+        "delivery_status": "delivered",
+        "attempt_count": "1",
+        "scheduled_date": "2023-12-06",
+        "actual_delivery_date": "2023-12-08",
+        "delivery_note": "Giao thành công"
+      }
+    },
+    "repacking_csv": {
+      "type": "CSV",
+      "path": "/Users/an/Workspace/Hkt_AI_base/scripts/../SEAL SP2026 FOR STUDENTS/warehouse/WAREHOUSE/nhat_ky_dong_goi_lai.csv",
+      "status": "PASS",
+      "errors": [],
+      "rows": 600,
+      "columns": 18,
+      "fields": [
+        "repack_id",
+        "tracking_code",
+        "order_code",
+        "customer_code",
+        "reason",
+        "original_box_count",
+        "new_box_count",
+        "original_weight_kg",
+        "new_weight_kg",
+        "repack_fee_vnd",
+        "material_cost_vnd",
+        "requested_at",
+        "completed_at",
+        "repack_staff",
+        "approved_by",
+        "status",
+        "before_photo_url",
+        "after_photo_url"
+      ],
+      "empty_by_column": {},
+      "size_kb": 165,
+      "sample": {
+        "repack_id": "RPK000001",
+        "tracking_code": "TRK0009012",
+        "order_code": "ORD0005995",
+        "customer_code": "KH01812",
+        "reason": "Tối ưu cước phí",
+        "original_box_count": "2",
+        "new_box_count": "3",
+        "original_weight_kg": "1.61",
+        "new_weight_kg": "1.53",
+        "repack_fee_vnd": "30000",
+        "material_cost_vnd": "10000",
+        "requested_at": "2023-11-17 08:59:00",
+        "completed_at": "2023-11-21 08:59:00",
+        "repack_staff": "Cẩm Tú Phạm",
+        "approved_by": "Quản lý Kho HN",
+        "status": "completed",
+        "before_photo_url": "https://storage.company.vn/repack/before_1.jpg",
+        "after_photo_url": "https://storage.company.vn/repack/after_1.jpg"
+      }
+    },
+    "manifests_pdf": {
+      "type": "PDF",
+      "path": "/Users/an/Workspace/Hkt_AI_base/scripts/../SEAL SP2026 FOR STUDENTS/warehouse/WAREHOUSE/manifest_chuyen_bay",
+      "status": "PASS",
+      "errors": [],
+      "files": [],
+      "total_files": 400,
+      "readable": 400,
+      "empty": 0,
+      "failed": 0,
+      "failed_files": [],
+      "total_chars": 996064,
+      "avg_chars": 2490,
+      "sample_text": "PHIẾU HÀNG HÓA CHUYẾN BAY — CARGO MANIFEST\nMã chuyến bay:\nFL0001\nSố hiệu:\nTG202\nHãng hàng không:\nTG\nTuyến bay:\nHN - Seoul\nNgày khởi hành:\n2023-09-09 10:54\nNgày đến:\n2023-09-09 22:54\nTrạng thái:\nARRIVED\nChi phí vận hành:\n51,000,000 VND\nTổng KL hàng:\n1423.0 kg\nSố kiện:\n172\nNgày thông quan:\n2023-09-11\n"
+    },
+    "customs_pdf": {
+      "type": "PDF",
+      "path": "/Users/an/Workspace/Hkt_AI_base/scripts/../SEAL SP2026 FOR STUDENTS/warehouse/WAREHOUSE/to_khai_hai_quan",
+      "status": "PASS",
+      "errors": [],
+      "files": [],
+      "total_files": 60,
+      "readable": 60,
+      "empty": 0,
+      "failed": 0,
+      "failed_files": [],
+      "total_chars": 109655,
+      "avg_chars": 1827,
+      "sample_text": "TỜ KHAI HẢI QUAN NHẬP KHẨU\nIMPORT CUSTOMS DECLARATION FORM\nSố tờ khai / Declaration No.:\nHQ-VN-393185-2024\nNgày / Date:\n2023-09-28\nChuyến bay / Flight:\nCX608\nTuyến / Route:\nHCM - Los Angeles\nCảng nhập / Port of Entry:\nNội Bài\nMã số thuế:\n5932536026\nNV Hải quan:\nHQ-880\nTrạng thái:\nCLEARED\nTổng kiện:\n"
+    },
+    "damage_jpg": {
+      "type": "JPG",
+      "path": "/Users/an/Workspace/Hkt_AI_base/scripts/../SEAL SP2026 FOR STUDENTS/warehouse/WAREHOUSE/bien_ban_hu_hong",
+      "status": "PASS",
+      "errors": [],
+      "total_files": 120,
+      "readable": 120,
+      "failed": 0,
+      "avg_size_kb": 165,
+      "total_size_mb": 19,
+      "min_size_kb": 133,
+      "max_size_kb": 232
+    },
+    "packing_jpg": {
+      "type": "JPG",
+      "path": "/Users/an/Workspace/Hkt_AI_base/scripts/../SEAL SP2026 FOR STUDENTS/warehouse/WAREHOUSE/phieu_dong_goi",
+      "status": "PASS",
+      "errors": [],
+      "total_files": 500,
+      "readable": 500,
+      "failed": 0,
+      "avg_size_kb": 184,
+      "total_size_mb": 90,
+      "min_size_kb": 139,
+      "max_size_kb": 279
+    },
+    "sop_docx": {
+      "type": "DOCX",
+      "path": "/Users/an/Workspace/Hkt_AI_base/scripts/../SEAL SP2026 FOR STUDENTS/warehouse/WAREHOUSE/SOP_kho_v3.docx",
+      "status": "PASS",
+      "errors": [],
+      "files": [],
+      "total_files": 1,
+      "readable": 1,
+      "total_chars": 2245,
+      "file_details": [
+        {
+          "file": "SOP_kho_v3.docx",
+          "chars": 2245,
+          "paragraphs": 38,
+          "independent": true,
+          "data_refs": null
+        }
+      ],
+      "all_independent": true
+    },
+    "policies_docx": {
+      "type": "DOCX",
+      "path": "/Users/an/Workspace/Hkt_AI_base/scripts/../SEAL SP2026 FOR STUDENTS/warehouse/chinh_sach_cong_ty",
+      "status": "PASS",
+      "errors": [],
+      "files": [],
+      "total_files": 19,
+      "readable": 19,
+      "total_chars": 51059,
+      "file_details": [
+        {
+          "file": "Bang_gia_van_chuyen_duong_air.docx",
+          "chars": 735,
+          "paragraphs": 22,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_bao_hiem_den_bu.docx",
+          "chars": 4350,
+          "paragraphs": 43,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_bao_mat.docx",
+          "chars": 4532,
+          "paragraphs": 43,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_boi_thuong.docx",
+          "chars": 3826,
+          "paragraphs": 34,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_dong_goi_tieu_chuan.docx",
+          "chars": 2441,
+          "paragraphs": 37,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_ho_tro_sau_giao_dich.docx",
+          "chars": 1352,
+          "paragraphs": 8,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_hop_dong.docx",
+          "chars": 2176,
+          "paragraphs": 6,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_mien_tru_trach_nhiem.docx",
+          "chars": 1460,
+          "paragraphs": 6,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_minh_bach_trach_nhiem.docx",
+          "chars": 2845,
+          "paragraphs": 18,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_phan_loai_hang_hoa.docx",
+          "chars": 2818,
+          "paragraphs": 41,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_phi_dich_vu_thanh_toan.docx",
+          "chars": 3099,
+          "paragraphs": 41,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Chinh_sach_xu_ly_khieu_nai.docx",
+          "chars": 2207,
+          "paragraphs": 28,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Danh_muc_hang_cam_han_che.docx",
+          "chars": 3948,
+          "paragraphs": 18,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Dieu_khoan_su_dung_dich_vu.docx",
+          "chars": 2428,
+          "paragraphs": 7,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Quy_dinh_quy_cach_dong_goi.docx",
+          "chars": 3325,
+          "paragraphs": 30,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Quy_dinh_ve_khieu_nai.docx",
+          "chars": 2721,
+          "paragraphs": 28,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Quy_trinh_van_hanh.docx",
+          "chars": 1308,
+          "paragraphs": 14,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Trach_nhiem_cong_ty_trong_giao_dich.docx",
+          "chars": 2328,
+          "paragraphs": 11,
+          "independent": true,
+          "data_refs": null
+        },
+        {
+          "file": "Truong_hop_hang_den_tre.docx",
+          "chars": 3160,
+          "paragraphs": 11,
+          "independent": true,
+          "data_refs": null
+        }
+      ],
+      "all_independent": true
+    }
+  },
+  "totals": {
+    "files": 0,
+    "pass": 0,
+    "fail": 0,
+    "rows_for_db": 10344,
+    "chars_for_rag": 53304
+  }
+}

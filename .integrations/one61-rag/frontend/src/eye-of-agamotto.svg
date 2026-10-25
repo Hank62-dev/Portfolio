@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 408" width="512" height="408" role="img" aria-labelledby="title desc">
+  <title id="title">Eye of Agamotto</title>
+  <desc id="desc">An aged bronze Eye of Agamotto with a wide engraved shell, interwoven metal bands, a marbled green Time Stone and a curved lower cradle. Transparent background.</desc>
+  <defs>
+    <linearGradient id="brass" x1=".12" y1="0" x2=".83" y2="1">
+      <stop stop-color="#c0b38a"/><stop offset=".16" stop-color="#716b48"/><stop offset=".34" stop-color="#a99a6b"/>
+      <stop offset=".5" stop-color="#4b4c32"/><stop offset=".7" stop-color="#9b8c5d"/><stop offset=".88" stop-color="#454631"/><stop offset="1" stop-color="#b6a77a"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#e0d7b8"/><stop offset=".22" stop-color="#9c9473"/><stop offset=".48" stop-color="#4b4d36"/>
+      <stop offset=".7" stop-color="#c1b58c"/><stop offset="1" stop-color="#706849"/>
+    </linearGradient>
+    <linearGradient id="cradle" x1="0" y1=".2" x2="1" y2=".7">
+      <stop stop-color="#b2a67f"/><stop offset=".18" stop-color="#5a5940"/><stop offset=".45" stop-color="#a79c75"/>
+      <stop offset=".65" stop-color="#56553a"/><stop offset=".85" stop-color="#c0b38a"/><stop offset="1" stop-color="#6d6848"/>
+    </linearGradient>
+    <radialGradient id="cavity" cx=".4" cy=".45" r=".65">
+      <stop stop-color="#1c321d"/><stop offset=".46" stop-color="#111b12"/><stop offset="1" stop-color="#050a07"/>
+    </radialGradient>
+    <radialGradient id="stone" cx=".35" cy=".3" r=".78">
+      <stop stop-color="#c1ff75"/><stop offset=".2" stop-color="#70f746"/><stop offset=".49" stop-color="#28d52d"/>
+      <stop offset=".77" stop-color="#07852c"/><stop offset="1" stop-color="#143c22"/>
+    </radialGradient>
+    <radialGradient id="glow">
+      <stop stop-color="#78ff45" stop-opacity=".55"/><stop offset=".6" stop-color="#33ef39" stop-opacity=".18"/><stop offset="1" stop-color="#33ef39" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glass" cx=".36" cy=".23" r=".75">
+      <stop stop-color="#efffb8" stop-opacity=".45"/><stop offset=".4" stop-color="#b7ff87" stop-opacity="0"/>
+      <stop offset=".8" stop-color="#052f12" stop-opacity="0"/><stop offset="1" stop-color="#052f12" stop-opacity=".65"/>
+    </radialGradient>
+    <pattern id="engraving" width="19" height="25" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)">
+      <path d="M3 2h10v5H7v5h8v9H5v-5h5M1 23h16" fill="none" stroke="#292e20" stroke-width="2" opacity=".8"/>
+      <path d="M4 1h10v5M8 11h8v9M6 15h5" fill="none" stroke="#d2c59b" stroke-width=".8" opacity=".65"/>
+    </pattern>
+    <path id="shell" d="M463 193a193 149 0 1 1-386 0 193 149 0 1 1 386 0ZM393 192a149 121 0 1 0-298 0 149 121 0 1 0 298 0Z" fill-rule="evenodd"/>
+    <path id="support" d="M54 193C48 275 99 352 183 382c54 20 112 19 162-4 77-34 130-101 142-180l-19 8c-20 66-64 121-131 149-48 20-97 21-145 4-68-24-111-85-119-158Z"/>
+    <clipPath id="gemClip"><circle cx="237" cy="191" r="36"/></clipPath>
+    <g id="orbit" fill="none">
+      <ellipse cx="244" cy="192" rx="65" ry="123" stroke="#10180f" stroke-width="15"/>
+      <ellipse cx="244" cy="192" rx="65" ry="123" stroke="url(#brass)" stroke-width="10"/>
+      <ellipse cx="244" cy="192" rx="68" ry="123" stroke="#c6bd97" stroke-width="1.5"/>
+      <ellipse cx="244" cy="192" rx="62" ry="123" stroke="#333d27" stroke-width="1.5"/>
+      <ellipse cx="244" cy="192" rx="65" ry="123" stroke="#c9bc90" stroke-width="1.5" stroke-dasharray="1 5" opacity=".6"/>
+    </g>
+  </defs>
+
+  <!-- The low crescent follows the body instead of extending into a pointed pendant. -->
+  <use href="#support" fill="url(#cradle)" stroke="#303225" stroke-width="4" stroke-linejoin="round"/>
+  <use href="#support" fill="url(#engraving)"/>
+  <path d="M58 204c0 75 51 144 127 173 51 19 109 18 157-4 73-32 124-94 139-166M80 247c21 56 58 95 114 115 48 18 100 17 143-2 58-24 99-67 123-119" fill="none" stroke="#d3c8a2" stroke-width="2"/>
+  <path d="M77 264c30 67 90 110 161 116m46-1c75-10 140-58 170-121" fill="none" stroke="#393c29" stroke-width="5" stroke-dasharray="2 6"/>
+
+  <!-- Dark cords and the two worn neck fittings. -->
+  <path d="M97 65 63-9M424 61 458-9" fill="none" stroke="#141b15" stroke-width="12"/>
+  <path d="M94 61 62-9M427 57 459-9" fill="none" stroke="#414332" stroke-width="2"/>
+  <path d="m107 97-25-42q-4-7 3-11l13-7q7-4 11 3l25 44m263 0 24-44q4-7 11-3l13 7q7 4 3 11l-24 43" fill="url(#brass)" stroke="#292f21" stroke-width="4"/>
+  <path d="m88 51 23 40m322-46-23 43m-315-37 9-5m-5 12 9-5m-5 12 9-5m316-6-10-5m6 12-10-5m6 12-10-5" fill="none" stroke="#bcb18b" stroke-width="2"/>
+
+  <!-- A left-offset recess leaves a broad, engraved right-hand shell. -->
+  <ellipse cx="274" cy="201" rx="193" ry="149" fill="#303224" stroke="#191f16" stroke-width="5"/>
+  <use href="#shell" fill="url(#brass)" stroke="#3a402b" stroke-width="3"/>
+  <use href="#shell" fill="url(#engraving)" opacity=".8"/>
+  <ellipse cx="270" cy="193" rx="190" ry="146" fill="none" stroke="url(#edge)" stroke-width="5"/>
+  <path d="M81 178C90 99 156 49 249 47m37 0c87 5 156 58 173 123M108 274c32 40 78 61 140 65" fill="none" stroke="#d4cbae" stroke-width="1.8" opacity=".75"/>
+  <path d="M419 103c25 24 38 53 39 87s-13 64-34 89m-9-153c15 22 24 43 24 69s-8 47-23 68" fill="none" stroke="#333c28" stroke-width="3"/>
+  <path d="M423 104c23 25 36 54 36 85m-41-62c15 21 23 44 23 65" fill="none" stroke="#c3b78f" stroke-width="1"/>
+  <ellipse cx="244" cy="192" rx="149" ry="121" fill="url(#cavity)" stroke="#323c26" stroke-width="6"/>
+  <ellipse cx="244" cy="192" rx="149" ry="121" fill="none" stroke="url(#edge)" stroke-width="4"/>
+  <ellipse cx="244" cy="192" rx="139" ry="112" fill="none" stroke="#8d875b" stroke-width="3"/>
+  <ellipse cx="244" cy="192" rx="132" ry="106" fill="none" stroke="#3e4a2c" stroke-width="5"/>
+  <ellipse cx="244" cy="192" rx="154" ry="126" fill="none" stroke="#d0c399" stroke-width="2.5" stroke-dasharray="1 23" opacity=".8"/>
+
+  <!-- Rear armillary rings, flattened in perspective. -->
+  <use href="#orbit" transform="translate(0 42.24) scale(1 .78) rotate(57 244 192)"/>
+  <use href="#orbit" transform="translate(0 42.24) scale(1 .78) rotate(-49 244 192)"/>
+  <ellipse cx="245" cy="191" rx="123" ry="73" transform="rotate(15 245 191)" fill="none" stroke="#111a10" stroke-width="13"/>
+  <ellipse cx="245" cy="191" rx="123" ry="73" transform="rotate(15 245 191)" fill="none" stroke="url(#edge)" stroke-width="7"/>
+  <path d="M144 130c31-30 77-43 116-35m47 14c36 19 56 48 61 77m-26 71c-33 26-76 35-115 25m-59-28c-25-22-37-49-34-78" fill="none" stroke="#aaa074" stroke-width="2" stroke-dasharray="1 5"/>
+  <path d="M161 102c47 5 82 35 105 74s63 71 104 78M116 229c48-7 77-46 112-77s79-46 119-34" fill="none" stroke="#0c170e" stroke-width="12"/>
+  <path d="M161 102c47 5 82 35 105 74s63 71 104 78M116 229c48-7 77-46 112-77s79-46 119-34" fill="none" stroke="url(#brass)" stroke-width="7"/>
+
+  <!-- Rounded stone with flowing mineral veins, clipped inside the glass. -->
+  <circle cx="237" cy="191" r="63" fill="url(#glow)"/>
+  <circle cx="237" cy="191" r="41" fill="#253a1e" stroke="#6a7044" stroke-width="5"/>
+  <circle cx="237" cy="191" r="36" fill="url(#stone)" stroke="#9fa36a" stroke-width="1.5"/>
+  <g clip-path="url(#gemClip)" fill="none" stroke-linecap="round">
+    <path d="M205 166c28-8 10 21 28 28s25-5 39 8m-74-15c22-11 20 20 38 20s15-11 40 4m-63 22c-2-21 28-13 35-30s-8-31 8-43" stroke="#197f26" stroke-width="7" opacity=".5"/>
+    <path d="M205 165c23-5 12 16 23 24s24-1 31 9 3 18 16 20m-77-28c20-12 21 11 31 15s21-5 32 4m-47 23c0-16 24-13 30-25s-8-25 4-35m-21-25c-3 17 16 12 22 22" stroke="#d1ff86" stroke-width="2" opacity=".7"/>
+    <path d="M210 170c17-6 8 14 21 18s23-6 34 6m-59 11c13-7 17 5 29 7s14-6 28-1m-32 21c-5-12 15-12 16-23m-15-51c-1 13 15 6 20 18" stroke="#8bfa4d" stroke-width="1"/>
+    <circle cx="237" cy="191" r="36" fill="url(#glass)"/>
+  </g>
+  <path d="M214 173c5-7 12-10 19-10" fill="none" stroke="#e9ffc3" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+
+  <!-- Asymmetric front bands frame an open eye around the stone. -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M260 74c-5 40-40 61-75 82s-65 49-60 84c4 30 36 53 74 60" stroke="#111a10" stroke-width="17"/>
+    <path d="M260 74c-5 40-40 61-75 82s-65 49-60 84c4 30 36 53 74 60" stroke="url(#brass)" stroke-width="11"/>
+    <path d="M256 75c-6 38-40 58-74 78s-66 49-61 85c4 30 36 55 74 62" stroke="#c7bf9c" stroke-width="1.5"/>
+    <path d="M262 77c-7 40-40 61-74 82s-62 48-57 80" stroke="#c5b98b" stroke-width="1.5" stroke-dasharray="1 4"/>
+    <path d="M106 226c37-27 63-62 110-74s99 3 163 41" stroke="#0c160d" stroke-width="17"/>
+    <path d="M106 226c37-27 63-62 110-74s99 3 163 41" stroke="url(#edge)" stroke-width="10"/>
+    <path d="M105 222c38-26 64-62 110-74s101 4 164 41" stroke="#d3caa8" stroke-width="1.5"/>
+    <path d="M108 173c44 19 76 55 115 66 55 16 110-3 157-45" stroke="#0b150c" stroke-width="17"/>
+    <path d="M108 173c44 19 76 55 115 66 55 16 110-3 157-45" stroke="url(#brass)" stroke-width="11"/>
+    <path d="M108 169c44 19 77 55 116 66 54 16 108-3 155-45" stroke="#d1c7a2" stroke-width="1.7"/>
+    <path d="M110 175c43 19 75 55 114 66 53 15 108-4 154-45" stroke="#bbae7e" stroke-width="1.7" stroke-dasharray="1 4"/>
+    <path d="M299 83c40 28 60 59 55 91s-33 62-62 79-50 37-53 60" stroke="#10190f" stroke-width="15"/>
+    <path d="M299 83c40 28 60 59 55 91s-33 62-62 79-50 37-53 60" stroke="url(#brass)" stroke-width="9"/>
+    <path d="M302 82c40 28 60 61 55 93s-34 63-63 80-48 36-51 57" stroke="#c8bd96" stroke-width="1.5"/>
+  </g>
+  <g fill="#242e1e" stroke="#b8ad83" stroke-width="1.5">
+    <circle cx="149" cy="79" r="3"/><circle cx="337" cy="91" r="3"/><circle cx="96" cy="206" r="3"/>
+    <circle cx="164" cy="300" r="3"/><circle cx="305" cy="329" r="3"/><circle cx="435" cy="253" r="3"/>
+  </g>
+  <path d="M249 378h27l-3 20h-21Z" fill="url(#brass)" stroke="#353a29" stroke-width="2"/>
+  <path d="M254 383h17m-16 9h15" stroke="#c9bc92" stroke-width="1.5"/>
+  <circle cx="263" cy="388" r="2" fill="#2b3522"/>
+</svg>

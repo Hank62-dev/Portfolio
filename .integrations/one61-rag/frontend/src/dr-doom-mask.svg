@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 600" width="512" height="600" role="img" aria-labelledby="title desc">
+  <title id="title">Dr. Doom — silver mask</title>
+  <desc id="desc">A symmetrical silver metal mask with dark angular eyes, riveted brow plates, a pointed nose, a slotted mouth and a layered chin. Transparent background.</desc>
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#4a4e50"/><stop offset=".12" stop-color="#d5d8d9"/>
+      <stop offset=".3" stop-color="#8b8f92"/><stop offset=".5" stop-color="#42464a"/>
+      <stop offset=".7" stop-color="#8b8f92"/><stop offset=".88" stop-color="#d5d8d9"/><stop offset="1" stop-color="#4a4e50"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#eff1f2"/><stop offset=".28" stop-color="#b5b9bc"/>
+      <stop offset=".63" stop-color="#63686c"/><stop offset="1" stop-color="#b5b9bc"/>
+    </linearGradient>
+    <linearGradient id="dome" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#e0e3e4"/><stop offset=".12" stop-color="#6f757a"/>
+      <stop offset=".44" stop-color="#292e33"/><stop offset=".77" stop-color="#969b9f"/><stop offset="1" stop-color="#565b60"/>
+    </linearGradient>
+    <linearGradient id="nose" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#f0f2f3"/><stop offset=".26" stop-color="#858b90"/>
+      <stop offset=".52" stop-color="#383e43"/><stop offset="1" stop-color="#a4a9ad"/>
+    </linearGradient>
+    <linearGradient id="chin" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#e3e6e8"/><stop offset=".22" stop-color="#777d82"/>
+      <stop offset=".55" stop-color="#373c41"/><stop offset="1" stop-color="#b9bfc3"/>
+    </linearGradient>
+    <radialGradient id="rivet" cx=".32" cy=".25" r=".7">
+      <stop stop-color="#fff"/><stop offset=".4" stop-color="#b7bdc1"/><stop offset="1" stop-color="#343a40"/>
+    </radialGradient>
+    <g id="left" stroke="#42484d" stroke-width="2" stroke-linejoin="round">
+      <!-- Temple and cheek armor. -->
+      <path d="M83 239 75 328 100 352 108 454 176 506 203 417 185 350 139 310Z" fill="url(#plate)"/>
+      <path d="M80 333Q119 339 140 372L145 479 107 452 101 377Z" fill="url(#steel)"/>
+      <path d="M103 365Q115 369 121 382L127 451" fill="none" stroke="#e3e6e8" stroke-width="3"/>
+      <path d="M142 306 195 322 177 365 143 386 111 350Z" fill="url(#plate)"/>
+      <path d="M105 343 140 365 177 345" fill="none" stroke="#d3d7da" stroke-width="3"/>
+      <!-- Deep eye opening and raised metal rim. -->
+      <path d="M101 247Q124 232 146 239L222 261 215 299Q167 322 108 309Z" fill="#353a3f"/>
+      <path d="M108 257Q128 248 149 254L214 272 207 291Q161 307 116 296Z" fill="#030506" stroke="#c7cdd0" stroke-width="4"/>
+      <path d="M104 309Q157 330 214 303" fill="none" stroke="#e4e7e9" stroke-width="4"/>
+      <!-- Brow plate. -->
+      <path d="M86 206Q143 177 230 213L225 267 145 245Q112 235 91 253Z" fill="url(#plate)"/>
+      <path d="M91 205Q145 183 224 214" fill="none" stroke="#f2f3f4" stroke-width="2"/>
+      <g fill="url(#rivet)" stroke="#535b61" stroke-width=".8">
+        <circle cx="103" cy="223" r="3.4"/><circle cx="116" cy="226" r="3.4"/>
+        <circle cx="129" cy="230" r="3.4"/><circle cx="142" cy="234" r="3.4"/>
+        <circle cx="155" cy="238" r="3.4"/><circle cx="168" cy="242" r="3.4"/>
+        <circle cx="181" cy="246" r="3.4"/><circle cx="194" cy="250" r="3.4"/>
+      </g>
+    </g>
+  </defs>
+  <!-- Silhouette. -->
+  <path d="M256 28C142 28 81 93 78 207L73 325 89 341 96 448Q101 474 132 491L196 532Q214 558 256 572Q298 558 316 532L380 491Q411 474 416 448L423 341 439 325 434 207C431 93 370 28 256 28Z" fill="url(#steel)" stroke="#2f353a" stroke-width="4"/>
+  <!-- Crown. -->
+  <path d="M82 211C85 91 151 32 256 32C361 32 427 91 430 211L358 199 287 218 256 244 225 218 154 199Z" fill="url(#dome)" stroke="#51585e" stroke-width="2"/>
+  <path d="M84 198C91 95 154 39 226 36" fill="none" stroke="#f1f3f4" stroke-width="3" opacity=".8"/>
+  <path d="M286 36C358 39 421 95 428 198" fill="none" stroke="#f1f3f4" stroke-width="3" opacity=".6"/>
+  <path d="M232 34V213L245 242H267L280 213V34" fill="url(#steel)" stroke="#70777d" stroke-width="1.5"/>
+  <path d="M233 37V203M279 37V203" stroke="#d8dde0" stroke-width="1" opacity=".5"/>
+  <!-- Lower face. -->
+  <path d="M194 321 234 295H278L318 321 335 423 310 503 256 550 202 503 177 423Z" fill="url(#steel)" stroke="#4b5258" stroke-width="2"/>
+  <use href="#left"/>
+  <use href="#left" transform="translate(512 0) scale(-1 1)"/>
+  <!-- Nose: a projecting triangular keel. -->
+  <path d="M244 224H268L277 268H235Z" fill="url(#nose)" stroke="#434b51" stroke-width="2"/>
+  <path d="M239 266H273L300 368 256 390 212 368Z" fill="url(#nose)" stroke="#333b42" stroke-width="2.5"/>
+  <path d="M239 269 220 362 256 370 292 362" fill="none" stroke="#dce1e4" stroke-width="2"/>
+  <path d="M256 270V370" stroke="#9aa1a6" stroke-width="1.5"/>
+  <path d="M212 368 256 390 300 368 256 373Z" fill="#252b30"/>
+  <!-- Mouth grill. -->
+  <path d="M190 429Q194 414 214 414H298Q318 414 322 429L328 451H184Z" fill="#06090b" stroke="#565e65" stroke-width="3"/>
+  <path d="M192 431H320M210 416V449M234 415V449M256 415V449M278 415V449M302 416V449" fill="none" stroke="#a6adb2" stroke-width="7"/>
+  <path d="M183 451Q190 441 208 440H304Q322 441 329 451L321 473Q256 454 191 473Z" fill="url(#plate)" stroke="#454d54" stroke-width="2"/>
+  <!-- Stepped chin plates. -->
+  <path d="M188 480Q256 451 324 480L315 505Q256 477 197 505Z" fill="url(#chin)" stroke="#414a51" stroke-width="2"/>
+  <path d="M198 508Q256 479 314 508L301 532Q256 506 211 532Z" fill="url(#chin)" stroke="#414a51" stroke-width="2"/>
+  <path d="M212 535Q256 508 300 535L279 557Q256 545 233 557Z" fill="url(#chin)" stroke="#414a51" stroke-width="2"/>
+  <path d="M233 557Q256 543 279 557L256 571Z" fill="url(#plate)" stroke="#414a51" stroke-width="2"/>
+  <path d="M190 481Q256 453 322 481M201 509Q256 483 311 509M216 535Q256 513 296 535" fill="none" stroke="#e3e7ea" stroke-width="1.5" opacity=".8"/>
+</svg>

@@ -1,0 +1,43 @@
+name: one61-rag
+
+services:
+  # Vector Database for Knowledge Graph & Documents
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: one61-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+  # Cache & Memory
+  redis:
+    image: redis:7-alpine
+    container_name: one61-redis
+    ports:
+      - "6382:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Warehouse PostgreSQL (Optional for Text-to-SQL Agent)
+  postgres:
+    image: postgres:16-alpine
+    container_name: one61-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-one61_rag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-one61_rag}
+      POSTGRES_DB: ${POSTGRES_DB:-one61_rag}
+    ports:
+      - "5979:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/sql/warehouse_schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+volumes:
+  qdrant_data:
+  redis_data:
+  postgres_data:

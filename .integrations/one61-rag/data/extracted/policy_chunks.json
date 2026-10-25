@@ -1,0 +1,1118 @@
+[
+  {
+    "chunk_id": "chunk_1",
+    "text": "QUY TRÌNH VẬN HÀNH KHO — STANDARD OPERATING PROCEDURE\nBan hành: 01/01/2024 | Phiên bản: 3.1 | Bộ phận: Warehouse Operations\n1. QUY TRÌNH NHẬP KHO\nKiểm tra tờ khai hải quan — clearance_status PHẢI = \"cleared\" trước khi nhập kho.\nĐối chiếu số kiện thực tế với số kiện trên manifest chuyến bay.\nChụp ảnh tình trạng kiện hàng trước khi nhập (lưu vào hệ thống WMS).\nCập nhật item_status = arrived_domestic_warehouse trong hệ thống.\nXếp kiện hàng vào vị trí đúng theo item_category và customer_tier.\nKhu VIP và Gold: k",
+    "metadata": {
+      "source": "SOP_kho_v3.docx",
+      "doc_type": "sop",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_2",
+    "text": "item_category và customer_tier.\nKhu VIP và Gold: khu vực ưu tiên, dễ lấy, có kiểm soát nhiệt độ.\n2. QUY TRÌNH ĐÓNG GÓI\nChỉ đóng gói khi item_status = arrived_domestic_warehouse.\nBắt buộc: qc_checked = true trước khi xuất kho.\nNV QC PHẢI KHÁC NV đóng gói (tránh xung đột lợi ích).\nHàng is_fragile = true: bắt buộc dùng bubble wrap + thùng carton đôi + nhãn Dễ Vỡ.\nGhi nhận cân thực tế (actual_weight_kg) và cân thể tích (volumetric_weight_kg).\nCân tính cước = MAX(actual, volumetric) — áp dụng cho cả cước quốc tế",
+    "metadata": {
+      "source": "SOP_kho_v3.docx",
+      "doc_type": "sop",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_3",
+    "text": "(actual, volumetric) — áp dụng cho cả cước quốc tế và nội địa.\nSau đóng gói, cập nhật item_status = packed.\n3. QUY TRÌNH ĐÓNG GÓI LẠI (REPACK)\nLập yêu cầu repack (repack_id), ghi rõ lý do (reason).\nRepack phải có phê duyệt của quản lý kho (approved_by).\nChụp ảnh TRƯỚC (before_photo_url) khi bắt đầu thực hiện.\nLỗi của công ty: repack_fee = 0, khách không phát sinh phí.\nKhách yêu cầu: tính phí theo bảng giá (30.000 – 200.000 VND).\nChụp ảnh SAU (after_photo_url) khi hoàn thành.\nCập nhật new_weight_kg, new_box_",
+    "metadata": {
+      "source": "SOP_kho_v3.docx",
+      "doc_type": "sop",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_4",
+    "text": ") khi hoàn thành.\nCập nhật new_weight_kg, new_box_count vào hệ thống.\n4. QUY TRÌNH XUẤT KHO — GIAO NV VẬN CHUYỂN\nTạo delivery_id, cập nhật item_status = dispatched.\nBàn giao cho carrier: GHN, GHTK, Viettel Post, J&T, SPX…\ncarrier_tracking_code PHẢI được cập nhật ngay sau bàn giao.\nCOD chỉ thu khi payment_status = \"pending\" hoặc \"partial\".\nGiao hàng thất bại (failed_attempt): cập nhật attempt_count += 1.\nSau 3 lần thất bại: đơn tự động về kho (returning), thông báo NV kinh doanh.\n5. QUY TẮC CÂN NẶNG — TÍNH C",
+    "metadata": {
+      "source": "SOP_kho_v3.docx",
+      "doc_type": "sop",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_5",
+    "text": "ng báo NV kinh doanh.\n5. QUY TẮC CÂN NẶNG — TÍNH CƯỚC\nCân thể tích = (Dài × Rộng × Cao) / 6000 (đơn vị cm, kết quả kg).\nCước tính theo: chargeable_weight = MAX(actual_weight, volumetric_weight).\nVí dụ: thùng 50×40×30cm → thể tích = 10kg. Thực tế 3kg → Tính 10kg.\nMột đơn nhiều kiện: tính cước độc lập từng kiện, KHÔNG cộng gộp.\nSau repack: nếu cân thay đổi, tính cước theo cân mới (new_weight_kg).",
+    "metadata": {
+      "source": "SOP_kho_v3.docx",
+      "doc_type": "sop",
+      "length": 397
+    }
+  },
+  {
+    "chunk_id": "chunk_6",
+    "text": "CHÍNH SÁCH GIÁ ĐƯỜNG AIR TUYẾN [NƯỚC XUẤT] - [NƯỚC NHẬP]\nÁp dụng từ ngày 12/01/2026\nBẢNG GIÁ DỊCH VỤ VẬN CHUYỂN:\nGiá dịch vụ vận chuyển đã báo gồm phí ship nội địa [Nước nhập], chưa bao gồm VAT\nThời gian nhận hàng:\n[Thành phố đầu xuất 1]: 2 – 5 ngày kể từ ngày\n[Thành phố đầu xuất 2]: 5-7 ngày kể từ ngày bay\nQUY ƯỚC TÍNH\nDưới 1kg ⇨ Làm tròn thành 1kg\nTrên 1kg ⇨ Làm tròn một chữ số thập phân sau dấu phẩy\nKích thước hàng cồng kềnh: (Dài x rộng x cao) > 30 x 30 x30 (cm)\nPHỤ THU:\nĐIỀU KHOẢN KHÁC:\nKhách hàng vui",
+    "metadata": {
+      "source": "Bang_gia_van_chuyen_duong_air.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_7",
+    "text": "x30 (cm)\nPHỤ THU:\nĐIỀU KHOẢN KHÁC:\nKhách hàng vui lòng thanh toán 100% cước vận chuyển để tiến hành gửi hàng;\nHàng hóa phải có đủ các thông tin: Tên + SĐT người Tên + SĐT + địa chỉ người nhận;\nKhách hàng phải khai báo trung thực, đầy đủ số lượng và change loại hàng hóa",
+    "metadata": {
+      "source": "Bang_gia_van_chuyen_duong_air.docx",
+      "doc_type": "policy",
+      "length": 269
+    }
+  },
+  {
+    "chunk_id": "chunk_8",
+    "text": "CHÍNH SÁCH BẢO HIỂM, ĐỀN BÙ\nChính sách đền bù giúp bảo vệ quyền lợi khách hàng khi sử dụng dịch vụ vận chuyển tại [Công ty]. Xem chính sách này để hiểu rõ mức đền bù, điều kiện áp dụng và quy trình xử lý khi không may xảy ra thất lạc, mất mát hàng hóa.\nKhi sử dụng dịch vụ của [Công ty], khách hàng có thể lựa chọn mua bảo hiểm hàng hóa hoặc không mua bảo hiểm hàng hóa, với mức đền bù cụ thể như sau.\n1. Mức bảo hiểm và mức đền bù\nMua bảo hiểm hàng hóa\nPhí bảo hiểm: [X]% giá trị hàng hóa do khách khai báo.\nTrư",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_9",
+    "text": "hiểm: [X]% giá trị hàng hóa do khách khai báo.\nTrường hợp hàng hóa bị thất lạc, mất mát hoàn toàn trong quá trình [Công ty] nhận – vận chuyển – giao cho khách:\n→ Đền bù tối đa 100% giá trị hàng hóa khách khai báo (không bao gồm các chi phí phát sinh khác, trừ khi có thỏa thuận riêng).\nKhông mua bảo hiểm hàng hóa\nKhách hàng không phải trả phí bảo hiểm.\nNếu xảy ra thất lạc, mất mát hàng hóa trong quá trình vận chuyển.\n→ Đền bù tối đa 100% phí vận chuyển đã thanh toán, nhưng không vượt quá [Mức trần bồi thường",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_10",
+    "text": "nh toán, nhưng không vượt quá [Mức trần bồi thường]/đơn hàng.\nMức đền bù ở trên được áp dụng cho các đơn hàng sử dụng dịch vụ vận chuyển của [Công ty], trừ khi hai bên có thỏa thuận riêng bằng văn bản hoặc thông báo cụ thể khác.\n2. Điều kiện được xem xét đền bù\nKhách hàng được quyền yêu cầu [Công ty] xem xét đền bù khi đáp ứng đầy đủ các điều kiện sau:\nĐơn hàng được gửi qua hệ thống/kho của [Công ty] và có mã vận đơn, chứng từ giao nhận hợp lệ.\nHàng hóa được xác định là thất lạc, mất mát hoàn toàn trong quá",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_11",
+    "text": "xác định là thất lạc, mất mát hoàn toàn trong quá trình vận chuyển do lỗi của [Công ty].\nKhách hàng thông báo kịp thời cho [Công ty] sau khi phát hiện không nhận được hàng trong thời gian dự kiến, theo hướng dẫn trong mục Quy trình yêu cầu đền bù.\nKhách hàng cung cấp đầy đủ chứng từ cần thiết: hóa đơn mua hàng (nếu có), thông tin khai báo giá trị hàng hóa, chứng từ thanh toán, chứng từ nhận hàng (nếu đã nhận một phần), hình ảnh liên quan (nếu có) …\n3. Các trường hợp không áp dụng đền bù\n[Công ty] có quyền",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 510
+    }
+  },
+  {
+    "chunk_id": "chunk_12",
+    "text": "rường hợp không áp dụng đền bù\n[Công ty] có quyền từ chối hoặc không áp dụng đền bù trong các trường hợp sau:\nHàng hóa thuộc danh mục cấm vận chuyển, cấm lưu thông hoặc trái quy định pháp luật của [Nước xuất], [Nước nhập] hoặc quy định của hãng vận chuyển.\nKhách hàng khai sai, khai thiếu hoặc cố tình che giấu thông tin về loại hàng, số lượng, giá trị thực tế của hàng hóa.\nHàng hóa bị tịch thu, tiêu hủy, xử lý bởi cơ quan nhà nước có thẩm quyền do vi phạm quy định pháp luật, sai khai báo hải quan hoặc do chí",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_13",
+    "text": "định pháp luật, sai khai báo hải quan hoặc do chính bản chất hàng hóa.\nKhách hàng không cung cấp được chứng từ, thông tin để chứng minh quyền lợi hoặc không phối hợp cùng [Công ty] trong quá trình xác minh.\nHàng hóa chỉ bị chậm trễ thời gian giao nhưng cuối cùng vẫn được giao tới khách (không phải trường hợp mất mát, thất lạc hoàn toàn).\nHết thời hạn thông báo/yêu cầu đền bù theo quy định của [Công ty] tại từng thời điểm.\n4. Quy trình yêu cầu đền bù\nKhi nghi ngờ đơn hàng bị thất lạc, khách hàng thực hiện t",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_14",
+    "text": "i ngờ đơn hàng bị thất lạc, khách hàng thực hiện theo các bước sau:\nLiên hệ [Công ty]: Thông qua các kênh hỗ trợ chính thức (hotline, Zalo, email, fanpage…) và cung cấp: mã vận đơn, ngày gửi, loại hàng, giá trị khai báo, hình ảnh/chứng từ liên quan.\n[Công ty] kiểm tra và xác minh\n[Công ty] làm việc với kho, đối tác vận chuyển và các bên liên quan để xác minh tình trạng lô hàng.\nNếu xác định hàng thất lạc, [Công ty] thông báo kết quả và mức đền bù dự kiến cho khách hàng dựa trên trạng thái bảo hiểm (có mua b",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_15",
+    "text": "khách hàng dựa trên trạng thái bảo hiểm (có mua bảo hiểm hoặc không).\nThống nhất phương án đền bù\nHình thức: chuyển khoản, trừ vào các đơn hàng tiếp theo hoặc hình thức khác phù hợp, tùy thỏa thuận với khách hàng.\nThời gian xử lý: dự kiến trong vòng 5–10 ngày làm việc kể từ khi [Công ty] hoàn tất xác minh và thống nhất phương án đền bù với khách hàng.\n5. Cam kết dịch vụ của [Công ty]\n[Công ty] cam kết:\nCung cấp thông tin về mức bảo hiểm, phí bảo hiểm ([X]%) và mức đền bù một cách rõ ràng, minh bạch ngay từ",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_16",
+    "text": "và mức đền bù một cách rõ ràng, minh bạch ngay từ khi khách hàng sử dụng dịch vụ.\nHỗ trợ khách hàng giải đáp thắc mắc, hướng dẫn quy trình yêu cầu đền bù khi phát sinh sự cố thất lạc hàng hóa.\nPhối hợp với các đối tác vận chuyển và các bên liên quan để hạn chế tối đa rủi ro, nâng cao chất lượng dịch vụ, mua hộ, đấu giá hộ và vận chuyển hàng Việt – Nhật, mang lại trải nghiệm an toàn và yên tâm cho khách hàng.\nTrong trường hợp có thắc mắc, khiếu nại hoặc cần giải thích thêm về Chính sách đền bù khi thất lạc",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 510
+    }
+  },
+  {
+    "chunk_id": "chunk_17",
+    "text": "giải thích thêm về Chính sách đền bù khi thất lạc hàng hóa – [Công ty], khách hàng vui lòng liên hệ qua các kênh hỗ trợ chính thức được hiển thị trên website [Công ty] để được tư vấn chi tiết.",
+    "metadata": {
+      "source": "Chinh_sach_bao_hiem_den_bu.docx",
+      "doc_type": "policy",
+      "length": 192
+    }
+  },
+  {
+    "chunk_id": "chunk_18",
+    "text": "CHÍNH SÁCH BẢO MẬT\nTrong suốt quá trình cung cấp dịch vụ, [Công ty] luôn coi trọng việc bảo vệ dữ liệu cá nhân và thông tin giao dịch của khách hàng. Chính sách bảo mật này được xây dựng nhằm giúp bạn hiểu rõ cách chúng tôi thu thập, sử dụng, lưu trữ và bảo vệ thông tin cá nhân khi bạn sử dụng dịch vụ của [Công ty].\n1. Mục đích và phạm vi thu thập thông tin cá nhân\nTrong quá trình sử dụng dịch vụ tại website/ứng dụng của [Công ty], chúng tôi có thể thu thập các thông tin sau:\nHọ và tên khách hàng.\nTên đăng",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_19",
+    "text": "các thông tin sau:\nHọ và tên khách hàng.\nTên đăng nhập (nếu có).\nMật khẩu đăng nhập (khách hàng tự tạo).\nSố điện thoại liên hệ.\nĐịa chỉ email.\nThông tin giao nhận (địa chỉ nhận hàng, người nhận, số điện thoại người nhận, v.v).\nThời điểm thu thập: Khi bạn đăng ký sử dụng hệ thống dịch vụ của [Công ty], đặt hàng, hoặc sử dụng các tính năng trên website/app.\nLưu ý: Trong quá trình thực hiện giao dịch/thanh toán, [Công ty] chỉ lưu giữ các thông tin chi tiết về đơn hàng đã thanh toán và không lưu giữ thông tin v",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_20",
+    "text": "ơn hàng đã thanh toán và không lưu giữ thông tin về số tài khoản ngân hàng hoặc số thẻ ngân hàng của khách hàng.\nKhách hàng có trách nhiệm tự bảo mật tên đăng nhập, mật khẩu và hộp thư điện tử cá nhân của mình. Nếu phát hiện có hành vi lạm dụng, sử dụng trái phép hoặc vi phạm bảo mật từ bên thứ ba, bạn cần thông báo kịp thời cho [Công ty] để chúng tôi phối hợp xử lý.\n2. Phạm vi sử dụng thông tin\n[Công ty] cam kết không sử dụng thông tin cá nhân của bạn cho các mục đích ngoài những gì đã được nêu. Cụ thể, th",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_21",
+    "text": "ác mục đích ngoài những gì đã được nêu. Cụ thể, thông tin thu thập được sử dụng để:\nCung cấp các sản phẩm/dịch vụ mà bạn đăng ký tại [Công ty].\nGửi thông báo liên quan tới hoạt động, chương trình ưu đãi, khuyến mại (nếu bạn đồng ý nhận).\nLiên lạc, hỗ trợ và giải quyết tình huống phát sinh trong quá trình sử dụng dịch vụ.\nNgăn chặn, phát hiện các hoạt động giả mạo, phá hoại tài khoản người dùng hoặc vi phạm an ninh hệ thống.\nTrong một số trường hợp đặc biệt, nếu có yêu cầu hợp pháp từ cơ quan có thẩm quyền (",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_22",
+    "text": "nếu có yêu cầu hợp pháp từ cơ quan có thẩm quyền (ví dụ: [Cơ quan chức năng], Tòa án) theo luật pháp [Nước nhập], [Công ty] có trách nhiệm hợp tác và cung cấp thông tin cá nhân để điều tra hành vi vi phạm pháp luật.\n3. Thời gian lưu trữ thông tin\n[Công ty] lưu trữ thông tin cá nhân mà bạn cung cấp trong hệ thống nội bộ trong khoảng thời gian sau:\nTrong thời gian bạn sử dụng dịch vụ hoặc cho đến khi mục đích thu thập thông tin hoàn thành.\nSau khi kết thúc việc cung cấp dịch vụ, thông tin vẫn có thể được lưu",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_23",
+    "text": "c cung cấp dịch vụ, thông tin vẫn có thể được lưu giữ trong một khoảng thời gian nhất định nhằm mục đích đối chiếu, giải quyết khiếu nại, tra cứu lịch sử giao dịch. Bạn cũng có quyền yêu cầu xóa hoặc ngừng lưu trữ thông tin cá nhân của mình theo quy định nếu không còn sử dụng dịch vụ.\n5. Phương tiện và công cụ để tiếp cận, chỉnh sửa dữ liệu cá nhân\nBạn có quyền truy cập, chỉnh sửa hoặc yêu cầu xóa dữ liệu cá nhân của mình bằng cách:\nTruy cập tài khoản cá nhân trên website của [Công ty] và thực hiện chỉnh sử",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_24",
+    "text": "n trên website của [Công ty] và thực hiện chỉnh sửa thông tin trực tiếp.\nLiên hệ qua Hotline Hỗ trợ hoặc Email Hỗ trợ để gửi yêu cầu.\n[Công ty] sẽ xử lý yêu cầu của bạn trong thời gian hợp lý và thông báo kết quả.\n6. Cam kết bảo mật thông tin\n[Công ty] cam kết:\nBảo mật tuyệt đối thông tin cá nhân của khách hàng theo chính sách này và theo quy định pháp luật về bảo vệ dữ liệu cá nhân của [Nước nhập].\nKhông mua bán, trao đổi thông tin cá nhân khách hàng với bên thứ ba nhằm mục đích thương mại.\nKhuyến nghị bạn",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_25",
+    "text": "n thứ ba nhằm mục đích thương mại.\nKhuyến nghị bạn sử dụng mật khẩu mạnh, không đăng nhập trên các thiết bị công cộng, thường xuyên cập nhật phần mềm bảo mật.\n[Công ty] sẽ không chịu trách nhiệm nếu thông tin cá nhân bị lộ ra ngoài do lỗi từ phía bạn (ví dụ: bạn tiết lộ mật khẩu, sử dụng thiết bị không an toàn…).\nChính sách bảo mật này chỉ áp dụng cho thông tin bạn cung cấp trên website/ứng dụng chính thức của [Công ty]. Mọi thông tin đăng ký tại các nền tảng khác không thuộc phạm vi bảo mật này.\n7. Cơ chế",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_26",
+    "text": "g khác không thuộc phạm vi bảo mật này.\n7. Cơ chế tiếp nhận và giải quyết khiếu nại\nKhi bạn phát hiện hoặc nghi ngờ thông tin cá nhân của mình bị lạm dụng, xâm phạm, vui lòng liên hệ qua các thông tin đã cung cấp trên để\n[Công ty] sẽ tiếp nhận yêu cầu, kiểm tra và phản hồi trong thời gian tối đa 24-72 giờ (hoặc theo chính sách công ty). Trong trường hợp cần thiết, chúng tôi sẽ phối hợp với cơ quan chức năng có liên quan.\n8. Hiệu lực và thay đổi chính sách bảo mật\nChính sách này có hiệu lực kể từ khi được đă",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_27",
+    "text": "o mật\nChính sách này có hiệu lực kể từ khi được đăng tải trên website. [Công ty] có quyền cập nhật, chỉnh sửa hoặc thay đổi chính sách để phù hợp với hoạt động thực tế hoặc quy định pháp luật. Khi có thay đổi đáng kể, chúng tôi sẽ thông báo rõ ràng trên website.\nViệc bạn tiếp tục sử dụng dịch vụ sau khi có cập nhật đồng nghĩa bạn chấp nhận nội dung chính sách bảo mật mới.",
+    "metadata": {
+      "source": "Chinh_sach_bao_mat.docx",
+      "doc_type": "policy",
+      "length": 374
+    }
+  },
+  {
+    "chunk_id": "chunk_28",
+    "text": "CHÍNH SÁCH BỒI THƯỜNG\nCác quy định bồi thường\nĐối với hàng không bảo hiểm như thịt, trái cây, đồ fake, mỹ phẩm, TPCN..., đi nguyên kiên, đi dạng tịch thu hủy bỏ không khiếu nại, nếu đi chung đồ khô đi kèm bị hỏng cũng không được bồi thường.\nNếu mất do làm mất, lạc mất, rơi mất, thất lạc hàng, khách hàng được bồi thường theo giá trị hàng hoá đã khai báo.\nKiện hàng giao hàng quá thời gian quy định dẫn đến hỏng hàng (> 30 ngày, không tính ngày nghỉ lễ Tết của [Nước nhập])\nChúng tôi không chịu trách nhiệm và bồ",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_29",
+    "text": "Nước nhập])\nChúng tôi không chịu trách nhiệm và bồi thường cho các kiện hàng sau đây:\nHàng đông lạnh hoặc thực phẩm có hạn sử dụng ngắn ngày (< 30 ngày ) chúng tôi không chịu trách nhiệm cũng như không có phương án bồi thường nếu hải quan chỉ định kiểm tra hàng hóa theo quy định kiểm tra hàng hóa nhập khẩu\nHàng hoá đã gửi phát đúng thoả thuận trong hợp đồng và quy định.\nKiện hàng bị bắt id, thông tin người nhận không chính chủ\nNgười nhận khiếu nại sau thời gian quy định của công ty.\nKhách hàng không cung cấ",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_30",
+    "text": "ian quy định của công ty.\nKhách hàng không cung cấp đầy đủ các giấy tờ cần thiết phục vụ cho việc chuyển phát, khiếu nại hàng hóa là nguyên nhân dẫn tới các thiệt hại như hàng hóa để lâu bị hỏng, bị phạt vi phạm, bị tịch thu.\nHàng gửi bị hư hại, mất mát do lỗi của người gửi/Khách hàng hoặc do đặc tính tự nhiên.\nHàng gửi bị cơ quan Nhà nước có thẩm quyền tịch thu theo quy định của hải quan.\nNgười gửi không có chứng từ xác nhận việc gửi hàng hóa dẫn đến việc mất mát, hư hỏng, phát chậm.\nCác trường hợp bất khả",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_31",
+    "text": "ất mát, hư hỏng, phát chậm.\nCác trường hợp bất khả kháng như: động đất, bão lụt, chiến tranh, bạo loạn, dịch bệnh…\nĐối với nhóm hàng hóa dễ vỡ, dễ móp méo (đồ gốm sứ, thủy tinh, hộp giấy, hộp đồ chơi…) công ty chỉ đền bù trong trường hợp bị mất, không đền bù nếu bị sứt vỡ, móp méo do khách hàng tự đóng gói không đảm bảo quy cách vận chuyển.\nCác mặt hàng hóa dạng lỏng hoặc thực phẩm chảy nước, hỏng, vỡ thùng trong quá trình vận chuyển (không sử dụng dịch vụ đổi thùng)\nNgười sử dụng dịch vụ không chứng minh đ",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_32",
+    "text": "ổi thùng)\nNgười sử dụng dịch vụ không chứng minh được bưu phẩm bị móp, hư hỏng do phía vận chuyển.\nNgười nhận không có video mở hàng trong trường hợp báo thiếu hàng, mất hàng, hư hỏng do đơn vị vận chuyển.\nKhông miễn trừ cước trong các trường hợp chậm trễ do yếu tố khách quan như: thời tiết, ngày thứ bảy, chủ nhật, nghĩ lễ, các cơ quan chức năng tạm giữ để kiểm tra, hàng hóa không cung cấp được chứng từ hợp lệ, người nhận không có để nhận tại thời điểm giao hàng, địa chỉ khó tìm, trục trặc kỹ thuật hàng khô",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_33",
+    "text": "hàng, địa chỉ khó tìm, trục trặc kỹ thuật hàng không …\nDo nhà cung cấp bán hàng giao thiếu, hàng bị lỗi với trường hợp khách mua hàng trên web hoặc người gửi mua thông qua giao dịch riêng với nhà cung cấp.\nNếu bên sân bay [Nước nhập] báo nhận thiếu kiện so với bên VN gửi nhưng bên VN không có ảnh kiện (đã dán bill).\nCác kiện hàng khi khách nhận được thông báo bị mất một phần hoặc một món đồ trong kiện hàng nhưng bên khách hàng không cung cấp ảnh các mặt hàng trong kiện hàng đầy đủ trước khi gửi đi.\nKiện hàn",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_34",
+    "text": "trong kiện hàng đầy đủ trước khi gửi đi.\nKiện hàng có giấy tờ quan trọng, được gửi kèm với hàng hóa hạn chế, và bị hủy toàn bộ. Hỗ trợ khách hàng báo hải quan tách, gửi lại giấy tờ cho khách, tuy nhiên phía công ty không có trách nhiệm nếu giấy tờ bị mất, hoặc không tìm lại được do hải quan tiến hành hủy trước khi nhận được khiếu nại.\nNhững kiện hàng đã được báo giao thành công và có minh chứng giao hàng nhưng khách báo không thấy hàng.\n2. Mức bảo hiểm và mức đền bù\n* Mua bảo hiểm hàng hóa\nPhí bảo hiểm: [X",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_35",
+    "text": "ức đền bù\n* Mua bảo hiểm hàng hóa\nPhí bảo hiểm: [X]% giá trị hàng hóa do khách khai báo.\nTrường hợp hàng hóa bị thất lạc, mất mát hoàn toàn trong quá trình [Công ty] JP nhận – vận chuyển – giao cho khách:\n→ Đền bù tối đa 100% giá trị hàng hóa khách khai báo (không bao gồm các chi phí phát sinh khác, trừ khi có thỏa thuận riêng).\n* Không mua bảo hiểm hàng hóa\nKhách hàng không phải trả phí bảo hiểm.\nNếu xảy ra thất lạc, mất mát hàng hóa trong quá trình vận chuyển.\n→ Đền bù tối đa 100% phí vận chuyển đã thanh",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_36",
+    "text": "yển.\n→ Đền bù tối đa 100% phí vận chuyển đã thanh toán, nhưng không vượt quá [Mức trần bồi thường]/đơn hàng.",
+    "metadata": {
+      "source": "Chinh_sach_boi_thuong.docx",
+      "doc_type": "policy",
+      "length": 108
+    }
+  },
+  {
+    "chunk_id": "chunk_37",
+    "text": "CHÍNH SÁCH ĐÓNG GÓI THEO TIÊU CHUẨN\nĐể đảm bảo kiện hàng được vận chuyển an toàn, hạn chế hư hỏng và đáp ứng đúng yêu cầu của hãng bay, [Công ty] áp dụng quy định đóng gói chuẩn như sau:\n1. Nguyên tắc chung\nTất cả kiện hàng gửi sang [Nước nhập] phải được đóng gói theo tiêu chí:\n“an toàn – sạch sẽ – không rò rỉ – không có mùi lạ”\nTrong trường hợp kiện hàng chưa đạt tiêu chuẩn, [Công ty] có quyền đóng gói lại để đảm bảo an toàn vận chuyển và tránh rủi ro trong quá trình xử lý.\n2. Quy định đóng gói hàng dễ vỡ",
+    "metadata": {
+      "source": "Chinh_sach_dong_goi_tieu_chuan.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_38",
+    "text": "quá trình xử lý.\n2. Quy định đóng gói hàng dễ vỡ\nÁp dụng cho các mặt hàng như: ly sứ, chai thủy tinh, đồ trang trí, đồ điện tử và các sản phẩm công nghệ.\nKhách hàng cần đảm bảo:\nMỗi sản phẩm phải được bọc bằng 3–5 lớp bubble chống sốc.\nBên trong thùng phải có khoảng trống tối thiểu 3cm để giảm va đập.\nBên ngoài phải dùng hộp carton từ 2–3 lớp, chắc chắn, không móp méo.\nThùng phải dán nhãn cảnh báo: “FRAGILE – HANDLE WITH CARE”.\n3. Quy định chống xì – chống tràn cho chất lỏng\nÁp dụng cho: mỹ phẩm, nước giặt",
+    "metadata": {
+      "source": "Chinh_sach_dong_goi_tieu_chuan.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_39",
+    "text": "tràn cho chất lỏng\nÁp dụng cho: mỹ phẩm, nước giặt, nước rửa chén, dầu gội, sữa tắm, nước chấm, thực phẩm dạng lỏng…\nYêu cầu bắt buộc:\nNắp chai, lọ phải được băng keo niêm kín để chống rò rỉ.\nToàn bộ sản phẩm phải được đặt vào túi zip hoặc túi chống thấm.\nCác món chất lỏng nên có hộp riêng, không đóng chung trực tiếp với đồ khô hoặc đồ điện tử.\n4. Quy định đóng gói hàng thực phẩm\nÁp dụng cho: bánh kẹo, đồ khô, thực phẩm đóng gói sẵn.\nLưu ý:\nChỉ nhận thực phẩm có hạn sử dụng rõ ràng và bao bì còn nguyên seal",
+    "metadata": {
+      "source": "Chinh_sach_dong_goi_tieu_chuan.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_40",
+    "text": "m có hạn sử dụng rõ ràng và bao bì còn nguyên seal.\nKhông nhận thực phẩm tự làm (handmade) hoặc chia nhỏ bao bì.\nKhông nhận thực phẩm có mùi mạnh ảnh hưởng đến kiện hàng khác.\nThực phẩm đông lạnh hoặc cần bảo quản lạnh không nhận gửi theo đường hàng không thông thường.\n5. Phụ phí đóng gói lại\n[Công ty] sẽ thu phí trong các trường hợp phát sinh công tác đóng gói lại, bao gồm:\nHộp không đạt tiêu chuẩn của hãng bay (mỏng, yếu, móp méo).\nHàng lỏng không được chống tràn đúng yêu cầu.\nHàng dễ vỡ không bọc bubble",
+    "metadata": {
+      "source": "Chinh_sach_dong_goi_tieu_chuan.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_41",
+    "text": "ng tràn đúng yêu cầu.\nHàng dễ vỡ không bọc bubble đúng quy định.\nMức phí sẽ dựa trên số lượng kiện hàng và thời gian xử lý. [Công ty] sẽ thông báo trước khi tiến hành đóng gói lại.\n6. Trách nhiệm khi khách tự đóng gói sai chuẩn\nNếu hàng bị hư hỏng do khách tự đóng gói không đúng quy định, [Công ty] không chịu trách nhiệm bồi thường.\nNếu kiện hàng gây ảnh hưởng đến các kiện khác trong cùng chuyến bay (như tràn chất lỏng, gây mùi, gây hư hỏng), khách sẽ chịu toàn bộ chi phí xử lý phát sinh.\n[Công ty] có quyền",
+    "metadata": {
+      "source": "Chinh_sach_dong_goi_tieu_chuan.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_42",
+    "text": "oàn bộ chi phí xử lý phát sinh.\n[Công ty] có quyền từ chối vận chuyển nếu kiện hàng không đảm bảo tiêu chuẩn an toàn của hãng bay.",
+    "metadata": {
+      "source": "Chinh_sach_dong_goi_tieu_chuan.docx",
+      "doc_type": "policy",
+      "length": 130
+    }
+  },
+  {
+    "chunk_id": "chunk_43",
+    "text": "CHÍNH SÁCH HỖ TRỢ SAU GIAO DỊCH\nTiếp nhận phản hồi sau khi khách gửi/ nhận hàng\nSau khi khách hàng gửi hàng, [Công ty] vẫn duy trì hỗ trợ để giải đáp thắc mắc liên quan đến vận đơn, chứng từ. Khách hàng có thể gửi phản hồi qua hotline, email hoặc các kênh chăm sóc khách hàng để được ghi nhận và xử lý.\n[Công ty] sẽ không hỗ trợ trong trường hợp khách phát hiện sản phẩm bị lỗi do nhà bán (chất lượng sản phẩm, hàng hư hỏng từ trước khi đóng gói,...).\nHỗ trợ đối với sự cố thuộc phạm vi vận chuyển\nNếu sản phẩm b",
+    "metadata": {
+      "source": "Chinh_sach_ho_tro_sau_giao_dich.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_44",
+    "text": "với sự cố thuộc phạm vi vận chuyển\nNếu sản phẩm bị ảnh hưởng trong quá trình vận chuyển do bên [Công ty] phụ trách (ví dụ: thất lạc kiện, hư hại do xử lý vận chuyển), [Công ty] sẽ tiến hành kiểm tra, đối chiếu thông tin và đưa ra phương án hỗ trợ theo chính sách vận chuyển hiện hành của công ty.\nPhương án có thể bao gồm: đền bù theo giá trị giới hạn, hỗ trợ một phần phí, hoặc xử lý theo thỏa thuận tùy mức độ thiệt hại được xác minh.\nDuy trì hỗ trợ sau giao dịch nhưng không cam kết chất lượng hàng hoá\n[Công",
+    "metadata": {
+      "source": "Chinh_sach_ho_tro_sau_giao_dich.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_45",
+    "text": "dịch nhưng không cam kết chất lượng hàng hoá\n[Công ty] không thực hiện bảo hành, không cam kết chất lượng, số lượng, công năng sử dụng hoặc tình trạng của hàng hóa sau khi hàng đã được giao cho đơn vị vận chuyển và hoàn tất thủ tục xuất khẩu. Mọi khiếu nại liên quan đến chất lượng sản phẩm, mục đích sử dụng hoặc thỏa thuận thương mại giữa khách hàng và bên nhận hàng ở nước ngoài không thuộc phạm vi trách nhiệm của [Công ty].",
+    "metadata": {
+      "source": "Chinh_sach_ho_tro_sau_giao_dich.docx",
+      "doc_type": "policy",
+      "length": 428
+    }
+  },
+  {
+    "chunk_id": "chunk_46",
+    "text": "CHÍNH SÁCH HỢP ĐỒNG\nHợp đồng dịch vụ giữa khách hàng và [Công ty] được hình thành khi khách hàng xác nhận sử dụng dịch vụ chuyển hàng từ [Nước xuất] sang [Nước nhập], hoàn tất thanh toán và đồng ý với các điều khoản dịch vụ được công bố trên hệ thống của [Công ty]. Hợp đồng là cơ sở pháp lý xác định quyền và nghĩa vụ của các bên trong suốt quá trình thực hiện dịch vụ.\nNội dung hợp đồng có thể bao gồm các thông tin chính như: mô tả hàng hóa gửi đi (chủng loại, số lượng, giá trị khai báo); chi phí dịch vụ và",
+    "metadata": {
+      "source": "Chinh_sach_hop_dong.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_47",
+    "text": ", số lượng, giá trị khai báo); chi phí dịch vụ và các khoản phí phát sinh liên quan đến vận chuyển nội địa – quốc tế (nếu có); thời gian giao hàng dự kiến; và phạm vi trách nhiệm của từng bên trong quá trình tiếp nhận, vận chuyển và bàn giao hàng hóa từ [Nước xuất] sang [Nước nhập].\n[Công ty] cam kết tiếp nhận và xử lý lô hàng theo đúng thông tin khách hàng đã xác nhận, đồng thời theo dõi quá trình vận chuyển xuyên suốt các giai đoạn bao gồm: tiếp nhận hàng tại [Nước xuất], vận chuyển nội địa, vận chuyển qu",
+    "metadata": {
+      "source": "Chinh_sach_hop_dong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_48",
+    "text": "tại [Nước xuất], vận chuyển nội địa, vận chuyển quốc tế tuyến [Nước xuất] – [Nước nhập], thực hiện thủ tục hải quan và bàn giao hàng cho bên nhận theo thông tin do khách hàng cung cấp. Mọi thay đổi phát sinh trong quá trình xử lý (nếu có) liên quan đến thời gian vận chuyển, yêu cầu chứng từ hoặc quy định từ cơ quan chức năng và đơn vị vận chuyển sẽ được [Công ty] thông báo kịp thời để khách hàng nắm bắt và phối hợp xử lý.\nKhách hàng chịu trách nhiệm đảm bảo tính chính xác và đầy đủ của thông tin hàng hóa, t",
+    "metadata": {
+      "source": "Chinh_sach_hop_dong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_49",
+    "text": "tính chính xác và đầy đủ của thông tin hàng hóa, thông tin người gửi và người nhận. Trường hợp khách hàng có nhu cầu điều chỉnh thông tin lô hàng hoặc yêu cầu thay đổi dịch vụ, [Công ty] chỉ có thể hỗ trợ khi hàng hóa chưa được bàn giao cho đơn vị vận chuyển hoặc chưa phát sinh các thủ tục liên quan đến vận chuyển và hải quan.\nSau khi hàng hóa đã được tiếp nhận chính thức để vận chuyển hoặc đã phát sinh các công đoạn xử lý liên quan, yêu cầu điều chỉnh hoặc hủy dịch vụ có thể không còn khả thi. Trong trường",
+    "metadata": {
+      "source": "Chinh_sach_hop_dong.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_50",
+    "text": "hủy dịch vụ có thể không còn khả thi. Trong trường hợp khách hàng vẫn yêu cầu thay đổi hoặc hủy bỏ dịch vụ ở giai đoạn này, toàn bộ chi phí phát sinh (bao gồm nhưng không giới hạn ở phí xử lý, phí vận chuyển đã thực hiện, phí lưu kho hoặc các chi phí liên quan khác) sẽ do khách hàng tự chịu theo quy định của các bên liên quan.",
+    "metadata": {
+      "source": "Chinh_sach_hop_dong.docx",
+      "doc_type": "policy",
+      "length": 328
+    }
+  },
+  {
+    "chunk_id": "chunk_51",
+    "text": "CHÍNH SÁCH MIỄN TRỪ TRÁCH NHIỆM\nDo đặc thù của dịch vụ chuyển hàng quốc tế từ [Nước xuất] sang [Nước nhập], [Công ty] không chịu trách nhiệm đối với các vấn đề phát sinh liên quan đến bản chất hàng hóa, người gửi, người bán hoặc bên cung cấp hàng hóa. Các trường hợp này bao gồm nhưng không giới hạn ở việc hàng hóa không đúng mô tả, sai màu sắc, kích thước, khác hình ảnh tham khảo; hàng hóa bị lỗi kỹ thuật, hư hỏng, đã qua sử dụng, thiếu phụ kiện; hoặc chất lượng hàng hóa không đáp ứng kỳ vọng của bên nhận h",
+    "metadata": {
+      "source": "Chinh_sach_mien_tru_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_52",
+    "text": "ượng hàng hóa không đáp ứng kỳ vọng của bên nhận hàng.\n[Công ty] cũng không chịu trách nhiệm đối với các chậm trễ hoặc phát sinh do nguyên nhân từ phía người bán, người gửi hoặc bên thứ ba, bao gồm việc bàn giao hàng chậm, thiếu hàng hoặc các vấn đề ngoài phạm vi kiểm soát của [Công ty].\nNgoài ra, [Công ty] được miễn trách nhiệm đối với các rủi ro phát sinh từ yếu tố bất khả kháng, bao gồm nhưng không giới hạn ở thiên tai, đình công, dịch bệnh, chiến tranh; thay đổi chính sách pháp luật, quy định hải quan h",
+    "metadata": {
+      "source": "Chinh_sach_mien_tru_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_53",
+    "text": "thay đổi chính sách pháp luật, quy định hải quan hoặc yêu cầu kiểm tra chuyên ngành; cũng như các chậm trễ hoặc sự cố từ phía hãng vận chuyển quốc tế.\nKhách hàng có trách nhiệm kiểm tra tình trạng kiện hàng ngay khi nhận và cung cấp đầy đủ bằng chứng theo quy định, bao gồm video mở kiện hàng liên tục từ thời điểm chưa khui niêm phong và hình ảnh bao bì, vận đơn. Trường hợp khách hàng không phản hồi trong thời hạn hỗ trợ quy định, giao dịch được xem là hoàn tất và [Công ty] được miễn trách nhiệm đối với mọi",
+    "metadata": {
+      "source": "Chinh_sach_mien_tru_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_54",
+    "text": "ất và [Công ty] được miễn trách nhiệm đối với mọi vấn đề phát sinh sau đó.",
+    "metadata": {
+      "source": "Chinh_sach_mien_tru_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 74
+    }
+  },
+  {
+    "chunk_id": "chunk_55",
+    "text": "CHÍNH SÁCH MINH BẠCH TRÁCH NHIỆM CÁC BÊN\nLàm rõ phạm vi dịch vụ của [Công ty]\n[Công ty] cung cấp dịch vụ xuất hộ và vận chuyển hàng hóa từ [Nước xuất] sang [Nước nhập] theo yêu cầu của khách hàng. Công ty đóng vai trò đơn vị trung gian hỗ trợ xuất khẩu và vận chuyển, không tham gia vào giao dịch mua bán hàng hóa, không trực tiếp sản xuất, kinh doanh hoặc phân phối sản phẩm.\n[Công ty] không kiểm soát và không can thiệp vào quá trình đánh giá, kiểm tra chất lượng hàng hóa của người gửi hoặc của bên nhận hàng",
+    "metadata": {
+      "source": "Chinh_sach_minh_bach_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_56",
+    "text": "ợng hàng hóa của người gửi hoặc của bên nhận hàng tại [Nước nhập]. Do đó, [Công ty] không cam kết, không bảo đảm về chất lượng, mẫu mã, màu sắc, kích thước, thông số kỹ thuật, công năng sử dụng hoặc mức độ phù hợp của hàng hóa với mục đích sử dụng sau khi giao hàng hoàn tất.\nTrách nhiệm của các bên\nTrách nhiệm của khách hàng/ người gửi: Cung cấp đầy đủ, chính xác thông tin lô hàng xuất sang [Nước nhập] (tên hàng, chủng loại, số lượng, giá trị khai báo, người nhận, địa chỉ tại [Nước nhập]…); Đảm bảo hàng hóa",
+    "metadata": {
+      "source": "Chinh_sach_minh_bach_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_57",
+    "text": "nhận, địa chỉ tại [Nước nhập]…); Đảm bảo hàng hóa không thuộc danh mục cấm/hạn chế xuất khẩu hoặc nhập khẩu vào [Nước nhập]; Đóng gói hàng hóa đúng tiêu chuẩn vận chuyển quốc tế hoặc chấp thuận phương án đóng gói do [Công ty] tư vấn.\nTrách nhiệm của [Công ty]: [Công ty] chịu trách nhiệm thực hiện đúng yêu cầu đặt hàng của khách, theo dõi quá trình vận chuyển quốc tế – nội địa và bàn giao hàng theo thông tin khách đã đăng ký.\nKhông che giấu thông tin và luôn giải thích rõ ràng\nToàn bộ chi phí dịch vụ xuất h",
+    "metadata": {
+      "source": "Chinh_sach_minh_bach_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_58",
+    "text": "giải thích rõ ràng\nToàn bộ chi phí dịch vụ xuất hộ và vận chuyển tuyến VN – [Nước nhập] (phí dịch vụ, phí vận chuyển nội địa, phí vận chuyển quốc tế, thuế/phí phát sinh nếu có tại [Nước xuất] hoặc [Nước nhập]) đều được [Công ty] thông báo trước để khách hàng xác nhận.\nCác rủi ro có thể phát sinh như:\nChậm trễ thông quan do kiểm tra hải quan [Nước xuất] hoặc [Nước nhập];\nThay đổi chính sách nhập khẩu của [Nước nhập];\nPhát sinh chi phí lưu kho, tái đóng gói, hoặc điều chỉnh cước từ hãng vận chuyển;\nđều được",
+    "metadata": {
+      "source": "Chinh_sach_minh_bach_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 510
+    }
+  },
+  {
+    "chunk_id": "chunk_59",
+    "text": "hoặc điều chỉnh cước từ hãng vận chuyển;\nđều được giải thích rõ trước khi khách hàng quyết định sử dụng dịch vụ.\nLàm rõ giới hạn trách nhiệm khi phát sinh vấn đề\nNếu sự cố phát sinh do bản chất hàng hóa hoặc lỗi từ người gửi/người bán (hàng không đúng mô tả, vi phạm quy định nhập khẩu của Nhật, hàng dễ hư hỏng…), [Công ty] không chịu trách nhiệm bồi thường, nhưng sẽ hỗ trợ cung cấp thông tin và phối hợp làm việc với các bên liên quan khi cần thiết.\nNếu sự cố phát sinh trong quá trình vận chuyển do [Công ty]",
+    "metadata": {
+      "source": "Chinh_sach_minh_bach_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_60",
+    "text": "phát sinh trong quá trình vận chuyển do [Công ty] trực tiếp tổ chức, công ty sẽ xử lý theo từng trường hợp cụ thể (mất hàng, hư hỏng do vận chuyển, giao nhầm…), căn cứ theo phạm vi dịch vụ đã thỏa thuận và quy định của đơn vị vận chuyển/đối tác tại [Nước xuất] và [Nước nhập].\nNguyên tắc chung: [Công ty] cam kết cung cấp dịch vụ xuất hộ tuyến [Nước xuất] – [Nước nhập] đúng phạm vi, đúng trách nhiệm, minh bạch thông tin, không né tránh trách nhiệm nhưng không nhận nghĩa vụ vượt ngoài phạm vi dịch vụ xuất hộ",
+    "metadata": {
+      "source": "Chinh_sach_minh_bach_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 510
+    }
+  },
+  {
+    "chunk_id": "chunk_61",
+    "text": "nhận nghĩa vụ vượt ngoài phạm vi dịch vụ xuất hộ và vận chuyển quốc tế.",
+    "metadata": {
+      "source": "Chinh_sach_minh_bach_trach_nhiem.docx",
+      "doc_type": "policy",
+      "length": 71
+    }
+  },
+  {
+    "chunk_id": "chunk_62",
+    "text": "CHÍNH SÁCH PHÂN LOẠI HÀNG HÓA VÀ HẠN CHẾ GỬI SANG \n[NƯỚC NHẬP]\nĐể đảm bảo việc gửi hàng sang [Nước nhập] được thuận lợi và tuân thủ đúng quy định của Hải quan [Nước nhập], luật an toàn Hàng không và quy định của các hãng vận chuyển, [Công ty] áp dụng chính sách phân loại hàng hóa như sau:\n1. Hàng hóa không được nhận gửi (Hàng cấm)\nVì lý do pháp lý và an toàn chuyến bay, một số mặt hàng hoàn toàn không thể gửi sang [Nước nhập]. Bao gồm:\nCác chất ma túy, chất kích thích, chất gây nghiện.\nVũ khí, đạn dược, dao",
+    "metadata": {
+      "source": "Chinh_sach_phan_loai_hang_hoa.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_63",
+    "text": "kích thích, chất gây nghiện.\nVũ khí, đạn dược, dao, kiếm, các dụng cụ tự vệ.\nThực vật sống, hạt giống, đất, phân bón.\nĐộng vật sống hoặc sản phẩm từ động vật chưa qua xử lý.\nTiền mặt, tiền xu, thẻ ngân hàng, thẻ tín dụng và giấy tờ có giá trị.\nHóa chất độc hại, chất dễ cháy nổ, bình gas, khí nén.\nThực phẩm tươi sống như thịt, cá, hải sản chưa chế biến.\nThuốc lá và các sản phẩm thuốc lá.\nNhững mặt hàng này nếu bị phát hiện sẽ bị từ chối, trả về hoặc tiêu hủy theo quy định của phía [Nước nhập].\n2. Hàng hóa đư",
+    "metadata": {
+      "source": "Chinh_sach_phan_loai_hang_hoa.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_64",
+    "text": "theo quy định của phía [Nước nhập].\n2. Hàng hóa được gửi nhưng có hạn chế\nMột số mặt hàng được phép gửi nhưng phải tuân thủ đúng quy định của [Nước nhập] và quy định của hãng bay. Cụ thể:\nĐồ uống dạng lỏng: chỉ nhận số lượng nhỏ, yêu cầu đóng nắp kín và chống tràn kỹ.\nThực phẩm khô, bánh kẹo, đồ ăn đóng gói: bao bì phải còn nguyên và có hạn sử dụng rõ ràng.\nMỹ phẩm dạng kem, gel, lotion: nhận số lượng cá nhân, không quá nhiều để tránh bị coi là hàng thương mại.\nĐiện thoại, đồng hồ, tai nghe có pin: pin phải",
+    "metadata": {
+      "source": "Chinh_sach_phan_loai_hang_hoa.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_65",
+    "text": "ại.\nĐiện thoại, đồng hồ, tai nghe có pin: pin phải gắn liền trong thiết bị, không phồng, không hư hỏng.\nPin dự phòng: chỉ nhận loại trong giới hạn Wh theo quy định hãng bay.\n3. Hàng hóa cần giấy phép hoặc kiểm định\nMột số sản phẩm có yêu cầu đặc thù, cần khách hàng cung cấp thông tin và giấy tờ bổ sung trước khi gửi:\nMỹ phẩm: cần thông tin thành phần hoặc giấy tờ chứng minh nguồn gốc.\nThực phẩm chức năng: cần nhãn rõ ràng, thành phần đầy đủ, không nhận hàng tự chia nhỏ.\nSản phẩm chứa cồn: như nước hoa, dung",
+    "metadata": {
+      "source": "Chinh_sach_phan_loai_hang_hoa.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_66",
+    "text": "tự chia nhỏ.\nSản phẩm chứa cồn: như nước hoa, dung dịch có nồng độ cồn cao.\nThuốc, vitamin, thiết bị y tế: có thể yêu cầu giấy phép nhập khẩu tùy loại.\nNếu không cung cấp được thông tin đúng quy định, hàng có thể bị giữ lại hoặc bị tiêu hủy bởi Hải quan [Nước nhập].\n4. Hàng hoá nguy hiểm (Dangerous Goods – DG)\nMột số mặt hàng thuộc nhóm DG chỉ được nhận khi khách khai báo đúng và đóng gói theo tiêu chuẩn IATA:\nPin lithium rời (Li-ion, Li-po).\nChất lỏng dễ cháy.\nChất oxy hóa, ăn mòn.\nNam châm mạnh.\nCác mặt h",
+    "metadata": {
+      "source": "Chinh_sach_phan_loai_hang_hoa.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_67",
+    "text": "áy.\nChất oxy hóa, ăn mòn.\nNam châm mạnh.\nCác mặt hàng này có thể phát sinh thêm phụ phí do hãng bay quy định.\n5. Trách nhiệm của khách hàng\nĐể đảm bảo kiện hàng được thông quan và vận chuyển suôn sẻ, khách hàng vui lòng:\nCung cấp thông tin trung thực và chính xác về mặt hàng.\nKhông khai sai hoặc giấu thành phần trong kiện hàng.\nChủ động chuẩn bị các loại giấy tờ khi được yêu cầu.\nMọi chi phí phát sinh do hàng vi phạm quy định (phí phạt, phí trả hàng, phí tiêu hủy, phí lưu kho…) sẽ do khách hàng tự chịu.",
+    "metadata": {
+      "source": "Chinh_sach_phan_loai_hang_hoa.docx",
+      "doc_type": "policy",
+      "length": 508
+    }
+  },
+  {
+    "chunk_id": "chunk_68",
+    "text": "u hủy, phí lưu kho…) sẽ do khách hàng tự chịu.",
+    "metadata": {
+      "source": "Chinh_sach_phan_loai_hang_hoa.docx",
+      "doc_type": "policy",
+      "length": 46
+    }
+  },
+  {
+    "chunk_id": "chunk_69",
+    "text": "CHÍNH SÁCH PHÍ DỊCH VỤ & THANH TOÁN CỦA [CÔNG TY]\nChính sách này nhằm giúp khách hàng hiểu rõ các khoản chi phí liên quan khi sử dụng dịch vụ chuyển hàng quốc tế từ [Nước xuất] sang [Nước nhập] thông qua [Công ty]. Mọi thông tin về phí và phương thức thanh toán được công khai minh bạch, giúp khách hàng chủ động quản lý chi phí và đảm bảo quyền lợi trong suốt quá trình sử dụng dịch vụ.\n1. Cách tính phí dịch vụ\nPhí dịch vụ của [Công ty] được xác định dựa trên các yếu tố sau:\nThông tin hàng hóa gửi đi (chủng l",
+    "metadata": {
+      "source": "Chinh_sach_phi_dich_vu_thanh_toan.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_70",
+    "text": "các yếu tố sau:\nThông tin hàng hóa gửi đi (chủng loại, tính chất hàng hóa, giá trị khai báo);\nMức độ hỗ trợ theo yêu cầu của khách hàng (tư vấn đóng gói, xử lý chứng từ, hỗ trợ thủ tục hải quan, xử lý hàng đặc thù…);\nTuyến vận chuyển và phương thức vận chuyển áp dụng.\n[Công ty] báo giá và xác nhận chi phí trước khi khách hàng đồng ý sử dụng dịch vụ. Sau khi khách hàng xác nhận, không phát sinh thêm chi phí ngoài báo giá, trừ trường hợp có yêu cầu bổ sung từ phía khách hàng hoặc phát sinh chi phí bắt buộc th",
+    "metadata": {
+      "source": "Chinh_sach_phi_dich_vu_thanh_toan.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_71",
+    "text": "phía khách hàng hoặc phát sinh chi phí bắt buộc theo quy định của cơ quan chức năng và đơn vị vận chuyển.\nMinh bạch chi phí: Trước khi thanh toán, khách hàng được cung cấp bảng chi tiết các khoản phí, bao gồm:\nPhí dịch vụ của [Công ty];\nPhí vận chuyển nội địa và quốc tế;\nThuế, phí liên quan (nếu có theo quy định);\nCác chi phí hỗ trợ phát sinh đã được khách hàng xác nhận.\n2. Phí vận chuyển quốc tế tuyến [Nước xuất] – [Nước nhập]\nPhí vận chuyển từ [Nước xuất] sang [Nước nhập] được tính dựa trên:\nKhối lượng th",
+    "metadata": {
+      "source": "Chinh_sach_phi_dich_vu_thanh_toan.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_72",
+    "text": "sang [Nước nhập] được tính dựa trên:\nKhối lượng thực tế của kiện hàng (kg);\nKhối lượng quy đổi theo tiêu chuẩn vận chuyển quốc tế;\nLoại hàng hóa (hàng thường, hàng đặc thù, hàng dễ vỡ…);\nTuyến vận chuyển và hình thức vận chuyển áp dụng.\n3. Thuế và phí hải quan\n[Công ty] hỗ trợ khách hàng trong quá trình chuẩn bị hồ sơ và thực hiện các thủ tục hải quan liên quan đến việc chuyển hàng từ [Nước xuất] sang [Nước nhập] trong phạm vi dịch vụ đã thỏa thuận.\nCác khoản thuế, phí có thể phát sinh bao gồm:\nThuế, phí th",
+    "metadata": {
+      "source": "Chinh_sach_phi_dich_vu_thanh_toan.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_73",
+    "text": "n thuế, phí có thể phát sinh bao gồm:\nThuế, phí theo quy định của cơ quan hải quan;\nPhí kiểm tra, kiểm định đối với hàng hóa đặc thù (nếu có);\nPhí chứng từ hải quan phát sinh theo yêu cầu của cơ quan chức năng.\n*Nguyên tắc thu phí:\nCác khoản thuế, phí được áp dụng theo quy định pháp luật hiện hành;\n[Công ty] thông báo trước cho khách hàng khi có khả năng phát sinh để khách hàng chủ động quyết định.\n4. Các phụ phí có thể phát sinh\nTrong một số trường hợp đặc biệt, có thể phát sinh thêm các khoản phụ phí như:",
+    "metadata": {
+      "source": "Chinh_sach_phi_dich_vu_thanh_toan.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_74",
+    "text": "biệt, có thể phát sinh thêm các khoản phụ phí như:\nPhí lưu kho do hàng chờ xử lý hoặc chờ bổ sung chứng từ;\nPhí kiểm định, chứng nhận đối với hàng hóa đặc thù theo yêu cầu của cơ quan chức năng;\nPhí tái đóng gói, xử lý hàng hóa theo yêu cầu riêng của khách hàng;\nPhí hoàn hàng hoặc thay đổi phương án vận chuyển theo yêu cầu của khách hàng.\n*Nguyên tắc xử lý phụ phí:\nMọi phụ phí đều được thông báo rõ ràng trước;\nChỉ thu khi khách hàng xác nhận đồng ý;\nKhông áp dụng các khoản phí không rõ ràng hoặc ngoài phạm",
+    "metadata": {
+      "source": "Chinh_sach_phi_dich_vu_thanh_toan.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_75",
+    "text": "dụng các khoản phí không rõ ràng hoặc ngoài phạm vi dịch vụ đã thỏa thuận.\n🔎 Thông điệp từ [Công ty]\n“[Công ty] cam kết minh bạch chi phí, rõ ràng điều khoản và đồng hành cùng khách hàng trong mọi bước của giao dịch. Mục tiêu của chúng tôi là mang đến giải pháp tối ưu về chi phí nhưng vẫn bảo vệ đầy đủ quyền lợi khách hàng.”",
+    "metadata": {
+      "source": "Chinh_sach_phi_dich_vu_thanh_toan.docx",
+      "doc_type": "policy",
+      "length": 326
+    }
+  },
+  {
+    "chunk_id": "chunk_76",
+    "text": "CHÍNH SÁCH VỀ XỬ LÝ YÊU CẦU KHIẾU NẠI SẢN PHẨM TỪ KHÁCH HÀNG\n1. Điều kiện tiếp nhận khiếu nại\n[Công ty] tiếp nhận và xử lý khiếu nại trong vòng 72 giờ kể từ thời điểm khách hàng xác nhận đã nhận hàng thành công.\nĐể việc xử lý diễn ra nhanh chóng và chính xác, khách hàng cần cung cấp đầy đủ các thông tin sau:\nMã đơn hàng để [Công ty] kiểm tra lịch sử giao dịch và đối chiếu thông tin.\nMô tả cụ thể vấn đề gặp phải: gồm tình trạng sản phẩm, lỗi phát sinh hoặc sự khác biệt so với mô tả từ Nhà bán.\nVideo mở kiện",
+    "metadata": {
+      "source": "Chinh_sach_xu_ly_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_77",
+    "text": "khác biệt so với mô tả từ Nhà bán.\nVideo mở kiện bắt buộc, thể hiện rõ toàn bộ quá trình:\nVideo bắt đầu từ lúc gói hàng còn nguyên vẹn.\nQuay liên tục cho đến khi mở bao bì và kiểm tra toàn bộ sản phẩm bên trong.\nTrong video cần quay cận cảnh khu vực có lỗi để xác nhận vấn đề một cách rõ ràng.\nHình ảnh sản phẩm lỗi, bao gồm ảnh tổng thể và ảnh chi tiết phần có vấn đề.\nĐây là căn cứ bắt buộc để [Công ty] xử lý khiếu nại, bảo vệ quyền lợi của khách hàng.\n2. Quy trình xử lý sau khi tiếp nhận yêu cầu\nBước 1: Ti",
+    "metadata": {
+      "source": "Chinh_sach_xu_ly_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_78",
+    "text": "y trình xử lý sau khi tiếp nhận yêu cầu\nBước 1: Tiếp nhận và kiểm tra thông tin ban đầu\nNhân viên phụ trách ghi nhận yêu cầu khiếu nại kèm mã đơn hàng, mô tả vấn đề và các bằng chứng khách hàng cung cấp.\nKiểm tra tính đầy đủ của hồ sơ (video mở kiện, hình ảnh sản phẩm, thông tin lỗi…).\nBước 2: Liên hệ xác minh với khách hàng\nNhân viên chủ động liên hệ khách hàng để làm rõ tình trạng sản phẩm, xác minh nội dung khiếu nại và bổ sung thông tin nếu cần.\nGhi nhận toàn bộ thông tin xác thực để đưa vào biên bản xử",
+    "metadata": {
+      "source": "Chinh_sach_xu_ly_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_79",
+    "text": "toàn bộ thông tin xác thực để đưa vào biên bản xử lý.\nBước 3: Đối chiếu và đánh giá vấn đề\n[Công ty] tiến hành đối chiếu dữ liệu từ hệ thống, mô tả sản phẩm, hình ảnh sản phẩm gốc và bằng chứng khách hàng cung cấp.\nXác định mức độ lỗi, nguyên nhân và đánh giá sản phẩm có đủ điều kiện hỗ trợ xử lý khiếu nại hay không.\nBước 4: Thông báo cho khách hàng\nSau khi xác minh chính xác, [Công ty] sẽ thông báo kết quả xử lý cho khách hàng. Nhân viên phụ trách thông báo rõ ràng phương án xử lý, thời gian thực hiện và",
+    "metadata": {
+      "source": "Chinh_sach_xu_ly_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 510
+    }
+  },
+  {
+    "chunk_id": "chunk_80",
+    "text": "o rõ ràng phương án xử lý, thời gian thực hiện và các hướng dẫn tiếp theo\nKhách hàng xác nhận đồng ý trước khi [Công ty] tiến hành các bước tiếp theo.\nBước 6: Thực hiện và theo dõi đến khi hoàn tất\n[Công ty] tiến hành xử lý theo đúng phương án đã thống nhất. Theo dõi tiến độ, cập nhật thường xuyên cho khách hàng cho đến khi vụ việc được giải quyết hoàn tất.",
+    "metadata": {
+      "source": "Chinh_sach_xu_ly_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 359
+    }
+  },
+  {
+    "chunk_id": "chunk_81",
+    "text": "QUY ĐỊNH VỀ DANH MỤC HÀNG CẤM\nHOẶC GỬI CÓ GIỚI HẠN\nCác loại thịt gà, heo, bò tươi hoặc các sản phẩm có chứa các loại thịt này.\nCác loại thuốc có chứa thành phần chất gây nghiện hoặc bị cấm theo quy định pháp luật. Các loại thuốc nằm trong danh mục bị cấm như thuốc kích thích, thuốc tránh thai khẩn cấp…\nCác thiết bị điện tử có pin và các vật liệu dễ bắt cháy, gây cháy nổ (sơn gel…). Các loại vũ khí như súng, gươm, chất hóa học…và các chất dễ phát nổ.\nHàng giả, hàng nhái, hàng không rõ nguồn gốc xuất xứ, vi p",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_82",
+    "text": ", hàng nhái, hàng không rõ nguồn gốc xuất xứ, vi phạm bản quyền sở hữu trí tuệ; Tiền mặt, trái phiếu, khế ước, hợp đồng, vật thế chấp, vàng… Vàng và trang sức quý giá (nguy cơ bị mất cao, chúng tôi khuyến cáo không nên cho vào hàng gửi).\nTất cả các loại hạt thực vật, sâu bọ, côn trùng, rắn…\nCác sản phẩm từ sữa (sữa bột, phô mai…) 1 kiện tối đa 5kg.\nĐối với mặt hàng đông lạnh, để an toàn nhất cho từng kiện hàng, tỷ lệ thông quan cao thì quý khách hàng không nên đóng hàng cấm như thuốc lá, hoa quả, hàng thịt",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_83",
+    "text": "ên đóng hàng cấm như thuốc lá, hoa quả, hàng thịt cấm ... cùng hàng đông lạnh, vì tính chất của hàng đông lạnh dễ hư hỏng nên nếu có hàng cấm thì tỷ lệ kẹt lại ở hải quan cao hơn và khi đó dẫn đến hàng đông lạnh sẽ hỏng. Và mỗi kiện hàng nên đóng nhỏ hơn 10kg cùng với thùng xốp chắc chắn. Những mặt hàng đông lạnh cần đóng hợp vệ sinh an toàn thực phẩm như hút chân không, tem nhãn mác đầy đủ. Những mặt hàng đông lạnh được phép nhập vào [Nước nhập] là những mặt hàng là những mặt hàng thủy hải sản đã qua chế b",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_84",
+    "text": "t hàng là những mặt hàng thủy hải sản đã qua chế biến ví dụ như: chả mực, chả cá, chả tôm, nem hải sản… Còn những mặt hàng chưa qua chế biến như: cá basa đông lạnh, bề bề bóc vỏ đông lạnh, mực đông lạnh .... thì khả năng thông sẽ thấp hơn, cần được mix cùng hàng đông lạnh được phép nhập khẩu để gửi cùng theo tỷ lệ 60%-40% (60% là mặt hàng đã qua chế biến, 40% là mặt hàng chưa qua chế biến) thì tỷ lệ thông quan là 80-90%.\nKhông gửi kèm tài liệu quan trọng với hàng hoá thường. Không gửi các loại cây khô, lá k",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_85",
+    "text": "hàng hoá thường. Không gửi các loại cây khô, lá khô chưa qua gia công làm sạch, hạn chế trầm hương sâm và những sản phẩm xuất xứ từ [Nước nhập] sẽ bị cấm thông quan.\nĐối với kiện hàng có thuốc lá, dù chỉ chứa 1 hay vài bao thuốc nhỏ, bị bắt là hủy 100% kiện hàng.\nĐối với hàng giả, hàng nhái thương hiệu hải quan sẽ hủy toàn bộ. Trường hợp khách hàng gửi hàng thật hỗ trợ kiểm tra và hướng dẫn tạo hóa đơn trước khi gửi hàng hóa, nếu được nên gửi kèm hóa đơn luôn theo cùng kiện hàng tương ứng đối với hàng thật",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_86",
+    "text": "ôn theo cùng kiện hàng tương ứng đối với hàng thật. Chỉ chấp nhận hóa đơn điện tử hoặc hóa đơn in từ chi nhánh bán hàng của hãng tại các trung tâm thương mại hoặc cửa hàng lớn có thẩm quyền. Trong trường hợp sau khi hàng đi rồi mới khai báo là hàng thật, những dữ liệu khách hàng cung cấp, hải quan không chấp nhận vẫn giữ nguyên kết quả hủy toàn bộ bên công ty [Công ty] sẽ không chịu trách nhiệm (do khai báo không trung thực)\nCác mặt hàng liên quan đến y tế (vd: khẩu trang số lượng nhiều, máy hút sữa, kim xă",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_87",
+    "text": "vd: khẩu trang số lượng nhiều, máy hút sữa, kim xăm…) đều là hàng rủi ro, đi không bảo hiểm\nĐối với hàng hóa khô, như nấm hương, nấm tai mèo hay măng khô, lạc, đỗ, các loại mắm hải sản nói chung cần đóng gói đúng quy định, đảm bảo vệ sinh an toàn thực phẩm kèm theo nhãn mác về thành phần và nguồn gốc xuất sứ, đóng gói trong điều kiện hút chân không.\nNgoài ra những mặt hàng cấm, hạn chế thông quan trong danh sách hàng hóa cấm thông quan có thể bị hủy toàn bộ hay 1 phần tùy thuộc vào tính chất và độ nghiêm tr",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_88",
+    "text": "hay 1 phần tùy thuộc vào tính chất và độ nghiêm trọng của hàng hóa. Đối với những mặt hàng cấm như ma túy, chất kích thích, chất gây nghiện v.v có thể truy cứu trách nhiệm hình sự. Trong trường hợp này, đối tác phải có trách nhiệm cung cấp đầy đủ thông tin hải quan cần thiết, hợp tác trong quá trình điều tra.\nMong Quý đối tác/ khách hàng phối hợp và tuân thủ các quy định thông quan hàng hóa cùng Công ty để có thể đảm bảo tình trạng thông quan hàng hóa tại hải quan [Nước nhập].\nVậy Công ty kính gửi thông báo",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_89",
+    "text": "i quan [Nước nhập].\nVậy Công ty kính gửi thông báo để Quý đối tác nắm được thông tin và thông báo tới khách hàng của mình. Nếu Quý khách hàng có thắc mắc gì hãy liên hệ trực tiếp cho bộ phận CS để được hỗ trợ nhanh nhất.",
+    "metadata": {
+      "source": "Danh_muc_hang_cam_han_che.docx",
+      "doc_type": "policy",
+      "length": 220
+    }
+  },
+  {
+    "chunk_id": "chunk_90",
+    "text": "ĐIỀU KHOẢN KHI SỬ DỤNG DỊCH VỤ\n[Công ty] nghiêm cấm mọi hành vi giả mạo, truy cập trái phép, can thiệp vào hệ thống hoặc khai thác dữ liệu khách hàng dưới bất kỳ hình thức nào. Trường hợp phát hiện vi phạm, [Công ty] có quyền khóa tài khoản ngay lập tức và áp dụng các biện pháp xử lý cần thiết theo quy định của pháp luật [Nước xuất], tùy theo mức độ nghiêm trọng của hành vi vi phạm.\n[Công ty] luôn đặt bảo mật thông tin khách hàng lên hàng đầu. Toàn bộ dữ liệu cá nhân và thông tin giao dịch được bảo mật và m",
+    "metadata": {
+      "source": "Dieu_khoan_su_dung_dich_vu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_91",
+    "text": "u cá nhân và thông tin giao dịch được bảo mật và mã hóa trong quá trình xử lý nhằm hạn chế tối đa nguy cơ truy cập trái phép. [Công ty] không chia sẻ thông tin khách hàng cho bên thứ ba, ngoại trừ các trường hợp cần thiết để thực hiện dịch vụ vận chuyển từ [Nước xuất] sang [Nước nhập] hoặc theo yêu cầu của cơ quan có thẩm quyền theo quy định pháp luật.\nKhách hàng có trách nhiệm cung cấp đầy đủ, chính xác thông tin cá nhân và thông tin người nhận tại [Nước nhập], bao gồm số điện thoại, địa chỉ nhận hàng và c",
+    "metadata": {
+      "source": "Dieu_khoan_su_dung_dich_vu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_92",
+    "text": "ập], bao gồm số điện thoại, địa chỉ nhận hàng và các thông tin liên quan đến lô hàng trước khi xác nhận sử dụng dịch vụ. Trường hợp khách hàng cung cấp sai thông tin, không tuân thủ quy trình hoặc gây gián đoạn hoạt động của hệ thống, [Công ty] có quyền từ chối hoặc hủy dịch vụ mà không cần thông báo trước, đồng thời khách hàng tự chịu các chi phí phát sinh (nếu có).\n[Công ty] cam kết minh bạch về giá và chi phí dịch vụ. Mọi khoản phí liên quan đến việc chuyển hàng từ [Nước xuất] sang [Nước nhập] được thông",
+    "metadata": {
+      "source": "Dieu_khoan_su_dung_dich_vu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_93",
+    "text": "ển hàng từ [Nước xuất] sang [Nước nhập] được thông báo rõ ràng và xác nhận với khách hàng trước khi tiến hành. Sau khi khách hàng hoàn tất thanh toán và xác nhận dịch vụ, [Công ty] không tự ý thu thêm phụ phí ngoài các khoản đã thỏa thuận, trừ trường hợp phát sinh chi phí bắt buộc theo quy định của cơ quan chức năng hoặc đơn vị vận chuyển và đã được thông báo cho khách hàng.\nDo [Công ty] chỉ cung cấp dịch vụ vận chuyển hàng hóa quốc tế, không trực tiếp bán hoặc kiểm soát chất lượng hàng hóa, khách hàng có t",
+    "metadata": {
+      "source": "Dieu_khoan_su_dung_dich_vu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_94",
+    "text": "oặc kiểm soát chất lượng hàng hóa, khách hàng có trách nhiệm kiểm tra kỹ tính hợp pháp, chủng loại và điều kiện vận chuyển của hàng hóa trước khi gửi. [Công ty] có quyền từ chối tiếp nhận hoặc thực hiện dịch vụ đối với các lô hàng thuộc danh mục cấm, hạn chế xuất – nhập khẩu, vi phạm pháp luật hoặc có dấu hiệu gian lận. Trong trường hợp giao dịch không thể tiếp tục do yếu tố ngoài khả năng kiểm soát (thay đổi chính sách, yêu cầu kiểm tra chuyên ngành, sự cố từ đối tác vận chuyển…), [Công ty] sẽ thông báo để",
+    "metadata": {
+      "source": "Dieu_khoan_su_dung_dich_vu.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_95",
+    "text": "từ đối tác vận chuyển…), [Công ty] sẽ thông báo để khách hàng phối hợp điều chỉnh hoặc chấm dứt dịch vụ theo quy định.",
+    "metadata": {
+      "source": "Dieu_khoan_su_dung_dich_vu.docx",
+      "doc_type": "policy",
+      "length": 118
+    }
+  },
+  {
+    "chunk_id": "chunk_96",
+    "text": "QUY ĐỊNH VỀ QUY CÁCH ĐÓNG GÓI HÀNG HOÁ\nVề khối lượng, cân nặng tối đa là 15kg và tối thiểu là 3kg. Các kiện dưới 3kg thì tính 3kg hoặc tính cân thực tế + phụ phí giao hàng 45.000 vnđ/ kiện\nCác kiện có khối lượng cao, cồng kềnh, quý khách vui lòng chia nhỏ thành nhiều kiện nhỏ. Hàng cồng kềnh quy đổi theo cân nặng kích thước (Dài x Rộng x Cao)/6000. Cân nặng thực tế và cân nặng kích thước phần nào lớn hơn lấy cân đó. Hàng cồng kềnh sẽ phát sinh thêm chi phí giao hàng cồng kềnh tại [Nước nhập].\nĐối với thực p",
+    "metadata": {
+      "source": "Quy_dinh_quy_cach_dong_goi.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_97",
+    "text": "iao hàng cồng kềnh tại [Nước nhập].\nĐối với thực phẩm chức năng, thuốc, mỹ phẩm, quần áo,… nên đóng tối đa 3kg (khoảng 2,9kg) và mỗi kiện không quá 6 hộp thuốc (hoặc mỹ phẩm), quần áo không quá 10 bộ.\nCác hàng đông lạnh thủy hải sản thực phẩm chưa qua chế biến, còn máu vẫn bị kiểm dịch động vật.\nCác sản phẩm thực phẩm không có bảng thành phần, bao bì không phải hàng siêu thị vẫn có khả năng kiểm dịch và không được thông quan\nNếu chỉ đi một mặt hàng, số lượng > 6 sản phẩm hải quan sẽ nghi ngờ là buôn bán, sẽ",
+    "metadata": {
+      "source": "Quy_dinh_quy_cach_dong_goi.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_98",
+    "text": "> 6 sản phẩm hải quan sẽ nghi ngờ là buôn bán, sẽ tiêu huỷ hoặc phát sinh thuế ( nếu có )\nCác mặt hàng có giá trị cao như yến xào, chỉ đóng tối đa 1 hộp /1 kiện giá trị < 3 triệu/ kiện\nHàng thường (đồ khô) không đóng gói bằng giấy vàng, bạc, túi bóng đen. Hải thường chú ý những kiện này, sẽ tiến hành giữ lại hàng và kiểm tra và kéo dài thời gian giao hàng hoặc có khả năng bị tiêu huỷ.\nCác loại thực phẩm có mùi như nước mắm, khô mực, chả cá,... cần được đóng gói kỹ trong các chai lọ hoặc hộp bảo quản ngăn m",
+    "metadata": {
+      "source": "Quy_dinh_quy_cach_dong_goi.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_99",
+    "text": "gói kỹ trong các chai lọ hoặc hộp bảo quản ngăn mùi.\nCác sản phẩm có đường cần được bọc trong bao bì kín, tránh bị kiến hoặc các loại côn trùng khác xâm nhập.\nCác hàng hóa thuộc dạng lỏng cần được đóng gói cẩn thận trong chai lọ bằng nhựa dày. Chúng tôi không chịu trách nhiệm nếu hàng hóa bị chảy tràn hoặc chai lọ bị vỡ trong quá trình vận chuyển.\nCác đồ ăn vặt có tính chất giòn, dễ vỡ (như chuối sấy, khoai lang sấy, sầu riêng sấy,...) cần được bảo quản trong hộp, tránh để bị vỡ nát. Chúng tôi không chịu t",
+    "metadata": {
+      "source": "Quy_dinh_quy_cach_dong_goi.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_100",
+    "text": "ng hộp, tránh để bị vỡ nát. Chúng tôi không chịu trách nhiệm nếu các loại thực phẩm này bị vỡ nát trong quá trình vận chuyển.\nĐóng thùng xốp dày, chắc chắn đối với hàng đông lạnh, bọc kỹ 4 góc thùng chắc chắn bằng băng dính.\nĐối với hàng thường, dùng thùng bìa carton không biến dạng, tránh đóng 2 thùng nhỏ rồi dùng băng dính ghép lại với nhau.\nĐối với khách lẻ, khi gửi hàng đến kho của công ty, ghi người gửi + SĐT + Tên Zalo hoặc Facebook trên kiện hàng (hoặc bọc hàng). VD: [tên khách] [số điện thoại]\nĐối v",
+    "metadata": {
+      "source": "Quy_dinh_quy_cach_dong_goi.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_101",
+    "text": "c bọc hàng). VD: [tên khách] [số điện thoại]\nĐối với cộng tác viên, khi gửi hàng đến kho của công ty, ghi tên CTV + SĐT trên kiện hàng\n(hoặc bọc hàng). VD: [tên CTV] [số điện thoại]\nKhi gửi hàng, quý khách chụp ảnh kiện hàng, nhắn trước cho nhân viên tư vấn.\nNếu có nhiều kiện hàng, quý khách vui lòng đánh số, ký hiệu để tiện theo dõi.\nĐịa chỉ kho nhận hàng:\nTại [thành phố đầu xuất]: [địa chỉ kho]. [TP đầu xuất]\nCÁC LƯU Ý KHÁC\nThanh toán: Vì công ty book tải bay hằng ngày và số lượng lớn nên quý khách vui lò",
+    "metadata": {
+      "source": "Quy_dinh_quy_cach_dong_goi.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_102",
+    "text": "bay hằng ngày và số lượng lớn nên quý khách vui lòng thanh toán trước khi bay.\nBảng giá: Tại mỗi thời điểm, mỗi quốc gia đều có 1 bảng giá khác nhau. Quý khách có nhu cầu vui lòng liên hệ hotline để có bảng giá chính xác nhất.\nĐối với hàng rượu, tinh dầu có tính phụ phí giá trị mỗi loại.\nCông ty thu phụ phí với các kiện hàng có địa chỉ ở đảo Jeju, vùng sâu, vùng xa …:\nKhi nhận hàng, quý khách vui lòng cân lại và quay video quá trình khui hàng. Mọi trường hợp khiếu nại không có video khui hàng đều không được",
+    "metadata": {
+      "source": "Quy_dinh_quy_cach_dong_goi.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_103",
+    "text": "khiếu nại không có video khui hàng đều không được giải quyết.",
+    "metadata": {
+      "source": "Quy_dinh_quy_cach_dong_goi.docx",
+      "doc_type": "policy",
+      "length": 61
+    }
+  },
+  {
+    "chunk_id": "chunk_104",
+    "text": "QUY ĐỊNH VỀ KHIẾU NẠI\n1. Thời gian khiếu nại:\nThời gian khiếu nại 02 ngày kể từ thời điểm giao hàng thành công trong khách hàng và 07 ngày đối với các kiện hàng có kết quả chi tiết của Hải quan về huỷ toàn bộ hoặc 1 phần.\nĐối với kiện hàng chứa hàng hóa hạn chế thông quan có quyết định hủy toàn bộ hoặc 1 phần vì 1 trong những lý do (không đạt kiểm dịch động vật, thực vật, thuốc lá, hàng giả, hàng nhái thương hiệu, quá số lượng tiêu dùng cá nhân, không đảm bảo quy cách đóng gói, hàng cấm thông quan v.v) chỉ",
+    "metadata": {
+      "source": "Quy_dinh_ve_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_105",
+    "text": "o quy cách đóng gói, hàng cấm thông quan v.v) chỉ nhận khiếu nại khi khách hàng khẳng định họ gửi hàng sạch, có hình ảnh gửi hàng hóa ban đầu từ [Nước xuất]. Tùy theo tính chất của kiện hàng mà nhân viên hải quan có thể yêu cầu ID 2 mặt, giấy xác nhận cư trú hoặc hợp đồng nhà để đối chiếu, xác thực tính minh bạch, hỗ trợ hàng ra. Trong trường hợp những dữ liệu khách hàng cung cấp, hải quan không chấp nhận vẫn giữ nguyên kết quả hủy toàn bộ hoặc 1 phần bên công ty cũng không có trách nhiệm vì vượt quá thẩm q",
+    "metadata": {
+      "source": "Quy_dinh_ve_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_106",
+    "text": "ng ty cũng không có trách nhiệm vì vượt quá thẩm quyền.\nSau thời gian nói trên, mọi khiếu nại liên quan sẽ không có hiệu lực.\n2. Thời hạn giải quyết khiếu nại:\nSau khi tiếp nhận khiếu nại liên quan đến bưu gửi, [Công ty] sẽ giải quyết khiếu nại trong vòng 30 ngày.\nTất cả kiện hàng khiếu nại do hỏng hàng, thiếu hàng yêu cầu cần có video quay lại từ lúc bóc hàng đến khi kiểm xong, quay rõ mã kiện và nội dung hàng. (Nếu không có video khui hàng bên phía công ty không thể hỗ trợ giải quyết khiếu nại).\nQuy trình",
+    "metadata": {
+      "source": "Quy_dinh_ve_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_107",
+    "text": "không thể hỗ trợ giải quyết khiếu nại).\nQuy trình xử lý sau khi tiếp nhận yêu cầu\nBước 1: Tiếp nhận và kiểm tra thông tin ban đầu\nNhân viên phụ trách ghi nhận yêu cầu khiếu nại kèm mã đơn hàng, mô tả vấn đề và các bằng chứng khách hàng cung cấp.\nKiểm tra tính đầy đủ của hồ sơ (video mở kiện, hình ảnh sản phẩm, thông tin lỗi…).\nBước 2: Liên hệ xác minh với khách hàng\nNhân viên chủ động liên hệ khách hàng để làm rõ tình trạng sản phẩm, xác minh nội dung khiếu nại và bổ sung thông tin nếu cần.\nGhi nhận toàn b",
+    "metadata": {
+      "source": "Quy_dinh_ve_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_108",
+    "text": "nại và bổ sung thông tin nếu cần.\nGhi nhận toàn bộ thông tin xác thực để đưa vào biên bản xử lý.\nBước 3: Đối chiếu và đánh giá vấn đề\n[Công ty] tiến hành đối chiếu dữ liệu từ hệ thống, mô tả sản phẩm, hình ảnh sản phẩm gốc và bằng chứng khách hàng cung cấp.\nXác định mức độ lỗi, nguyên nhân và đánh giá sản phẩm có đủ điều kiện hỗ trợ xử lý khiếu nại hay không.\nBước 4: Thông báo cho khách hàng\nSau khi xác minh chính xác, [Công ty] sẽ thông báo kết quả xử lý cho khách hàng. Nhân viên phụ trách thông báo rõ rà",
+    "metadata": {
+      "source": "Quy_dinh_ve_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_109",
+    "text": "ho khách hàng. Nhân viên phụ trách thông báo rõ ràng phương án xử lý, thời gian thực hiện và các hướng dẫn tiếp theo\nKhách hàng xác nhận đồng ý trước khi [Công ty] tiến hành các bước tiếp theo.\nBước 5: Thực hiện và theo dõi đến khi hoàn tất\n[Công ty] tiến hành xử lý theo đúng phương án đã thống nhất. Theo dõi tiến độ, cập nhật thường xuyên cho khách hàng cho đến khi vụ việc được giải quyết hoàn tất.",
+    "metadata": {
+      "source": "Quy_dinh_ve_khieu_nai.docx",
+      "doc_type": "policy",
+      "length": 402
+    }
+  },
+  {
+    "chunk_id": "chunk_110",
+    "text": "QUY TRÌNH\nBước 1: Tiếp nhận hàng hóa tại kho [Nước xuất]\nKhách hàng gửi hàng đến kho [Nước xuất] của đối tác. Sau khi tiếp nhận, kho tiến hành kiểm tra tình trạng hàng hóa, quy cách đóng gói và mức độ an toàn của lô hàng khi vận chuyển.\nBước 2: Kiểm tra an toàn và hỗ trợ đóng gói\nTrường hợp hàng hóa chưa đảm bảo an toàn, đối tác sẽ tư vấn và hỗ trợ đóng gói lại, bổ sung vật liệu chống sốc, chống ẩm nhằm đáp ứng tiêu chuẩn vận chuyển. Đồng thời, đối tác thông tin cho khách hàng về việc hàng hóa có bảo hiểm h",
+    "metadata": {
+      "source": "Quy_trinh_van_hanh.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_111",
+    "text": "tin cho khách hàng về việc hàng hóa có bảo hiểm hay không và mức độ an toàn trước khi xuất.\nBước 3: Xác nhận tình trạng hàng hóa\nSau khi hoàn tất kiểm tra và đóng gói, đối tác chụp hình thực tế hàng hóa và gửi cho khách hàng để xác nhận tình trạng trước khi vận chuyển.\nBước 4: Vận chuyển hàng hóa sang [Nước nhập]\nKhi hàng hóa đã được xác nhận an toàn, lô hàng sẽ được tiến hành vận chuyển bằng đường hàng không sang [Nước nhập] theo kế hoạch.\nBước 5: Giao hàng nội địa [Nước nhập] và cung cấp mã tracking\nSau",
+    "metadata": {
+      "source": "Quy_trinh_van_hanh.docx",
+      "doc_type": "policy",
+      "length": 510
+    }
+  },
+  {
+    "chunk_id": "chunk_112",
+    "text": "g nội địa [Nước nhập] và cung cấp mã tracking\nSau khi hàng đến [Nước nhập] và được bàn giao cho đơn vị vận chuyển nội địa, đối tác cung cấp mã tracking giao hàng nội địa [Nước nhập] để khách hàng theo dõi.\nBước 6: Thu cước phí dịch vụ\nCước phí vận chuyển và các chi phí liên quan được thu sau khi phát sinh mã tracking nội địa [Nước nhập], đảm bảo minh bạch và rõ ràng cho khách hàng.",
+    "metadata": {
+      "source": "Quy_trinh_van_hanh.docx",
+      "doc_type": "policy",
+      "length": 384
+    }
+  },
+  {
+    "chunk_id": "chunk_113",
+    "text": "CHÍNH SÁCH VỀ TRÁCH NHIỆM TRONG HOẠT ĐỘNG GIAO DỊCH CỦA [CÔNG TY]\n[Công ty] xây dựng chính sách trách nhiệm dựa trên quy định pháp luật [Nước xuất] và thông lệ của hoạt động vận chuyển hàng hóa quốc tế, nhằm đảm bảo quyền lợi và trải nghiệm của khách hàng trong suốt quá trình chuyển hàng từ [Nước xuất] sang [Nước nhập]. Trên cơ sở đó, [Công ty] cam kết thực hiện các nội dung sau:\n1. Đảm bảo an toàn và minh bạch trong giao dịch\n[Công ty] chịu trách nhiệm tổ chức, giám sát và theo dõi toàn bộ quá trình tiếp n",
+    "metadata": {
+      "source": "Trach_nhiem_cong_ty_trong_giao_dich.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_114",
+    "text": "hức, giám sát và theo dõi toàn bộ quá trình tiếp nhận, xử lý và vận chuyển hàng hóa theo thông tin khách hàng đã xác nhận, bảo đảm các khâu bàn giao – vận chuyển – thông quan được thực hiện đúng quy trình và minh bạch. Mọi thông tin liên quan đến lô hàng đều được lưu trữ và cập nhật để kịp thời phát hiện, xử lý các tình huống có thể ảnh hưởng đến quyền lợi của khách hàng.\n2. Theo dõi, tư vấn và hỗ trợ xuyên suốt quá trình vận chuyển\n[Công ty] chủ động cập nhật tiến độ xử lý lô hàng, tình trạng vận chuyển, l",
+    "metadata": {
+      "source": "Trach_nhiem_cong_ty_trong_giao_dich.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_115",
+    "text": "ật tiến độ xử lý lô hàng, tình trạng vận chuyển, lịch trình dự kiến và các thông tin liên quan trong quá trình chuyển hàng từ [Nước xuất] sang [Nước nhập] để khách hàng nắm rõ. Đội ngũ nhân viên của [Công ty] sẵn sàng tư vấn các vấn đề liên quan đến quy trình gửi hàng, yêu cầu chứng từ, thủ tục hải quan và các quy định vận chuyển quốc tế. Trường hợp phát sinh thay đổi từ phía cơ quan chức năng hoặc đơn vị vận chuyển, [Công ty] sẽ thông báo kịp thời và đề xuất phương án xử lý phù hợp.\n3. Hỗ trợ khiếu nại và",
+    "metadata": {
+      "source": "Trach_nhiem_cong_ty_trong_giao_dich.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_116",
+    "text": "t phương án xử lý phù hợp.\n3. Hỗ trợ khiếu nại và xử lý sự cố phát sinh\nTrong trường hợp phát sinh sự cố trong quá trình vận chuyển như giao nhầm, thiếu kiện, hư hỏng do vận chuyển hoặc các vấn đề khác thuộc phạm vi dịch vụ, [Công ty] cam kết tiếp nhận và phản hồi thông tin trong thời gian sớm nhất, đồng thời phối hợp với các bên liên quan để xử lý trên cơ sở đúng phạm vi trách nhiệm và quy định áp dụng.\n4. Đồng hành cùng khách hàng trước các rủi ro của vận chuyển quốc tế\nDo đặc thù của hoạt động vận chuyển",
+    "metadata": {
+      "source": "Trach_nhiem_cong_ty_trong_giao_dich.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_117",
+    "text": "chuyển quốc tế\nDo đặc thù của hoạt động vận chuyển hàng hóa quốc tế có thể phát sinh chậm trễ, kiểm tra hải quan, thay đổi chính sách nhập khẩu của [Nước nhập] hoặc các yếu tố khách quan khác, [Công ty] luôn nỗ lực hỗ trợ và đồng hành cùng khách hàng trong suốt quá trình xử lý, trên tinh thần minh bạch, hợp tác và tuân thủ pháp luật. Công ty mong khách hàng phối hợp cung cấp đầy đủ, kịp thời thông tin và chứng từ cần thiết để việc xử lý được thực hiện nhanh chóng và hiệu quả.",
+    "metadata": {
+      "source": "Trach_nhiem_cong_ty_trong_giao_dich.docx",
+      "doc_type": "policy",
+      "length": 480
+    }
+  },
+  {
+    "chunk_id": "chunk_118",
+    "text": "I/ Vận chuyển quốc tế và cam kết hỗ trợ của [Công ty]\nHàng hóa được [Công ty] hỗ trợ vận chuyển từ [Nước xuất] sang [Nước nhập] theo yêu cầu của khách hàng. Do đặc thù của hoạt động vận chuyển quốc tế và thủ tục xuất – nhập khẩu, trong một số trường hợp thời gian giao hàng có thể phát sinh chậm hơn so với dự kiến ban đầu. Khi xảy ra tình huống này, [Công ty] sẽ chủ động kiểm tra nguyên nhân, cập nhật thông tin kịp thời và phối hợp với các bên liên quan để tìm phương án xử lý phù hợp, nhằm đảm bảo quyền lợi",
+    "metadata": {
+      "source": "Truong_hop_hang_den_tre.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_119",
+    "text": "m phương án xử lý phù hợp, nhằm đảm bảo quyền lợi chính đáng của khách hàng trong phạm vi dịch vụ xuất hộ.\nVới kinh nghiệm trong lĩnh vực giao nhận quốc tế, [Công ty] tập trung xây dựng quy trình vận hành chuẩn hóa, minh bạch và tối ưu cho các tuyến xuất khẩu, trong đó có tuyến [Nước xuất] – [Nước nhập]. Công ty không ngừng cải tiến chất lượng dịch vụ, đặc biệt ở các khâu tiếp nhận hàng, xử lý chứng từ và phối hợp vận chuyển quốc tế – nội địa, nhằm rút ngắn thời gian giao hàng và hạn chế rủi ro phát sinh.\nT",
+    "metadata": {
+      "source": "Truong_hop_hang_den_tre.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_120",
+    "text": "thời gian giao hàng và hạn chế rủi ro phát sinh.\nTuy nhiên, hoạt động vận chuyển xuyên biên giới chịu ảnh hưởng bởi nhiều yếu tố khách quan như quy trình kiểm tra của hải quan, chính sách nhập khẩu của [Nước nhập], điều kiện vận tải quốc tế, thời tiết hoặc thời gian xử lý của các đối tác logistics. Do đó, một số lô hàng có thể được giao chậm hơn so với thời gian ước tính. Trong những trường hợp này, [Công ty] cam kết tiếp tục đồng hành, hỗ trợ khách hàng theo dõi lô hàng và rất mong nhận được sự phối hợp, t",
+    "metadata": {
+      "source": "Truong_hop_hang_den_tre.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_121",
+    "text": "o dõi lô hàng và rất mong nhận được sự phối hợp, thông cảm từ phía khách hàng để việc xử lý được diễn ra hiệu quả.\nII/ Quy trình vận hành giao dịch và xử lý tình huống phát sinh\nMỗi giao dịch tại [Công ty] đều được thực hiện theo một quy trình thống nhất, bao gồm tiếp nhận thông tin lô hàng từ khách hàng, kiểm tra điều kiện xuất khẩu, phối hợp vận chuyển nội địa – quốc tế, thực hiện thủ tục thông quan và bàn giao hàng cho bên nhận tại [Nước nhập]. Mặc dù quy trình được xây dựng chặt chẽ, hoạt động vận chuyể",
+    "metadata": {
+      "source": "Truong_hop_hang_den_tre.docx",
+      "doc_type": "policy",
+      "length": 512
+    }
+  },
+  {
+    "chunk_id": "chunk_122",
+    "text": "trình được xây dựng chặt chẽ, hoạt động vận chuyển quốc tế vẫn có thể phát sinh những rủi ro ngoài dự kiến do phụ thuộc vào nhiều bên liên quan.\nĐể khách hàng chủ động nắm bắt thông tin và an tâm khi sử dụng dịch vụ, [Công ty] xây dựng và cập nhật các kịch bản xử lý đối với những tình huống có thể ảnh hưởng đến tiến độ giao hàng. Các tình huống này có thể bao gồm việc chậm trễ trong khâu vận chuyển nội địa, phát sinh yêu cầu bổ sung chứng từ khi thông quan, kiểm tra chuyên ngành đối với một số loại hàng hó",
+    "metadata": {
+      "source": "Truong_hop_hang_den_tre.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_123",
+    "text": "kiểm tra chuyên ngành đối với một số loại hàng hóa đặc thù, hoặc các yếu tố khách quan khác trong quá trình vận chuyển quốc tế. Khi phát sinh sự cố, [Công ty] sẽ thông báo rõ ràng tình trạng lô hàng, nguyên nhân và hướng xử lý dự kiến để khách hàng nắm bắt và phối hợp.\nThông điệp gửi đến quý khách hàng\n“Kính gửi Quý khách hàng,\nTrong quá trình phối hợp giao nhận và xử lý đơn hàng, đôi khi sẽ có những tình huống ngoài mong muốn xảy ra. Đây là đặc thù chung của hoạt động vận chuyển và giao nhận quốc tế, liên",
+    "metadata": {
+      "source": "Truong_hop_hang_den_tre.docx",
+      "doc_type": "policy",
+      "length": 511
+    }
+  },
+  {
+    "chunk_id": "chunk_124",
+    "text": "ủa hoạt động vận chuyển và giao nhận quốc tế, liên quan đến nhiều bên (người bán, đơn vị vận chuyển, thủ tục thông quan, cơ quan kiểm định…).\nChúng tôi thấu hiểu rằng mỗi đơn hàng là giá trị, là sự kỳ vọng của khách hàng. Vì vậy, trong bất kỳ tình huống phát sinh nào, [Công ty] luôn đứng về phía khách hàng, đồng hành cùng quý khách để tìm ra giải pháp tốt nhất, công bằng và minh bạch.\"",
+    "metadata": {
+      "source": "Truong_hop_hang_den_tre.docx",
+      "doc_type": "policy",
+      "length": 388
+    }
+  }
+]

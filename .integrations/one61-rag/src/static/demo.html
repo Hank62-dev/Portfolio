@@ -1,0 +1,829 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>HKT AI Demo</title>
+    <style>
+        body {
+            font-family: monospace;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 15px;
+            background: #111;
+            color: #eee;
+        }
+
+        h1 {
+            color: #0f0;
+            font-size: 18px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 60px;
+            background: #222;
+            color: #eee;
+            border: 1px solid #444;
+            padding: 8px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        button {
+            background: #0a0;
+            color: #fff;
+            border: none;
+            padding: 8px 20px;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 14px;
+            margin: 5px 5px 5px 0;
+        }
+
+        button:disabled {
+            background: #333;
+            color: #666;
+        }
+
+        button:hover:not(:disabled) {
+            background: #0c0;
+        }
+
+        .section {
+            border: 1px solid #333;
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        .section h3 {
+            margin: 0 0 8px;
+            color: #0af;
+            font-size: 14px;
+        }
+
+        .label {
+            color: #888;
+            font-size: 12px;
+        }
+
+        .value {
+            color: #fff;
+            margin-bottom: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .step {
+            background: #1a1a2e;
+            border-left: 3px solid #0af;
+            padding: 6px 10px;
+            margin: 4px 0;
+            font-size: 13px;
+        }
+
+        .step .num {
+            color: #0af;
+            font-weight: bold;
+        }
+
+        .verified {
+            color: #0f0;
+            font-weight: bold;
+        }
+
+        .not-verified {
+            color: #f44;
+            font-weight: bold;
+        }
+
+        .agent-tag {
+            display: inline-block;
+            background: #333;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .loading {
+            color: #ff0;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        .meta {
+            color: #666;
+            font-size: 11px;
+        }
+
+        pre {
+            background: #1a1a1a;
+            padding: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            border: 1px solid #333;
+        }
+
+        .samples {
+            margin: 8px 0;
+        }
+
+        .samples button {
+            background: #333;
+            font-size: 12px;
+            padding: 4px 10px;
+        }
+
+        .samples button:hover {
+            background: #444;
+        }
+
+        #timer {
+            color: #ff0;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            margin: 10px 0 0;
+        }
+
+        .tab {
+            padding: 6px 16px;
+            background: #222;
+            color: #888;
+            border: 1px solid #333;
+            border-bottom: none;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .tab.active {
+            background: #111;
+            color: #0f0;
+            border-bottom: 1px solid #111;
+        }
+
+        .tab-content {
+            display: none;
+            border: 1px solid #333;
+            border-top: none;
+            padding: 10px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .async-status {
+            color: #0af;
+            font-size: 13px;
+            padding: 6px;
+            background: #1a1a2e;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>[ HKT AI RAG Demo ] -- Multi-Agent Pipeline</h1>
+    <p class="meta">
+        Guard (8B) -> Router (8B) -> RAG (70B+CoT) -> Verification (70B) |
+        BGE-M3 + LightRAG + Qdrant
+    </p>
+
+    <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('sync')">
+            Sync (/api/chat)
+        </div>
+        <div class="tab" onclick="switchTab('async')">
+            Async (/api/chat/async)
+        </div>
+        <div style="margin-left: auto; padding-right: 10px; align-self: center;">
+            <label class="label" for="execution-mode">Mode: </label>
+            <select id="execution-mode" style="background:#222;color:#eee;border:1px solid #444;padding:4px;font-family:monospace;font-size:12px;">
+                <option value="reasoning">Reasoning (Flash)</option>
+                <option value="fast">Fast (Lite)</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="tab-sync" class="tab-content active">
+        <!-- Document Upload Section -->
+        <div class="section" style="border-color:#0a0;margin-bottom:8px;">
+            <h3 style="color:#0f0;font-size:13px;margin-bottom:6px;">
+                📎 Upload Documents (test doc RAG)
+                <span id="doc-count" style="color:#888;font-weight:normal;margin-left:8px;"></span>
+            </h3>
+            <div id="drop-zone" style="border:2px dashed #444;padding:15px;text-align:center;cursor:pointer;margin-bottom:6px;transition:border-color 0.2s;"
+                 onclick="document.getElementById('file-input').click()"
+                 ondragover="event.preventDefault();this.style.borderColor='#0f0'"
+                 ondragenter="event.preventDefault();this.style.borderColor='#0f0'"
+                 ondragleave="this.style.borderColor='#444'"
+                 ondrop="handleDrop(event)">
+                <span style="color:#888;">Drop files here or click to select (PDF, DOCX, TXT — max 25MB)</span>
+                <input type="file" id="file-input" multiple accept=".pdf,.docx,.txt,.md,.csv,.json" style="display:none" onchange="handleFileSelect(event)">
+            </div>
+            <div id="upload-status" style="font-size:12px;color:#888;"></div>
+            <div id="uploaded-files" style="font-size:12px;"></div>
+        </div>
+
+        <textarea id="input" placeholder="Nhap cau hoi (sync mode)..."></textarea>
+        <div>
+            <button onclick="sendSync()" id="btn">Send</button>
+            <button onclick="newChat()" style="background:#555">🔄 New Chat</button>
+            <button onclick="clearAll()">Clear</button>
+            <span id="timer"></span>
+            <span id="session-info" style="color:#888;font-size:12px;margin-left:10px"></span>
+        </div>
+    </div>
+
+    <div id="tab-async" class="tab-content">
+        <textarea id="input-async" placeholder="Nhap cau hoi (async mode - gui xuong BE)..."></textarea>
+        <div>
+            <input id="conv-id" placeholder="conversationId (UUID)" style="
+                        background: #222;
+                        color: #eee;
+                        border: 1px solid #444;
+                        padding: 6px;
+                        font-family: monospace;
+                        width: 300px;
+                    " value="" />
+            <input id="user-id" placeholder="userId (UUID)" style="
+                        background: #222;
+                        color: #eee;
+                        border: 1px solid #444;
+                        padding: 6px;
+                        font-family: monospace;
+                        width: 300px;
+                    " value="" />
+        </div>
+        <div>
+            <button onclick="sendAsync()" id="btn-async">Send Async</button>
+            <button onclick="clearAll()">Clear</button>
+            <span id="timer-async"></span>
+        </div>
+    </div>
+
+    <div class="samples">
+        <span class="label">In-domain: </span>
+        <button onclick="fill('Nhan vien chinh thuc duoc bao nhieu ngay phep?')">
+            Nghi phep
+        </button>
+        <button onclick="fill('Lam viec tu xa duoc may ngay 1 tuan?')">
+            WFH
+        </button>
+        <button onclick="fill('So sanh chinh sach nghi phep va lam viec tu xa')">
+            So sanh
+        </button>
+        <br />
+        <span class="label">Out-of-domain: </span>
+        <button onclick="fill('Giai thich nguyen ly tuong doi cua Einstein')">
+            Einstein
+        </button>
+        <button onclick="fill('Cong thuc giai phuong trinh bac 2')">
+            PT bac 2
+        </button>
+        <br />
+        <span class="label">Other: </span>
+        <button onclick="fill('Xin chao!')">Greeting</button>
+        <button onclick="fill('asdfghjkl')">Gibberish</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        let currentTab = "sync";
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document
+                .querySelectorAll(".tab")
+                .forEach((t) => t.classList.remove("active"));
+            document
+                .querySelectorAll(".tab-content")
+                .forEach((t) => t.classList.remove("active"));
+            document
+                .querySelector(
+                    ".tab-bar .tab:nth-child(" +
+                    (tab === "sync" ? 1 : 2) +
+                    ")",
+                )
+                .classList.add("active");
+            document.getElementById("tab-" + tab).classList.add("active");
+        }
+
+        function fill(t) {
+            document.getElementById("input").value = t;
+            document.getElementById("input-async").value = t;
+        }
+        function clearAll() {
+            document.getElementById("result").innerHTML = "";
+            document.getElementById("input").value = "";
+            document.getElementById("input-async").value = "";
+        }
+
+        function generateUUID() {
+            return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+                var r = (Math.random() * 16) | 0;
+                return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+            });
+        }
+
+        // Persistent session ID — survives refresh via localStorage
+        let sessionId = localStorage.getItem("demo_session_id") || generateUUID();
+        let turnCount = parseInt(localStorage.getItem("demo_turn_count") || "0");
+        let uploadedDocs = JSON.parse(localStorage.getItem("demo_uploaded_docs") || "[]");
+
+        function saveSession() {
+            localStorage.setItem("demo_session_id", sessionId);
+            localStorage.setItem("demo_turn_count", String(turnCount));
+            localStorage.setItem("demo_uploaded_docs", JSON.stringify(uploadedDocs));
+        }
+        saveSession();
+
+        // Restore uploaded docs UI on page load
+        if (uploadedDocs.length > 0) {
+            const filesList = document.getElementById("uploaded-files");
+            const docCount = document.getElementById("doc-count");
+            const status = document.getElementById("upload-status");
+            uploadedDocs.forEach(d => {
+                filesList.innerHTML += `<div style="color:#0f0;padding:2px 0;">
+                    ✅ ${d.filename} — ${d.chunks_created} chunks
+                    (${(d.text_length / 1024).toFixed(1)}KB text)
+                </div>`;
+            });
+            docCount.textContent = `(${uploadedDocs.length} doc${uploadedDocs.length > 1 ? 's' : ''} loaded)`;
+            status.innerHTML = `<span style="color:#0f0">✅ Ready! Ask questions about your documents.</span>`;
+        }
+        document.getElementById("session-info").textContent =
+            "Session: " + sessionId.slice(0, 8) + "..." + (uploadedDocs.length ? " 📎" : "");
+
+        function newChat() {
+            sessionId = generateUUID();
+            turnCount = 0;
+            uploadedDocs = [];
+            saveSession();
+            clearAll();
+            document.getElementById("session-info").textContent =
+                "New session: " + sessionId.slice(0, 8) + "...";
+            document.getElementById("doc-count").textContent = "";
+            document.getElementById("uploaded-files").innerHTML = "";
+            document.getElementById("upload-status").textContent = "";
+        }
+
+        // ── Document Upload Logic ──────────────────────────────────
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.style.borderColor = "#444";
+            const files = e.dataTransfer.files;
+            if (files.length > 0) uploadFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) uploadFiles(files);
+            e.target.value = ""; // reset input
+        }
+
+        async function uploadFiles(files) {
+            const status = document.getElementById("upload-status");
+            const filesList = document.getElementById("uploaded-files");
+            const docCount = document.getElementById("doc-count");
+
+            for (const file of files) {
+                if (file.size > 25 * 1024 * 1024) {
+                    status.innerHTML = `<span style="color:red">❌ ${file.name}: exceeds 25MB limit</span>`;
+                    continue;
+                }
+
+                status.innerHTML = `<span style="color:#ff0">⏳ Uploading & chunking: ${file.name}...</span>`;
+
+                try {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("conversation_id", sessionId);
+
+                    const resp = await fetch("/api/test/upload", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (!resp.ok) {
+                        const err = await resp.json();
+                        throw new Error(err.detail || resp.statusText);
+                    }
+
+                    const result = await resp.json();
+                    uploadedDocs.push(result);
+                    saveSession();
+
+                    // Update UI
+                    filesList.innerHTML += `<div style="color:#0f0;padding:2px 0;">
+                        ✅ ${result.filename} — ${result.chunks_created} chunks
+                        (${(result.text_length / 1024).toFixed(1)}KB text)
+                    </div>`;
+                    docCount.textContent = `(${uploadedDocs.length} doc${uploadedDocs.length > 1 ? 's' : ''} loaded)`;
+                    status.innerHTML = `<span style="color:#0f0">✅ Ready! Ask questions about your documents.</span>`;
+
+                } catch (err) {
+                    status.innerHTML = `<span style="color:red">❌ ${file.name}: ${err.message}</span>`;
+                }
+            }
+        }
+
+        // Sync mode
+        async function sendSync() {
+            const msg = document.getElementById("input").value.trim();
+            if (!msg) return;
+            const btn = document.getElementById("btn");
+            btn.disabled = true;
+            btn.textContent = "Processing...";
+            const timer = document.getElementById("timer");
+            const t0 = Date.now();
+            const iv = setInterval(() => {
+                timer.textContent =
+                    ((Date.now() - t0) / 1000).toFixed(1) + "s";
+            }, 100);
+
+            const mode = document.getElementById("execution-mode").value;
+
+            document.getElementById("result").innerHTML =
+                '<p class="loading">Pipeline running: Guard -> Router -> RAG -> Verification...</p>';
+
+            try {
+                const r = await fetch("/api/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        request_id: generateUUID(),
+                        user_id: "demo",
+                        session_id: sessionId,
+                        message: msg,
+                        mode: mode,
+                    }),
+                });
+                const d = await r.json();
+                clearInterval(iv);
+                timer.textContent =
+                    ((Date.now() - t0) / 1000).toFixed(1) + "s total";
+                turnCount++;
+                document.getElementById("session-info").textContent =
+                    "Session: " + sessionId.slice(0, 8) + "... | Turn: " + turnCount;
+                render(d);
+            } catch (e) {
+                clearInterval(iv);
+                document.getElementById("result").innerHTML =
+                    '<pre style="color:red">Error: ' + e.message + "</pre>";
+            }
+            btn.disabled = false;
+            btn.textContent = "Send";
+        }
+
+        // Async mode
+        async function sendAsync() {
+            const msg = document.getElementById("input-async").value.trim();
+            if (!msg) return;
+
+            let convId = document.getElementById("conv-id").value.trim();
+            let userId = document.getElementById("user-id").value.trim();
+            if (!convId) {
+                convId = generateUUID();
+                document.getElementById("conv-id").value = convId;
+            }
+            if (!userId) {
+                userId = generateUUID();
+                document.getElementById("user-id").value = userId;
+            }
+
+            const btn = document.getElementById("btn-async");
+            btn.disabled = true;
+            btn.textContent = "Sending...";
+            const timer = document.getElementById("timer-async");
+            const t0 = Date.now();
+            const mode = document.getElementById("execution-mode").value;
+
+            const payload = {
+                conversationId: convId,
+                userId: userId,
+                author: "user",
+                mode: mode,
+                message: {
+                    content: {
+                        contentType: "text",
+                        text: msg,
+                    },
+                },
+            };
+
+            document.getElementById("result").innerHTML =
+                '<p class="loading">Sending async request...</p>';
+
+            try {
+                const r = await fetch("/api/chat/async", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                const d = await r.json();
+                timer.textContent =
+                    ((Date.now() - t0) / 1000).toFixed(1) + "s";
+
+                let h = '<div class="async-status">';
+                h +=
+                    "<strong>202 Accepted</strong> - Request queued for background processing<br>";
+                h +=
+                    '<span class="label">Status:</span> ' +
+                    d.status +
+                    "<br>";
+                h +=
+                    '<span class="label">Conversation:</span> ' +
+                    d.conversationId +
+                    "<br>";
+                h +=
+                    '<span class="label">Message:</span> ' +
+                    d.message +
+                    "<br>";
+                h += "</div>";
+                h +=
+                    '<details><summary class="label" style="cursor:pointer;margin-top:10px">Request Payload</summary>';
+                h +=
+                    "<pre>" +
+                    escHtml(JSON.stringify(payload, null, 2)) +
+                    "</pre></details>";
+                h +=
+                    '<details><summary class="label" style="cursor:pointer;margin-top:5px">202 Response</summary>';
+                h +=
+                    "<pre>" +
+                    escHtml(JSON.stringify(d, null, 2)) +
+                    "</pre></details>";
+                h +=
+                    '<p class="meta">Result will be POSTed to CALLBACK_URL. Check server logs for output.</p>';
+                document.getElementById("result").innerHTML = h;
+            } catch (e) {
+                document.getElementById("result").innerHTML =
+                    '<pre style="color:red">Error: ' + e.message + "</pre>";
+            }
+            btn.disabled = false;
+            btn.textContent = "Send Async";
+        }
+
+        function render(d) {
+            let h = "";
+
+            // Status + Time
+            h += '<div class="section"><h3>Status</h3>';
+            h +=
+                '<div class="label">Status:</div><div class="value">' +
+                d.status +
+                "</div>";
+            if (d.metadata) {
+                h +=
+                    '<div class="label">Time:</div><div class="value">' +
+                    d.metadata.processing_time_ms +
+                    "ms</div>";
+                h +=
+                    '<div class="label">Model:</div><div class="value">' +
+                    d.metadata.model_used +
+                    "</div>";
+                if (d.metadata.tokens_used) {
+                    const tu = d.metadata.tokens_used;
+                    h +=
+                        '<div class="label">Tokens:</div><div class="value">' +
+                        tu.total +
+                        " (Prompt: " +
+                        tu.prompt +
+                        ", Completion: " +
+                        tu.completion +
+                        ")</div>";
+                }
+                const ks = d.metadata.knowledge_source || "rag";
+                const ksColor = ks === "rag" ? "#0f0" : "#ff0";
+                const ksLabel =
+                    ks === "rag"
+                        ? "RAG (Knowledge Base)"
+                        : "GENERAL KNOWLEDGE (LLM)";
+                h +=
+                    '<div class="label">Knowledge Source:</div><div class="value" style="color:' +
+                    ksColor +
+                    ';font-weight:bold">' +
+                    ksLabel +
+                    "</div>";
+                h += '<div class="label">Agents:</div><div class="value">';
+                (d.metadata.agents_trace || []).forEach((a) => {
+                    h += '<span class="agent-tag">' + a + "</span> -> ";
+                });
+                h = h.replace(/ -> $/, "");
+                h += "</div>";
+            }
+            h += "</div>";
+            // Status + Time
+            //   h+='<div class="section"><h3>Status</h3>';
+            //   h+='<div class="label">Status:</div><div class="value">'+d.status+'</div>';
+            //   if(d.metadata){
+            //     h+='<div class="label">Time:</div><div class="value">'+d.metadata.processing_time_ms+'ms</div>';
+            //     h+='<div class="label">Model:</div><div class="value">'+d.metadata.model_used+'</div>';
+            //     const ks=d.metadata.knowledge_source||'rag';
+            //     const ksColor=ks==='rag'?'#0f0':'#ff0';
+            //     const ksLabel=ks==='rag'?'RAG (Knowledge Base)':'GENERAL KNOWLEDGE (LLM)';
+            //     h+='<div class="label">Knowledge Source:</div><div class="value" style="color:'+ksColor+';font-weight:bold">'+ksLabel+'</div>';
+            //     h+='<div class="label">Agents:</div><div class="value">';
+            //     (d.metadata.agents_trace||[]).forEach(a=>{h+='<span class="agent-tag">'+a+'</span> -> '});
+            //     h=h.replace(/ -> $/,'');
+            //     h+='</div>';
+            //     if(d.metadata.cache_hit){
+            //       h+='<div class="label">Cache:</div><div class="value" style="color:#0f0;font-weight:bold">⚡ CACHE HIT ('+d.metadata.processing_time_ms+'ms)</div>';
+            //     }
+            //   }
+            //   h+='</div>';
+
+            // Task Classification
+            if (d.task_classification) {
+                h +=
+                    '<div class="section"><h3>Task Classification (Guard Agent)</h3>';
+                h +=
+                    '<div class="label">Type:</div><div class="value">' +
+                    d.task_classification.task_type +
+                    "</div>";
+                if (
+                    d.task_classification.sub_types &&
+                    d.task_classification.sub_types.length
+                )
+                    h +=
+                        '<div class="label">Sub-types:</div><div class="value">' +
+                        d.task_classification.sub_types.join(", ") +
+                        "</div>";
+                h +=
+                    '<div class="label">Confidence:</div><div class="value">' +
+                    d.task_classification.confidence +
+                    "</div>";
+                h += "</div>";
+            }
+
+            // Response
+            if (d.response) {
+                h += '<div class="section"><h3>Response (RAG Agent)</h3>';
+                h +=
+                    '<div class="value" style="color:#0f0;font-size:14px">' +
+                    escHtml(d.response.message) +
+                    "</div>";
+                h += "</div>";
+
+                // Reasoning Trace (CoT)
+                if (
+                    d.response.reasoning_trace &&
+                    d.response.reasoning_trace.length
+                ) {
+                    h +=
+                        '<div class="section"><h3>Chain-of-Thought Reasoning (' +
+                        d.response.reasoning_trace.length +
+                        " steps)</h3>";
+                    d.response.reasoning_trace.forEach((s) => {
+                        const actionColors = {
+                            INTENT: "#0af",
+                            SCAN: "#fa0",
+                            EXTRACT: "#0f0",
+                            CROSSREF: "#f0a",
+                            "CROSS-REF": "#f0a",
+                            VERIFY: "#ff0",
+                            COMPOSE: "#0ff",
+                            KNOWLEDGE: "#fa0",
+                            ACCURACY: "#ff0",
+                        };
+                        const ac = s.action || "";
+                        const badge = ac
+                            ? '<span style="background:' +
+                            (actionColors[ac.toUpperCase()] || "#555") +
+                            ';color:#000;padding:1px 6px;border-radius:3px;font-size:11px;margin-right:6px">' +
+                            ac +
+                            "</span>"
+                            : "";
+                        h +=
+                            '<div class="step"><span class="num">Step ' +
+                            s.step +
+                            ":</span> " +
+                            badge +
+                            escHtml(s.thought);
+                        if (s.result)
+                            h +=
+                                '<br><span class="label">Result:</span> ' +
+                                escHtml(s.result);
+                        h += "</div>";
+                    });
+                    h += "</div>";
+                }
+            }
+
+            // Verification
+            if (d.verification) {
+                const v = d.verification;
+                h +=
+                    '<div class="section"><h3>Verification (Anti-Hallucination)</h3>';
+                h +=
+                    '<div class="label">Verified:</div><div class="' +
+                    (v.is_verified ? "verified" : "not-verified") +
+                    '">' +
+                    (v.is_verified ? "VERIFIED" : "NOT VERIFIED") +
+                    "</div>";
+                h +=
+                    '<div class="label">Confidence:</div><div class="value">' +
+                    scoreBar(v.confidence_score) +
+                    "</div>";
+                h +=
+                    '<div class="label">Groundedness:</div><div class="value">' +
+                    scoreBar(v.groundedness_score) +
+                    "</div>";
+                if (v.hallucination_flags && v.hallucination_flags.length)
+                    h +=
+                        '<div class="label">Flags:</div><div class="value" style="color:#f44">' +
+                        v.hallucination_flags.join(", ") +
+                        "</div>";
+                if (v.disclaimer)
+                    h +=
+                        '<div class="label">Disclaimer:</div><div class="value" style="color:#ff0">' +
+                        escHtml(v.disclaimer) +
+                        "</div>";
+                h += "</div>";
+            }
+
+            // Citations
+            if (d.citations && d.citations.length) {
+                h +=
+                    '<div class="section"><h3>Citations (' +
+                    d.citations.length +
+                    ")</h3>";
+                d.citations.forEach((c) => {
+                    h +=
+                        '<div class="value">[' +
+                        c.source_id +
+                        "] score=" +
+                        c.relevance_score;
+                    if (c.chunk_text)
+                        h +=
+                            ' -- "' +
+                            escHtml(c.chunk_text.substring(0, 100)) +
+                            '..."';
+                    h += "</div>";
+                });
+                h += "</div>";
+            }
+
+            // Raw JSON
+            h +=
+                '<details><summary class="label" style="cursor:pointer;margin-top:10px">Raw JSON Response</summary>';
+            h +=
+                "<pre>" +
+                escHtml(JSON.stringify(d, null, 2)) +
+                "</pre></details>";
+
+            document.getElementById("result").innerHTML = h;
+        }
+
+        function scoreBar(v) {
+            if (v == null) return "N/A";
+            const pct = Math.round(v * 100);
+            const color = pct >= 70 ? "#0f0" : pct >= 40 ? "#ff0" : "#f44";
+            return (
+                '<span style="color:' +
+                color +
+                '">' +
+                v +
+                " (" +
+                pct +
+                "%)</span>"
+            );
+        }
+
+        function escHtml(s) {
+            return s
+                ? String(s)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\\n/g, "<br>")
+                : "";
+        }
+
+        document
+            .getElementById("input")
+            .addEventListener("keydown", (e) => {
+                if (e.ctrlKey && e.key === "Enter") sendSync();
+            });
+        document
+            .getElementById("input-async")
+            .addEventListener("keydown", (e) => {
+                if (e.ctrlKey && e.key === "Enter") sendAsync();
+            });
+    </script>
+</body>
+
+</html>
