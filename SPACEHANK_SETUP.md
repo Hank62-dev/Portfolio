@@ -4,7 +4,7 @@ SpaceHank gồm ba phần chạy thật:
 
 - Vite/React frontend: giao diện `/spacehank` và WebGL company floor.
 - Node realtime server: authentication, WebSocket telemetry, task dispatch và worker process.
-- Hank RAG (`.integrations/one61-rag`): FastAPI xử lý chat, upload, embeddings và truy hồi tài liệu.
+- Hank RAG (`.integrations/hank62-rag`): FastAPI xử lý chat, upload, embeddings và truy hồi tài liệu.
 
 Không có demo fallback. Nếu realtime server chưa chạy thì UI chỉ hiển thị offline và không gửi task. Nếu agent chưa có worker command thì task bị từ chối; SpaceHank không tự giả lập kết quả.
 
@@ -12,7 +12,7 @@ Không có demo fallback. Nếu realtime server chưa chạy thì UI chỉ hiể
 
 - Node.js 20 hoặc 22 và npm.
 - Python 3.11, uv.
-- Docker Desktop nếu dùng service của One61 RAG.
+- Docker Desktop nếu dùng service của Hank62 RAG.
 - Gemini API key cho Hank RAG.
 - CLI/API worker thật cho từng agent muốn giao việc.
 
@@ -43,7 +43,7 @@ Worker command phải đọc prompt từ `stdin` và trả exit code `0` khi ho�
 ### 2. Hank RAG
 
 ```powershell
-Set-Location .integrations\one61-rag
+Set-Location .integrations\hank62-rag
 Copy-Item .env.example .env
 docker compose up -d
 uv sync --extra dev

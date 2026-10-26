@@ -1,4 +1,4 @@
-# One61 React Workspace
+# Hank62 React Workspace
 
 Giao diện React + Tailwind CSS 4 lấy cảm hứng từ macOS: khung toàn màn hình,
 sidebar, chế độ sáng/tối, bố cục thích ứng với điện thoại. Không có dock hay wallpaper.

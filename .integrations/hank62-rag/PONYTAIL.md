@@ -25,7 +25,7 @@ Never cut:
 
 ## The Token Optimization Quad
 
-- **RTK** ([RTK.md](file:///d:/my-project/one61-rag/RTK.md)): Compresses shell command output.
-- **Headroom** ([HEADROOM.md](file:///d:/my-project/one61-rag/HEADROOM.md)): Compresses prompt context & shapes verbosity.
-- **Caveman** ([CAVEMAN.md](file:///d:/my-project/one61-rag/CAVEMAN.md)): Compresses what the agent says (prose).
-- **Ponytail** ([PONYTAIL.md](file:///d:/my-project/one61-rag/PONYTAIL.md)): Compresses what the agent builds (code).
+- **RTK** ([RTK.md](file:///d:/my-project/hank62-rag/RTK.md)): Compresses shell command output.
+- **Headroom** ([HEADROOM.md](file:///d:/my-project/hank62-rag/HEADROOM.md)): Compresses prompt context & shapes verbosity.
+- **Caveman** ([CAVEMAN.md](file:///d:/my-project/hank62-rag/CAVEMAN.md)): Compresses what the agent says (prose).
+- **Ponytail** ([PONYTAIL.md](file:///d:/my-project/hank62-rag/PONYTAIL.md)): Compresses what the agent builds (code).

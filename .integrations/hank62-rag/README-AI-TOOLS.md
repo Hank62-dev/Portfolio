@@ -1,7 +1,7 @@
 # Hướng Dẫn Cài Đặt & Sử Dụng Hệ Thống Tối Ưu Hóa Token Cho AI Agent
 ### (Bộ Tứ Token: RTK + Headroom + Caveman + Ponytail)
 
-Tài liệu hướng dẫn cài đặt và thiết lập bộ 4 công cụ tối ưu hóa chi phí token, tốc độ phản hồi và chất lượng sinh code cho AI Coding Agents (Google Antigravity, Codex, Claude Code, Cursor, v.v.) trong dự án **one61-rag**.
+Tài liệu hướng dẫn cài đặt và thiết lập bộ 4 công cụ tối ưu hóa chi phí token, tốc độ phản hồi và chất lượng sinh code cho AI Coding Agents (Google Antigravity, Codex, Claude Code, Cursor, v.v.) trong dự án **hank62-rag**.
 
 ---
 
@@ -54,12 +54,12 @@ Hệ thống được thiết kế để **tự động kích hoạt toàn bộ 
 ### Cách Hoạt Động Ngầm (Under the Hood):
 
 1. **Headroom (Tự động bọc Proxy)**:
-   - Khi chạy script [`start-agent.ps1`](file:///d:/my-project/one61-rag/start-agent.ps1), Headroom khởi động proxy ngầm tại cổng `8787` và dẫn luồng API qua proxy trước khi gửi đi.
+   - Khi chạy script [`start-agent.ps1`](file:///d:/my-project/hank62-rag/start-agent.ps1), Headroom khởi động proxy ngầm tại cổng `8787` và dẫn luồng API qua proxy trước khi gửi đi.
 2. **RTK (Tự động Rewrite lệnh Shell)**:
    - Đã cài hook toàn cục (`rtk init -g --auto-patch`).
    - Mọi lệnh terminal mà AI thực thi (`git status`, `uv run pytest`, `docker compose`) được hệ thống tự động nén.
 3. **Caveman & Ponytail (Tự động nạp Rule)**:
-   - Được khai báo cố định trong file định tuyến context [`AGENTS.md`](file:///d:/my-project/one61-rag/AGENTS.md) và thư mục rule [`.agents/rules/`](file:///d:/my-project/one61-rag/.agents/rules/).
+   - Được khai báo cố định trong file định tuyến context [`AGENTS.md`](file:///d:/my-project/hank62-rag/AGENTS.md) và thư mục rule [`.agents/rules/`](file:///d:/my-project/hank62-rag/.agents/rules/).
    - Mọi phiên làm việc của AI (Google Antigravity, Codex, Cursor) mở thư mục này sẽ tự động nạp luật:
      - **Caveman**: Tự động trả lời cộc lốc, súc tích, lược bỏ rườm rà.
      - **Ponytail**: Tự động chặn over-engineering, ưu tiên native API và YAGNI.
@@ -153,8 +153,8 @@ headroom output-savings # Xem phần trăm output token đã cắt giảm
 > **Mục tiêu**: Ép AI trả lời cộc lốc, súc tích như "người tiền sử". Giữ nguyên 100% code, lệnh CLI, file path, lỗi và cảnh báo bảo mật.
 
 ### Cài đặt & Tích hợp
-- Cục bộ: Đã cấu hình tại [`.agents/skills/caveman/SKILL.md`](file:///d:/my-project/one61-rag/.agents/skills/caveman/SKILL.md)
-- Khai báo trong [`AGENTS.md`](file:///d:/my-project/one61-rag/AGENTS.md):
+- Cục bộ: Đã cấu hình tại [`.agents/skills/caveman/SKILL.md`](file:///d:/my-project/hank62-rag/.agents/skills/caveman/SKILL.md)
+- Khai báo trong [`AGENTS.md`](file:///d:/my-project/hank62-rag/AGENTS.md):
   ```markdown
   @.agents/skills/caveman/SKILL.md
   ```
@@ -174,8 +174,8 @@ headroom output-savings # Xem phần trăm output token đã cắt giảm
 > **Mục tiêu**: Ngăn chặn over-engineering. Chỉ viết lượng code tối thiểu cần thiết để giải quyết vấn đề. Tận dụng Stdlib và Native API.
 
 ### Cài đặt & Tích hợp
-- Đã cài đặt rule luôn bật tại: [`.agents/rules/ponytail.md`](file:///d:/my-project/one61-rag/.agents/rules/ponytail.md)
-- Khai báo trong [`AGENTS.md`](file:///d:/my-project/one61-rag/AGENTS.md):
+- Đã cài đặt rule luôn bật tại: [`.agents/rules/ponytail.md`](file:///d:/my-project/hank62-rag/.agents/rules/ponytail.md)
+- Khai báo trong [`AGENTS.md`](file:///d:/my-project/hank62-rag/AGENTS.md):
   ```markdown
   @PONYTAIL.md
   ```
@@ -193,7 +193,7 @@ headroom output-savings # Xem phần trăm output token đã cắt giảm
 
 ---
 
-## Cấu Hình Định Tuyến Dự Án ([AGENTS.md](file:///d:/my-project/one61-rag/AGENTS.md))
+## Cấu Hình Định Tuyến Dự Án ([AGENTS.md](file:///d:/my-project/hank62-rag/AGENTS.md))
 
 ```markdown
 @RTK.md

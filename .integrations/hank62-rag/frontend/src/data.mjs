@@ -1,4 +1,4 @@
-export const STORAGE_KEY = 'one61.workspace.v1';
+export const STORAGE_KEY = 'hank62.workspace.v1';
 
 export function newConversation() {
   return { id: crypto.randomUUID(), title: 'Cuộc trò chuyện mới', messages: [], documents: [] };

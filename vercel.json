@@ -1,3 +1,5 @@
 {
-  "rewrites": [{ "source": "/((?!assets/|images/|.*\\..*).*)", "destination": "/index.html" }]
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

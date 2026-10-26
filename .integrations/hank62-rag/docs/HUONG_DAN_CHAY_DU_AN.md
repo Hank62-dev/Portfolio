@@ -1,6 +1,6 @@
-# 📘 Cẩm Nang Cài Đặt & Khởi Chạy Dự Án One61 RAG
+# 📘 Cẩm Nang Cài Đặt & Khởi Chạy Dự Án Hank62 RAG
 
-Tài liệu này hướng dẫn chi tiết từng bước từ con số 0 để cài đặt, nạp cơ sở dữ liệu và vận hành hệ thống **One61 Multi-Agent RAG**.
+Tài liệu này hướng dẫn chi tiết từng bước từ con số 0 để cài đặt, nạp cơ sở dữ liệu và vận hành hệ thống **Hank62 Multi-Agent RAG**.
 
 ---
 
@@ -54,10 +54,10 @@ QDRANT_PORT=6333
 QDRANT_COLLECTION=hkt_rag
 
 # 5. Cơ sở dữ liệu kho bãi PostgreSQL
-POSTGRES_USER=one61_rag
-POSTGRES_PASSWORD=one61_rag
-POSTGRES_DB=one61_rag
-DATABASE_URL=postgresql://one61_rag:one61_rag@localhost:5979/one61_rag
+POSTGRES_USER=hank62_rag
+POSTGRES_PASSWORD=hank62_rag
+POSTGRES_DB=hank62_rag
+DATABASE_URL=postgresql://hank62_rag:hank62_rag@localhost:5979/hank62_rag
 
 # 6. Redis Semantic Cache & Memory
 REDIS_URL=redis://localhost:6382/0
@@ -87,7 +87,7 @@ Kiểm tra trạng thái các container:
 ```powershell
 docker ps
 ```
-Nếu thấy cả 3 container `one61-postgres`, `one61-qdrant`, `one61-redis` đều ở trạng thái `Up` là thành công!
+Nếu thấy cả 3 container `hank62-postgres`, `hank62-qdrant`, `hank62-redis` đều ở trạng thái `Up` là thành công!
 
 ---
 
@@ -102,7 +102,7 @@ uv sync --extra dev
 
 ## Bước 4: Nạp dữ liệu kho bãi vào PostgreSQL
 
-Dự án đã có sẵn dữ liệu thực tế tại `data/extracted/`. Chạy script sau để tự động nạp hơn 55.000 dòng dữ liệu vào database `one61_rag`:
+Dự án đã có sẵn dữ liệu thực tế tại `data/extracted/`. Chạy script sau để tự động nạp hơn 55.000 dòng dữ liệu vào database `hank62_rag`:
 ```powershell
 uv run python -m scripts.import_warehouse_to_postgres
 ```
@@ -139,7 +139,7 @@ uv run python -m src.main
 Server sẽ khởi động và log thông tin:
 ```text
 INFO:     Uvicorn running on http://0.0.0.0:8000
-INFO:     Postgres pool created: localhost:5979/one61_rag
+INFO:     Postgres pool created: localhost:5979/hank62_rag
 INFO:     Redis ready: redis://localhost:6382/0
 INFO:     Connecting LightRAG to Qdrant VectorDB at http://localhost:6333
 INFO:     Main model: gemini-3.8-flash
@@ -223,7 +223,7 @@ print("Độ tin cậy:", data["response"]["verification"]["confidence_score"])
   ```powershell
   docker compose stop postgres
   docker compose rm -f postgres
-  docker volume rm one61-rag_postgres_data
+  docker volume rm hank62-rag_postgres_data
   docker compose up -d postgres
   uv run python -m scripts.import_warehouse_to_postgres
   ```
@@ -231,7 +231,7 @@ print("Độ tin cậy:", data["response"]["verification"]["confidence_score"])
   ```powershell
   docker compose stop qdrant
   docker compose rm -f qdrant
-  docker volume rm one61-rag_qdrant_data
+  docker volume rm hank62-rag_qdrant_data
   docker compose up -d qdrant
   ```
 

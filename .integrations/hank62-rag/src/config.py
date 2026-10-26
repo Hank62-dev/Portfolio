@@ -55,7 +55,7 @@ class Settings(BaseSettings):
 
     # --- Postgres (Warehouse DB) ---
     database_url: str = Field(
-        default="postgresql://one61_rag:one61_rag@localhost:5979/one61_rag",
+        default="postgresql://hank62_rag:hank62_rag@localhost:5979/hank62_rag",
         description="Postgres connection string for warehouse DB",
     )
 

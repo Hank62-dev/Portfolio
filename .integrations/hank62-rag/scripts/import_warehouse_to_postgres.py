@@ -1,4 +1,4 @@
-"""Import extracted warehouse JSON data into PostgreSQL one61_rag database."""
+"""Import extracted warehouse JSON data into PostgreSQL hank62_rag database."""
 
 import asyncio
 import json

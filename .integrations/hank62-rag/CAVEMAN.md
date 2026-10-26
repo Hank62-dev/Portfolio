@@ -32,4 +32,4 @@ stop caveman          # Revert to normal mode
 
 - **Code, commands, error messages, and file paths are NEVER mangled.**
 - Auto-clarity fallback: Drops to normal prose for security warnings or irreversible operations.
-- Reference skill file: [SKILL.md](file:///d:/my-project/one61-rag/.agents/skills/caveman/SKILL.md)
+- Reference skill file: [SKILL.md](file:///d:/my-project/hank62-rag/.agents/skills/caveman/SKILL.md)

@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: hank62-realtime
+    runtime: node
+    plan: starter
+    buildCommand: npm ci
+    startCommand: npm run spacehank:server
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: SPACEHANK_PORT
+        value: 10000
+      - key: SPACEHANK_PASSWORD
+        sync: false
+      - key: SPACEHANK_ORIGIN
+        sync: false
+      - key: SPACEHANK_WORKDIR
+        value: /opt/render/project/src
+      - key: SPACEHANK_CODEX_CMD
+        sync: false
+      - key: SPACEHANK_CLAUDE_CMD
+        sync: false
+
+  - type: web
+    name: hank62-rag
+    runtime: python
+    plan: starter
+    rootDir: .integrations/hank62-rag
+    buildCommand: pip install uv && uv sync --frozen
+    startCommand: uv run uvicorn src.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: GEMINI_FAST_MODEL
+        value: gemini-2.5-flash
+      - key: DATABASE_URL
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false

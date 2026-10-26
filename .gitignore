@@ -4,5 +4,10 @@ dist-ssr
 *.local
 .env
 .env.local
+.integrations/**/.env
+.integrations/**/.venv/
+.integrations/**/.cache/
+.integrations/**/__pycache__/
+.integrations/**/.pytest_cache/
 .DS_Store
 .vite

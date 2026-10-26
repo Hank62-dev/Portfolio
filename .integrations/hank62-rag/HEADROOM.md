@@ -30,7 +30,7 @@ Launch Codex with disabled telemetry beacon using:
 ```powershell
 .\codex-headroom.ps1
 ```
-(Defined in [codex-headroom.ps1](file:///d:/my-project/one61-rag/codex-headroom.ps1))
+(Defined in [codex-headroom.ps1](file:///d:/my-project/hank62-rag/codex-headroom.ps1))
 
 ## Verification
 
