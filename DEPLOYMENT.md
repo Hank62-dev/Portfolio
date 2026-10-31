@@ -41,6 +41,7 @@ For Hank RAG:
   QDRANT_URL=<managed-qdrant-url>
   QDRANT_API_KEY=<qdrant-cloud-api-key>
   REDIS_URL=<managed-redis-url>
+  CORS_ORIGINS=https://your-vercel-domain
 
 The RAG service must have persistent external services. Do not use local Docker Compose ports or localhost URLs in Render.
 

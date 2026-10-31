@@ -117,6 +117,10 @@ class Settings(BaseSettings):
     port: int = Field(default=8000)
     workers: int = Field(default=4)
     log_level: str = Field(default="info")
+    cors_origins: str = Field(
+        default="http://localhost:5173,http://127.0.0.1:5173",
+        description="Comma-separated browser origins allowed to call the API (e.g. the Vercel URL)",
+    )
     debug: bool = Field(default=False, validation_alias="AI_DEBUG")
 
     # --- Anti-Hallucination Thresholds ---
@@ -130,6 +134,11 @@ class Settings(BaseSettings):
     )
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "allow"}
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """Parse comma-separated origins, dropping blanks and trailing slashes."""
+        return [o.strip().rstrip("/") for o in self.cors_origins.split(",") if o.strip()]
 
     @property
     def qdrant_endpoint(self) -> str:

@@ -58,6 +58,7 @@ Không đặt `SPACEHANK_CODEX_CMD`, `SPACEHANK_CLAUDE_CMD` và các biến `SPA
 | `QDRANT_URL` | `https://<cluster>.cloud.qdrant.io:6333` | Mục 4.1 |
 | `QDRANT_API_KEY` | Chuỗi API key | Mục 4.1 |
 | `REDIS_URL` | `rediss://default:pass@host:6379` | Mục 4.3 |
+| `CORS_ORIGINS` | `https://<ten-du-an>.vercel.app` | URL Vercel của bạn, không có `/` ở cuối. Nhiều origin thì cách nhau bằng dấu phẩy (ví dụ thêm domain riêng). Ở lần tạo đầu điền tạm `https://example.com`, rồi sửa lại ở bước 7 |
 
 Các biến đã có sẵn trong `render.yaml`: `PYTHON_VERSION`, `GEMINI_MODEL`, `GEMINI_FAST_MODEL`, `LIGHTRAG_WORKING_DIR` (trỏ vào ổ đĩa bền vững `/var/data`). Hãy kiểm tra tên model còn dùng được tại https://ai.google.dev/gemini-api/docs/models. Nếu cần đổi, sửa `GEMINI_MODEL` và `GEMINI_FAST_MODEL` trong Render.
 
@@ -128,6 +129,8 @@ Lần khởi động đầu, RAG tự nạp tài liệu chính sách vào Qdrant
 1. Vào Render → service `hank62-realtime` → **Environment** → sửa `SPACEHANK_ORIGIN` thành đúng URL Vercel (không có `/` ở cuối) → Save. Service tự redeploy.
 2. Mở `https://<vercel>/spacehank` → đăng nhập bằng `SPACEHANK_PASSWORD`.
 3. Nhãn realtime phải hiện online. Chat gửi tới RAG phải có phản hồi.
+
+Làm tương tự cho RAG: vào Render → service `hank62-rag` → **Environment** → sửa `CORS_ORIGINS` thành URL Vercel → Save. Nếu quên bước này, chat sẽ lỗi CORS trong trình duyệt. URL xem trước (preview) của Vercel có địa chỉ khác URL chính, nên chúng bị chặn trừ khi bạn thêm vào `CORS_ORIGINS`.
 
 Muốn tránh bước sửa lại: đặt tên project Vercel trước, URL sẽ là `https://<ten-du-an>.vercel.app`, rồi dùng đúng URL đó cho `SPACEHANK_ORIGIN` ngay từ bước 5.3. Nếu tên bị trùng, Vercel thêm hậu tố và bạn phải sửa lại như trên.
 
@@ -202,6 +205,7 @@ Task và event lưu trong bộ nhớ. Restart server là mất lịch sử và p
 | Đăng nhập báo thành công nhưng tải lại lại bị đăng xuất | `SPACEHANK_ORIGIN` không khớp URL Vercel, hoặc dùng `http://` | Đặt đúng origin `https://...`, không có `/` ở cuối |
 | Trang `/spacehank` báo SERVER OFFLINE | Biến `VITE_*` sai hoặc chưa redeploy | Sửa biến trên Vercel rồi Redeploy |
 | Trình duyệt báo lỗi CORS khi gọi realtime | `SPACEHANK_ORIGIN` sai | Sửa như trên |
+| Trình duyệt báo lỗi CORS khi chat hoặc upload (gọi RAG) | `CORS_ORIGINS` của RAG thiếu hoặc không khớp URL Vercel | Đặt đúng origin, `https://`, không có `/` ở cuối, rồi chờ service redeploy |
 | `Worker command is not configured` | Agent chưa có `SPACEHANK_<ID>_CMD` | Bình thường ở production. Chỉ thêm command khi nó tồn tại trong service |
 | RAG `/health` trả `rag_initialized: false` | Qdrant sai URL hoặc API key | Kiểm tra `QDRANT_URL` (có `https://` và cổng `:6333`) và `QDRANT_API_KEY`, xem log |
 | Chat báo lỗi `GEMINI_API_KEY not configured` | Thiếu key | Điền `GEMINI_API_KEY` |
@@ -218,5 +222,5 @@ Task và event lưu trong bộ nhớ. Restart server là mất lịch sử và p
 - Đặt `SPACEHANK_ORIGIN` đúng một origin, không dùng `*`.
 - Đổi `SPACEHANK_PASSWORD` ngay nếu nghi ngờ bị lộ.
 - Giới hạn quyền của worker và `SPACEHANK_WORKDIR`.
-- RAG hiện cho phép mọi origin gọi API (CORS `*`) và không có đăng nhập. Ai có URL RAG đều gọi được và tiêu tốn quota Gemini của bạn. Cân nhắc giới hạn origin hoặc thêm xác thực trước khi công khai rộng rãi.
+- RAG chỉ cho trình duyệt từ các origin trong `CORS_ORIGINS` gọi API. CORS chỉ chặn trình duyệt, không chặn `curl` hay script, và RAG chưa có đăng nhập. Ai biết URL RAG vẫn gọi được ngoài trình duyệt và tiêu tốn quota Gemini của bạn. Nếu cần chặn hẳn, thêm xác thực (ví dụ API key hoặc đi qua proxy có đăng nhập) trước khi công khai rộng rãi.
 - Bật backup cho Postgres và Qdrant trước khi nạp dữ liệu quan trọng.

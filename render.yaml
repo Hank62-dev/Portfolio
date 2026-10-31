@@ -43,6 +43,8 @@ services:
         sync: false
       - key: REDIS_URL
         sync: false
+      - key: CORS_ORIGINS
+        sync: false
       - key: LIGHTRAG_WORKING_DIR
         value: /var/data/lightrag_storage
     disk:
