@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { can3D, qualityTier, readEnvironment } from '../../lib/capabilities';
 import { clsx } from '../../lib/format';
+import { useTheme } from '../../lib/theme';
 import StackIllustration from './StackIllustration';
 
 // three.js is a separate chunk: it only downloads after first paint, on devices that can use it.
@@ -16,6 +17,7 @@ const cancelIdle = (id) => ('cancelIdleCallback' in window ? window.cancelIdleCa
  * Narrow screens get the flat drawing inline in the Hero instead, and never load three.js.
  */
 export default function HeroVisual({ labels, active }) {
+  const { theme } = useTheme();
   const [env, setEnv] = useState(null);
   const [ready, setReady] = useState(false);
 
@@ -42,7 +44,7 @@ export default function HeroVisual({ labels, active }) {
       {use3D && (
         <Suspense fallback={null}>
           <div className={clsx('absolute inset-0 transition-opacity duration-700', ready ? 'opacity-100' : 'opacity-0')}>
-            <HeroScene labels={labels} active={active} quality={qualityTier(env)} onReady={() => setReady(true)} />
+            <HeroScene labels={labels} active={active} quality={qualityTier(env)} theme={theme} onReady={() => setReady(true)} />
           </div>
         </Suspense>
       )}

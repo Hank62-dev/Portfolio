@@ -61,7 +61,7 @@ const Hero = ({ github }) => {
     >
       {/* A slow drift of warm light behind everything; static with reduced motion. */}
       <div
-        className="absolute -inset-[15%] animate-aurora opacity-60 [background-image:radial-gradient(38%_46%_at_72%_32%,var(--color-signal-soft),transparent),radial-gradient(34%_42%_at_18%_82%,rgb(236_230_218/0.05),transparent)] motion-reduce:animate-none"
+        className="absolute -inset-[15%] animate-aurora opacity-60 [background-image:radial-gradient(38%_46%_at_72%_32%,var(--color-signal-soft),transparent),radial-gradient(34%_42%_at_18%_82%,var(--color-line),transparent)] motion-reduce:animate-none"
         aria-hidden="true"
       />
       <div

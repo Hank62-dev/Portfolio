@@ -13,6 +13,7 @@ export const copy = {
       close: 'Close menu',
       language: 'Language',
       home: 'Home — Võ Gia Huy',
+      theme: 'Switch between the light and dark theme',
     },
     skip: 'Skip to content',
     hero: {
@@ -163,6 +164,7 @@ export const copy = {
       close: 'Đóng menu',
       language: 'Ngôn ngữ',
       home: 'Trang chủ — Võ Gia Huy',
+      theme: 'Chuyển giữa giao diện sáng và tối',
     },
     skip: 'Bỏ qua, đến nội dung',
     hero: {

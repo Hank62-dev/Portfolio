@@ -161,6 +161,58 @@
   }
 }
 
+/* ───────────────────────── Light theme ─────────────────────────
+   Dark is the default (see src/lib/theme.jsx). The same token names are redefined for paper-and-ink;
+   utilities and components read the variables, so nothing else needs to know which theme is active.
+   The accent is a touch deeper in light so small text on paper keeps its contrast. */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --color-ink-0: #f4f0e8;
+  --color-ink-1: #ece7dc;
+  --color-ink-2: #e3ddd0;
+  --color-ink-3: #d8d1c2;
+  --color-bone: #17140f;
+  --color-bone-dim: #4d483e;
+  --color-bone-faint: #6b6558;
+  --color-signal: #c93a0a;
+  --color-signal-soft: rgb(201 58 10 / 0.12);
+  --color-line: rgb(23 20 15 / 0.12);
+  --color-line-strong: rgb(23 20 15 / 0.26);
+  --color-ok: #1f7a4a;
+  --color-warn: #8f5a08;
+  --color-danger: #c4382e;
+  --shadow-pop: 0 24px 64px rgb(23 20 15 / 0.2);
+}
+
+/* The pull cord's rope colour, and where it hangs: just inside the right edge, clear of the header controls. */
+:root {
+  --pullcord-top: 0px;
+  --pullcord-right: clamp(1rem, 2.2vw, 2.4rem);
+  --pullcord-z: 55;
+  --pullcord-ink: rgb(236 230 218 / 0.5);
+}
+:root[data-theme='light'] {
+  --pullcord-ink: rgb(23 20 15 / 0.55);
+}
+@media (max-width: 860px) {
+  :root {
+    --pullcord-right: 4.6rem;
+  }
+}
+
+/* While the theme switches, colours cross-fade (the class is added by ThemeProvider and removed after 0.7s). */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition:
+    background-color 0.6s ease,
+    border-color 0.6s ease,
+    color 0.6s ease,
+    fill 0.6s ease,
+    stroke 0.6s ease !important;
+}
+
 /* ───────────────────────── Custom variants ───────────────────────── */
 
 /* anywhere inside an element that scroll-reveal has marked `.in` */

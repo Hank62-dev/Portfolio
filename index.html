@@ -36,12 +36,24 @@
 
     <meta name="color-scheme" content="dark" />
     <style>
-      /* paint the page ink-black before the stylesheet arrives, so there is no white flash */
+      /* paint the page in its theme colour before the stylesheet arrives, so there is no flash */
       html {
         background: #0b0c0e;
         color-scheme: dark;
       }
+      html[data-theme='light'] {
+        background: #f4f0e8;
+        color-scheme: light;
+      }
     </style>
+    <script>
+      // Dark unless the visitor chose light (see src/lib/theme.jsx). Runs before first paint.
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
+      } catch (e) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />

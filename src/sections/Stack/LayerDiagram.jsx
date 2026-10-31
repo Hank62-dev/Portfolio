@@ -9,9 +9,6 @@ const THICK = 12;
 const Y0 = 100;
 const STEP = 108;
 
-export const PLATE_IDLE = { top: '#101114', stroke: '#8a8579' };
-export const PLATE_LIT = { top: '#2b1810', stroke: '#ff5b2e' };
-
 const Plate = ({ y, label, index }) => (
   <g data-plate={index}>
     <polygon
@@ -25,11 +22,19 @@ const Plate = ({ y, label, index }) => (
       stroke="var(--color-line-strong)"
     />
     <polygon
-      data-top={index}
       points={`${CX},${y - HALF_D} ${CX + HALF_W},${y} ${CX},${y + HALF_D} ${CX - HALF_W},${y}`}
-      fill={PLATE_IDLE.top}
-      stroke={PLATE_IDLE.stroke}
+      fill="var(--color-ink-1)"
+      stroke="var(--color-bone-faint)"
       strokeOpacity="0.7"
+    />
+    {/* the lit state: an accent wash and outline faded in over the plate */}
+    <polygon
+      data-glow={index}
+      points={`${CX},${y - HALF_D} ${CX + HALF_W},${y} ${CX},${y + HALF_D} ${CX - HALF_W},${y}`}
+      fill="var(--color-signal)"
+      fillOpacity="0.2"
+      stroke="var(--color-signal)"
+      opacity="0"
     />
     <circle data-node={index} cx={CX} cy={y} r="5" fill="var(--color-signal)" />
     <text

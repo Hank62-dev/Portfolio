@@ -15,7 +15,7 @@ const Contact = () => {
   const timer = useRef(null);
   const glowRef = usePointerGlow();
   const emailRef = useRef(null);
-  useLetterProximity(emailRef, { radius: 200, lift: 22, rest: '#ece6da' });
+  useLetterProximity(emailRef, { radius: 200, lift: 22 });
 
   useEffect(() => () => clearTimeout(timer.current), []);
 

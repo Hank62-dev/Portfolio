@@ -1,6 +1,6 @@
 import { gsap, prefersReducedMotion } from './gsap';
 
-const COLORS = ['#ff5b2e', '#ece6da', '#ff8a5c', '#a8a396'];
+const token = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
 /** A short burst of small squares from a point (viewport coordinates). They remove themselves. No-op with reduced motion. */
 export const burst = (x, y, count = 28) => {
@@ -10,10 +10,11 @@ export const burst = (x, y, count = 28) => {
   layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:96;overflow:hidden';
   document.body.appendChild(layer);
 
+  const colors = [token('--color-signal'), token('--color-bone'), token('--color-bone-faint'), token('--color-signal')];
   const pieces = Array.from({ length: count }, () => {
     const el = document.createElement('i');
     const size = gsap.utils.random(4, 9);
-    el.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${gsap.utils.random(COLORS)}`;
+    el.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:${size}px;height:${size}px;background:${gsap.utils.random(colors)}`;
     layer.appendChild(el);
     return el;
   });

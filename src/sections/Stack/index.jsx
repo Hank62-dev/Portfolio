@@ -5,7 +5,7 @@ import { clsx } from '../../lib/format';
 import { gsap, DESKTOP, MOTION, ScrollTrigger } from '../../motion/gsap';
 import { useGsap } from '../../motion/useGsap';
 import SectionTitle from '../../components/common/SectionTitle';
-import LayerDiagram, { PLATE_IDLE, PLATE_LIT } from './LayerDiagram';
+import LayerDiagram from './LayerDiagram';
 
 const ALL = 'all';
 
@@ -23,18 +23,14 @@ const Stack = () => {
     mm.add(`${MOTION} and ${DESKTOP}`, () => {
       const root = ref.current;
       const plates = [...root.querySelectorAll('[data-plate]')];
-      const tops = [...root.querySelectorAll('[data-top]')];
+      const glows = [...root.querySelectorAll('[data-glow]')];
       const nodes = [...root.querySelectorAll('[data-node]')];
 
       const light = (active) => {
         plates.forEach((plate, i) => {
           const on = i === active;
           gsap.to(plate, { y: on ? -18 : 0, opacity: on ? 1 : 0.38, duration: 0.8, ease: 'expo.out', overwrite: 'auto' });
-          gsap.to(tops[i], {
-            attr: { fill: on ? PLATE_LIT.top : PLATE_IDLE.top, stroke: on ? PLATE_LIT.stroke : PLATE_IDLE.stroke },
-            duration: 0.6,
-            overwrite: 'auto',
-          });
+          gsap.to(glows[i], { opacity: on ? 1 : 0, duration: 0.6, overwrite: 'auto' });
           gsap.to(nodes[i], { attr: { r: on ? 9 : 5 }, duration: 0.6, ease: 'back.out(2)', overwrite: 'auto' });
         });
       };

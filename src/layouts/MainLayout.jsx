@@ -1,11 +1,13 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useLang } from '../lib/i18n';
 import { useReveal } from '../hooks/useReveal';
 import Navbar from '../components/common/Navbar';
 import ScrollProgress from '../components/common/ScrollProgress';
 import Footer from '../components/common/Footer';
+import 'pullcord/pullcord.css';
 import { profile } from '../data/profile';
+import { useTheme } from '../lib/theme';
 import { scrollToTarget } from '../lib/scroll';
 import BackgroundField from '../motion/BackgroundField';
 import Cursor from '../motion/Cursor';
@@ -15,6 +17,9 @@ import Intro from '../motion/Intro';
 import RouteWipe from '../motion/RouteWipe';
 
 /** Route changes should land at the top, or at the #hash target if there is one. */
+// The cord pulls in a physics library, so it loads after the page is up rather than with it.
+const PullCord = lazy(() => import('pullcord').then((module) => ({ default: module.PullCord })));
+
 const ScrollManager = () => {
   const { pathname, hash } = useLocation();
 
@@ -34,6 +39,7 @@ const ScrollManager = () => {
 const MainLayout = ({ children }) => {
   const { c } = useLang();
   const { pathname } = useLocation();
+  const { theme, toggle } = useTheme();
   useReveal();
 
   if (pathname === '/spacehank') {
@@ -48,6 +54,10 @@ const MainLayout = ({ children }) => {
       <Cursor />
       <RouteWipe />
       <Intro name={profile.name} />
+      {/* A rope hanging from the top edge: pull it to switch between the dark and light themes. */}
+      <Suspense fallback={null}>
+        <PullCord onPull={toggle} pulled={theme === 'light'} ariaLabel={c.nav.theme} />
+      </Suspense>
       <ScrollProgress />
       <a
         href="#main"

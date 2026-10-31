@@ -44,13 +44,8 @@ export default function Cursor() {
         const text = tagged?.dataset.cursor || '';
         const interactive = Boolean(tagged || e.target.closest?.(INTERACTIVE));
         labelEl.textContent = text;
-        gsap.to(ringEl, {
-          scale: text ? 3.2 : interactive ? 1.8 : 1,
-          backgroundColor: text ? 'rgb(255 91 46 / 0.92)' : 'rgb(255 255 255 / 0)',
-          borderColor: text ? 'rgb(255 91 46 / 0)' : 'rgb(236 230 218 / 0.7)',
-          duration: 0.4,
-          ease: 'expo.out',
-        });
+        ringEl.dataset.lens = String(Boolean(text));
+        gsap.to(ringEl, { scale: text ? 3.2 : interactive ? 1.8 : 1, duration: 0.4, ease: 'expo.out' });
         gsap.to(labelEl, { opacity: text ? 1 : 0, duration: 0.25 });
         gsap.to(dotEl, { scale: interactive ? 0 : 1, duration: 0.25 });
       };
@@ -73,8 +68,8 @@ export default function Cursor() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[90]" aria-hidden="true">
-      <div ref={ring} className="absolute top-0 left-0 grid size-9 place-items-center rounded-full border border-bone/70 opacity-0">
-        <span ref={label} className="font-mono text-[4px] font-semibold tracking-[0.1em] text-ink-0 uppercase opacity-0" />
+      <div ref={ring} className="absolute top-0 left-0 grid size-9 place-items-center rounded-full border border-bone/70 opacity-0 transition-[background-color,border-color] duration-300 data-[lens=true]:border-transparent data-[lens=true]:bg-signal">
+        <span ref={label} className="font-mono text-[4px] font-semibold tracking-[0.1em] text-white uppercase opacity-0" />
       </div>
       <div ref={dot} className="absolute top-0 left-0 size-1.5 rounded-full bg-signal opacity-0" />
     </div>

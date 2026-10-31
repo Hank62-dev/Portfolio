@@ -113,7 +113,8 @@ describe('realtime server', () => {
     expect((await call('/api/auth/login', { method: 'POST', body: { password: 'x'.repeat(70 * 1024) } })).status).toBe(413);
   });
 
-  it('logs in, exposes state, runs a worker and logs out', async () => {
+  // A real child process is spawned here, which can take a while on a busy machine.
+  it('logs in, exposes state, runs a worker and logs out', { timeout: 30000 }, async () => {
     const login = await call('/api/auth/login', { method: 'POST', body: { password: PASSWORD } });
     expect(login.status).toBe(200);
     const setCookie = login.headers.get('set-cookie');

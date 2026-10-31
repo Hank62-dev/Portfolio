@@ -11,12 +11,15 @@ const GAP = 0.95;
 const TOP = (LAYERS.length - 1) / 2;
 const BEAM_HEIGHT = 5.6;
 const SIGNAL = '#ff5b2e';
-const BONE = '#ece6da';
+const PALETTE = {
+  dark: { dust: '#ece6da', edge: '#ece6da' },
+  light: { dust: '#17140f', edge: '#d8d1c2' },
+};
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
 /** Plates drift apart as the hero scrolls out of view. */
-function Layers({ labels }) {
+function Layers({ labels, edge }) {
   const plates = useRef([]);
   const nodes = useRef([]);
 
@@ -37,7 +40,7 @@ function Layers({ labels }) {
             <mesh>
               <boxGeometry args={PLATE} />
               <meshStandardMaterial color="#1a1c21" roughness={0.55} metalness={0.25} transparent opacity={0.94} />
-              <Edges threshold={20} color={BONE} transparent opacity={0.5} />
+              <Edges threshold={20} color={edge} transparent opacity={0.55} />
             </mesh>
             <Html position={[PLATE[0] / 2 + 0.2, 0, PLATE[2] / 2 - 0.1]} style={{ pointerEvents: 'none' }} zIndexRange={[5, 0]}>
               <span className="font-mono text-[10px] tracking-[0.12em] whitespace-nowrap text-bone-dim uppercase">
@@ -61,14 +64,14 @@ function Layers({ labels }) {
 }
 
 /** Specks of "data" rising through the stack along the beam. */
-function Flow({ count }) {
+function Flow({ count, dust }) {
   const points = useRef();
   const { positions, colors, speeds } = useMemo(() => {
     const pos = new Float32Array(count * 3);
     const col = new Float32Array(count * 3);
     const spd = new Float32Array(count);
     const signal = new THREE.Color(SIGNAL);
-    const bone = new THREE.Color(BONE);
+    const bone = new THREE.Color(dust);
     for (let i = 0; i < count; i += 1) {
       pos[i * 3] = (Math.random() - 0.5) * PLATE[0] * 0.95;
       pos[i * 3 + 1] = (Math.random() - 0.5) * BEAM_HEIGHT;
@@ -77,7 +80,7 @@ function Flow({ count }) {
       spd[i] = 0.25 + Math.random() * 0.55;
     }
     return { positions: pos, colors: col, speeds: spd };
-  }, [count]);
+  }, [count, dust]);
 
   useFrame((_, delta) => {
     const attr = points.current?.geometry.attributes.position;
@@ -123,8 +126,9 @@ function Rig({ children }) {
   );
 }
 
-export default function HeroScene({ labels, active, quality, onReady }) {
+export default function HeroScene({ labels, active, quality, theme, onReady }) {
   const high = quality === 'high';
+  const colors = PALETTE[theme] ?? PALETTE.dark;
   return (
     <Canvas
       frameloop={active ? 'always' : 'never'}
@@ -137,8 +141,8 @@ export default function HeroScene({ labels, active, quality, onReady }) {
       <directionalLight position={[4, 6, 5]} intensity={2.2} color="#ffe2d0" />
       <pointLight position={[0, 0, 0.5]} intensity={3.5} distance={6} color={SIGNAL} />
       <Rig>
-        <Layers labels={labels} />
-        <Flow count={high ? 220 : 90} />
+        <Layers labels={labels} edge={colors.edge} />
+        <Flow count={high ? 220 : 90} dust={colors.dust} />
       </Rig>
     </Canvas>
   );

@@ -8,7 +8,7 @@ export default function Grain() {
   // element wider than the viewport makes mobile browsers widen the page, even when it is clipped.
   return (
     <div
-      className="pointer-events-none fixed inset-0 z-[80] animate-grain opacity-[0.07] motion-reduce:animate-none motion-reduce:opacity-[0.04]"
+      className="pointer-events-none fixed inset-0 z-[80] animate-grain opacity-[0.07] motion-reduce:animate-none motion-reduce:opacity-[0.04] [:root[data-theme=light]_&]:invert"
       style={{ backgroundImage: NOISE, backgroundSize: '160px 160px' }}
       aria-hidden="true"
     />
