@@ -2,7 +2,7 @@ services:
   - type: web
     name: hank62-realtime
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: npm ci
     startCommand: npm run spacehank:server
     healthCheckPath: /health
@@ -21,7 +21,7 @@ services:
   - type: web
     name: hank62-rag
     runtime: python
-    plan: standard  # 2GB; LightRAG + deps exceed starter (512MB)
+    plan: free  # 512MB RAM, sleeps after 15 min idle, no persistent disk
     rootDir: .integrations/hank62-rag
     buildCommand: pip install uv && uv sync --frozen
     startCommand: uv run uvicorn src.main:app --host 0.0.0.0 --port $PORT
@@ -45,9 +45,3 @@ services:
         sync: false
       - key: CORS_ORIGINS
         sync: false
-      - key: LIGHTRAG_WORKING_DIR
-        value: /var/data/lightrag_storage
-    disk:
-      name: lightrag-data
-      mountPath: /var/data
-      sizeGB: 1

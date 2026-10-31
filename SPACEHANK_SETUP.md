@@ -14,15 +14,27 @@ Chỉ cần trang portfolio: làm mục 6 (Vercel) và bỏ trống 3 biến `VI
 
 Không có chế độ demo giả. Realtime server chưa chạy thì UI chỉ báo offline. Agent chưa có worker command thì task bị từ chối.
 
-## 2. Chi phí tham khảo
+## 2. Chỉ dùng gói miễn phí: giới hạn cần biết
 
-Giá thay đổi, hãy kiểm tra lại tại https://render.com/pricing trước khi tạo.
+Toàn bộ cấu hình dùng gói free, không cần thẻ trả phí. Đổi lại có các giới hạn dưới đây. Điều kiện gói free có thể thay đổi, hãy kiểm tra lại trên trang của từng dịch vụ trước khi tạo.
 
-- Render `hank62-realtime`: gói `starter` (trả phí, vài USD mỗi tháng). Gói free ngủ khi không dùng, không hợp với WebSocket.
-- Render `hank62-rag`: gói `standard` (2GB RAM, khoảng 25 USD mỗi tháng) kèm ổ đĩa 1GB.
-- Vercel: gói Hobby miễn phí là đủ.
-- Qdrant Cloud, Neon, Upstash: đều có gói free đủ để chạy thử.
-- Gemini API: gói free có giới hạn lượt gọi. Mỗi tin nhắn chat gọi thêm một lần embedding.
+| Dịch vụ | Giới hạn gói free |
+|---|---|
+| Render (cả hai service) | 512MB RAM. Service ngủ sau 15 phút không có request (hoặc tin nhắn WebSocket), lần đánh thức tiếp theo mất khoảng 1 phút. Mỗi tài khoản có 750 giờ chạy mỗi tháng. **Không có ổ đĩa bền vững** |
+| Vercel (Hobby) | Miễn phí, dành cho dự án cá nhân phi thương mại |
+| Qdrant Cloud | Cluster 1GB. Cluster không hoạt động 1 tuần sẽ bị tạm dừng, 4 tuần sẽ bị xóa. Bạn cần vào dashboard để kích hoạt lại |
+| Neon (Postgres) | Khoảng 100 CU-giờ tính toán và 0,5GB dung lượng mỗi tháng. Database tự ngủ khi rảnh nên truy vấn đầu tiên chậm |
+| Upstash (Redis) | 500.000 lệnh mỗi tháng, 256MB dữ liệu |
+| Gemini API | Có hạn mức theo phút và theo ngày, và hạn mức thay đổi theo model. Mỗi tin nhắn chat gọi nhiều lần LLM (guard, router, RAG, verification) và 1–2 lần embedding. Xem hạn mức hiện tại của bạn tại https://aistudio.google.com |
+
+Hệ quả thực tế:
+
+- **Trang có thể chậm lần đầu.** Sau 15 phút rảnh, realtime server và RAG ngủ. Lần truy cập kế tiếp phải chờ đánh thức, RAG lâu hơn vì phải nạp thư viện.
+- **Đăng nhập SpaceHank mất khi realtime server ngủ hoặc restart,** vì phiên lưu trong bộ nhớ. Bạn phải đăng nhập lại.
+- **Kho tri thức LightRAG không bền.** Không có ổ đĩa bền vững nên dữ liệu đồ thị LightRAG mất mỗi lần RAG ngủ hoặc restart, trong khi vector trong Qdrant vẫn còn nên RAG không nạp lại. Kết quả: câu hỏi dựa trên kho tri thức có thể trả về trống sau mỗi lần restart. Chat với tài liệu bạn tải lên (lưu trong Qdrant) và hỏi đáp trên dữ liệu kho (Postgres) không bị ảnh hưởng.
+- **Hết hạn mức Gemini thì chat dừng đến khi hạn mức được đặt lại.** Hạn mức theo ngày thường đặt lại vào nửa đêm giờ Thái Bình Dương.
+- **Nếu Render kill RAG vì hết bộ nhớ (OOM),** gói free không đủ. Tôi đo thử RAG chạy rảnh, chưa kết nối Qdrant/Postgres/Redis, đã dùng khoảng 300MB. Khi kết nối đủ và xử lý chat, mức dùng có thể gần 512MB. Nếu xảy ra, cách duy nhất để ổn định là nâng gói `standard` (trả phí) hoặc chạy RAG ở nơi khác.
+- **Giữ cluster Qdrant không bị tạm dừng:** dự án phải có truy cập ít nhất mỗi tuần.
 
 ## 3. Danh sách biến môi trường và nơi lấy
 
@@ -60,7 +72,7 @@ Không đặt `SPACEHANK_CODEX_CMD`, `SPACEHANK_CLAUDE_CMD` và các biến `SPA
 | `REDIS_URL` | `rediss://default:pass@host:6379` | Mục 4.3 |
 | `CORS_ORIGINS` | `https://<ten-du-an>.vercel.app` | URL Vercel của bạn, không có `/` ở cuối. Nhiều origin thì cách nhau bằng dấu phẩy (ví dụ thêm domain riêng). Ở lần tạo đầu điền tạm `https://example.com`, rồi sửa lại ở bước 7 |
 
-Các biến đã có sẵn trong `render.yaml`: `PYTHON_VERSION`, `GEMINI_MODEL`, `GEMINI_FAST_MODEL`, `LIGHTRAG_WORKING_DIR` (trỏ vào ổ đĩa bền vững `/var/data`). Hãy kiểm tra tên model còn dùng được tại https://ai.google.dev/gemini-api/docs/models. Nếu cần đổi, sửa `GEMINI_MODEL` và `GEMINI_FAST_MODEL` trong Render.
+Các biến đã có sẵn trong `render.yaml`: `PYTHON_VERSION`, `GEMINI_MODEL`, `GEMINI_FAST_MODEL`. Hãy kiểm tra tên model còn dùng được tại https://ai.google.dev/gemini-api/docs/models. Nếu cần đổi, sửa `GEMINI_MODEL` và `GEMINI_FAST_MODEL` trong Render.
 
 ## 4. Tạo các dịch vụ ngoài
 
@@ -115,7 +127,7 @@ Nếu bỏ qua Redis, RAG chạy bình thường nhưng không có cache và b�
    ```
    Realtime phải trả về `"mode":"production"`. RAG phải trả về `"status":"healthy"`.
 
-Lần khởi động đầu, RAG tự nạp tài liệu chính sách vào Qdrant ở chế độ nền. Việc này gọi Gemini nhiều lần và có thể mất vài phút đến hàng chục phút. Trong lúc đó `/health` vẫn trả lời bình thường, nhưng câu trả lời dựa trên tài liệu chưa đầy đủ. Xem tiến độ trong **Logs** của service `hank62-rag`. Ổ đĩa 1GB giữ dữ liệu LightRAG qua các lần restart, nên bước này chỉ chạy một lần.
+Lần khởi động đầu, RAG tự nạp tài liệu chính sách vào Qdrant ở chế độ nền. Việc này gọi Gemini nhiều lần và có thể mất vài phút đến hàng chục phút. Trong lúc đó `/health` vẫn trả lời bình thường, nhưng câu trả lời dựa trên tài liệu chưa đầy đủ. Xem tiến độ trong **Logs** của service `hank62-rag`. Vì gói free không có ổ đĩa bền vững, dữ liệu đồ thị LightRAG mất khi service ngủ hoặc restart (xem mục 2). Qdrant vẫn giữ vector nên RAG không tự nạp lại.
 
 ## 6. Deploy trên Vercel
 
@@ -212,8 +224,10 @@ Task và event lưu trong bộ nhớ. Restart server là mất lịch sử và p
 | Log RAG báo `Postgres pool init failed` | `DATABASE_URL` sai hoặc thiếu `sslmode=require` | Kiểm tra connection string |
 | Log RAG báo `Redis unavailable` | `REDIS_URL` sai hoặc thiếu TLS | Dùng `rediss://` với Upstash |
 | Log RAG báo 429 hoặc quota khi embedding | Hết hạn mức Gemini | Đợi hoặc nâng gói Gemini |
-| RAG bị Render kill vì hết bộ nhớ | Gói quá nhỏ | Dùng gói `standard` trở lên |
-| Ngủ đông / chậm lần đầu | Gói free của Render | Dùng gói trả phí |
+| RAG bị Render kill vì hết bộ nhớ | Gói free chỉ có 512MB | Không sửa được trong gói free. Cần gói `standard` (trả phí) hoặc nơi chạy khác |
+| Truy cập lần đầu chậm khoảng 1 phút | Service free đang ngủ | Bình thường ở gói free. Chờ rồi tải lại |
+| Câu hỏi về kho tri thức trả về trống sau khi RAG restart | Dữ liệu đồ thị LightRAG mất vì không có ổ đĩa | Xem mục 2. Hạn chế của gói free |
+| Qdrant báo không kết nối được sau thời gian dài không dùng | Cluster free bị tạm dừng | Vào https://cloud.qdrant.io kích hoạt lại cluster |
 
 ## 11. Bảo mật
 

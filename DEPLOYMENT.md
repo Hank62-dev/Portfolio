@@ -23,6 +23,8 @@ vercel.json keeps /spacehank working on refresh.
 
 ## Render
 
+Both services use the free plan (512MB RAM, sleep after 15 minutes idle, no persistent disk). See SPACEHANK_SETUP.md section 2 for limitations.
+
 The root render.yaml defines both services. Create a Blueprint from the repository, then set the secret values marked sync: false.
 
 For the realtime service:
