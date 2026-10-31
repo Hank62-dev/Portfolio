@@ -25,7 +25,7 @@ services:
   - type: web
     name: hank62-rag
     runtime: python
-    plan: pro  # BGE-M3 + torch need ~3GB RAM; starter (512MB) and standard (2GB) OOM
+    plan: standard  # 2GB; LightRAG + deps exceed starter (512MB)
     rootDir: .integrations/hank62-rag
     buildCommand: pip install uv && uv sync --frozen
     startCommand: uv run uvicorn src.main:app --host 0.0.0.0 --port $PORT

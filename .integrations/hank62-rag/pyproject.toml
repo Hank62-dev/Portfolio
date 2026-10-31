@@ -16,9 +16,6 @@ dependencies = [
     "openai>=1.50.0",
     # RAG
     "lightrag-hku>=1.3.0",
-    # Embedding
-    "sentence-transformers>=3.4.0",
-    "torch>=2.5.0",
     # Vector DB
     "qdrant-client>=1.13.0",
     # Postgres (shared DB)

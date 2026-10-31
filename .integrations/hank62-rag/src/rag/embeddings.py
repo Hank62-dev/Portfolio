@@ -1,45 +1,44 @@
-"""BGE-M3 Embedding Function for LightRAG.
+"""Gemini embeddings for LightRAG, the document store and the semantic cache.
 
-Runs locally on CPU (MBP 16GB compatible).
-Supports dense, sparse, and ColBERT retrieval.
+Uses the Gemini API (no local model, no torch), so the service fits in a small container.
 """
 
+import asyncio
 import logging
 
 import numpy as np
+from google.genai import types
+
+from src.config import settings
+from src.llm.gemini_client import _get_client
 
 logger = logging.getLogger(__name__)
 
-_model = None
+_BATCH_SIZE = 100  # embed_content accepts at most 100 texts per request
+_MAX_RETRIES = 5
 
 
-def _get_model():
-    """Lazy-load the embedding model (singleton)."""
-    global _model
-    if _model is None:
-        logger.info("Loading BGE-M3 embedding model... (first load takes ~30s)")
-        from sentence_transformers import SentenceTransformer
-
-        _model = SentenceTransformer(
-            "BAAI/bge-m3",
-            device="cpu",
-            trust_remote_code=True,
-        )
-        logger.info(
-            "BGE-M3 loaded successfully. Dimension: %d",
-            _model.get_sentence_embedding_dimension(),
-        )
-    return _model
-
-
-def preload_model():
-    """Eagerly load BGE-M3 at server startup to avoid cold start on first request."""
-    _get_model()
-    logger.info("BGE-M3 preloaded and ready for inference")
+async def _embed_batch(texts: list[str]) -> list[list[float]]:
+    client = _get_client()
+    config = types.EmbedContentConfig(output_dimensionality=settings.embedding_dimension)
+    for attempt in range(_MAX_RETRIES):
+        try:
+            response = await client.aio.models.embed_content(
+                model=settings.embedding_model,
+                contents=texts,
+                config=config,
+            )
+            return [embedding.values for embedding in response.embeddings]
+        except Exception as e:
+            if attempt == _MAX_RETRIES - 1:
+                raise
+            delay = 2 ** attempt
+            logger.warning("Gemini embedding failed (%s), retrying in %ds", e, delay)
+            await asyncio.sleep(delay)
 
 
-async def bge_m3_embed(texts: list[str]) -> np.ndarray:
-    """Generate embeddings using BGE-M3.
+async def embed_texts(texts: list[str]) -> np.ndarray:
+    """Generate L2-normalized embeddings with Gemini.
 
     Compatible with LightRAG's EmbeddingFunc interface.
 
@@ -47,19 +46,18 @@ async def bge_m3_embed(texts: list[str]) -> np.ndarray:
         texts: List of text strings to embed.
 
     Returns:
-        numpy array of shape (len(texts), embedding_dim).
+        numpy array of shape (len(texts), embedding_dimension).
     """
-    model = _get_model()
-    embeddings = model.encode(
-        texts,
-        normalize_embeddings=True,
-        show_progress_bar=False,
-        batch_size=32,
-    )
-    return np.array(embeddings)
+    vectors: list[list[float]] = []
+    for start in range(0, len(texts), _BATCH_SIZE):
+        vectors.extend(await _embed_batch(texts[start:start + _BATCH_SIZE]))
+
+    embeddings = np.array(vectors, dtype=np.float32)
+    # Truncated outputs (< 3072 dims) are not unit length.
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    return embeddings / np.maximum(norms, 1e-12)
 
 
 def get_embedding_dimension() -> int:
-    """Get the embedding dimension for BGE-M3 (1024)."""
-    return 1024
-
+    """Embedding dimension (must match the Qdrant collections)."""
+    return settings.embedding_dimension

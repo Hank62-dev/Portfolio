@@ -43,10 +43,9 @@ GEMINI_API_KEY=AQ.your_gemini_api_key_here
 GEMINI_MODEL=gemini-3.8-flash
 GEMINI_FAST_MODEL=gemini-3.5-flash-lite
 
-# 3. Model nhúng BGE-M3
-EMBEDDING_MODEL=BAAI/bge-m3
+# 3. Embedding qua Gemini API (cần GEMINI_API_KEY)
+EMBEDDING_MODEL=gemini-embedding-001
 EMBEDDING_DIMENSION=1024
-EMBEDDING_DEVICE=cpu
 
 # 4. Qdrant Vector DB
 QDRANT_HOST=localhost
@@ -144,11 +143,10 @@ INFO:     Redis ready: redis://localhost:6382/0
 INFO:     Connecting LightRAG to Qdrant VectorDB at http://localhost:6333
 INFO:     Main model: gemini-3.8-flash
 INFO:     Fast model: gemini-3.5-flash-lite
-INFO:     BGE-M3 preloaded and ready for inference
 INFO:     Application startup complete.
 ```
 
-> **Lưu ý**: Lần đầu khởi động, hệ thống sẽ tải model `BAAI/bge-m3` (~2.2GB) về máy cache, mất khoảng 20-30 giây. Các lần khởi động sau sẽ nạp tức thì.
+> **Lưu ý**: Embedding chạy qua Gemini API nên không còn tải model local. Nếu trước đó bạn đã index bằng BGE-M3, phải xóa collection Qdrant (`lightrag_vdb_*`, `hkt_user_docs`) và `data/lightrag_storage` rồi ingest lại, vì không gian vector khác nhau.
 
 ---
 

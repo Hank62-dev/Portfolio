@@ -88,8 +88,8 @@ class AgentPipeline:
             pre_cache_embedding = None
             if session_id:
                 try:
-                    from src.rag.embeddings import bge_m3_embed
-                    emb_result = await bge_m3_embed([request.message])
+                    from src.rag.embeddings import embed_texts
+                    emb_result = await embed_texts([request.message])
                     pre_cache_embedding = emb_result[0]
                 except Exception as e:
                     logger.debug("Pre-cache embedding skipped: %s", e)
@@ -167,11 +167,11 @@ class AgentPipeline:
             ):
                 return await self._handle_direct(request, guard_result, agents_trace, start_time)
 
-            # 3. Compute embedding for semantic cache (reuses preloaded BGE-M3)
+            # 3. Compute embedding for semantic cache (Gemini embeddings)
             query_embedding = None
             try:
-                from src.rag.embeddings import bge_m3_embed
-                emb_result = await bge_m3_embed([guard_result.cleaned_prompt])
+                from src.rag.embeddings import embed_texts
+                emb_result = await embed_texts([guard_result.cleaned_prompt])
                 query_embedding = emb_result[0]
             except Exception as e:
                 logger.debug("Embedding computation skipped: %s", e)

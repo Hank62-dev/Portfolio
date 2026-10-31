@@ -32,7 +32,7 @@ CHUNKS_FILE = os.path.join(OUT_DIR, "policy_chunks.json")
 # Config path to src
 sys.path.append(os.path.abspath(os.path.join(BASE_DIR, "..", "..")))
 from src.config import settings
-from src.rag.embeddings import bge_m3_embed
+from src.rag.embeddings import embed_texts
 from src.rag.doc_chunker import chunk_text
 
 COLLECTION_NAME = "warehouse_policies"
@@ -113,12 +113,12 @@ async def process_and_embed_policies():
     print(f"💾 Đã lưu chuỗi chunks ra: {CHUNKS_FILE}")
 
     # 4. Tính toán NLP Embeddings
-    print(f"\n🧠 Chạy model BGE-M3 nhúng {len(all_chunks)} chunks sang Vector...")
+    print(f"\n🧠 Dùng Gemini embedding nhúng {len(all_chunks)} chunks sang Vector...")
     texts = [c["text"] for c in all_chunks]
     
     # Bắt đầu tính toán embeddings (Gọi hàm bất đồng bộ)
     try:
-        embeddings = await bge_m3_embed(texts)
+        embeddings = await embed_texts(texts)
     except Exception as e:
         print(f"❌ Custom embedding failed, error: {e}")
         return

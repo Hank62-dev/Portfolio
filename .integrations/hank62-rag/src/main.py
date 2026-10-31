@@ -58,11 +58,6 @@ async def lifespan(app: FastAPI):
     pipeline = AgentPipeline(rag_engine=rag_engine)
     logger.info("Agent Pipeline ready")
 
-    # Preload BGE-M3 embedding model (eliminates ~13s cold start on first request)
-    from src.rag.embeddings import preload_model
-    preload_model()
-    logger.info("Embedding model preloaded")
-
     if settings.callback_url:
         logger.info("Callback URL: %s", settings.callback_url)
     else:
@@ -318,7 +313,7 @@ async def test_upload_document(
     try:
         from src.rag.doc_parser import extract_text
         from src.rag.doc_chunker import chunk_text
-        from src.rag.embeddings import bge_m3_embed
+        from src.rag.embeddings import embed_texts
 
         # Parse → Chunk → Embed → Upsert (inline, no URL download)
         text = extract_text(content, filename)
@@ -333,7 +328,7 @@ async def test_upload_document(
         if not chunks:
             raise HTTPException(status_code=400, detail="File produced no chunks")
 
-        embeddings = await bge_m3_embed(chunks)
+        embeddings = await embed_texts(chunks)
 
         await pipeline.doc_store.ensure_collection()
         await pipeline.doc_store._upsert_chunks(

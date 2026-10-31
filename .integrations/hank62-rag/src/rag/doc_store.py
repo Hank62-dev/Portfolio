@@ -21,7 +21,7 @@ from src.cache.redis_client import get_redis
 from src.config import settings
 from src.rag.doc_chunker import chunk_text
 from src.rag.doc_parser import extract_text
-from src.rag.embeddings import bge_m3_embed
+from src.rag.embeddings import embed_texts
 
 logger = logging.getLogger(__name__)
 
@@ -171,7 +171,7 @@ class ConversationDocStore:
                 return 0
 
             # 4. Embed chunks
-            embeddings = await bge_m3_embed(chunks)
+            embeddings = await embed_texts(chunks)
 
             # 5. Upsert to Qdrant
             await self._upsert_chunks(

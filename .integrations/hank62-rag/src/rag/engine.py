@@ -1,4 +1,4 @@
-"""LightRAG Engine - Groq + BGE-M3 integration."""
+"""LightRAG Engine - Groq + Gemini embeddings integration."""
 
 import logging
 import os
@@ -6,7 +6,7 @@ from functools import partial
 from typing import Any
 
 from src.config import settings
-from src.rag.embeddings import bge_m3_embed, get_embedding_dimension
+from src.rag.embeddings import embed_texts, get_embedding_dimension
 
 logger = logging.getLogger(__name__)
 
@@ -98,7 +98,7 @@ class RAGEngine:
 
     Integrates:
     - LightRAG for graph-based retrieval
-    - BGE-M3 for local embeddings
+    - Gemini embeddings
     - Groq for LLM calls (via OpenAI-compatible API)
     """
 
@@ -133,7 +133,7 @@ class RAGEngine:
                 embedding_func=EmbeddingFunc(
                     embedding_dim=get_embedding_dimension(),
                     max_token_size=8192,
-                    func=bge_m3_embed,
+                    func=embed_texts,
                 ),
                 vector_storage="QdrantVectorDBStorage",
                 vector_db_storage_cls_kwargs={"cosine_better_than_threshold": 0.2}

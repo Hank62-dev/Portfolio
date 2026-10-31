@@ -18,11 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY pyproject.toml ./
 
-# Install CPU-only PyTorch first (saves ~4-5GB vs default CUDA bundle),
-# then install the rest of the project dependencies.
-RUN pip install --no-cache-dir \
-    torch --index-url https://download.pytorch.org/whl/cpu \
-    && pip install --no-cache-dir .
+RUN pip install --no-cache-dir .
 
 # ---- Stage 2: Runtime ----
 FROM python:3.11-slim

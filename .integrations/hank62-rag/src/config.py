@@ -44,9 +44,8 @@ class Settings(BaseSettings):
     )
 
     # --- Embedding ---
-    embedding_model: str = Field(default="BAAI/bge-m3")
+    embedding_model: str = Field(default="gemini-embedding-001")
     embedding_dimension: int = Field(default=1024)
-    embedding_device: str = Field(default="cpu")
 
     # --- Qdrant ---
     qdrant_host: str = Field(default="localhost")

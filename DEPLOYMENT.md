@@ -36,7 +36,7 @@ The Render Node service cannot execute local desktop CLIs unless they are instal
 
 For Hank RAG:
 
-  GEMINI_API_KEY=<secret>
+  GEMINI_API_KEY=<secret>  # also used for embeddings (gemini-embedding-001, 1024 dims)
   DATABASE_URL=<managed-postgres-url>
   QDRANT_URL=<managed-qdrant-url>
   QDRANT_API_KEY=<qdrant-cloud-api-key>
