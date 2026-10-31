@@ -7,6 +7,6 @@ export const heroStore = {
   pointerY: 0,
   /** How far the hero has scrolled out of view, 0..1. */
   scroll: 0,
-  /** Whether the hero is on screen; the scene stops rendering when it is not. */
-  visible: true,
+  /** Rises by one each time the hero is clicked: the scene answers with a volley of requests. */
+  burst: 0,
 };

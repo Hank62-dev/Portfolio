@@ -5,7 +5,8 @@ import { clsx } from '../../lib/format';
 import { gsap, DESKTOP, MOTION, ScrollTrigger } from '../../motion/gsap';
 import { useGsap } from '../../motion/useGsap';
 import SectionTitle from '../../components/common/SectionTitle';
-import LayerDiagram from './LayerDiagram';
+import StackVisual from './StackVisual';
+import { stackStore } from './stackStore';
 
 const ALL = 'all';
 
@@ -27,6 +28,7 @@ const Stack = () => {
       const nodes = [...root.querySelectorAll('[data-node]')];
 
       const light = (active) => {
+        stackStore.set(active);
         plates.forEach((plate, i) => {
           const on = i === active;
           gsap.to(plate, { y: on ? -18 : 0, opacity: on ? 1 : 0.38, duration: 0.8, ease: 'expo.out', overwrite: 'auto' });
@@ -89,7 +91,7 @@ const Stack = () => {
               data-diagram
               className="sticky top-[calc(var(--spacing-header)+24px)] grid h-[calc(100svh-var(--spacing-header)-48px)] place-items-center"
             >
-              <LayerDiagram labels={c.stack.layers} />
+              <StackVisual labels={c.stack.layers} />
             </div>
           </div>
 

@@ -1,11 +1,22 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { deriveStack, LAYERS } from '../../data/projects';
 import { can3D, qualityTier, readEnvironment } from '../../lib/capabilities';
 import { clsx } from '../../lib/format';
 import { useTheme } from '../../lib/theme';
+import { motionStore } from '../../motion/store';
+import { heroStore } from './heroStore';
 import StackIllustration from './StackIllustration';
 
 // three.js is a separate chunk: it only downloads after first paint, on devices that can use it.
-const HeroScene = lazy(() => import('./HeroScene'));
+const StackScene = lazy(() => import('../../scene/stack/StackScene'));
+
+const getInput = () => ({
+  pointerX: heroStore.pointerX,
+  pointerY: heroStore.pointerY,
+  scroll: heroStore.scroll,
+  boost: motionStore.velocity,
+});
+const getBurst = () => heroStore.burst;
 
 const whenIdle = (callback) =>
   'requestIdleCallback' in window ? window.requestIdleCallback(callback, { timeout: 1500 }) : window.setTimeout(callback, 300);
@@ -28,6 +39,17 @@ export default function HeroVisual({ labels, active }) {
 
   const use3D = env ? can3D(env) : false;
 
+  // the words that orbit the stack: the technologies used by the most projects
+  const techs = useMemo(() => {
+    const stack = deriveStack();
+    const seen = new Set();
+    return LAYERS.flatMap((layer) => stack[layer])
+      .sort((a, b) => b.slugs.length - a.slugs.length)
+      .filter(({ tech }) => !seen.has(tech) && seen.add(tech))
+      .slice(0, 12)
+      .map(({ tech }) => tech);
+  }, []);
+
   return (
     <div
       className="pointer-events-none absolute inset-y-0 right-0 bottom-36 hidden w-[58%] [mask-image:linear-gradient(90deg,transparent,#000_22%)] lg:block"
@@ -44,7 +66,17 @@ export default function HeroVisual({ labels, active }) {
       {use3D && (
         <Suspense fallback={null}>
           <div className={clsx('absolute inset-0 transition-opacity duration-700', ready ? 'opacity-100' : 'opacity-0')}>
-            <HeroScene labels={labels} active={active} quality={qualityTier(env)} theme={theme} onReady={() => setReady(true)} />
+            <StackScene
+              mode="hero"
+              labels={labels}
+              techs={techs}
+              active={active}
+              quality={qualityTier(env)}
+              theme={theme}
+              getInput={getInput}
+              getBurst={getBurst}
+              onReady={() => setReady(true)}
+            />
           </div>
         </Suspense>
       )}

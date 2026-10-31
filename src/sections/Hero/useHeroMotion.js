@@ -39,6 +39,9 @@ export const useHeroMotion = (sectionRef) => {
       heroStore.pointerX = ((e.clientX - r.left) / r.width - 0.5) * 2;
       heroStore.pointerY = ((e.clientY - r.top) / r.height - 0.5) * 2;
     };
+    const onDown = (e) => {
+      if (!e.target.closest('a, button')) heroStore.burst += 1;
+    };
     const onLeave = () => {
       heroStore.pointerX = 0;
       heroStore.pointerY = 0;
@@ -50,6 +53,7 @@ export const useHeroMotion = (sectionRef) => {
     if (canUsePointerFx()) {
       section.addEventListener('pointermove', onPointer);
       section.addEventListener('pointerleave', onLeave);
+      section.addEventListener('pointerdown', onDown);
     }
 
     return () => {
@@ -59,6 +63,7 @@ export const useHeroMotion = (sectionRef) => {
       window.removeEventListener('resize', schedule);
       section.removeEventListener('pointermove', onPointer);
       section.removeEventListener('pointerleave', onLeave);
+      section.removeEventListener('pointerdown', onDown);
       Object.assign(heroStore, { pointerX: 0, pointerY: 0, scroll: 0 });
     };
   }, [sectionRef]);
