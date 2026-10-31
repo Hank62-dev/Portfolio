@@ -52,6 +52,11 @@ class Settings(BaseSettings):
     qdrant_host: str = Field(default="localhost")
     qdrant_port: int = Field(default=6333)
     qdrant_collection: str = Field(default="hkt_rag")
+    qdrant_url: str = Field(
+        default="",
+        description="Full Qdrant URL (e.g. Qdrant Cloud). Overrides host/port when set",
+    )
+    qdrant_api_key: str = Field(default="", description="Qdrant Cloud API key")
 
     # --- Postgres (Warehouse DB) ---
     database_url: str = Field(
@@ -126,6 +131,11 @@ class Settings(BaseSettings):
     )
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "allow"}
+
+    @property
+    def qdrant_endpoint(self) -> str:
+        """Base URL of the Qdrant server (QDRANT_URL, else http://host:port)."""
+        return self.qdrant_url.rstrip("/") or f"http://{self.qdrant_host}:{self.qdrant_port}"
 
     @property
     def groq_keys_list(self) -> list[str]:

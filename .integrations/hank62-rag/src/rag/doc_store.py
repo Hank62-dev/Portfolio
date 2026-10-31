@@ -44,14 +44,11 @@ class ConversationDocStore:
         if self._client is None:
             from qdrant_client import QdrantClient
             self._client = QdrantClient(
-                host=settings.qdrant_host,
-                port=settings.qdrant_port,
+                url=settings.qdrant_endpoint,
+                api_key=settings.qdrant_api_key or None,
                 timeout=10,
             )
-            logger.info(
-                "DocStore Qdrant client connected: %s:%d",
-                settings.qdrant_host, settings.qdrant_port,
-            )
+            logger.info("DocStore Qdrant client connected: %s", settings.qdrant_endpoint)
         return self._client
 
     async def ensure_collection(self) -> None:

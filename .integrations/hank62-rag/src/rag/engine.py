@@ -119,8 +119,10 @@ class RAGEngine:
             os.makedirs(working_dir, exist_ok=True)
 
             # Define Qdrant URL for LightRAG
-            qdrant_url = f"http://{settings.qdrant_host}:{settings.qdrant_port}"
+            qdrant_url = settings.qdrant_endpoint
             os.environ.setdefault("QDRANT_URL", qdrant_url)
+            if settings.qdrant_api_key:
+                os.environ.setdefault("QDRANT_API_KEY", settings.qdrant_api_key)
 
             logger.info("Connecting LightRAG to Qdrant VectorDB at %s", qdrant_url)
 

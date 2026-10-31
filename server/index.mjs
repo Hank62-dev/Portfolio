@@ -8,6 +8,7 @@ const AUTH_PASSWORD = process.env.SPACEHANK_PASSWORD;
 const SPACEHANK_ORIGIN = process.env.SPACEHANK_ORIGIN;
 if (!AUTH_PASSWORD) throw new Error('SPACEHANK_PASSWORD is required');
 if (!SPACEHANK_ORIGIN) throw new Error('SPACEHANK_ORIGIN is required');
+const COOKIE_ATTRS = SPACEHANK_ORIGIN.startsWith('https://') ? 'SameSite=None; Secure' : 'SameSite=Lax';
 const SESSION_TTL = 1000 * 60 * 60 * 12;
 const clients = new Set();
 const sessions = new Map();
@@ -65,8 +66,8 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(204, corsHeaders); return res.end(); }
   if (req.url === '/health') return json(res, 200, { ok: true, mode: 'production', uptime: process.uptime(), agents: agents.length, configuredWorkers: agents.filter((agent) => process.env[`SPACEHANK_${agent.id.toUpperCase()}_CMD`]).map((agent) => agent.id) });
   if (req.method === 'GET' && req.url === '/api/auth/session') return json(res, 200, { authenticated: authorized(req) });
-  if (req.method === 'POST' && req.url === '/api/auth/login') { try { const input = await body(req); if (!safePasswordMatch(input.password)) return json(res, 401, { error: 'Invalid password' }); const token = randomUUID(); sessions.set(token, { expiresAt: Date.now() + SESSION_TTL }); return json(res, 200, { authenticated: true }, { 'Set-Cookie': `spacehank_session=${token}; HttpOnly; SameSite=Lax; Max-Age=${SESSION_TTL / 1000}; Path=/` }); } catch { return json(res, 400, { error: 'Invalid JSON' }); } }
-  if (req.method === 'POST' && req.url === '/api/auth/logout') { const token = cookie(req, 'spacehank_session'); if (token) sessions.delete(token); return json(res, 200, { authenticated: false }, { 'Set-Cookie': 'spacehank_session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/' }); }
+  if (req.method === 'POST' && req.url === '/api/auth/login') { try { const input = await body(req); if (!safePasswordMatch(input.password)) return json(res, 401, { error: 'Invalid password' }); const token = randomUUID(); sessions.set(token, { expiresAt: Date.now() + SESSION_TTL }); return json(res, 200, { authenticated: true }, { 'Set-Cookie': `spacehank_session=${token}; HttpOnly; ${COOKIE_ATTRS}; Max-Age=${SESSION_TTL / 1000}; Path=/` }); } catch { return json(res, 400, { error: 'Invalid JSON' }); } }
+  if (req.method === 'POST' && req.url === '/api/auth/logout') { const token = cookie(req, 'spacehank_session'); if (token) sessions.delete(token); return json(res, 200, { authenticated: false }, { 'Set-Cookie': 'spacehank_session=; HttpOnly; ${COOKIE_ATTRS}; Max-Age=0; Path=/' }); }
   if (req.url === '/api/state') { if (!requireAuth(req, res)) return; return json(res, 200, { agents, tasks, events }); }
   if (req.method === 'POST' && req.url === '/api/tasks') { if (!requireAuth(req, res)) return; try { const task = createTask(await body(req)); return json(res, 201, task); } catch (error) { return json(res, 400, { error: error.message }); } }
   return json(res, 404, { error: 'Not found' });

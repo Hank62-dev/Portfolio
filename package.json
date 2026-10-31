@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "spacehank:server": "node --env-file=.env server/index.mjs"
+    "spacehank:server": "node --env-file-if-exists=.env server/index.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.3.1",

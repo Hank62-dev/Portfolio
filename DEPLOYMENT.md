@@ -39,6 +39,7 @@ For Hank RAG:
   GEMINI_API_KEY=<secret>
   DATABASE_URL=<managed-postgres-url>
   QDRANT_URL=<managed-qdrant-url>
+  QDRANT_API_KEY=<qdrant-cloud-api-key>
   REDIS_URL=<managed-redis-url>
 
 The RAG service must have persistent external services. Do not use local Docker Compose ports or localhost URLs in Render.

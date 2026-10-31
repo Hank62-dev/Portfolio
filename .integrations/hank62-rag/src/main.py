@@ -94,7 +94,11 @@ async def _auto_ingest_if_empty(engine: RAGEngine):
 
     try:
         import httpx
-        resp = httpx.get(f"http://{settings.qdrant_host}:{settings.qdrant_port}/collections/lightrag_vdb_chunks")
+        resp = httpx.get(
+            f"{settings.qdrant_endpoint}/collections/lightrag_vdb_chunks",
+            headers={"api-key": settings.qdrant_api_key} if settings.qdrant_api_key else {},
+            timeout=10,
+        )
         points_count = resp.json().get("result", {}).get("points_count", 0)
     except Exception:
         points_count = 0

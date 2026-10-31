@@ -25,7 +25,7 @@ services:
   - type: web
     name: hank62-rag
     runtime: python
-    plan: starter
+    plan: pro  # BGE-M3 + torch need ~3GB RAM; starter (512MB) and standard (2GB) OOM
     rootDir: .integrations/hank62-rag
     buildCommand: pip install uv && uv sync --frozen
     startCommand: uv run uvicorn src.main:app --host 0.0.0.0 --port $PORT
@@ -42,6 +42,8 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
         sync: false
       - key: REDIS_URL
         sync: false
