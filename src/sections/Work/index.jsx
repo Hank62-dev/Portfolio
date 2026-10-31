@@ -6,7 +6,7 @@ import { clsx } from '../../lib/format';
 import { useTilt } from '../../hooks/useMotion';
 import SectionTitle from '../../components/common/SectionTitle';
 import ProjectMark from '../../components/ui/ProjectMark';
-import Tag from '../../components/ui/Tag';
+import Badge from '../../design-system/Badge';
 
 const topTech = (p) => [...p.layers.interface, ...p.layers.service, ...p.layers.data].slice(0, 5);
 
@@ -81,7 +81,7 @@ const Work = () => {
                     <span className="max-w-[52ch] text-bone-dim">{t(p.tagline)}</span>
                     <span className="mt-1 flex flex-wrap gap-1.5">
                       {topTech(p).map((tech) => (
-                        <Tag key={tech}>{tech}</Tag>
+                        <Badge key={tech}>{tech}</Badge>
                       ))}
                     </span>
                   </span>

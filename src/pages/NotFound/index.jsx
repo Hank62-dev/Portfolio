@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useLang } from '../../lib/i18n';
 import { usePageMeta } from '../../hooks/usePageMeta';
-import Button from '../../components/common/Button';
+import Button from '../../design-system/Button';
 
 /** `variant="project"` is used by the project route when the slug/id is unknown. */
 const NotFound = ({ variant }) => {

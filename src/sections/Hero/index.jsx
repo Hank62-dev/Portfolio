@@ -4,7 +4,7 @@ import { useLang } from '../../lib/i18n';
 import { clsx, timeAgo } from '../../lib/format';
 import { jumpTo } from '../../lib/scroll';
 import { usePointerGlow } from '../../hooks/useMotion';
-import Button from '../../components/common/Button';
+import Button from '../../design-system/Button';
 
 // The blueprint grid is two 1px gradients; the glow layer repeats it in the accent colour.
 const GRID_LINES = 'bg-[size:72px_72px]';

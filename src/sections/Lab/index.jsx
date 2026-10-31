@@ -3,7 +3,7 @@ import { byTier, projectHref } from '../../data/projects';
 import { useLang } from '../../lib/i18n';
 import { clsx } from '../../lib/format';
 import SectionTitle from '../../components/common/SectionTitle';
-import Tag from '../../components/ui/Tag';
+import Badge from '../../design-system/Badge';
 
 const Lab = () => {
   const { c, t } = useLang();
@@ -45,7 +45,7 @@ const Lab = () => {
                   <p className="text-bone-dim">{t(p.tagline)}</p>
                   <div className="mt-1 flex flex-wrap gap-1.5">
                     {[...p.layers.interface, ...p.layers.service].slice(0, 4).map((tech) => (
-                      <Tag key={tech}>{tech}</Tag>
+                      <Badge key={tech}>{tech}</Badge>
                     ))}
                   </div>
                   <Link

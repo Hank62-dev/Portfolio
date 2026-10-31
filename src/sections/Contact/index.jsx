@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { profile, socials } from '../../data/profile';
 import { useLang } from '../../lib/i18n';
 import SectionTitle from '../../components/common/SectionTitle';
-import Button from '../../components/common/Button';
+import Button from '../../design-system/Button';
 
 const Contact = () => {
   const { c } = useLang();

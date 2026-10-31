@@ -1,13 +1,16 @@
 import { useState } from 'react';
+import { Sparkles } from 'lucide-react';
+import { Button, Card, ErrorState, Eyebrow, Field, Input, Spinner } from '../../../design-system';
 
 const messageFor = (error) =>
   error.message === 'Failed to fetch' ? 'Realtime server is unreachable. Check that it is running.' : error.message;
 
 export function AuthLoading() {
   return (
-    <div className="space-auth auth-loading">
-      <div className="auth-spinner" />
-      <span>Securing workspace…</span>
+    <div className="grid min-h-screen place-items-center bg-ink-0 text-bone-dim">
+      <div className="flex items-center gap-3 font-mono text-fine">
+        <Spinner label="Securing workspace" /> Securing workspace…
+      </div>
     </div>
   );
 }
@@ -30,31 +33,37 @@ export default function LoginScreen({ onLogin }) {
   };
 
   return (
-    <div className="space-auth">
-      <div className="auth-glow" />
-      <form className="auth-card" onSubmit={submit}>
-        <div className="auth-mark">✦</div>
-        <div className="auth-kicker">PRIVATE WORKSPACE / 01</div>
-        <h1>Welcome back.</h1>
-        <p>This space is reserved for the people running the company.</p>
+    <div className="grid min-h-screen place-items-center bg-ink-0 px-gutter py-10">
+      <Card as="form" onSubmit={submit} className="flex w-full max-w-[420px] flex-col gap-5 p-7 shadow-pop">
+        <span className="grid size-10 place-items-center rounded-sm bg-signal text-ink-0">
+          <Sparkles size={18} aria-hidden="true" />
+        </span>
+        <div>
+          <Eyebrow>PRIVATE WORKSPACE / 01</Eyebrow>
+          <h1 className="mt-2 font-display text-h2 leading-none">Welcome back.</h1>
+          <p className="mt-2 text-bone-dim">This space is reserved for the people running the company.</p>
+        </div>
         {/* Hidden username field so password managers treat this as a login form. */}
         <input type="text" name="username" autoComplete="username" value="owner" readOnly hidden />
-        <label htmlFor="space-password">Access key</label>
-        <input
-          id="space-password"
-          type="password"
-          autoFocus
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          placeholder="Enter your workspace password"
-        />
-        <button type="submit" disabled={loading || !password}>
+        <Field label="Access key">
+          {(props) => (
+            <Input
+              {...props}
+              type="password"
+              autoFocus
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Enter your workspace password"
+            />
+          )}
+        </Field>
+        <Button type="submit" loading={loading} disabled={!password}>
           {loading ? 'Checking access…' : 'Enter SpaceHank ↗'}
-        </button>
-        {error && <div className="auth-error">{error}</div>}
-        <small className="auth-note">Session protected · 12 hour expiry</small>
-      </form>
+        </Button>
+        {error && <ErrorState title="Could not sign in" message={error} />}
+        <small className="text-center font-mono text-fine text-bone-faint">Session protected · 12 hour expiry</small>
+      </Card>
     </div>
   );
 }

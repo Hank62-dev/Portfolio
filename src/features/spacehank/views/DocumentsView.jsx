@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react';
-import { ArrowUpRight, FileText, FolderOpen, Plus, Search, Upload } from 'lucide-react';
+import { ArrowUpRight, FileText, FolderOpen, Upload } from 'lucide-react';
+import { Badge, Button, Card, CardHeader, EmptyState, ErrorState, PageHeader } from '../../../design-system';
 import { uploadDocument } from '../api/rag';
 import { spacehankConfig } from '../config';
-import { EmptyState, SectionIntro } from '../components/ui';
 
 const sizeLabel = (bytes) => `${Math.max(1, Math.round(bytes / 1024))} KB`;
+const STATUS_TONE = { uploading: 'warn', indexed: 'ok', failed: 'danger' };
 
 export default function DocumentsView({ onTab }) {
   const [files, setFiles] = useState([]);
@@ -38,65 +39,68 @@ export default function DocumentsView({ onTab }) {
   const choose = () => inputRef.current?.click();
 
   return (
-    <div className="modern-page">
-      <SectionIntro
+    <div className="flex flex-col gap-6">
+      <PageHeader
         eyebrow="KNOWLEDGE VAULT"
         title="Document Vault"
         description="Upload documents directly into Hank RAG."
-        action={
-          <button className="primary-action" onClick={choose} disabled={busy}>
-            <Upload size={16} /> {busy ? 'Indexing...' : 'Add documents'}
-          </button>
+        actions={
+          <Button size="sm" onClick={choose} loading={busy}>
+            <Upload size={15} aria-hidden="true" /> {busy ? 'Indexing…' : 'Add documents'}
+          </Button>
         }
       />
       <input ref={inputRef} hidden type="file" multiple accept={spacehankConfig.uploadAccept} onChange={onUpload} />
-      <section className="document-layout">
-        <div className="surface-card dropzone" onClick={choose}>
-          <div className="dropzone-icon">
-            <Upload size={22} />
-          </div>
-          <h3>Upload to Hank's vault</h3>
-          <p>PDF, DOCX, TXT, MD, CSV or JSON</p>
-          <button className="secondary-action">
-            <Plus size={15} /> Choose files
-          </button>
-        </div>
-        <div className="surface-card document-list">
-          <div className="card-heading">
-            <div>
-              <span className="eyebrow">RAG INDEX</span>
-              <h3>
-                Uploaded documents <em>{files.length}</em>
-              </h3>
-            </div>
-            <Search size={17} />
-          </div>
+      <div className="grid gap-4 lg:grid-cols-[1fr_1.4fr]">
+        <button
+          type="button"
+          onClick={choose}
+          className="flex flex-col items-center justify-center gap-2 rounded-card border border-dashed border-line-strong bg-ink-1 px-6 py-14 text-center transition-colors hover:border-signal"
+        >
+          <Upload size={22} className="text-bone-faint" aria-hidden="true" />
+          <h3 className="font-display text-h3 leading-tight">Upload to Hank's vault</h3>
+          <p className="text-bone-dim">PDF, DOCX, TXT, MD, CSV or JSON</p>
+          <span className="mt-2 font-mono text-fine text-signal">Choose files</span>
+        </button>
+        <Card>
+          <CardHeader
+            eyebrow="RAG INDEX"
+            title={
+              <>
+                Uploaded documents <span className="font-mono text-fine text-bone-faint">{files.length}</span>
+              </>
+            }
+          />
           {files.length ? (
-            files.map((file, index) => (
-              <div className="document-row" key={`${file.name}-${index}`}>
-                <span className="file-icon">
-                  <FileText size={17} />
-                </span>
-                <div>
-                  <b>{file.name}</b>
-                  <small>
-                    {file.size} - {file.status === 'indexed' ? `${file.chunks} chunks indexed` : file.status}
-                  </small>
-                </div>
-                <span className="indexing-pill">{file.status.toUpperCase()}</span>
-              </div>
-            ))
+            <ul className="flex flex-col">
+              {files.map((file, index) => (
+                <li className="flex items-center gap-3 border-t border-line py-3 first:border-t-0 first:pt-0" key={`${file.name}-${index}`}>
+                  <FileText size={17} className="shrink-0 text-bone-faint" aria-hidden="true" />
+                  <div className="min-w-0 flex-1">
+                    <b className="block truncate text-fine font-medium">{file.name}</b>
+                    <small className="font-mono text-[0.72rem] text-bone-faint">
+                      {file.size}
+                      {file.status === 'indexed' && ` - ${file.chunks} chunks indexed`}
+                    </small>
+                  </div>
+                  <Badge tone={STATUS_TONE[file.status]}>{file.status.toUpperCase()}</Badge>
+                </li>
+              ))}
+            </ul>
           ) : (
-            <EmptyState icon={FolderOpen} size={25}>
-              <p>No documents indexed in this session.</p>
-              <button className="text-action" onClick={() => onTab('rag')}>
-                Open Hank RAG <ArrowUpRight size={14} />
-              </button>
-            </EmptyState>
+            <EmptyState
+              icon={FolderOpen}
+              title="No documents indexed in this session"
+              action={
+                <Button variant="link" onClick={() => onTab('rag')}>
+                  Open Hank RAG <ArrowUpRight size={14} aria-hidden="true" />
+                </Button>
+              }
+            />
           )}
-          {error && <p className="rag-inline-error">{error}</p>}
-        </div>
-      </section>
+          {error && <ErrorState className="mt-4" title="Upload failed" message={error} />}
+        </Card>
+      </div>
     </div>
   );
 }

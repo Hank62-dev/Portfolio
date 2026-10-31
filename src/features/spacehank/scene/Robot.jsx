@@ -85,17 +85,20 @@ export function Character({ agent, selected, onSelect, paused }) {
       <RobotModel color={agent.color} />
       {selected && <pointLight color={agent.color} intensity={2} distance={2.2} position={[0, 1, 0]} />}
       <Html position={[0, 2, 0]} center distanceFactor={9}>
-        <div className="world-agent-stack">
-          <button className={`world-label ${selected ? 'chosen' : ''}`} style={{ '--agent-color': agent.color }} onClick={select}>
-            <span className="employee-line">
-              <i className="employee-dot" />
-              <b>{agent.name}</b>
-            </span>
-            <small>
-              {agent.role} · {agent.status}
-            </small>
-          </button>
-        </div>
+        <button
+          onClick={select}
+          aria-pressed={selected}
+          className="flex min-w-28 flex-col rounded-sm border bg-ink-1/90 px-2.5 py-1.5 text-left font-mono whitespace-nowrap backdrop-blur-sm transition-shadow"
+          style={{ borderColor: agent.color, boxShadow: selected ? `0 0 0 2px ${agent.color}` : 'none' }}
+        >
+          <span className="flex items-center gap-1.5 text-[11px] font-medium text-bone">
+            <i className="size-1.5 rounded-full" style={{ background: agent.color }} aria-hidden="true" />
+            {agent.name}
+          </span>
+          <small className="text-[9px] text-bone-dim">
+            {agent.role} · {agent.status}
+          </small>
+        </button>
       </Html>
     </group>
   );

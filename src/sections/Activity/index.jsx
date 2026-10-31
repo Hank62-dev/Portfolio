@@ -4,7 +4,7 @@ import { useLang } from '../../lib/i18n';
 import { computeStreaks, lastDays, sumCounts } from '../../lib/contributions';
 import { formatDate, timeAgo } from '../../lib/format';
 import SectionTitle from '../../components/common/SectionTitle';
-import Button from '../../components/common/Button';
+import Button from '../../design-system/Button';
 import CountUp from '../../components/ui/CountUp';
 
 const DAYS = 28;

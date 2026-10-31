@@ -2,9 +2,9 @@ import { Link, useParams } from 'react-router-dom';
 import { LAYERS, byTier, getProject, projectHref } from '../../data/projects';
 import { useLang } from '../../lib/i18n';
 import { usePageMeta } from '../../hooks/usePageMeta';
-import Button from '../../components/common/Button';
+import Button from '../../design-system/Button';
 import ProjectMark from '../../components/ui/ProjectMark';
-import Tag from '../../components/ui/Tag';
+import Badge from '../../design-system/Badge';
 import NotFound from '../NotFound';
 
 const H2 =
@@ -112,7 +112,7 @@ const ProjectDetail = () => {
                   <dt className="mb-2 font-display text-lead">{c.stack.layers[layer]}</dt>
                   <dd className="flex flex-wrap gap-1.5">
                     {project.layers[layer].length ? (
-                      project.layers[layer].map((tech) => <Tag key={tech}>{tech}</Tag>)
+                      project.layers[layer].map((tech) => <Badge key={tech}>{tech}</Badge>)
                     ) : (
                       <span className="text-bone-faint">{c.project.nolayer}</span>
                     )}

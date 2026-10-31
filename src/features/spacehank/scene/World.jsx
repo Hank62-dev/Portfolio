@@ -9,7 +9,7 @@ export default function World({ agents, selected, onSelect, paused }) {
   return (
     <Canvas dpr={[1, 1.15]} className="webgl-world" onPointerMissed={() => onSelect(null)}>
       <PerspectiveCamera makeDefault position={[14, 16, 19]} fov={42} />
-      <color attach="background" args={['#091118']} />
+      <color attach="background" args={['#0b0c0e']} />
       <ambientLight intensity={1.4} />
       <directionalLight position={[4, 10, 5]} intensity={3} color="#c9e9e4" />
       <pointLight position={[0, 4, 0]} intensity={7} distance={15} color="#2fd8ca" />

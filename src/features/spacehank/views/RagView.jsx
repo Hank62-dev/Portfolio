@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Activity, ArrowUpRight, BrainCircuit, Check, ChevronRight, Gauge, Plus, Send, Sparkles, X } from 'lucide-react';
+import { ArrowUpRight, BrainCircuit, Check, ChevronDown, Gauge, Send, Sparkles } from 'lucide-react';
+import { Avatar, Badge, Button, Card, EmptyState, ErrorState, Eyebrow, Menu, Spinner, Textarea } from '../../../design-system';
+import { clsx } from '../../../lib/format';
 import { askRag } from '../api/rag';
+import Markdown from '../components/Markdown';
 import { owner, spacehankConfig } from '../config';
 import '../i18n';
 
@@ -13,7 +14,6 @@ export default function RagView() {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState('fast');
-  const [autoMode, setAutoMode] = useState('auto');
   const [messages, setMessages] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -58,115 +58,96 @@ export default function RagView() {
     }
   };
 
+  const prompts = [
+    { label: t('rag.promptSummary'), text: t('rag.askSummary') },
+    { label: t('rag.promptPolicy'), text: t('rag.askPolicy') },
+  ];
+
   return (
-    <div className="modern-page rag-page">
-      <div className="rag-chat-toolbar">
-        <span>
-          <i /> {t('rag.channel')}
-        </span>
-        <details className="rag-mode-menu">
-          <summary>
-            <Gauge size={14} /> {modeLabel}
-          </summary>
-          <div>
-            <button type="button" className={mode === 'fast' ? 'active' : ''} onClick={() => setMode('fast')}>
-              <Gauge size={14} /> {t('rag.fast')}
-            </button>
-            <button type="button" className={mode === 'reasoning' ? 'active' : ''} onClick={() => setMode('reasoning')}>
-              <BrainCircuit size={14} /> {t('rag.deep')}
-            </button>
-          </div>
-        </details>
+    <div className="mx-auto flex w-full max-w-[860px] flex-col gap-4">
+      <div className="flex items-center justify-between gap-3">
+        <Eyebrow className="flex items-center gap-2">
+          <i className="size-1.5 shrink-0 rounded-full bg-ok" aria-hidden="true" /> {t('rag.channel')}
+        </Eyebrow>
+        <Menu
+          trigger={
+            <Button variant="secondary" size="sm" aria-label="Retrieval mode">
+              <Gauge size={14} aria-hidden="true" /> {modeLabel} <ChevronDown size={14} aria-hidden="true" />
+            </Button>
+          }
+          align="end"
+          items={[
+            { id: 'fast', label: t('rag.fast'), icon: Gauge, selected: mode === 'fast', onSelect: () => setMode('fast') },
+            { id: 'reasoning', label: t('rag.deep'), icon: BrainCircuit, selected: mode === 'reasoning', onSelect: () => setMode('reasoning') },
+          ]}
+        />
       </div>
-      <div className="rag-workspace-panel">
-        <section className="rag-conversation">
-          <div className="conversation-body">
-            {messages.length ? (
-              messages.map((message, index) => (
-                <div className={`chat-message ${message.role}`} key={`${message.role}-${index}`}>
-                  <span className="chat-avatar">{message.role === 'user' ? owner.initials : <Sparkles size={14} />}</span>
-                  <div>
-                    <small>{message.role === 'user' ? 'YOU' : 'HANK RAG'}</small>
-                    <div className="chat-markdown">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.text}</ReactMarkdown>
-                    </div>
-                    {message.role === 'assistant' && message.verified && (
-                      <span className="source-chip">
-                        <Check size={12} /> Sources verified
-                      </span>
-                    )}
+
+      <Card className="flex min-h-[420px] flex-col gap-5 p-0">
+        <div className="flex flex-1 flex-col gap-5 p-5" aria-live="polite">
+          {messages.length ? (
+            messages.map((message, index) => (
+              <div className="flex gap-3" key={`${message.role}-${index}`}>
+                <Avatar color={message.role === 'assistant' ? 'var(--color-signal)' : undefined}>
+                  {message.role === 'user' ? owner.initials : <Sparkles size={14} />}
+                </Avatar>
+                <div className="min-w-0 flex-1">
+                  <small className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint">
+                    {message.role === 'user' ? 'YOU' : 'HANK RAG'}
+                  </small>
+                  <div className={clsx('mt-1 break-words', message.role === 'user' ? 'text-bone-dim' : 'text-bone')}>
+                    <Markdown>{message.text}</Markdown>
                   </div>
-                </div>
-              ))
-            ) : (
-              <div className="rag-welcome">
-                <div className="welcome-icon">
-                  <Sparkles size={25} />
-                </div>
-                <h3>{t('rag.welcomeTitle')}</h3>
-                <p>{t('rag.welcomeText')}</p>
-                <div className="prompt-grid">
-                  <button onClick={() => setComposer(t('rag.askSummary'))}>
-                    {t('rag.promptSummary')} <ArrowUpRight size={14} />
-                  </button>
-                  <button onClick={() => setComposer(t('rag.askPolicy'))}>
-                    {t('rag.promptPolicy')} <ArrowUpRight size={14} />
-                  </button>
+                  {message.role === 'assistant' && message.verified && (
+                    <Badge tone="ok" className="mt-2">
+                      <Check size={12} aria-hidden="true" /> Sources verified
+                    </Badge>
+                  )}
                 </div>
               </div>
-            )}
-            {busy && (
-              <div className="rag-loading">
-                <i /> {t('rag.thinking')}
-              </div>
-            )}
-          </div>
-          <form className="rag-input" onSubmit={ask}>
-            <div className="rag-composer-tools">
-              <button type="button" aria-label="Add attachment">
-                <Plus size={17} />
-              </button>
-              <button type="button" aria-label="Voice input">
-                <Activity size={16} />
-              </button>
-              <button type="button" aria-label="Composer options">
-                <ChevronRight size={15} />
-              </button>
-            </div>
-            <textarea
-              ref={composerRef}
-              value={query}
-              onChange={(event) => setComposer(event.target.value)}
-              onKeyDown={submitOnEnter}
-              placeholder={t('rag.placeholder')}
-              rows="1"
+            ))
+          ) : (
+            <EmptyState
+              className="my-auto"
+              icon={Sparkles}
+              title={t('rag.welcomeTitle')}
+              description={t('rag.welcomeText')}
+              action={
+                <div className="flex flex-wrap justify-center gap-2">
+                  {prompts.map(({ label, text }) => (
+                    <Button key={label} variant="ghost" size="sm" onClick={() => setComposer(text)}>
+                      {label} <ArrowUpRight size={14} aria-hidden="true" />
+                    </Button>
+                  ))}
+                </div>
+              }
             />
-            <div className="rag-composer-meta">
-              <span>Hank RAG</span>
-              <span>{modeLabel}</span>
-              <details>
-                <summary>{autoMode === 'auto' ? 'Auto' : 'Manual'}</summary>
-                <div>
-                  <button type="button" onClick={() => setAutoMode('auto')}>
-                    Auto
-                  </button>
-                  <button type="button" onClick={() => setAutoMode('manual')}>
-                    Manual
-                  </button>
-                </div>
-              </details>
-            </div>
-            <button className="rag-send" type="submit" disabled={busy || !query.trim()}>
-              <Send size={17} />
-            </button>
-          </form>
-          {error && (
-            <div className="rag-inline-error">
-              <X size={14} /> {error}
+          )}
+          {busy && (
+            <div className="flex items-center gap-3 font-mono text-fine text-bone-dim">
+              <Spinner label={t('rag.thinking')} /> {t('rag.thinking')}
             </div>
           )}
-        </section>
-      </div>
+        </div>
+
+        {error && <ErrorState className="mx-5" title="Hank RAG could not answer" message={error} />}
+
+        <form className="flex items-end gap-2 border-t border-line p-3" onSubmit={ask}>
+          <Textarea
+            ref={composerRef}
+            aria-label={t('rag.placeholder')}
+            value={query}
+            onChange={(event) => setComposer(event.target.value)}
+            onKeyDown={submitOnEnter}
+            placeholder={t('rag.placeholder')}
+            rows={1}
+            className="max-h-[220px] min-h-[56px] resize-none border-0 bg-transparent"
+          />
+          <Button type="submit" size="icon" aria-label="Send question" disabled={busy || !query.trim()}>
+            <Send size={16} aria-hidden="true" />
+          </Button>
+        </form>
+      </Card>
     </div>
   );
 }

@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import './styles/spacehank.css';
-import './styles/modern.css';
 import LoginScreen, { AuthLoading } from './components/LoginScreen';
-import { Toast } from './components/ui';
+import { Toast } from '../../design-system';
 import { useRealtime } from './hooks/useRealtime';
 import { DEFAULT_AGENT_ID } from './model/agents';
 import { DEFAULT_TAB } from './navigation';
