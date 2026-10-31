@@ -17,10 +17,6 @@ services:
         sync: false
       - key: SPACEHANK_WORKDIR
         value: /opt/render/project/src
-      - key: SPACEHANK_CODEX_CMD
-        sync: false
-      - key: SPACEHANK_CLAUDE_CMD
-        sync: false
 
   - type: web
     name: hank62-rag
@@ -47,3 +43,9 @@ services:
         sync: false
       - key: REDIS_URL
         sync: false
+      - key: LIGHTRAG_WORKING_DIR
+        value: /var/data/lightrag_storage
+    disk:
+      name: lightrag-data
+      mountPath: /var/data
+      sizeGB: 1

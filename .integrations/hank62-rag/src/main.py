@@ -3,6 +3,7 @@
 Multi-agent pipeline: Guard -> Router -> RAG -> Verification.
 """
 
+import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
@@ -50,7 +51,10 @@ async def lifespan(app: FastAPI):
     try:
         await rag_engine.initialize()
         logger.info("RAG Engine initialized")
-        await _auto_ingest_if_empty(rag_engine)
+        # Ingest in the background: embedding + LLM extraction of every policy chunk can take
+        # minutes, and blocking startup here would fail the hosting platform's health check.
+        ingest_task = asyncio.create_task(_auto_ingest_if_empty(rag_engine))
+        ingest_task.add_done_callback(_log_ingest_result)
     except Exception as e:
         logger.warning("RAG Engine not initialized: %s (will work without RAG)", str(e))
         rag_engine = None
@@ -74,6 +78,11 @@ async def lifespan(app: FastAPI):
     await close_redis()
     await close_db_pool()
     logger.info("Shutting down HKT AI Service...")
+
+
+def _log_ingest_result(task: asyncio.Task) -> None:
+    if not task.cancelled() and task.exception():
+        logger.error("Auto-ingest failed: %s", task.exception())
 
 
 async def _auto_ingest_if_empty(engine: RAGEngine):
