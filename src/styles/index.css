@@ -74,7 +74,13 @@
   --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
   --animate-marquee: marquee 60s linear infinite;
   --animate-fade-in: fade-in 0.25s var(--ease-out-expo) both;
+  --animate-aurora: aurora 28s ease-in-out infinite alternate;
 
+  @keyframes aurora {
+    to {
+      transform: translate3d(3%, -2%, 0) scale(1.08);
+    }
+  }
   @keyframes fade-in {
     from {
       opacity: 0;

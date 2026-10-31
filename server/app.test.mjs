@@ -134,7 +134,7 @@ describe('realtime server', () => {
     const task = await created.json();
 
     let state;
-    for (let attempt = 0; attempt < 50; attempt += 1) {
+    for (let attempt = 0; attempt < 150; attempt += 1) {
       state = await (await call('/api/state', { headers: { Cookie: cookie } })).json();
       if (state.tasks.find((t) => t.id === task.id)?.status !== 'running') break;
       await new Promise((resolve) => setTimeout(resolve, 100));

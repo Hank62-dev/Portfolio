@@ -4,7 +4,7 @@ import { useMagnetic } from '../hooks/useMotion';
 import { Spinner } from './Feedback';
 
 const BASE =
-  'group inline-flex items-center justify-center gap-2.5 font-mono text-fine font-medium tracking-[0.02em] whitespace-nowrap transition-[background-color,color,border-color,transform] duration-300 ease-out-expo disabled:cursor-not-allowed disabled:opacity-50';
+  'group inline-flex items-center justify-center gap-2.5 font-mono text-fine font-medium tracking-[0.02em] whitespace-nowrap transition-[background-color,color,border-color,transform,scale] duration-300 ease-out-expo active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50';
 
 const VARIANTS = {
   primary: 'rounded-sm bg-bone text-ink-0 hover:bg-signal disabled:hover:bg-bone',

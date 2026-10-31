@@ -5,6 +5,9 @@ import { clsx, timeAgo } from '../../lib/format';
 import { jumpTo } from '../../lib/scroll';
 import { usePointerGlow } from '../../hooks/useMotion';
 import Button from '../../design-system/Button';
+import HeroVisual from './HeroVisual';
+import StackIllustration from './StackIllustration';
+import { useHeroMotion } from './useHeroMotion';
 
 // The blueprint grid is two 1px gradients; the glow layer repeats it in the accent colour.
 const GRID_LINES = 'bg-[size:72px_72px]';
@@ -39,6 +42,7 @@ const LatestPush = ({ github }) => {
 const Hero = ({ github }) => {
   const { c, t } = useLang();
   const glowRef = usePointerGlow();
+  const inView = useHeroMotion(glowRef);
 
   // The sheet's rows enter one after another; the last is the live GitHub row.
   const rows = [
@@ -54,6 +58,11 @@ const Hero = ({ github }) => {
       className="group relative flex min-h-svh items-center overflow-hidden pt-[calc(var(--spacing-header)+48px)] pb-[72px]"
       aria-labelledby="hero-title"
     >
+      {/* A slow drift of warm light behind everything; static with reduced motion. */}
+      <div
+        className="absolute -inset-[15%] animate-aurora opacity-60 [background-image:radial-gradient(38%_46%_at_72%_32%,var(--color-signal-soft),transparent),radial-gradient(34%_42%_at_18%_82%,rgb(236_230_218/0.05),transparent)] motion-reduce:animate-none"
+        aria-hidden="true"
+      />
       <div
         className={clsx(
           'absolute inset-0 opacity-55 [mask-image:linear-gradient(to_bottom,#000_0%,transparent_85%)]',
@@ -73,8 +82,11 @@ const Hero = ({ github }) => {
         aria-hidden="true"
       />
 
-      <div className="wrap relative grid items-end gap-14 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-[72px]">
-        <div>
+      <HeroVisual labels={c.stack.layers} active={inView} />
+
+      {/* --p (0..1) is the scroll progress written by useHeroMotion: the content lifts and fades as it leaves. */}
+      <div className="wrap relative flex flex-col gap-14 [opacity:calc(1_-_var(--p,0)*0.9)] [transform:translateY(calc(var(--p,0)*-56px))] will-change-[transform,opacity] lg:gap-16">
+        <div className="lg:max-w-[min(62%,860px)]">
           <p
             className="enter mb-7 font-mono text-fine tracking-[0.1em] text-bone-dim uppercase"
             style={{ '--d': 0 }}
@@ -112,21 +124,22 @@ const Hero = ({ github }) => {
           </div>
         </div>
 
-        <div
-          className="enter rounded-card border border-line-strong bg-ink-1"
-          style={{ '--d': 0.45 }}
-          role="group"
-          aria-label={c.hero.sheet}
-        >
-          <div className="flex justify-between gap-3 border-b border-line-strong px-[18px] py-3 font-mono text-fine tracking-[0.08em] text-bone-dim uppercase">
+        {/* Phones get the flat drawing here, in the flow of the page; wide screens get HeroVisual behind. */}
+        <div className="enter mx-auto h-[300px] w-full max-w-[420px] lg:hidden" style={{ '--d': 0.5 }} aria-hidden="true">
+          <StackIllustration labels={c.stack.layers} />
+        </div>
+
+        {/* The profile sheet is a strip along the bottom, so the right half stays free for the 3D scene. */}
+        <div className="enter" style={{ '--d': 0.45 }} role="group" aria-label={c.hero.sheet}>
+          <div className="mb-3 flex justify-between gap-3 font-mono text-[0.72rem] tracking-[0.08em] text-bone-faint uppercase">
             <span>{c.hero.sheet}</span>
             <span>@{GITHUB_USERNAME}</span>
           </div>
-          <dl className="grid">
+          <dl className="grid grid-cols-2 border-t border-line-strong lg:grid-cols-5">
             {rows.map((row, i) => (
               <div
                 key={row.key}
-                className="enter grid gap-1 border-b border-line px-[18px] py-3.5 last:border-b-0"
+                className="enter grid content-start gap-1 border-b border-line py-4 pr-4 lg:border-b-0 lg:border-l lg:px-5 lg:first:border-l-0 lg:first:pl-0"
                 style={{ '--d': 0.7 + i * 0.08 }}
               >
                 <dt className="font-mono text-[0.72rem] tracking-[0.08em] text-bone-faint uppercase">{row.label}</dt>

@@ -11,22 +11,22 @@ function RobotModel({ color }) {
   return (
     <group scale={0.82}>
       <RoundedBox args={[0.48, 0.55, 0.36]} radius={0.1} position={[0, 0.82, 0]}>
-        <meshStandardMaterial color="#dcefeb" roughness={0.38} metalness={0.18} />
+        <meshStandardMaterial color="#d9d3c6" roughness={0.38} metalness={0.18} />
       </RoundedBox>
       <RoundedBox args={[0.58, 0.48, 0.42]} radius={0.14} position={[0, 1.28, 0]}>
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.16} roughness={0.3} />
       </RoundedBox>
       <mesh position={[-0.12, 1.3, 0.215]}>
         <sphereGeometry args={[0.052, 12, 8]} />
-        <meshBasicMaterial color="#071318" />
+        <meshBasicMaterial color="#0b0c0e" />
       </mesh>
       <mesh position={[0.12, 1.3, 0.215]}>
         <sphereGeometry args={[0.052, 12, 8]} />
-        <meshBasicMaterial color="#071318" />
+        <meshBasicMaterial color="#0b0c0e" />
       </mesh>
       <mesh position={[0, 1.54, 0]}>
         <cylinderGeometry args={[0.018, 0.018, 0.16, 8]} />
-        <meshStandardMaterial color="#b8d8d3" />
+        <meshStandardMaterial color="#a8a396" />
       </mesh>
       <mesh position={[0, 1.64, 0]}>
         <sphereGeometry args={[0.045, 10, 8]} />
@@ -34,19 +34,19 @@ function RobotModel({ color }) {
       </mesh>
       <mesh position={[-0.35, 0.91, 0]} rotation={[0, 0, -0.32]}>
         <capsuleGeometry args={[0.065, 0.28, 5, 10]} />
-        <meshStandardMaterial color="#b9d8d4" roughness={0.4} />
+        <meshStandardMaterial color="#a8a396" roughness={0.4} />
       </mesh>
       <mesh position={[0.35, 0.91, 0]} rotation={[0, 0, 0.32]}>
         <capsuleGeometry args={[0.065, 0.28, 5, 10]} />
-        <meshStandardMaterial color="#b9d8d4" roughness={0.4} />
+        <meshStandardMaterial color="#a8a396" roughness={0.4} />
       </mesh>
       <mesh position={[-0.14, 0.4, 0]}>
         <capsuleGeometry args={[0.075, 0.38, 5, 10]} />
-        <meshStandardMaterial color="#86aead" roughness={0.42} />
+        <meshStandardMaterial color="#7d786c" roughness={0.42} />
       </mesh>
       <mesh position={[0.14, 0.4, 0]}>
         <capsuleGeometry args={[0.075, 0.38, 5, 10]} />
-        <meshStandardMaterial color="#86aead" roughness={0.42} />
+        <meshStandardMaterial color="#7d786c" roughness={0.42} />
       </mesh>
       <pointLight color={color} intensity={0.18} distance={1.4} />
     </group>

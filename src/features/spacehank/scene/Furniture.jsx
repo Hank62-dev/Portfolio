@@ -11,14 +11,14 @@ export function Room({ position, size, title, color, number }) {
   const [width, depth] = size;
   const wallY = WALL_HEIGHT / 2;
   const segmentWidth = (width - DOOR_WIDTH) / 2;
-  const wall = <meshStandardMaterial color="#263640" transparent opacity={0.42} roughness={0.72} />;
+  const wall = <meshStandardMaterial color="#2b2e34" transparent opacity={0.42} roughness={0.72} />;
   const posts = [-width / 2, width / 2, -DOOR_WIDTH / 2, DOOR_WIDTH / 2];
 
   return (
     <group position={position}>
       <mesh position={[0, 0.025, 0]}>
         <boxGeometry args={[width, 0.05, depth]} />
-        <meshStandardMaterial color="#13222c" roughness={0.8} />
+        <meshStandardMaterial color="#14161a" roughness={0.8} />
       </mesh>
       <mesh position={[0, wallY, -depth / 2]}>
         <boxGeometry args={[width, WALL_HEIGHT, 0.12]} />
@@ -50,13 +50,13 @@ export function Room({ position, size, title, color, number }) {
           <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.7} />
         </mesh>
       ))}
-      <Text position={[-width / 2 + 0.18, WALL_HEIGHT - 0.12, -depth / 2 + 0.05]} fontSize={0.14} color="#d4faf4" anchorX="left">
+      <Text position={[-width / 2 + 0.18, WALL_HEIGHT - 0.12, -depth / 2 + 0.05]} fontSize={0.14} color="#ece6da" anchorX="left">
         {title}
       </Text>
       <Text position={[width / 2 - 0.2, WALL_HEIGHT - 0.12, -depth / 2 + 0.05]} fontSize={0.1} color={color} anchorX="right">
         {number}
       </Text>
-      <Text position={[0, 0.58, depth / 2 + 0.05]} rotation={[0, Math.PI, 0]} fontSize={0.08} color="#8fb8b5" anchorX="center">
+      <Text position={[0, 0.58, depth / 2 + 0.05]} rotation={[0, Math.PI, 0]} fontSize={0.08} color="#a8a396" anchorX="center">
         DOOR / OPEN
       </Text>
     </group>
@@ -88,7 +88,7 @@ function WorkScreen({ position, color }) {
     <group position={position}>
       <mesh rotation={[-0.06, 0, 0]}>
         <planeGeometry args={[0.42, 0.28]} />
-        <meshBasicMaterial color="#071116" />
+        <meshBasicMaterial color="#0b0c0e" />
       </mesh>
       <mesh ref={pulse} position={[0, -0.07, 0.006]} rotation={[-0.06, 0, 0]}>
         <planeGeometry args={[0.3, 0.018]} />
@@ -96,11 +96,11 @@ function WorkScreen({ position, color }) {
       </mesh>
       <mesh position={[0, -0.015, 0.006]} rotation={[-0.06, 0, 0]}>
         <planeGeometry args={[0.22, 0.014]} />
-        <meshBasicMaterial color="#397482" />
+        <meshBasicMaterial color="#6a6658" />
       </mesh>
       <mesh position={[0, 0.04, 0.006]} rotation={[-0.06, 0, 0]}>
         <planeGeometry args={[0.34, 0.012]} />
-        <meshBasicMaterial color="#234b59" />
+        <meshBasicMaterial color="#3a3d44" />
       </mesh>
       <pointLight color={color} intensity={0.18} distance={1.2} />
     </group>
@@ -131,7 +131,7 @@ function ServerRack({ position, accent }) {
   return (
     <group position={position}>
       <RoundedBox args={[0.92, 2.5, 0.68]} radius={0.06}>
-        <meshStandardMaterial color="#101b24" metalness={0.6} roughness={0.4} />
+        <meshStandardMaterial color="#1a1c21" metalness={0.6} roughness={0.4} />
       </RoundedBox>
       <mesh position={[0, 1.29, 0]}>
         <boxGeometry args={[0.72, 0.04, 0.54]} />
@@ -141,7 +141,7 @@ function ServerRack({ position, accent }) {
         <group key={y}>
           <mesh position={[0, y, 0.36]}>
             <boxGeometry args={[0.68, 0.22, 0.025]} />
-            <meshStandardMaterial color="#091118" />
+            <meshStandardMaterial color="#0b0c0e" />
           </mesh>
           <mesh position={[-0.25, y, 0.39]}>
             <sphereGeometry args={[0.035, 8, 8]} />
@@ -153,7 +153,7 @@ function ServerRack({ position, accent }) {
           </mesh>
           <mesh position={[0.18, y, 0.39]}>
             <boxGeometry args={[0.22, 0.025, 0.01]} />
-            <meshBasicMaterial color="#335461" />
+            <meshBasicMaterial color="#4a4d55" />
           </mesh>
         </group>
       ))}
@@ -162,12 +162,12 @@ function ServerRack({ position, accent }) {
 }
 
 export function ServerRoom() {
-  const wall = <meshStandardMaterial color="#234651" transparent opacity={0.3} roughness={0.7} />;
+  const wall = <meshStandardMaterial color="#2b2e34" transparent opacity={0.3} roughness={0.7} />;
   return (
     <group position={SERVER_ROOM.position}>
       <mesh position={[0, 0.025, 0]}>
         <boxGeometry args={[8.4, 0.05, 7.2]} />
-        <meshStandardMaterial color="#10232c" roughness={0.8} />
+        <meshStandardMaterial color="#14161a" roughness={0.8} />
       </mesh>
       <mesh position={[0, 1.2, -3.6]}>
         <boxGeometry args={[8.4, 2.4, 0.1]} />
@@ -187,10 +187,10 @@ export function ServerRoom() {
           <ServerRack position={[x, 0, 0.75]} accent={index % 2 ? '#ffb76b' : '#62e7d3'} />
         </group>
       ))}
-      <Text position={[-3.95, 2.05, -3.52]} fontSize={0.18} color="#d4faf4" anchorX="left">
+      <Text position={[-3.95, 2.05, -3.52]} fontSize={0.18} color="#ece6da" anchorX="left">
         CONTROL / SERVER ROOM
       </Text>
-      <Text position={[-3.95, 1.78, -3.52]} fontSize={0.1} color="#6eafb0" anchorX="left">
+      <Text position={[-3.95, 1.78, -3.52]} fontSize={0.1} color="#a8a396" anchorX="left">
         24 NODES · LIVE INFERENCE · 24/7
       </Text>
       <pointLight position={[0, 2, 0]} color="#62e7d3" intensity={2.5} distance={7} />
