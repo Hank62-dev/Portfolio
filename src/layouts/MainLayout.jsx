@@ -5,19 +5,27 @@ import { useReveal } from '../hooks/useReveal';
 import Navbar from '../components/common/Navbar';
 import ScrollProgress from '../components/common/ScrollProgress';
 import Footer from '../components/common/Footer';
+import { profile } from '../data/profile';
+import { scrollToTarget } from '../lib/scroll';
+import BackgroundField from '../motion/BackgroundField';
+import Cursor from '../motion/Cursor';
+import { ScrollTrigger } from '../motion/gsap';
+import Grain from '../motion/Grain';
+import Intro from '../motion/Intro';
+import RouteWipe from '../motion/RouteWipe';
 
 /** Route changes should land at the top, or at the #hash target if there is one. */
 const ScrollManager = () => {
   const { pathname, hash } = useLocation();
 
   useEffect(() => {
-    if (hash) {
-      // Wait a frame so the target section exists after a route change.
-      const id = requestAnimationFrame(() => document.getElementById(hash.slice(1))?.scrollIntoView());
-      return () => cancelAnimationFrame(id);
-    }
-    window.scrollTo(0, 0);
-    return undefined;
+    // Wait a frame so the new page exists, then let ScrollTrigger measure it before we scroll.
+    const id = requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+      const target = hash ? document.getElementById(hash.slice(1)) : null;
+      scrollToTarget(target ?? 0, { immediate: true });
+    });
+    return () => cancelAnimationFrame(id);
   }, [pathname, hash]);
 
   return null;
@@ -35,6 +43,11 @@ const MainLayout = ({ children }) => {
   return (
     <>
       <ScrollManager />
+      <BackgroundField />
+      <Grain />
+      <Cursor />
+      <RouteWipe />
+      <Intro name={profile.name} />
       <ScrollProgress />
       <a
         href="#main"

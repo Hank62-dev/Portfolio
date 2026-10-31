@@ -1,47 +1,59 @@
-import { Fragment } from 'react';
-import { clsx } from '../../../lib/format';
+import { Fragment, useRef } from 'react';
+import { useGsap } from '../../../motion/useGsap';
+import { gsap, MOTION } from '../../../motion/gsap';
+import ScrambleText from '../../../motion/ScrambleText';
+import SplitReveal from '../../../motion/SplitReveal';
 
 /**
- * Section header: numbered label on a hairline, then a serif title whose lines rise
- * from behind a mask. `title` is an array of lines; the last line is emphasised.
+ * Section header: a numbered label on a hairline that draws itself, then a serif title whose lines rise
+ * out of a mask. `title` is an array of lines; the last line is emphasised.
  */
-const SectionTitle = ({ index, label, title, lede, id }) => (
-  <header className="mb-[clamp(40px,6vw,80px)] grid gap-7 min-[900px]:grid-cols-[5fr_4fr] min-[900px]:items-end min-[900px]:gap-x-16">
-    <div
-      className="flex items-center gap-4 border-b border-line pb-3.5 font-mono text-fine tracking-[0.08em] text-bone-dim uppercase min-[900px]:col-span-full"
-      data-reveal
-    >
-      <span className="text-signal">{index}</span>
-      <span>{label}</span>
-    </div>
+const SectionTitle = ({ index, label, title, lede, id }) => {
+  const rule = useRef(null);
+  const scope = useGsap(({ mm }) => {
+    mm.add(MOTION, () => {
+      gsap.from(rule.current, {
+        scaleX: 0,
+        transformOrigin: 'left',
+        duration: 1.4,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: rule.current, start: 'top 92%', once: true },
+      });
+    });
+  }, []);
 
-    <h2
-      id={id}
-      className="max-w-[18ch] font-display text-h2 min-[900px]:max-w-none"
-      data-reveal="mask"
+  return (
+    <header
+      ref={scope}
+      className="mb-[clamp(40px,6vw,80px)] grid gap-7 min-[900px]:grid-cols-[5fr_4fr] min-[900px]:items-end min-[900px]:gap-x-16"
     >
-      {title.map((line, i) => (
-        <Fragment key={line}>
-          {i > 0 && ' '}
-          <span className="line-mask">
-            <span className={clsx('line-inner', i === title.length - 1 && 'serif-accent')} style={{ '--i': i }}>
-              {line}
-            </span>
-          </span>
-        </Fragment>
-      ))}
-    </h2>
+      <div className="relative flex items-center gap-4 pb-3.5 font-mono text-fine tracking-[0.08em] text-bone-dim uppercase min-[900px]:col-span-full">
+        <ScrambleText text={index} className="text-signal" />
+        <ScrambleText text={label} />
+        <i ref={rule} className="absolute inset-x-0 bottom-0 h-px bg-line-strong" aria-hidden="true" />
+      </div>
 
-    {lede && (
-      <p
-        className="max-w-[58ch] text-lead leading-[1.55] text-bone-dim"
-        data-reveal
-        style={{ '--reveal-delay': '0.2s' }}
+      <SplitReveal
+        key={title.join('|')}
+        as="h2"
+        id={id}
+        className="max-w-[18ch] font-display text-h2 min-[900px]:max-w-none"
       >
-        {lede}
-      </p>
-    )}
-  </header>
-);
+        {title.map((line, i) => (
+          <Fragment key={line}>
+            {i > 0 && ' '}
+            <span className={i === title.length - 1 ? 'serif-accent' : undefined}>{line}</span>
+          </Fragment>
+        ))}
+      </SplitReveal>
+
+      {lede && (
+        <SplitReveal key={lede} as="p" delay={0.25} className="max-w-[58ch] text-lead leading-[1.55] text-bone-dim">
+          {lede}
+        </SplitReveal>
+      )}
+    </header>
+  );
+};
 
 export default SectionTitle;

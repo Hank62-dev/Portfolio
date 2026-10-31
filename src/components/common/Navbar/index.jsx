@@ -5,6 +5,7 @@ import { useLang } from '../../../lib/i18n';
 import { useActiveSection } from '../../../hooks/useActiveSection';
 import { clsx } from '../../../lib/format';
 import { jumpTo } from '../../../lib/scroll';
+import { lenisRef } from '../../../motion/SmoothScroll';
 import LangToggle from '../LangToggle';
 
 // Below the `nav` breakpoint the links become a full-screen panel that fades and slides in.
@@ -21,10 +22,18 @@ const Navbar = () => {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [tucked, setTucked] = useState(false);
   const active = useActiveSection(NAV_SECTIONS, pathname === '/');
 
+  // Scrolling down tucks the bar away to give the page room; scrolling up brings it back.
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      if (Math.abs(y - last) > 6) setTucked(y > last && y > 420);
+      last = y;
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -37,9 +46,11 @@ const Navbar = () => {
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    lenisRef.current?.stop();
     return () => {
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
+      lenisRef.current?.start();
     };
   }, [open]);
 
@@ -56,7 +67,8 @@ const Navbar = () => {
       // The blur lives on a pseudo-element: backdrop-filter on the header itself would make it the
       // containing block of the fixed mobile panel and collapse the panel to header height.
       className={clsx(
-        'fixed inset-x-0 top-0 z-50 h-header border-b transition-colors duration-500',
+        'fixed inset-x-0 top-0 z-50 h-header border-b transition-[colors,translate] duration-500',
+        tucked && !open && '-translate-y-full',
         'before:absolute before:inset-0 before:-z-10 before:bg-ink-0/90 before:backdrop-blur-md before:transition-opacity before:duration-500',
         solid ? 'border-line before:opacity-100' : 'border-transparent before:opacity-0'
       )}
@@ -100,7 +112,18 @@ const Navbar = () => {
                   >
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  {c.nav[id]}
+                  {/* two copies of the label: on hover the first rolls out and the second rolls in */}
+                  <span className="relative inline-block overflow-hidden align-bottom">
+                    <span className="block transition-transform duration-500 ease-out-expo group-hover:-translate-y-full max-nav:group-hover:translate-y-0">
+                      {c.nav[id]}
+                    </span>
+                    <span
+                      className="absolute inset-0 block translate-y-full text-signal transition-transform duration-500 ease-out-expo group-hover:translate-y-0 max-nav:hidden"
+                      aria-hidden="true"
+                    >
+                      {c.nav[id]}
+                    </span>
+                  </span>
                 </Link>
               </li>
             ))}

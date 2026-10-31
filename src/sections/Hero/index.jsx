@@ -5,6 +5,7 @@ import { clsx, timeAgo } from '../../lib/format';
 import { jumpTo } from '../../lib/scroll';
 import { usePointerGlow } from '../../hooks/useMotion';
 import Button from '../../design-system/Button';
+import ScrambleText from '../../motion/ScrambleText';
 import HeroVisual from './HeroVisual';
 import StackIllustration from './StackIllustration';
 import { useHeroMotion } from './useHeroMotion';
@@ -91,7 +92,7 @@ const Hero = ({ github }) => {
             className="enter mb-7 font-mono text-fine tracking-[0.1em] text-bone-dim uppercase"
             style={{ '--d': 0 }}
           >
-            {c.hero.eyebrow}
+            <ScrambleText key={c.hero.eyebrow} text={c.hero.eyebrow} />
           </p>
           <h1
             id="hero-title"

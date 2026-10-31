@@ -35,3 +35,23 @@ export const computeStreaks = (days) => {
 
   return { current, longest };
 };
+
+const WEEKDAY_ORDER = [0, 1, 2, 3, 4, 5, 6]; // Sunday first, like GitHub's own graph
+
+/**
+ * Lays days out for a weekly heatmap: one column per week, seven rows (Sunday..Saturday).
+ * Returns { cells: [{ date, count, level, col, row }], weeks }. `level` is 0..4, scaled to the busiest day.
+ */
+export const heatmapCells = (days, weeks = 53) => {
+  const recent = days.slice(-weeks * 7);
+  if (!recent.length) return { cells: [], weeks: 0 };
+  const max = Math.max(...recent.map((d) => d.count), 1);
+  const firstRow = WEEKDAY_ORDER.indexOf(new Date(`${recent[0].date}T00:00:00Z`).getUTCDay());
+
+  const cells = recent.map((d) => {
+    const slot = firstRow + Math.round((toUtc(d.date) - toUtc(recent[0].date)) / DAY);
+    const level = d.count === 0 ? 0 : Math.min(4, Math.ceil((d.count / max) * 4));
+    return { date: d.date, count: d.count, level, col: Math.floor(slot / 7), row: slot % 7 };
+  });
+  return { cells, weeks: cells[cells.length - 1].col + 1 };
+};
