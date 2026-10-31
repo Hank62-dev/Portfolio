@@ -11,6 +11,6 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['src/**/*.test.{js,jsx}'],
+    include: ['src/**/*.test.{js,jsx}', 'server/**/*.test.mjs'],
   },
 })
