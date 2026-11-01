@@ -46,8 +46,10 @@ const Navbar = () => {
     const onKey = (e) => e.key === 'Escape' && setOpen(false);
     document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
+    document.documentElement.dataset.menu = 'open'; // the theme pull cord hides while the menu covers the page
     lenisRef.current?.stop();
     return () => {
+      delete document.documentElement.dataset.menu;
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
       lenisRef.current?.start();
@@ -57,6 +59,9 @@ const Navbar = () => {
   // On the home page, scroll in place so clicking the current hash still works.
   const go = (id) => (e) => {
     setOpen(false);
+    // The open menu froze the page (Lenis stopped, body locked), and a frozen Lenis ignores scrollTo: let go first.
+    document.body.style.overflow = '';
+    lenisRef.current?.start();
     if (pathname === '/') jumpTo(id)(e);
   };
 

@@ -214,6 +214,11 @@
     --pullcord-right: 4.6rem;
   }
 }
+/* The full-screen menu sits under the cord's z-index; hide the cord so it cannot swallow taps meant for the menu. */
+:root[data-menu='open'] .pullcord {
+  visibility: hidden;
+  pointer-events: none;
+}
 
 /* While the theme switches, colours cross-fade (the class is added by ThemeProvider and removed after 0.7s). */
 .theme-switching,
