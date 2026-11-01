@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://portfolio-vgh.vercel.app/sitemap.xml
+Sitemap: https://hank62dev.vercel.app/sitemap.xml

@@ -3,7 +3,7 @@
 // from this site's previous config (email, social links). Nothing else is claimed.
 
 export const GITHUB_USERNAME = 'Hank62-dev';
-export const SITE_URL = 'https://portfolio-vgh.vercel.app';
+export const SITE_URL = 'https://hank62dev.vercel.app';
 
 export const profile = {
   name: 'Võ Gia Huy',

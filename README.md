@@ -60,7 +60,7 @@ If a source fails the page shows only what it has — it never fills in numbers.
 
 - `unused-assets/` holds images from the previous version that the site no longer references
   (a SmartCenter banner containing invented statistics, a stock ad, older portraits). Delete when no longer needed.
-- Social preview image: `public/og.png` (1200×630). Canonical URL and sitemap assume `https://portfolio-vgh.vercel.app`.
+- Social preview image: `public/og.png` (1200×630). Canonical URL and sitemap assume `https://hank62dev.vercel.app`.
 
 ## Styling
 
