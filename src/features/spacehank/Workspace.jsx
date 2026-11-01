@@ -1,17 +1,21 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { Copy, Pause, Play, Plus, SkipBack, SkipForward, Users } from 'lucide-react';
+import { Copy, Download, Pause, Play, Plus, SkipBack, SkipForward, Users } from 'lucide-react';
 import { Button, Spinner, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
+import { useInstall, useOnline } from './hooks/useInstall';
 import { clsx } from '../../lib/format';
 import CommandPalette from './components/CommandPalette';
 import GuestLocked from './components/GuestLocked';
 import Sidebar from './components/Sidebar';
 import TaskModal from './components/TaskModal';
 import Topbar from './components/Topbar';
+import { djPick, interpretCommand } from './api/owner';
+import { buildCatalog, validate } from './model/nlcommands';
 import { NAVIGATION } from './navigation';
+import { sendIntent } from './notes/library';
 import { library, loadLibrary } from './music/library';
 import NowPlayingBar from './music/NowPlayingBar';
-import { next, player, previous, togglePlay } from './music/player';
+import { next, playList, player, previous, setSleepTimer, togglePlay } from './music/player';
 import { toCss } from './studio/brand';
 import { useStore } from './store';
 import DashboardView from './views/DashboardView';
@@ -23,6 +27,7 @@ import MemoryView from './views/MemoryView';
 const RagView = lazy(() => import('./views/RagView'));
 const MusicView = lazy(() => import('./views/MusicView'));
 const StudioView = lazy(() => import('./views/StudioView'));
+const NotesView = lazy(() => import('./views/NotesView'));
 
 const PageLoading = () => (
   <div className="flex items-center gap-3 py-10 font-mono text-fine text-bone-dim">
@@ -50,6 +55,16 @@ const LOCKED = {
     ),
     description: 'Upload files and make them searchable.',
     why: 'The vault holds private files, so it is closed in the demo. Sign in to open it.',
+  },
+  notes: {
+    eyebrow: 'PRIVATE NOTES',
+    title: (
+      <>
+        Second <em>Brain.</em>
+      </>
+    ),
+    description: 'Notes and a daily journal you can ask questions of.',
+    why: 'Notes are personal and live in the owner\'s browser, so there is nothing to show in the demo. Sign in on your own device to use them.',
   },
   music: {
     eyebrow: 'PRIVATE LIBRARY',
@@ -89,6 +104,8 @@ export default function Workspace({
   const playing = useStore(player, (s) => s.playing);
   const trackCount = useStore(library, (s) => s.tracks.length);
   const music = !guest;
+  const app = useInstall();
+  const online = useOnline();
 
   useEffect(() => {
     if (music) void loadLibrary();
@@ -120,6 +137,16 @@ export default function Workspace({
       },
       ...agents.map((agent) => ({ id: `agent-${agent.id}`, label: `Focus ${agent.name}`, hint: agent.role, icon: Users, keywords: `${agent.model} ${agent.room} agent`, run: () => { onSelect(agent.id); onTab('space'); } })),
     ];
+    if (app.canInstall || app.ios) {
+      list.push({
+        id: 'install',
+        label: 'Install Hank62 as an app',
+        hint: 'App',
+        icon: Download,
+        keywords: 'pwa home screen phone',
+        run: () => (app.canInstall ? app.install() : onNotify?.('On iPhone: tap Share, then Add to Home Screen')),
+      });
+    }
     if (music && hasTrack) {
       list.push(
         { id: 'music-toggle', label: playing ? 'Pause the music' : 'Resume the music', hint: 'Music', icon: playing ? Pause : Play, keywords: 'play song', run: togglePlay },
@@ -128,7 +155,70 @@ export default function Workspace({
       );
     }
     return list;
-  }, [agents, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing]);
+  }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing]);
+
+  // "Tell Hank what to do": the sentence goes to the server, which only picks from this catalog, and the answer is
+  // checked here before it is shown. Nothing runs until the person confirms.
+  const interpret = async (text) => {
+    const tabsList = NAVIGATION.map(({ id, label }) => ({ id, label }));
+    const reply = await interpretCommand({
+      text,
+      catalog: buildCatalog({ tabs: tabsList, agents }),
+      context: { tab, agents: agents.length, songs: library.get().tracks.length, playing: player.get().playing },
+    });
+    return validate(reply, { tabs: tabsList, agents });
+  };
+
+  const execute = async ({ action, params }) => {
+    switch (action) {
+      case 'navigate':
+        return onTab(params.tab);
+      case 'dispatch_task':
+        return onNewTask(params.task, params.agent);
+      case 'focus_agent':
+        onSelect(params.agent);
+        return onTab('space');
+      case 'music': {
+        const { playing: isPlaying, trackId } = player.get();
+        if (params.do === 'next') return next();
+        if (params.do === 'previous') return previous();
+        if (!trackId) return onNotify?.('Nothing is playing yet');
+        if ((params.do === 'pause') === isPlaying || (params.do === 'resume') === !isPlaying) return togglePlay();
+        return undefined;
+      }
+      case 'play_mood': {
+        const songs = library.get().tracks;
+        if (!songs.length) return onNotify?.('The music library is empty');
+        try {
+          const pick = await djPick({ mood: params.mood, tracks: songs.map((t) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre })) });
+          if (!pick.ids.length) return onNotify?.('Nothing in your library fits that');
+          await playList(pick.ids);
+          return onNotify?.(pick.note || 'Mix started');
+        } catch (error) {
+          return onNotify?.(error.message);
+        }
+      }
+      case 'sleep_timer':
+        setSleepTimer(params.minutes);
+        return onNotify?.(`Music will stop in ${params.minutes} minutes`);
+      case 'new_note':
+        sendIntent('notes', { text: params.text });
+        return onTab('notes');
+      case 'ask_notes':
+        sendIntent('notes', { question: params.question });
+        return onTab('notes');
+      case 'search_notes':
+        sendIntent('notes', { search: params.query });
+        return onTab('notes');
+      case 'draft_image':
+        sendIntent('studio', { prompt: params.prompt });
+        return onTab('studio');
+      case 'floor':
+        return (params.do === 'pause') !== paused ? onPause() : undefined;
+      default:
+        return undefined;
+    }
+  };
 
   const views = {
     space: <FloorView agents={agents} events={events} selected={selected} onSelect={onSelect} paused={paused} onTab={onTab} />,
@@ -136,7 +226,7 @@ export default function Workspace({
     studio: <StudioView locked={guest} />,
     ...(guest
       ? Object.fromEntries(Object.entries(LOCKED).map(([id, copy]) => [id, <GuestLocked key={id} {...copy} onSignIn={onLogout} />]))
-      : { rag: <RagView />, docs: <DocumentsView onTab={onTab} />, music: <MusicView /> }),
+      : { rag: <RagView />, docs: <DocumentsView onTab={onTab} />, music: <MusicView />, notes: <NotesView /> }),
   };
   const page = views[tab] || <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
 
@@ -148,12 +238,19 @@ export default function Workspace({
           onTab={onTab}
           rail={rail}
           guest={guest}
+          app={app}
+          onNotify={onNotify}
           canCollapse={wide}
           onCollapse={() => setCollapsed((value) => !value)}
           onLogout={onLogout}
         />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar tab={tab} connected={connected} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
+          {!online && (
+            <div className="border-b border-line bg-ink-2 px-gutter py-2 font-mono text-fine text-bone-dim" role="status" data-offline>
+              You are offline. Music, notes and pictures still work; AI, the calendar and the realtime link wait for the connection.
+            </div>
+          )}
           {guest && (
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-warn/30 bg-warn/10 px-gutter py-2 font-mono text-fine text-warn" role="status" data-demo-banner>
               <span>You are viewing a demo with sample data. Nothing here is real, and nothing you do is sent anywhere.</span>
@@ -162,7 +259,7 @@ export default function Workspace({
               </Button>
             </div>
           )}
-          <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-8', music && hasTrack && 'pb-28')}>
+          <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-8', music && hasTrack && tab !== 'music' && 'pb-28')}>
             <Suspense fallback={<PageLoading />}>{page}</Suspense>
           </main>
           <footer className="flex flex-wrap justify-between gap-2 border-t border-line px-gutter py-4 font-mono text-fine text-bone-faint">
@@ -171,8 +268,15 @@ export default function Workspace({
           </footer>
         </div>
         {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
-        {music && <NowPlayingBar onOpen={() => onTab('music')} />}
-        <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} music={music && trackCount > 0} />
+        {music && tab !== 'music' && <NowPlayingBar onOpen={() => onTab('music')} />}
+        <CommandPalette
+          open={paletteOpen}
+          onOpenChange={setPaletteOpen}
+          commands={commands}
+          music={music && trackCount > 0}
+          onInterpret={guest ? undefined : interpret}
+          onRun={execute}
+        />
       </div>
     </TooltipProvider>
   );

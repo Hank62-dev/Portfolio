@@ -87,6 +87,16 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
       json(res, 200, await ai.note(await readJson(req, config.maxBodyBytes)));
     },
 
+    'POST /api/ai/ask': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.ask(await readJson(req, config.maxAiBodyBytes)));
+    },
+
+    'POST /api/ai/command': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.command(await readJson(req, config.maxBodyBytes)));
+    },
+
     'POST /api/ai/image': async (req, res) => {
       requireAuth(req);
       json(res, 200, await ai.image(await readJson(req, config.maxBodyBytes)));

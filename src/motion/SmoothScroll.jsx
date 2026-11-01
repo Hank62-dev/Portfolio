@@ -20,7 +20,15 @@ export default function SmoothScroll() {
     let tick;
 
     if (!reduced) {
-      lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
+      // A panel that scrolls on its own (the workspace sidebar, lyrics, the palette, a note list) must get the wheel
+      // itself, or only dragging its scrollbar would move it. Anything with room to scroll opts out of smoothing.
+      const scrollsOnItsOwn = (node) => {
+        for (let el = node; el && el !== document.body && el !== document.documentElement; el = el.parentElement) {
+          if (/(auto|scroll)/.test(getComputedStyle(el).overflowY) && el.scrollHeight > el.clientHeight + 1) return true;
+        }
+        return false;
+      };
+      lenis = new Lenis({ lerp: 0.1, smoothWheel: true, prevent: scrollsOnItsOwn });
       lenisRef.current = lenis;
       lenis.on('scroll', ScrollTrigger.update);
       tick = (time) => lenis.raf(time * 1000);

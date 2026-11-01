@@ -2,9 +2,9 @@
 // prompts live in this browser's IndexedDB and never leave it. Small promise wrappers, no dependency.
 
 const NAME = 'hank62-workspace';
-const VERSION = 1;
-// tracks / playlists / images / prompts hold records; blobs / covers hold the raw files, keyed by the owner id.
-const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts'];
+const VERSION = 2;
+// tracks / playlists / images / prompts / notes hold records; blobs / covers hold the raw files, keyed by the owner id.
+const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes'];
 
 let opening = null;
 

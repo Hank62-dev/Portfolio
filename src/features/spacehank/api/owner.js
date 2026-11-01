@@ -26,6 +26,8 @@ const call = async (path, { method = 'GET', body } = {}) => {
 export const aiUsage = () => call('/api/ai/usage');
 export const djPick = ({ mood, tracks }) => call('/api/ai/dj', { method: 'POST', body: { mood, tracks } });
 export const aiNote = ({ context, language }) => call('/api/ai/note', { method: 'POST', body: { context, language } });
+export const askNotes = ({ question, notes }) => call('/api/ai/ask', { method: 'POST', body: { question, notes } });
+export const interpretCommand = ({ text, catalog, context }) => call('/api/ai/command', { method: 'POST', body: { text, catalog, context } });
 export const generateImage = (prompt) => call('/api/ai/image', { method: 'POST', body: { prompt } });
 export const calendarBetween = (from, to) =>
   call(`/api/briefing/calendar?from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`);

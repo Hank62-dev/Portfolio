@@ -4,7 +4,7 @@ import { clsx } from '../../../lib/format';
 import { coverUrl } from './library';
 
 /** A track's cover art, or a quiet placeholder when the file has none. Square; size comes from the className. */
-export default function Cover({ track, className }) {
+export default function Cover({ track, className, rounded = 'rounded-sm' }) {
   const [src, setSrc] = useState('');
   const id = track?.id;
   const has = track?.hasCover;
@@ -19,8 +19,66 @@ export default function Cover({ track, className }) {
   }, [id, has]);
 
   return (
-    <span className={clsx('relative grid shrink-0 place-items-center overflow-hidden rounded-sm bg-ink-3 text-bone-faint', className)}>
+    <span className={clsx('relative grid shrink-0 place-items-center overflow-hidden bg-ink-3 text-bone-faint', rounded, className)}>
       {src ? <img src={src} alt="" className="size-full object-cover" /> : <Music2 size={18} aria-hidden="true" />}
     </span>
   );
+}
+
+const colours = new Map(); // cover url -> [r, g, b]
+
+/** The average colour of a cover, ignoring near-black and near-white pixels, so headers can take its tint. */
+const sample = (url) =>
+  new Promise((resolve) => {
+    if (colours.has(url)) return resolve(colours.get(url));
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 24;
+        canvas.height = 24;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, 24, 24);
+        const { data } = ctx.getImageData(0, 0, 24, 24);
+        let r = 0;
+        let g = 0;
+        let b = 0;
+        let n = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const lum = (data[i] + data[i + 1] + data[i + 2]) / 3;
+          if (lum < 28 || lum > 235) continue;
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+          n += 1;
+        }
+        const out = n ? [Math.round(r / n), Math.round(g / n), Math.round(b / n)] : null;
+        colours.set(url, out);
+        resolve(out);
+      } catch {
+        resolve(null);
+      }
+    };
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+
+/** The tint of a track's cover as 'r g b' (for rgb(... / alpha) in styles), or the accent when there is none. */
+export function useCoverTint(track) {
+  const [tint, setTint] = useState('255 91 46');
+  const id = track?.id;
+  const has = track?.hasCover;
+  useEffect(() => {
+    let live = true;
+    setTint('255 91 46');
+    if (id && has) {
+      coverUrl(id)
+        .then((url) => url && sample(url))
+        .then((rgb) => live && rgb && setTint(rgb.join(' ')));
+    }
+    return () => {
+      live = false;
+    };
+  }, [id, has]);
+  return tint;
 }

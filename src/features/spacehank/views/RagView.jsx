@@ -1,14 +1,69 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUpRight, BrainCircuit, Check, ChevronDown, Gauge, Send, Sparkles } from 'lucide-react';
-import { Avatar, Badge, Button, Card, EmptyState, ErrorState, Eyebrow, Menu, Spinner, Textarea } from '../../../design-system';
+import { ArrowUp, BrainCircuit, Check, Copy, FileSearch, Gauge, ListChecks, Scale, Sparkles } from 'lucide-react';
+import { Badge } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { askRag } from '../api/rag';
 import Markdown from '../components/Markdown';
-import { owner, spacehankConfig } from '../config';
+import { spacehankConfig } from '../config';
 import '../i18n';
 
-const MAX_COMPOSER_HEIGHT = 220;
+const MAX_COMPOSER_HEIGHT = 200;
+
+/** A soft, slowly turning orb: Hank's face. It breathes faster while it is thinking. */
+function Orb({ busy, size = 40 }) {
+  return (
+    <span
+      className={clsx('relative inline-block shrink-0 rounded-full', busy ? 'animate-[orb_1.6s_ease-in-out_infinite]' : 'animate-[orb_5s_ease-in-out_infinite]')}
+      style={{
+        width: size,
+        height: size,
+        background: 'radial-gradient(circle at 30% 28%, #ffd2bd, #ff7a4d 38%, #8a3bff 78%, #2b1a66)',
+        boxShadow: '0 0 40px -6px rgb(255 91 46 / 0.65), inset -6px -8px 14px rgb(0 0 0 / 0.35)',
+      }}
+      aria-hidden="true"
+    />
+  );
+}
+
+const citationLabel = (c) => (typeof c === 'string' ? c : c?.source || c?.title || c?.document || c?.file || c?.doc_id || '');
+
+function Message({ message, onCopy }) {
+  const mine = message.role === 'user';
+  const sources = (message.citations ?? []).map(citationLabel).filter(Boolean);
+  if (mine) {
+    return (
+      <div className="flex justify-end">
+        <p className="max-w-[85%] rounded-3xl rounded-br-lg bg-bone px-4 py-2.5 text-fine leading-relaxed text-ink-0">{message.text}</p>
+      </div>
+    );
+  }
+  return (
+    <div className="flex gap-3">
+      <Orb size={32} />
+      <div className="min-w-0 flex-1">
+        <div className="rounded-3xl rounded-tl-lg border border-white/8 bg-white/[0.04] px-5 py-4 text-bone backdrop-blur">
+          <Markdown>{message.text}</Markdown>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-1">
+          {message.verified && (
+            <Badge tone="ok">
+              <Check size={12} aria-hidden="true" /> Sources verified
+            </Badge>
+          )}
+          {[...new Set(sources)].slice(0, 4).map((s) => (
+            <span key={s} className="inline-flex max-w-[16rem] items-center gap-1 truncate rounded-full border border-line px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim">
+              <FileSearch size={11} className="shrink-0" aria-hidden="true" /> <span className="truncate">{s}</span>
+            </span>
+          ))}
+          <button type="button" onClick={() => onCopy(message.text)} aria-label="Copy the answer" className="ml-auto grid size-7 place-items-center rounded-full text-bone-faint transition-colors hover:bg-white/8 hover:text-bone">
+            <Copy size={13} aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function RagView() {
   const { t } = useTranslation();
@@ -18,22 +73,25 @@ export default function RagView() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const composerRef = useRef(null);
+  const endRef = useRef(null);
   const sessionId = useRef(`${spacehankConfig.sessionPrefix}-${crypto.randomUUID()}`);
 
-  const modeLabel = mode === 'fast' ? t('rag.fast') : t('rag.deep');
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages.length, busy]);
 
+  const grow = (el) => {
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, MAX_COMPOSER_HEIGHT)}px`;
+  };
   const setComposer = (value) => {
     setQuery(value);
-    requestAnimationFrame(() => {
-      const el = composerRef.current;
-      if (!el) return;
-      el.style.height = 'auto';
-      el.style.height = `${Math.min(el.scrollHeight, MAX_COMPOSER_HEIGHT)}px`;
-    });
+    requestAnimationFrame(() => grow(composerRef.current));
   };
 
   const ask = async (event) => {
-    event.preventDefault();
+    event?.preventDefault();
     const text = query.trim();
     if (!text || busy) return;
     setQuery('');
@@ -58,96 +116,93 @@ export default function RagView() {
     }
   };
 
-  const prompts = [
-    { label: t('rag.promptSummary'), text: t('rag.askSummary') },
-    { label: t('rag.promptPolicy'), text: t('rag.askPolicy') },
+  const ideas = [
+    { icon: ListChecks, label: t('rag.promptSummary'), text: t('rag.askSummary') },
+    { icon: Scale, label: t('rag.promptPolicy'), text: t('rag.askPolicy') },
   ];
 
   return (
-    <div className="mx-auto flex w-full max-w-[860px] flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <Eyebrow className="flex items-center gap-2">
-          <i className="size-1.5 shrink-0 rounded-full bg-ok" aria-hidden="true" /> {t('rag.channel')}
-        </Eyebrow>
-        <Menu
-          trigger={
-            <Button variant="secondary" size="sm" aria-label="Retrieval mode">
-              <Gauge size={14} aria-hidden="true" /> {modeLabel} <ChevronDown size={14} aria-hidden="true" />
-            </Button>
-          }
-          align="end"
-          items={[
-            { id: 'fast', label: t('rag.fast'), icon: Gauge, selected: mode === 'fast', onSelect: () => setMode('fast') },
-            { id: 'reasoning', label: t('rag.deep'), icon: BrainCircuit, selected: mode === 'reasoning', onSelect: () => setMode('reasoning') },
-          ]}
-        />
+    <div className="relative mx-auto flex min-h-[calc(100vh-11rem)] w-full max-w-[860px] flex-col">
+      <div className="pointer-events-none absolute -top-10 left-1/2 h-72 w-[min(720px,100%)] -translate-x-1/2 bg-[radial-gradient(50%_60%_at_50%_0%,rgb(255_91_46/0.16),transparent),radial-gradient(40%_50%_at_80%_20%,rgb(91_43_255/0.14),transparent)] blur-2xl" aria-hidden="true" />
+
+      <header className="relative flex items-center justify-between gap-3 pb-4">
+        <span className="flex items-center gap-2.5 font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">
+          <i className="size-1.5 shrink-0 animate-pulse rounded-full bg-ok" aria-hidden="true" /> {t('rag.channel')}
+        </span>
+        <div className="flex rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur" role="radiogroup" aria-label="Retrieval mode">
+          {[
+            ['fast', t('rag.fast'), Gauge],
+            ['reasoning', t('rag.deep'), BrainCircuit],
+          ].map(([id, label, Icon]) => (
+            <button key={id} type="button" role="radio" aria-checked={mode === id} onClick={() => setMode(id)} className={clsx('inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[0.78rem] transition-colors', mode === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
+              <Icon size={13} aria-hidden="true" /> {label}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <div className="relative flex flex-1 flex-col gap-5 pb-4" aria-live="polite">
+        {messages.length === 0 ? (
+          <div className="m-auto flex w-full max-w-xl flex-col items-center gap-6 py-10 text-center">
+            <Orb size={84} busy={busy} />
+            <div>
+              <h1 className="font-display text-h2 leading-[1.05] text-bone">{t('rag.welcomeTitle')}</h1>
+              <p className="mt-2 text-bone-dim">{t('rag.welcomeText')}</p>
+            </div>
+            <div className="grid w-full gap-2.5 sm:grid-cols-2">
+              {ideas.map(({ icon: Icon, label, text }) => (
+                <button key={label} type="button" onClick={() => setComposer(text)} className="group flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.04] p-4 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-signal/40 hover:bg-white/[0.07]">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">
+                    <Icon size={18} aria-hidden="true" />
+                  </span>
+                  <span className="text-fine font-medium text-bone">{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          messages.map((message, index) => <Message key={`${message.role}-${index}`} message={message} onCopy={(text) => navigator.clipboard?.writeText(text)} />)
+        )}
+
+        {busy && (
+          <div className="flex items-center gap-3">
+            <Orb size={32} busy />
+            <span className="flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.04] px-4 py-2.5 font-mono text-fine text-bone-dim" role="status">
+              <i className="size-1.5 animate-bounce rounded-full bg-signal [animation-delay:-0.3s]" />
+              <i className="size-1.5 animate-bounce rounded-full bg-signal [animation-delay:-0.15s]" />
+              <i className="size-1.5 animate-bounce rounded-full bg-signal" />
+              <span className="pl-1.5">{t('rag.thinking')}</span>
+            </span>
+          </div>
+        )}
+        {error && (
+          <p className="rounded-2xl border border-danger/40 bg-danger/10 px-4 py-3 font-mono text-fine text-danger" role="alert">
+            {error}
+          </p>
+        )}
+        <div ref={endRef} />
       </div>
 
-      <Card className="flex min-h-[420px] flex-col gap-5 p-0">
-        <div className="flex flex-1 flex-col gap-5 p-5" aria-live="polite">
-          {messages.length ? (
-            messages.map((message, index) => (
-              <div className="flex gap-3" key={`${message.role}-${index}`}>
-                <Avatar color={message.role === 'assistant' ? 'var(--color-signal)' : undefined}>
-                  {message.role === 'user' ? owner.initials : <Sparkles size={14} />}
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <small className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint">
-                    {message.role === 'user' ? 'YOU' : 'HANK RAG'}
-                  </small>
-                  <div className={clsx('mt-1 break-words', message.role === 'user' ? 'text-bone-dim' : 'text-bone')}>
-                    <Markdown>{message.text}</Markdown>
-                  </div>
-                  {message.role === 'assistant' && message.verified && (
-                    <Badge tone="ok" className="mt-2">
-                      <Check size={12} aria-hidden="true" /> Sources verified
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            ))
-          ) : (
-            <EmptyState
-              className="my-auto"
-              icon={Sparkles}
-              title={t('rag.welcomeTitle')}
-              description={t('rag.welcomeText')}
-              action={
-                <div className="flex flex-wrap justify-center gap-2">
-                  {prompts.map(({ label, text }) => (
-                    <Button key={label} variant="ghost" size="sm" onClick={() => setComposer(text)}>
-                      {label} <ArrowUpRight size={14} aria-hidden="true" />
-                    </Button>
-                  ))}
-                </div>
-              }
-            />
-          )}
-          {busy && (
-            <div className="flex items-center gap-3 font-mono text-fine text-bone-dim">
-              <Spinner label={t('rag.thinking')} /> {t('rag.thinking')}
-            </div>
-          )}
-        </div>
-
-        {error && <ErrorState className="mx-5" title="Hank RAG could not answer" message={error} />}
-
-        <form className="flex items-end gap-2 border-t border-line p-3" onSubmit={ask}>
-          <Textarea
-            ref={composerRef}
-            aria-label={t('rag.placeholder')}
-            value={query}
-            onChange={(event) => setComposer(event.target.value)}
-            onKeyDown={submitOnEnter}
-            placeholder={t('rag.placeholder')}
-            rows={1}
-            className="max-h-[220px] min-h-[56px] resize-none border-0 bg-transparent"
-          />
-          <Button type="submit" size="icon" aria-label="Send question" disabled={busy || !query.trim()}>
-            <Send size={16} aria-hidden="true" />
-          </Button>
-        </form>
-      </Card>
+      <form onSubmit={ask} className="sticky bottom-24 z-10 flex items-end gap-2 rounded-[1.75rem] border border-white/10 bg-ink-1/80 p-2 pl-5 shadow-[0_20px_60px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl focus-within:border-signal/50 md:bottom-6">
+        <textarea
+          ref={composerRef}
+          aria-label={t('rag.placeholder')}
+          value={query}
+          onChange={(event) => setComposer(event.target.value)}
+          onKeyDown={submitOnEnter}
+          placeholder={t('rag.placeholder')}
+          rows={1}
+          className="max-h-[200px] min-h-[44px] flex-1 resize-none self-center bg-transparent py-3 text-body text-bone placeholder:text-bone-faint focus-visible:outline-none"
+        />
+        <button
+          type="submit"
+          aria-label="Send question"
+          disabled={busy || !query.trim()}
+          className="grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-lg transition-all hover:brightness-110 active:scale-95 disabled:opacity-35"
+        >
+          {busy ? <Sparkles size={17} className="animate-spin" aria-hidden="true" /> : <ArrowUp size={19} strokeWidth={2.4} aria-hidden="true" />}
+        </button>
+      </form>
     </div>
   );
 }

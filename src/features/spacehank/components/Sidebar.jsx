@@ -1,4 +1,4 @@
-import { LockKeyhole, LogIn, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
+import { Download, LockKeyhole, LogIn, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
 import { Avatar, Badge, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { owner } from '../config';
@@ -25,7 +25,7 @@ function NavButton({ rail, active, label, icon: Icon, badge, onClick }) {
   );
 }
 
-export default function Sidebar({ tab, onTab, rail, guest, canCollapse, onCollapse, onLogout }) {
+export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCollapse, onCollapse, onLogout }) {
   const toggleLabel = rail ? 'Expand sidebar' : 'Collapse sidebar';
   return (
     <aside
@@ -62,6 +62,14 @@ export default function Sidebar({ tab, onTab, rail, guest, canCollapse, onCollap
       </nav>
 
       <div className="flex flex-col gap-1 border-t border-line pt-4">
+        {(app?.canInstall || app?.ios) && (
+          <NavButton
+            rail={rail}
+            label="Install app"
+            icon={Download}
+            onClick={() => (app.canInstall ? app.install() : onNotify?.('On iPhone: tap Share, then Add to Home Screen'))}
+          />
+        )}
         <NavButton rail={rail} label={guest ? 'Sign in' : 'Lock workspace'} icon={guest ? LogIn : LockKeyhole} onClick={onLogout} />
         {canCollapse && (
           <NavButton

@@ -1,30 +1,55 @@
 import { useRef, useState } from 'react';
-import { ArrowUpRight, FileText, FolderOpen, Upload } from 'lucide-react';
-import { Badge, Button, Card, CardHeader, EmptyState, ErrorState, PageHeader } from '../../../design-system';
+import { AlertTriangle, ArrowUpRight, Check, FileJson, FileSpreadsheet, FileText, FolderOpen, Loader2, Upload } from 'lucide-react';
+import { Button } from '../../../design-system';
+import { clsx } from '../../../lib/format';
 import { uploadDocument } from '../api/rag';
 import { spacehankConfig } from '../config';
 
-const sizeLabel = (bytes) => `${Math.max(1, Math.round(bytes / 1024))} KB`;
-const STATUS_TONE = { uploading: 'warn', indexed: 'ok', failed: 'danger' };
+const sizeLabel = (bytes) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
+
+// what kind of file it is: an icon, a short name and a colour, so a long list can be scanned at a glance
+const KINDS = {
+  pdf: { icon: FileText, label: 'PDF', hue: 8 },
+  docx: { icon: FileText, label: 'DOCX', hue: 215 },
+  txt: { icon: FileText, label: 'TXT', hue: 40 },
+  md: { icon: FileText, label: 'MD', hue: 160 },
+  csv: { icon: FileSpreadsheet, label: 'CSV', hue: 140 },
+  json: { icon: FileJson, label: 'JSON', hue: 280 },
+};
+const kindOf = (name) => KINDS[name.split('.').pop().toLowerCase()] ?? { icon: FileText, label: 'FILE', hue: 220 };
+
+const STATUS = {
+  uploading: { icon: Loader2, text: 'Indexing…', tone: 'text-warn', spin: true },
+  indexed: { icon: Check, text: 'Ready', tone: 'text-ok' },
+  failed: { icon: AlertTriangle, text: 'Failed', tone: 'text-danger' },
+};
+
+function Stat({ value, label }) {
+  return (
+    <div className="rounded-2xl border border-line bg-ink-1 px-5 py-4">
+      <b className="block font-display text-h3 leading-none text-bone tabular-nums">{value}</b>
+      <small className="mt-1.5 block font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{label}</small>
+    </div>
+  );
+}
 
 export default function DocumentsView({ onTab }) {
   const [files, setFiles] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [over, setOver] = useState(false);
   const inputRef = useRef(null);
   const conversationId = useRef(`${spacehankConfig.sessionPrefix}-docs-${crypto.randomUUID()}`);
 
   const update = (record, patch) => setFiles((old) => old.map((item) => (item === record ? { ...item, ...patch } : item)));
 
-  const onUpload = async (event) => {
-    const selected = Array.from(event.target.files || []);
-    event.target.value = '';
+  const ingest = async (selected) => {
     if (!selected.length) return;
     setBusy(true);
     setError('');
     for (const file of selected) {
-      const record = { name: file.name, size: sizeLabel(file.size), status: 'uploading' };
-      setFiles((old) => [...old, record]);
+      const record = { name: file.name, size: sizeLabel(file.size), bytes: file.size, status: 'uploading' };
+      setFiles((old) => [record, ...old]);
       try {
         const chunks = await uploadDocument({ file, conversationId: conversationId.current });
         update(record, { status: 'indexed', chunks });
@@ -36,71 +61,109 @@ export default function DocumentsView({ onTab }) {
     setBusy(false);
   };
 
+  const onUpload = (event) => {
+    const selected = Array.from(event.target.files || []);
+    event.target.value = '';
+    void ingest(selected);
+  };
+
   const choose = () => inputRef.current?.click();
+  const ready = files.filter((f) => f.status === 'indexed');
+  const chunks = ready.reduce((sum, f) => sum + (f.chunks || 0), 0);
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        eyebrow="KNOWLEDGE VAULT"
-        title="Document Vault"
-        description="Upload documents directly into Hank RAG."
-        actions={
-          <Button size="sm" onClick={choose} loading={busy}>
-            <Upload size={15} aria-hidden="true" /> {busy ? 'Indexing…' : 'Add documents'}
-          </Button>
-        }
-      />
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">Knowledge vault</span>
+          <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone">
+            Document <em className="serif-accent">Vault.</em>
+          </h1>
+          <p className="mt-2 max-w-[60ch] text-bone-dim">Drop documents in and Hank RAG can answer from them, with sources.</p>
+        </div>
+        <Button variant="ghost" size="sm" onClick={() => onTab('rag')}>
+          Ask Hank RAG <ArrowUpRight size={14} aria-hidden="true" />
+        </Button>
+      </header>
+
       <input ref={inputRef} hidden type="file" multiple accept={spacehankConfig.uploadAccept} onChange={onUpload} />
-      <div className="grid gap-4 lg:grid-cols-[1fr_1.4fr]">
+
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setOver(true);
+        }}
+        onDragLeave={(e) => e.currentTarget.contains(e.relatedTarget) || setOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setOver(false);
+          void ingest([...e.dataTransfer.files]);
+        }}
+      >
         <button
           type="button"
           onClick={choose}
-          className="flex flex-col items-center justify-center gap-2 rounded-card border border-dashed border-line-strong bg-ink-1 px-6 py-14 text-center transition-colors hover:border-signal"
-        >
-          <Upload size={22} className="text-bone-faint" aria-hidden="true" />
-          <h3 className="font-display text-h3 leading-tight">Upload to Hank's vault</h3>
-          <p className="text-bone-dim">PDF, DOCX, TXT, MD, CSV or JSON</p>
-          <span className="mt-2 font-mono text-fine text-signal">Choose files</span>
-        </button>
-        <Card>
-          <CardHeader
-            eyebrow="RAG INDEX"
-            title={
-              <>
-                Uploaded documents <span className="font-mono text-fine text-bone-faint">{files.length}</span>
-              </>
-            }
-          />
-          {files.length ? (
-            <ul className="flex flex-col">
-              {files.map((file, index) => (
-                <li className="flex items-center gap-3 border-t border-line py-3 first:border-t-0 first:pt-0" key={`${file.name}-${index}`}>
-                  <FileText size={17} className="shrink-0 text-bone-faint" aria-hidden="true" />
-                  <div className="min-w-0 flex-1">
-                    <b className="block truncate text-fine font-medium">{file.name}</b>
-                    <small className="font-mono text-[0.72rem] text-bone-faint">
-                      {file.size}
-                      {file.status === 'indexed' && ` - ${file.chunks} chunks indexed`}
-                    </small>
-                  </div>
-                  <Badge tone={STATUS_TONE[file.status]}>{file.status.toUpperCase()}</Badge>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState
-              icon={FolderOpen}
-              title="No documents indexed in this session"
-              action={
-                <Button variant="link" onClick={() => onTab('rag')}>
-                  Open Hank RAG <ArrowUpRight size={14} aria-hidden="true" />
-                </Button>
-              }
-            />
+          disabled={busy}
+          className={clsx(
+            'group relative flex w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-3xl border-2 border-dashed px-6 py-14 text-center transition-all duration-500',
+            over ? 'scale-[1.01] border-signal bg-signal-soft' : 'border-line-strong bg-[radial-gradient(60%_90%_at_50%_0%,rgb(255_91_46/0.1),transparent),var(--color-ink-1)] hover:border-signal/60'
           )}
-          {error && <ErrorState className="mt-4" title="Upload failed" message={error} />}
-        </Card>
+        >
+          <span className="relative grid size-16 place-items-center rounded-full bg-ink-3 text-signal">
+            <i className="absolute inset-0 animate-ping rounded-full bg-signal/20 [animation-duration:2.6s]" aria-hidden="true" />
+            {busy ? <Loader2 size={26} className="animate-spin" aria-hidden="true" /> : <Upload size={26} aria-hidden="true" />}
+          </span>
+          <h2 className="font-display text-h3 leading-tight text-bone">{busy ? 'Reading your documents…' : over ? 'Let go to add them' : "Drop documents into Hank's vault"}</h2>
+          <p className="text-bone-dim">PDF, DOCX, TXT, MD, CSV or JSON, up to {spacehankConfig.maxUploadBytes / 1024 / 1024} MB each</p>
+          <span className="rounded-full border border-line-strong px-4 py-1.5 font-mono text-fine text-bone transition-colors group-hover:border-signal group-hover:text-signal">Choose files</span>
+        </button>
       </div>
+
+      {error && (
+        <p className="rounded-2xl border border-danger/40 bg-danger/10 px-4 py-3 font-mono text-fine text-danger" role="alert">
+          {error}
+        </p>
+      )}
+
+      <div className="grid grid-cols-3 gap-3">
+        <Stat value={files.length} label="Documents" />
+        <Stat value={chunks} label="Chunks indexed" />
+        <Stat value={ready.length} label="Ready to ask" />
+      </div>
+
+      {files.length ? (
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Documents">
+          {files.map((file, index) => {
+            const kind = kindOf(file.name);
+            const state = STATUS[file.status];
+            const Icon = kind.icon;
+            const StateIcon = state.icon;
+            return (
+              <li key={`${file.name}-${index}`} className="group flex items-center gap-3.5 rounded-2xl border border-line bg-ink-1 p-3.5 transition-all hover:-translate-y-0.5 hover:border-line-strong" data-doc>
+                <span className="grid size-12 shrink-0 place-items-center rounded-xl" style={{ background: `hsl(${kind.hue} 60% 50% / 0.16)`, color: `hsl(${kind.hue} 85% 74%)` }}>
+                  <Icon size={21} aria-hidden="true" />
+                </span>
+                <div className="min-w-0 flex-1 leading-tight">
+                  <b className="block truncate text-fine font-medium text-bone">{file.name}</b>
+                  <small className="font-mono text-[0.72rem] text-bone-faint">
+                    {kind.label} · {file.size}
+                    {file.status === 'indexed' && ` · ${file.chunks} chunks`}
+                  </small>
+                </div>
+                <span className={clsx('flex items-center gap-1 font-mono text-[0.72rem]', state.tone)}>
+                  <StateIcon size={13} className={state.spin ? 'animate-spin' : ''} aria-hidden="true" /> {state.text}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <div className="flex flex-col items-center gap-2 rounded-3xl border border-line bg-ink-1 px-6 py-10 text-center">
+          <FolderOpen size={22} className="text-bone-faint" aria-hidden="true" />
+          <h2 className="font-display text-lead text-bone">No documents indexed in this session</h2>
+          <p className="max-w-sm text-fine text-bone-dim">What you add here is read, split into chunks and made searchable by Hank RAG.</p>
+        </div>
+      )}
     </div>
   );
 }

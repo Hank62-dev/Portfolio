@@ -1,77 +1,115 @@
-import { Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
-import { Button } from '../../../design-system';
+import { Heart, ListMusic, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { useStore } from '../store';
 import Cover from './Cover';
-import { formatTime, library } from './library';
+import { formatTime, library, toggleFavorite } from './library';
 import { cycleRepeat, next, player, previous, seek, setVolume, toggleShuffle, togglePlay } from './player';
 
-/** The player's controls, fixed to the bottom of the workspace so music carries on across every tab. */
+const Icon = ({ label, active, onClick, children, className, ...rest }) => (
+  <button
+    type="button"
+    aria-label={label}
+    aria-pressed={active}
+    onClick={onClick}
+    className={clsx('grid size-8 place-items-center rounded-full transition-colors hover:text-bone', active ? 'text-signal' : 'text-bone-dim', className)}
+    {...rest}
+  >
+    {children}
+  </button>
+);
+
+/** A slim range input that fills with the accent up to its value. */
+function Slider({ label, value, max, step = 1, onChange, className }) {
+  const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
+  return (
+    <input
+      type="range"
+      aria-label={label}
+      min={0}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      className={clsx('player-range', className)}
+      style={{ '--fill': `${pct}%` }}
+    />
+  );
+}
+
+/** The player: track on the left, transport and progress in the middle, queue and volume on the right. */
 export default function NowPlayingBar({ onOpen }) {
   const { trackId, playing, loading, time, duration, volume, shuffle, repeat, error } = useStore(player);
   const track = useStore(library, (s) => s.tracks.find((t) => t.id === trackId));
   if (!track) return null;
 
   const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
-  const progress = duration > 0 ? Math.min(100, (time / duration) * 100) : 0;
 
   return (
     <div
       role="region"
       aria-label="Now playing"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line-strong bg-ink-1/95 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ink-0/90 backdrop-blur-xl"
       data-now-playing
     >
-      <input
-        type="range"
-        aria-label="Seek"
-        min={0}
-        max={Math.max(1, Math.floor(duration))}
-        value={Math.floor(time)}
-        onChange={(e) => seek(Number(e.target.value))}
-        className="absolute inset-x-0 -top-2 h-4 w-full cursor-pointer opacity-0"
-      />
-      <i className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-line" aria-hidden="true" />
-      <i className="pointer-events-none absolute top-0 left-0 h-0.5 bg-signal" style={{ width: `${progress}%` }} aria-hidden="true" />
-
-      <div className="mx-auto flex max-w-[1280px] items-center gap-3 px-gutter py-2.5">
-        <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 items-center gap-3 text-left" aria-label="Open Hank Music">
-          <Cover track={track} className="size-11" />
-          <span className="min-w-0 leading-tight">
-            <b className="block truncate text-fine font-medium text-bone" data-now-title>
-              {track.title}
-            </b>
-            <small className="block truncate font-mono text-[0.72rem] text-bone-faint">{error || track.artist || 'Unknown artist'}</small>
-          </span>
-        </button>
-
-        <div className="flex items-center gap-1">
-          <Button variant="secondary" size="icon" aria-label="Shuffle" aria-pressed={shuffle} className={clsx('max-sm:hidden', shuffle && 'text-signal')} onClick={toggleShuffle}>
-            <Shuffle size={15} aria-hidden="true" />
-          </Button>
-          <Button variant="secondary" size="icon" aria-label="Previous track" onClick={previous}>
-            <SkipBack size={15} aria-hidden="true" />
-          </Button>
-          <Button size="icon" aria-label={playing ? 'Pause' : 'Play'} loading={loading} onClick={togglePlay}>
-            {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
-          </Button>
-          <Button variant="secondary" size="icon" aria-label="Next track" onClick={next}>
-            <SkipForward size={15} aria-hidden="true" />
-          </Button>
-          <Button variant="secondary" size="icon" aria-label={`Repeat: ${repeat}`} className={clsx('max-sm:hidden', repeat !== 'off' && 'text-signal')} onClick={cycleRepeat}>
-            <RepeatIcon size={15} aria-hidden="true" />
-          </Button>
+      <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto] items-center gap-3 px-3 py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] md:gap-6 md:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <button type="button" onClick={onOpen} aria-label="Open Hank Music" className="flex min-w-0 items-center gap-3 text-left">
+            <Cover track={track} className="size-12 shadow-lg" rounded="rounded-md" />
+            <span className="min-w-0 leading-tight">
+              <b className="block truncate text-fine font-medium text-bone" data-now-title>
+                {track.title}
+              </b>
+              <small className="block truncate font-mono text-[0.72rem] text-bone-faint">{error || track.artist || 'Unknown artist'}</small>
+            </span>
+          </button>
+          <Icon label={track.favorite ? 'Remove from favorites' : 'Add to favorites'} active={track.favorite} onClick={() => toggleFavorite(track.id)} className="max-sm:hidden">
+            <Heart size={16} fill={track.favorite ? 'currentColor' : 'none'} aria-hidden="true" />
+          </Icon>
         </div>
 
-        <span className="w-[5.5rem] text-right font-mono text-[0.72rem] text-bone-faint tabular-nums max-md:hidden">
-          {formatTime(time)} / {formatTime(duration)}
-        </span>
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="flex items-center gap-1.5">
+            <Icon label="Shuffle" active={shuffle} onClick={toggleShuffle} className="max-sm:hidden">
+              <Shuffle size={15} aria-hidden="true" />
+            </Icon>
+            <Icon label="Previous track" onClick={previous}>
+              <SkipBack size={17} fill="currentColor" aria-hidden="true" />
+            </Icon>
+            <button
+              type="button"
+              aria-label={playing ? 'Pause' : 'Play'}
+              onClick={togglePlay}
+              className={clsx('grid size-10 place-items-center rounded-full bg-bone text-ink-0 transition-transform hover:scale-105 active:scale-95', loading && 'animate-pulse')}
+            >
+              {playing ? <Pause size={18} fill="currentColor" aria-hidden="true" /> : <Play size={18} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
+            </button>
+            <Icon label="Next track" onClick={next}>
+              <SkipForward size={17} fill="currentColor" aria-hidden="true" />
+            </Icon>
+            <Icon label={`Repeat: ${repeat}`} active={repeat !== 'off'} onClick={cycleRepeat} className="max-sm:hidden">
+              <RepeatIcon size={15} aria-hidden="true" />
+            </Icon>
+          </div>
+          <div className="flex w-full items-center gap-2.5 max-md:hidden">
+            <span className="w-9 text-right font-mono text-[0.68rem] text-bone-faint tabular-nums">{formatTime(time)}</span>
+            <Slider label="Seek" value={Math.floor(time)} max={Math.max(1, Math.floor(duration))} onChange={seek} className="flex-1" />
+            <span className="w-9 font-mono text-[0.68rem] text-bone-faint tabular-nums">{formatTime(duration)}</span>
+          </div>
+        </div>
 
-        <label className="flex items-center gap-2 text-bone-faint max-lg:hidden">
-          {volume === 0 ? <VolumeX size={15} aria-hidden="true" /> : <Volume2 size={15} aria-hidden="true" />}
-          <span className="sr-only">Volume</span>
-          <input type="range" min={0} max={1} step={0.02} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-24 accent-[var(--color-signal)]" />
-        </label>
+        <div className="flex items-center justify-end gap-1 max-md:hidden">
+          <Icon label="Open the queue" onClick={onOpen}>
+            <ListMusic size={16} aria-hidden="true" />
+          </Icon>
+          <button type="button" aria-label={volume === 0 ? 'Unmute' : 'Mute'} onClick={() => setVolume(volume === 0 ? 0.8 : 0)} className="grid size-8 place-items-center text-bone-dim hover:text-bone">
+            {volume === 0 ? <VolumeX size={16} aria-hidden="true" /> : <Volume2 size={16} aria-hidden="true" />}
+          </button>
+          <Slider label="Volume" value={volume} max={1} step={0.02} onChange={setVolume} className="w-24" />
+        </div>
+      </div>
+      {/* on a phone the progress runs along the top edge */}
+      <div className="absolute inset-x-0 top-0 h-0.5 bg-line md:hidden" aria-hidden="true">
+        <i className="block h-full bg-signal" style={{ width: `${duration > 0 ? Math.min(100, (time / duration) * 100) : 0}%` }} />
       </div>
     </div>
   );

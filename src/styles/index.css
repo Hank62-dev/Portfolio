@@ -263,6 +263,244 @@
   }
 }
 
+/* The notes editor (TipTap): the formatted text takes the same type and colours as the rest of the workspace. */
+.rich .rich-body {
+  min-height: 300px;
+  outline: none;
+  color: var(--color-bone);
+  line-height: 1.7;
+}
+.rich .rich-body > * + * {
+  margin-top: 0.6em;
+}
+.rich .rich-body h1,
+.rich .rich-body h2,
+.rich .rich-body h3 {
+  font-family: var(--font-display);
+  line-height: 1.15;
+  color: var(--color-bone);
+}
+.rich .rich-body h1 {
+  font-size: 2rem;
+  margin-top: 0.4em;
+}
+.rich .rich-body h2 {
+  font-size: 1.5rem;
+  margin-top: 1em;
+}
+.rich .rich-body h3 {
+  font-size: 1.2rem;
+  margin-top: 0.9em;
+}
+.rich .rich-body strong {
+  color: var(--color-bone);
+  font-weight: 600;
+}
+.rich .rich-body a {
+  color: var(--color-signal);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.rich .rich-body ul:not([data-type='taskList']),
+.rich .rich-body ol {
+  padding-left: 1.4rem;
+}
+.rich .rich-body ul:not([data-type='taskList']) {
+  list-style: disc;
+}
+.rich .rich-body ol {
+  list-style: decimal;
+}
+.rich .rich-body li::marker {
+  color: var(--color-bone-faint);
+}
+.rich .rich-body li > p {
+  margin: 0;
+}
+.rich .rich-body ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0;
+}
+.rich .rich-body ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+.rich .rich-body ul[data-type='taskList'] li > label {
+  margin-top: 0.4rem;
+  user-select: none;
+}
+.rich .rich-body ul[data-type='taskList'] input[type='checkbox'] {
+  accent-color: var(--color-signal);
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+}
+.rich .rich-body ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: var(--color-bone-faint);
+  text-decoration: line-through;
+}
+.rich .rich-body blockquote {
+  border-left: 2px solid var(--color-signal);
+  padding-left: 1rem;
+  color: var(--color-bone-dim);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+}
+.rich .rich-body code {
+  border-radius: var(--radius-sm);
+  background: var(--color-ink-3);
+  padding: 0.1em 0.4em;
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+}
+.rich .rich-body pre {
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: var(--color-ink-0);
+  padding: 0.8rem 1rem;
+}
+.rich .rich-body pre code {
+  background: none;
+  padding: 0;
+}
+.rich .rich-body hr {
+  border: 0;
+  border-top: 1px solid var(--color-line-strong);
+  margin: 1.2em 0;
+}
+.rich .rich-body p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: var(--color-bone-faint);
+}
+
+/* The player's seek and volume bars: thin, filled up to the value, and a handle that appears on hover. */
+.player-range {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  cursor: pointer;
+  outline: none;
+  background: linear-gradient(to right, var(--color-bone) var(--fill, 0%), rgb(236 230 218 / 0.2) var(--fill, 0%));
+}
+.player-range:hover,
+.player-range:focus-visible {
+  background: linear-gradient(to right, var(--color-signal) var(--fill, 0%), rgb(236 230 218 / 0.2) var(--fill, 0%));
+}
+.player-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-bone);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.player-range:hover::-webkit-slider-thumb,
+.player-range:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+.player-range::-moz-range-track {
+  background: transparent;
+}
+.player-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-bone);
+}
+
+/* A soft light that sweeps over a placeholder while something is being made. */
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Hank's orb breathes; the listening room's colours drift; the record turns while a song plays. */
+@keyframes orb {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, -5%, 0) scale(1.15);
+  }
+}
+@keyframes disc {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.disc-spin {
+  animation: disc 16s linear infinite;
+  animation-play-state: paused;
+}
+.disc-spin.on {
+  animation-play-state: running;
+}
+@media (prefers-reduced-motion: reduce) {
+  .disc-spin.on,
+  .room-blob {
+    animation: none;
+  }
+}
+
+/* Three bars that move while a song plays. */
+.eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+.eq i {
+  width: 3px;
+  height: 30%;
+  border-radius: 1px;
+  background: var(--color-signal);
+}
+.eq-on i {
+  animation: eq 0.9s ease-in-out infinite;
+}
+.eq-on i:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.eq-on i:nth-child(3) {
+  animation-delay: -0.6s;
+}
+@keyframes eq {
+  0%,
+  100% {
+    height: 25%;
+  }
+  50% {
+    height: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .eq-on i {
+    animation: none;
+    height: 60%;
+  }
+}
+
 /* While the theme switches, colours cross-fade (the class is added by ThemeProvider and removed after 0.7s). */
 .theme-switching,
 .theme-switching *,
