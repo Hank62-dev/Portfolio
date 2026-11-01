@@ -17,6 +17,15 @@ services:
         sync: false
       - key: SPACEHANK_WORKDIR
         value: /opt/render/project/src
+      # Optional owner helpers (Hank DJ, morning note, Image Studio, calendar). Leave blank to switch them off.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: HF_TOKEN
+        sync: false
+      - key: CALENDAR_ICS_URL
+        sync: false
+      - key: AI_DAILY_LIMIT
+        value: 60
 
   - type: web
     name: hank62-rag

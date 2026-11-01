@@ -1,9 +1,11 @@
-import { ChevronRight, Pause, Play, Plus } from 'lucide-react';
+import { ChevronRight, Command, Pause, Play, Plus } from 'lucide-react';
 import { Avatar, Badge, Button, Tooltip } from '../../../design-system';
 import { owner } from '../config';
 import { NAVIGATION } from '../navigation';
 
-export default function Topbar({ tab, connected, paused, onPause, onNewTask }) {
+const isMac = typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(navigator.platform ?? '');
+
+export default function Topbar({ tab, connected, guest, paused, onPause, onNewTask, onPalette }) {
   const current = NAVIGATION.find((item) => item.id === tab) || NAVIGATION[0];
   const pauseLabel = paused ? 'Resume floor' : 'Pause floor';
   return (
@@ -14,9 +16,20 @@ export default function Topbar({ tab, connected, paused, onPause, onNewTask }) {
         <b className="truncate font-medium text-bone">{current.label.toUpperCase()}</b>
       </nav>
       <div className="flex shrink-0 items-center gap-2">
+        <button
+          type="button"
+          onClick={onPalette}
+          aria-label="Open the command palette"
+          className="flex h-9 items-center gap-2 rounded-sm border border-line bg-ink-2 px-3 font-mono text-fine text-bone-dim transition-colors hover:border-line-strong hover:text-bone"
+          data-palette-button
+        >
+          <Command size={14} aria-hidden="true" />
+          <span className="max-md:hidden">Search</span>
+          <kbd className="rounded-sm border border-line px-1 text-[0.68rem] text-bone-faint max-md:hidden">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+        </button>
         {/* On narrow screens only the status dot stays visible; the text remains for screen readers. */}
-        <Badge tone={connected ? 'ok' : 'danger'} dot>
-          <span className="max-sm:sr-only">{connected ? 'REALTIME LINK' : 'SERVER OFFLINE'}</span>
+        <Badge tone={guest ? 'warn' : connected ? 'ok' : 'danger'} dot>
+          <span className="max-sm:sr-only">{guest ? 'DEMO' : connected ? 'REALTIME LINK' : 'SERVER OFFLINE'}</span>
         </Badge>
         <Tooltip content={pauseLabel} side="bottom">
           <Button variant="secondary" size="icon" aria-label={pauseLabel} onClick={onPause}>
@@ -26,7 +39,7 @@ export default function Topbar({ tab, connected, paused, onPause, onNewTask }) {
         <Button size="sm" onClick={onNewTask} aria-label="New task">
           <Plus size={15} aria-hidden="true" /> <span className="max-sm:sr-only">New task</span>
         </Button>
-        <Avatar className="max-sm:hidden">{owner.initials}</Avatar>
+        <Avatar className="max-sm:hidden">{guest ? 'G' : owner.initials}</Avatar>
       </div>
     </header>
   );

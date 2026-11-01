@@ -1,5 +1,6 @@
 import { Activity, ArrowUpRight, BrainCircuit, Boxes, Database, Gauge, MessageCircle, Network, Users, Wifi } from 'lucide-react';
 import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, PageHeader, Stat } from '../../../design-system';
+import BriefingCard from '../components/BriefingCard';
 import { greetingFor, owner } from '../config';
 import { isWorking } from '../model/agents';
 
@@ -13,7 +14,7 @@ function LayerRow({ icon: Icon, label, value }) {
   );
 }
 
-export default function DashboardView({ agents, events, connected, onTab }) {
+export default function DashboardView({ agents, events, connected, onTab, owner: isOwner = true }) {
   const active = connected ? agents.filter(isWorking).length : 0;
   return (
     <div className="flex flex-col gap-6">
@@ -31,6 +32,7 @@ export default function DashboardView({ agents, events, connected, onTab }) {
           </Button>
         }
       />
+      <BriefingCard owner={isOwner} agents={agents} connected={connected} />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat icon={Users} label="AI WORKFORCE" value={active} note="agents active" />
         <Stat icon={Activity} label="LIVE EVENTS" value={events.length} note="server events" />

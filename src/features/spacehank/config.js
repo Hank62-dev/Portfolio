@@ -13,6 +13,8 @@ export const spacehankConfig = {
   uploadAccept: '.pdf,.docx,.txt,.md,.csv,.json',
   maxEvents: 40,
   toastMs: 2400,
+  // Where the morning briefing looks up the weather (Open-Meteo needs coordinates, not an address).
+  home: { name: 'Ho Chi Minh City', latitude: 10.8231, longitude: 106.6297 },
 };
 
 /** "Võ Gia Huy" -> "VH": first and last initial. */

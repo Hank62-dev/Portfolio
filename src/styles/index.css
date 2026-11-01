@@ -220,6 +220,49 @@
   pointer-events: none;
 }
 
+/* Scrollbars: slim, floating thumbs that match the page, and the accent when you reach for one. The page and every
+   scrollable panel (lyrics, menus, the command palette) share them. */
+:root {
+  --scroll-track: transparent;
+  --scroll-thumb: rgb(236 230 218 / 0.2);
+  --scroll-thumb-hover: rgb(255 91 46 / 0.75);
+}
+:root[data-theme='light'] {
+  --scroll-thumb: rgb(23 20 15 / 0.28);
+}
+.dark-island {
+  --scroll-thumb: rgb(236 230 218 / 0.2);
+}
+@supports selector(::-webkit-scrollbar) {
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track,
+  ::-webkit-scrollbar-corner {
+    background: var(--scroll-track);
+  }
+  ::-webkit-scrollbar-thumb {
+    min-height: 40px;
+    border: 3px solid transparent; /* the gap that makes the thumb float */
+    border-radius: 999px;
+    background: var(--scroll-thumb);
+    background-clip: padding-box;
+    transition: background-color 0.2s;
+  }
+  ::-webkit-scrollbar-thumb:hover,
+  ::-webkit-scrollbar-thumb:active {
+    background: var(--scroll-thumb-hover);
+    background-clip: padding-box;
+  }
+}
+@supports not selector(::-webkit-scrollbar) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  }
+}
+
 /* While the theme switches, colours cross-fade (the class is added by ThemeProvider and removed after 0.7s). */
 .theme-switching,
 .theme-switching *,

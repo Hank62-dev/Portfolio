@@ -57,7 +57,17 @@ Không bao giờ đặt mật khẩu hay API key vào biến `VITE_*`. Mọi ng�
 | `SPACEHANK_PASSWORD` | Chuỗi ngẫu nhiên dài | Bạn tự tạo. Chạy `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` rồi lưu vào trình quản lý mật khẩu. Đây là mật khẩu bạn gõ khi đăng nhập `/spacehank` |
 | `SPACEHANK_ORIGIN` | `https://<ten-du-an>.vercel.app` | URL Vercel của bạn, không có `/` ở cuối. Ở lần tạo đầu chưa có URL Vercel nên điền tạm `https://example.com`, rồi sửa lại ở bước 7 |
 
-Các biến đã có sẵn trong `render.yaml`, không cần nhập: `NODE_VERSION`, `SPACEHANK_PORT`, `SPACEHANK_WORKDIR`.
+Các biến đã có sẵn trong `render.yaml`, không cần nhập: `NODE_VERSION`, `SPACEHANK_PORT`, `SPACEHANK_WORKDIR`, `AI_DAILY_LIMIT` (mặc định 60 lượt AI mỗi ngày, để không cháy quota free).
+
+**Biến tuỳ chọn cho các tính năng riêng của chủ workspace.** Bỏ trống thì tính năng đó tự tắt, workspace vẫn chạy bình thường:
+
+| Biến | Dùng cho | Lấy ở đâu |
+|---|---|---|
+| `GEMINI_API_KEY` | Hank DJ (chọn nhạc theo tâm trạng) và bản tin buổi sáng | Cùng key Gemini ở mục 3.3 |
+| `HF_TOKEN` | Image Studio (tạo ảnh bằng FLUX qua Hugging Face) | https://huggingface.co/settings/tokens → tạo token loại Read. Có hạn mức free, hạn mức đổi theo thời điểm nên hãy xem trang của Hugging Face |
+| `CALENDAR_ICS_URL` | Lịch hôm nay trong bản tin | Google Calendar → Settings → chọn lịch → "Secret address in iCal format". Link này là bí mật, chỉ đặt trên Render, không đặt vào biến `VITE_*` |
+
+Tạo ảnh bằng Gemini cũng được (khi không có `HF_TOKEN`), nhưng model ảnh của Gemini có thể không nằm trong gói free, nên Image Studio ưu tiên Hugging Face.
 
 Không đặt `SPACEHANK_CODEX_CMD`, `SPACEHANK_CLAUDE_CMD` và các biến `SPACEHANK_*_CMD` khác. Render không cài sẵn các CLI đó, nên việc giao task sẽ bị từ chối. Điều này là bình thường ở production. Chỉ thêm một biến `SPACEHANK_<ID>_CMD` khi command đó thật sự tồn tại trong service.
 

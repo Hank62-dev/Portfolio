@@ -1,4 +1,4 @@
-import { LockKeyhole, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
+import { LockKeyhole, LogIn, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
 import { Avatar, Badge, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { owner } from '../config';
@@ -25,7 +25,7 @@ function NavButton({ rail, active, label, icon: Icon, badge, onClick }) {
   );
 }
 
-export default function Sidebar({ tab, onTab, rail, canCollapse, onCollapse, onLogout }) {
+export default function Sidebar({ tab, onTab, rail, guest, canCollapse, onCollapse, onLogout }) {
   const toggleLabel = rail ? 'Expand sidebar' : 'Collapse sidebar';
   return (
     <aside
@@ -62,7 +62,7 @@ export default function Sidebar({ tab, onTab, rail, canCollapse, onCollapse, onL
       </nav>
 
       <div className="flex flex-col gap-1 border-t border-line pt-4">
-        <NavButton rail={rail} label="Lock workspace" icon={LockKeyhole} onClick={onLogout} />
+        <NavButton rail={rail} label={guest ? 'Sign in' : 'Lock workspace'} icon={guest ? LogIn : LockKeyhole} onClick={onLogout} />
         {canCollapse && (
           <NavButton
             rail={rail}
@@ -72,11 +72,11 @@ export default function Sidebar({ tab, onTab, rail, canCollapse, onCollapse, onL
           />
         )}
         <div className={clsx('mt-2 flex items-center gap-3 px-2', rail && 'justify-center px-0')}>
-          <Avatar>{owner.initials}</Avatar>
+          <Avatar>{guest ? 'G' : owner.initials}</Avatar>
           {!rail && (
             <span className="leading-tight">
-              <b className="block text-fine font-medium">{owner.name}</b>
-              <small className="font-mono text-[0.7rem] text-bone-faint">Owner online</small>
+              <b className="block text-fine font-medium">{guest ? 'Guest' : owner.name}</b>
+              <small className="font-mono text-[0.7rem] text-bone-faint">{guest ? 'Viewing the demo' : 'Owner online'}</small>
             </span>
           )}
         </div>

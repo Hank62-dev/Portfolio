@@ -21,6 +21,17 @@ export const loadConfig = (env = process.env) => {
     workdir: env.SPACEHANK_WORKDIR || process.cwd(),
     sessionTtlMs: 12 * HOUR,
     maxBodyBytes: 64 * 1024,
+    maxAiBodyBytes: 128 * 1024, // a music library's track list rides along with a DJ request
+    ai: {
+      geminiKey: env.GEMINI_API_KEY || '',
+      geminiBase: (env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, ''), // overridable so tests can point at a fake
+      textModel: env.GEMINI_TEXT_MODEL || 'gemini-2.5-flash',
+      imageModel: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image',
+      hfToken: env.HF_TOKEN || '',
+      hfImageModel: env.HF_IMAGE_MODEL || 'black-forest-labs/FLUX.1-schnell',
+      dailyLimit: Number(env.AI_DAILY_LIMIT || 60),
+    },
+    calendarIcsUrl: env.CALENDAR_ICS_URL || '',
     maxTaskChars: 20000,
     maxTasks: 200,
     maxEvents: 40,

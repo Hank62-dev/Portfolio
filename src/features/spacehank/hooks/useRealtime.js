@@ -97,5 +97,5 @@ export function useRealtime() {
     [notify]
   );
 
-  return { authenticated, connected, agents, events, toast, login, logout, dispatchTask };
+  return { authenticated, connected, agents, events, toast, notify, login, logout, dispatchTask };
 }

@@ -23,6 +23,8 @@
     "i18next": "^26.5.10",
     "lenis": "^1.3.27",
     "lucide-react": "^1.61.0",
+    "music-metadata": "^12.3.3",
+    "node-ical": "^0.27.3",
     "postprocessing": "^6.39.5",
     "pullcord": "^0.1.0",
     "react": "^18.2.0",

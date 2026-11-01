@@ -1,7 +1,9 @@
 import http from 'node:http';
 import { WebSocketServer } from 'ws';
 import { configuredWorkers, createAgents } from './agents.mjs';
+import { createAi } from './ai.mjs';
 import { createAuth } from './auth.mjs';
+import { createCalendar } from './calendar.mjs';
 import { HttpError, createResponder, readJson } from './http.mjs';
 import { createHub } from './hub.mjs';
 import { createTaskService } from './tasks.mjs';
@@ -11,11 +13,13 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 // Behind Render's proxy the socket address is the proxy, so prefer the forwarded client address.
 const clientKey = (req) => req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
 
-export const createApp = (config) => {
+export const createApp = (config, { fetchImpl = fetch } = {}) => {
   const agents = createAgents();
   const hub = createHub({ agents, maxEvents: config.maxEvents, maxTasks: config.maxTasks });
   const auth = createAuth(config);
   const tasks = createTaskService({ agents, hub, config });
+  const ai = createAi({ ai: config.ai, fetchImpl });
+  const calendar = createCalendar({ url: config.calendarIcsUrl, fetchImpl });
   const { json, preflight } = createResponder(config.origin);
 
   const requireAuth = (req) => {
@@ -65,6 +69,33 @@ export const createApp = (config) => {
     'POST /api/tasks': async (req, res) => {
       requireAuth(req);
       json(res, 201, tasks.create(await readJson(req, config.maxBodyBytes)));
+    },
+
+    // Owner-only helpers. Each is behind the session and the origin check, and the AI ones share a daily budget.
+    'GET /api/ai/usage': (req, res) => {
+      requireAuth(req);
+      json(res, 200, { ...ai.usage(), calendar: calendar.configured });
+    },
+
+    'POST /api/ai/dj': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.dj(await readJson(req, config.maxAiBodyBytes)));
+    },
+
+    'POST /api/ai/note': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.note(await readJson(req, config.maxBodyBytes)));
+    },
+
+    'POST /api/ai/image': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.image(await readJson(req, config.maxBodyBytes)));
+    },
+
+    'GET /api/briefing/calendar': async (req, res) => {
+      requireAuth(req);
+      const { searchParams } = new URL(req.url, 'http://localhost');
+      json(res, 200, await calendar.between(new Date(searchParams.get('from') ?? ''), new Date(searchParams.get('to') ?? '')));
     },
   };
 

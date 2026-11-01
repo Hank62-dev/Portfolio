@@ -15,7 +15,7 @@ export function AuthLoading() {
   );
 }
 
-export default function LoginScreen({ onLogin }) {
+export default function LoginScreen({ onLogin, onGuest }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,6 +62,14 @@ export default function LoginScreen({ onLogin }) {
           {loading ? 'Checking access…' : 'Enter SpaceHank ↗'}
         </Button>
         {error && <ErrorState title="Could not sign in" message={error} />}
+        {onGuest && (
+          <div className="flex flex-col gap-2 border-t border-line pt-4">
+            <Button type="button" variant="ghost" onClick={onGuest}>
+              Look around as a guest
+            </Button>
+            <small className="text-center font-mono text-fine text-bone-faint">A demo with sample data. Nothing private is shown.</small>
+          </div>
+        )}
         <small className="text-center font-mono text-fine text-bone-faint">Session protected · 12 hour expiry</small>
       </Card>
     </div>
