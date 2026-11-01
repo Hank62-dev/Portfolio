@@ -9,7 +9,7 @@ import { useScene } from './SceneContext';
  * across it each time something lights the layer up. The layer's own content is passed as children.
  * In `stack` mode the layer chosen by `getFeatured()` rises and the others quieten.
  */
-export default function Plate({ index, label, palette, mode, getFeatured, children }) {
+export default function Plate({ index, label, palette, mode, getFeatured, showLabel = true, children }) {
   const scene = useScene();
   const group = useRef();
   const material = useRef();
@@ -47,12 +47,14 @@ export default function Plate({ index, label, palette, mode, getFeatured, childr
         <meshBasicMaterial ref={ringMaterial} color={HOT} toneMapped={false} transparent depthWrite={false} />
       </mesh>
       {children}
-      <Html position={[PLATE[0] / 2 + 0.2, 0, PLATE[2] / 2 - 0.1]} style={{ pointerEvents: 'none' }} zIndexRange={[5, 0]}>
-        <span className="font-mono text-[10px] tracking-[0.12em] whitespace-nowrap text-bone-dim uppercase">
-          <b className="mr-1.5 font-normal text-signal">{String(index + 1).padStart(2, '0')}</b>
-          {label}
-        </span>
-      </Html>
+      {showLabel && (
+        <Html position={[PLATE[0] / 2 + 0.2, 0, PLATE[2] / 2 - 0.1]} style={{ pointerEvents: 'none' }} zIndexRange={[5, 0]}>
+          <span className="font-mono text-[10px] tracking-[0.12em] whitespace-nowrap text-bone-dim uppercase">
+            <b className="mr-1.5 font-normal text-signal">{String(index + 1).padStart(2, '0')}</b>
+            {label}
+          </span>
+        </Html>
+      )}
     </group>
   );
 }

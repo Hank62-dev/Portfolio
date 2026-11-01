@@ -53,7 +53,7 @@ const About = () => {
   return (
     <section id="about" ref={scope} className="relative py-section" aria-labelledby="about-title">
       <div className="wrap">
-        <SectionTitle id="about-title" index="04" label={c.about.label} title={c.about.title} />
+        <SectionTitle id="about-title" index="05" label={c.about.label} title={c.about.title} />
 
         <div className="grid gap-12 lg:grid-cols-[380px_minmax(0,1fr)] lg:gap-20">
           <div className="relative lg:sticky lg:top-[calc(var(--spacing-header)+32px)] lg:self-start">

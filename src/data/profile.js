@@ -45,4 +45,4 @@ export const socials = [
   { id: 'instagram', label: 'Instagram', url: 'https://www.instagram.com/hankhyu.6226/', handle: '@hankhyu.6226' },
 ];
 
-export const NAV_SECTIONS = ['work', 'stack', 'lab', 'about', 'activity', 'contact'];
+export const NAV_SECTIONS = ['work', 'stack', 'lab', 'immersive', 'about', 'activity', 'contact'];

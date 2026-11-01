@@ -224,7 +224,7 @@ const Activity = ({ github }) => {
       <div className="wrap">
         <SectionTitle
           id="activity-title"
-          index="05"
+          index="06"
           label={c.activity.label}
           title={c.activity.title}
           lede={c.activity.lede}

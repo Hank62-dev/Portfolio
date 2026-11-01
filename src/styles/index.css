@@ -184,6 +184,21 @@
   --shadow-pop: 0 24px 64px rgb(23 20 15 / 0.2);
 }
 
+/* A region that stays dark in either theme (the VR hall): the dark values, re-declared for everything inside. */
+.dark-island {
+  --color-ink-0: #0b0c0e;
+  --color-ink-1: #101114;
+  --color-ink-2: #16181c;
+  --color-ink-3: #1e2127;
+  --color-bone: #ece6da;
+  --color-bone-dim: #a8a396;
+  --color-bone-faint: #8a8579;
+  --color-signal: #ff5b2e;
+  --color-line: rgb(236 230 218 / 0.1);
+  --color-line-strong: rgb(236 230 218 / 0.22);
+  color: var(--color-bone);
+}
+
 /* The pull cord's rope colour, and where it hangs: just inside the right edge, clear of the header controls. */
 :root {
   --pullcord-top: 0px;

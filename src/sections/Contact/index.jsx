@@ -75,7 +75,7 @@ const Contact = () => {
         aria-hidden="true"
       />
       <div className="wrap relative">
-        <SectionTitle id="contact-title" index="06" label={c.contact.label} title={c.contact.title} />
+        <SectionTitle id="contact-title" index="07" label={c.contact.label} title={c.contact.title} />
 
         <div className="grid gap-14 lg:grid-cols-[1.3fr_1fr] lg:gap-24">
           <div>
