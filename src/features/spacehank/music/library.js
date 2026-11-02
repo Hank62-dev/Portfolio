@@ -117,7 +117,7 @@ const update = async (id, patch) => {
 
 export const toggleFavorite = (id) => update(id, { favorite: !library.get().tracks.find((t) => t.id === id)?.favorite });
 export const setLyrics = (id, lyrics) => update(id, { lyrics: String(lyrics ?? '') });
-export const countPlay = (id) => update(id, { plays: (library.get().tracks.find((t) => t.id === id)?.plays ?? 0) + 1 });
+export const countPlay = (id) => update(id, { plays: (library.get().tracks.find((t) => t.id === id)?.plays ?? 0) + 1, playedAt: Date.now() });
 
 export const removeTracks = async (ids) => {
   const gone = new Set(ids);

@@ -46,10 +46,19 @@ const ensureAudio = () => {
   audio = new Audio();
   audio.preload = 'auto';
   audio.volume = player.get().volume;
-  audio.addEventListener('timeupdate', () => player.set({ time: audio.currentTime }));
+  audio.addEventListener('timeupdate', () => {
+    player.set({ time: audio.currentTime });
+    publishPosition();
+  });
   audio.addEventListener('durationchange', () => player.set({ duration: Number.isFinite(audio.duration) ? audio.duration : 0 }));
-  audio.addEventListener('play', () => player.set({ playing: true }));
-  audio.addEventListener('pause', () => player.set({ playing: false }));
+  audio.addEventListener('play', () => {
+    player.set({ playing: true });
+    publishState('playing');
+  });
+  audio.addEventListener('pause', () => {
+    player.set({ playing: false });
+    publishState('paused');
+  });
   audio.addEventListener('ended', () => goNext({ auto: true }));
   audio.addEventListener('error', () => {
     player.set({ playing: false, loading: false, error: 'This file could not be played.' });
@@ -57,9 +66,13 @@ const ensureAudio = () => {
   return audio;
 };
 
-/** The analyser for the visualizer. It is created on first use, which must follow a click (autoplay rules). */
+// On a phone or tablet the sound must stay on the browser's native audio path: routed through Web Audio (for the
+// visualizer) it is silenced when the screen locks or the app goes to the background, mostly on iPhone.
+const touchDevice = () => typeof window !== 'undefined' && (window.matchMedia('(pointer: coarse)').matches || window.matchMedia('(max-width: 767px)').matches);
+
+/** The analyser for the visualizer. It is created on first use, which must follow a click (autoplay rules). Not on touch devices. */
 export const getAnalyser = () => {
-  if (analyser || !audio) return analyser;
+  if (analyser || !audio || touchDevice()) return analyser;
   try {
     const Context = window.AudioContext || window.webkitAudioContext;
     context = new Context();
@@ -79,15 +92,37 @@ const resumeContext = () => {
   if (context && context.state === 'suspended') void context.resume();
 };
 
+/** What the lock screen and the notification shade show: the song, its cover, and where it is. */
 const publishToSystem = async (track) => {
   if (!('mediaSession' in navigator)) return;
   const art = track.hasCover ? await coverUrl(track.id) : '';
+  if (player.get().trackId !== track.id) return; // the song changed while the cover was loading
+  const sizes = ['96x96', '192x192', '256x256', '384x384', '512x512'];
   navigator.mediaSession.metadata = new MediaMetadata({
     title: track.title,
-    artist: track.artist,
-    album: track.album,
-    artwork: art ? [{ src: art, sizes: '512x512' }] : [],
+    artist: track.artist || 'Hank Music',
+    album: track.album || 'Hank62',
+    artwork: art ? sizes.map((size) => ({ src: art, sizes: size })) : [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }],
   });
+};
+
+let lastPosition = 0;
+const publishPosition = () => {
+  if (!audio || !('mediaSession' in navigator) || !navigator.mediaSession.setPositionState) return;
+  const now = Date.now();
+  if (now - lastPosition < 900) return;
+  lastPosition = now;
+  const duration = Number.isFinite(audio.duration) ? audio.duration : 0;
+  if (!duration) return;
+  try {
+    navigator.mediaSession.setPositionState({ duration, playbackRate: audio.playbackRate || 1, position: Math.min(audio.currentTime, duration) });
+  } catch {
+    /* some browsers refuse a position they think is out of range */
+  }
+};
+
+const publishState = (state) => {
+  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = state;
 };
 
 /** Loads the track at the queue's index and plays it. Skips over tracks whose file has gone missing. */
@@ -156,6 +191,13 @@ export const togglePlay = async () => {
       player.set({ error: 'The browser blocked playback. Press play.' });
     }
   } else element.pause();
+};
+
+export const resume = async () => {
+  if (!player.get().playing) await togglePlay();
+};
+export const pause = () => {
+  if (player.get().playing) audio?.pause();
 };
 
 const goNext = ({ auto = false } = {}) => {
@@ -227,6 +269,7 @@ export const setSleepTimer = (minutes) => {
 };
 
 export const stop = () => {
+  publishState('none');
   token += 1;
   audio?.pause();
   if (audio) audio.removeAttribute('src');
@@ -247,11 +290,14 @@ library.subscribe(() => {
 
 if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
   const handlers = {
-    play: () => togglePlay(),
-    pause: () => togglePlay(),
+    play: () => resume(),
+    pause: () => pause(),
+    stop: () => stop(),
     nexttrack: () => next(),
     previoustrack: () => previous(),
     seekto: (details) => seek(details.seekTime),
+    seekbackward: (details) => seek((audio?.currentTime ?? 0) - (details.seekOffset || 10)),
+    seekforward: (details) => seek((audio?.currentTime ?? 0) + (details.seekOffset || 10)),
   };
   for (const [action, handler] of Object.entries(handlers)) {
     try {
