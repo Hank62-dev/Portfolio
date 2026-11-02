@@ -25,7 +25,9 @@ export default function SpaceHank() {
   const activeAgent = agents.find((agent) => agent.id === selected) || agents[0];
 
   const submitTask = (text, agentId) => {
-    if (dispatchTask(text, agentId)) setSelected(agentId);
+    const sent = dispatchTask(text, agentId);
+    if (sent) setSelected(agentId);
+    return sent;
   };
 
   const leave = () => {

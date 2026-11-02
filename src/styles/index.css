@@ -425,6 +425,17 @@
   }
 }
 
+/* A plant in the garden sways a little. */
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-1.6deg);
+  }
+  50% {
+    transform: rotate(1.6deg);
+  }
+}
+
 /* Hank's orb breathes; the listening room's colours drift; the record turns while a song plays. */
 @keyframes orb {
   0%,

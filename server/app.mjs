@@ -92,6 +92,11 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
       json(res, 200, await ai.ask(await readJson(req, config.maxAiBodyBytes)));
     },
 
+    'POST /api/ai/cards': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.cards(await readJson(req, config.maxAiBodyBytes)));
+    },
+
     'POST /api/ai/command': async (req, res) => {
       requireAuth(req);
       json(res, 200, await ai.command(await readJson(req, config.maxBodyBytes)));

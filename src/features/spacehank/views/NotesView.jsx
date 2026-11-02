@@ -3,7 +3,7 @@ import { BookOpen, Download, Flame, LayoutGrid, List as ListIcon, Pin, Plus, Sea
 import { Badge, Button, Menu, Spinner } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { askNotes } from '../api/owner';
-import { MOODS, excerpt, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
+import { MOODS, excerpt, hueOf, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
 import { createNote, deleteNote, exportNotes, importNotes, intents, loadNotes, notesStore, openJournal } from '../notes/library';
 import { useStore } from '../store';
 
@@ -24,9 +24,6 @@ const download = (name, text) => {
   a.click();
   URL.revokeObjectURL(url);
 };
-
-// a stable colour per tag, so a note's accent tells you what it is about at a glance
-const hueOf = (tag) => [...(tag || 'note')].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 360, 7);
 
 const ago = (time) => {
   const days = Math.floor((Date.now() - time) / 86400000);
@@ -151,6 +148,7 @@ export default function NotesView() {
       setQuestion(intent.question);
       void ask(intent.question);
     }
+    if (intent.open) setSelected(intent.open);
     if (intent.text) createNote(intent.text, { html: textToHtml(intent.text) }).then((note) => setSelected(note.id));
     intents.set({ notes: null });
   }, [intent, loaded, ask]);

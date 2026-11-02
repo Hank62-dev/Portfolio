@@ -27,6 +27,9 @@ export const tagsOf = (text) => {
   return found;
 };
 
+/** A steady colour (a hue, 0 to 359) for any word, so a tag or topic always looks the same. */
+export const hueOf = (word) => [...String(word || 'note')].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 360, 7);
+
 export const tokenize = (text) => strip(text).split(/[^a-z0-9]+/).filter((t) => t.length > 1);
 
 const K1 = 1.4;

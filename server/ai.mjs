@@ -183,6 +183,32 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now }) => {
     return { action, params: action === 'none' ? {} : params, say: clip(parsed.say, 240) };
   };
 
+  /** Flashcards from a piece of the owner's own text: [{ front, back }], at most `limit`. */
+  const cards = async ({ text, limit = 8 }) => {
+    const source = String(text ?? '').trim().slice(0, 6000);
+    if (source.length < 40) throw new HttpError(400, 'Give it a longer piece of text to learn from.');
+    const wanted = Math.max(1, Math.min(Number(limit) || 8, 12));
+    const prompt = [
+      `Write up to ${wanted} flashcards that test the most important facts and ideas in the text below. Each card has a short question or term (front) and a concise answer (back).`,
+      'Use the language of the text. Do not invent facts that are not in it.',
+      'Reply as JSON: {"cards": [{"front": "...", "back": "..."}]}',
+      `Text: ${JSON.stringify(source)}`,
+    ].join('\n');
+    const data = await gemini(ai.textModel, { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.3 } });
+    let parsed;
+    try {
+      parsed = JSON.parse(textOf(data));
+    } catch {
+      throw new HttpError(502, 'No cards came back. Try again.');
+    }
+    const list = (Array.isArray(parsed.cards) ? parsed.cards : [])
+      .map((c) => ({ front: clip(c?.front, 300), back: clip(c?.back, 600) }))
+      .filter((c) => c.front && c.back)
+      .slice(0, wanted);
+    if (!list.length) throw new HttpError(502, 'No cards came back. Try again.');
+    return { cards: list };
+  };
+
   /** One picture. Returns { mime, data (base64) }. */
   const image = async ({ prompt }) => {
     const wish = clip(prompt, 900);
@@ -219,5 +245,5 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now }) => {
     return { mime: part.inlineData.mimeType || 'image/png', data: part.inlineData.data };
   };
 
-  return { usage, dj, note, image, ask, command };
+  return { usage, dj, note, image, ask, command, cards };
 };

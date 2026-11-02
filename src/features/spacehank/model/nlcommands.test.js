@@ -19,7 +19,7 @@ describe('buildCatalog', () => {
     expect(catalog.find((a) => a.id === 'dispatch_task').description).toContain('codex (Minh Codex');
   });
   it('has an action for everything validate can accept', () => {
-    for (const id of ['navigate', 'dispatch_task', 'focus_agent', 'music', 'play_mood', 'sleep_timer', 'new_note', 'ask_notes', 'search_notes', 'draft_image', 'floor']) {
+    for (const id of ['navigate', 'dispatch_task', 'focus_agent', 'music', 'play_mood', 'sleep_timer', 'new_note', 'ask_notes', 'search_notes', 'draft_image', 'new_card', 'log_money', 'floor']) {
       expect(catalog.some((a) => a.id === id), id).toBe(true);
     }
   });
@@ -61,6 +61,13 @@ describe('validate', () => {
       expect(run(action, params).ok, action).toBe(false);
     }
     expect(run('new_note', { text: '# Title\nbody' }).params.text).toBe('# Title\nbody');
+  });
+
+  it('adds a card, and logs money only when there is an amount', () => {
+    expect(run('new_card', { title: ' Fix the login ' })).toMatchObject({ ok: true, params: { title: 'Fix the login' } });
+    expect(run('new_card', { title: '' }).ok).toBe(false);
+    expect(run('log_money', { text: 'ăn trưa 45k' })).toMatchObject({ ok: true, params: { text: 'ăn trưa 45k' } });
+    expect(run('log_money', { text: 'ăn trưa' }).ok).toBe(false);
   });
 
   it('rejects an action that is not on the list, even if the model insists', () => {

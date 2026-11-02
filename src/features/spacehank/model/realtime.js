@@ -4,6 +4,7 @@ import { findAgent } from './agents';
 export const toUiEvent = (event, { now = false } = {}) => {
   const agent = findAgent(event.agent);
   return {
+    agentId: agent.id,
     name: agent.name,
     action: event.action,
     text: event.text,

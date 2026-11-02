@@ -119,6 +119,34 @@ describe('asking the notes', () => {
   });
 });
 
+describe('flashcards', () => {
+  const text = 'The mitochondria is the organelle that produces most of the cell energy as ATP, through oxidative phosphorylation.';
+  const reply = (obj) => vi.fn().mockResolvedValue(geminiReply(JSON.stringify(obj)));
+
+  it('returns clean cards, dropping empty ones and capping the count', async () => {
+    const ai = createAi({ ai: aiConfig(), fetchImpl: reply({ cards: [{ front: 'What makes ATP?', back: 'The mitochondria' }, { front: '', back: 'x' }, { front: 'q', back: '' }, { front: 'Process?', back: 'Oxidative phosphorylation' }] }) });
+    const result = await ai.cards({ text, limit: 2 });
+    expect(result.cards).toEqual([
+      { front: 'What makes ATP?', back: 'The mitochondria' },
+      { front: 'Process?', back: 'Oxidative phosphorylation' },
+    ]);
+  });
+
+  it('asks the model for cards from only that text', async () => {
+    const fetchImpl = reply({ cards: [{ front: 'a', back: 'b' }] });
+    await createAi({ ai: aiConfig(), fetchImpl }).cards({ text });
+    const prompt = JSON.parse(fetchImpl.mock.calls[0][1].body).contents[0].parts[0].text;
+    expect(prompt).toContain('mitochondria');
+    expect(prompt).toContain('Do not invent facts');
+  });
+
+  it('refuses text that is too short, and a reply with nothing usable', async () => {
+    await expect(createAi({ ai: aiConfig(), fetchImpl: vi.fn() }).cards({ text: 'short' })).rejects.toMatchObject({ status: 400 });
+    await expect(createAi({ ai: aiConfig(), fetchImpl: reply({ cards: [] }) }).cards({ text })).rejects.toMatchObject({ status: 502 });
+    await expect(createAi({ ai: aiConfig(), fetchImpl: vi.fn().mockResolvedValue(geminiReply('nope')) }).cards({ text })).rejects.toMatchObject({ status: 502 });
+  });
+});
+
 describe('natural-language commands', () => {
   const catalog = [
     { id: 'navigate', description: 'Open a tab', params: { tab: 'tab id' } },
@@ -229,7 +257,7 @@ describe('the routes', () => {
     });
 
   it('keeps every helper behind the session', async () => {
-    for (const [method, path] of [['GET', '/api/ai/usage'], ['POST', '/api/ai/ask'], ['POST', '/api/ai/command'], ['POST', '/api/ai/dj'], ['POST', '/api/ai/note'], ['POST', '/api/ai/image'], ['GET', '/api/briefing/calendar']]) {
+    for (const [method, path] of [['GET', '/api/ai/usage'], ['POST', '/api/ai/ask'], ['POST', '/api/ai/cards'], ['POST', '/api/ai/command'], ['POST', '/api/ai/dj'], ['POST', '/api/ai/note'], ['POST', '/api/ai/image'], ['GET', '/api/briefing/calendar']]) {
       expect((await call(path, { method, signedIn: false })).status).toBe(401);
     }
   });

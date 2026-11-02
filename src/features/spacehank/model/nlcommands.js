@@ -21,6 +21,8 @@ export const buildCatalog = ({ tabs, agents }) => [
   { id: 'ask_notes', description: 'Answer a question from the saved notes', params: { question: 'the question' } },
   { id: 'search_notes', description: 'Search the saved notes', params: { query: 'words to look for' } },
   { id: 'draft_image', description: 'Open the Image Studio with a picture description filled in (does not generate it)', params: { prompt: 'the picture to describe' } },
+  { id: 'new_card', description: 'Add a card to the Mission Board', params: { title: 'what the card is about' } },
+  { id: 'log_money', description: 'Log money spent or received in the Wallet, e.g. "ăn trưa 45k" or "lương 8tr"', params: { text: 'the entry as the person said it, with the amount' } },
   { id: 'floor', description: 'Pause or resume the animation on the 3D floor', params: { do: FLOOR_MOVES.join(' | ') } },
 ];
 
@@ -92,6 +94,14 @@ export const validate = (reply, { tabs, agents }) => {
     case 'draft_image': {
       const prompt = text(params.prompt, 500);
       return prompt ? { ok: true, action, params: { prompt }, describe: `Open the Image Studio with: “${text(prompt, 70)}”` } : refuse('What should the picture show?');
+    }
+    case 'new_card': {
+      const title = text(params.title, 140);
+      return title ? { ok: true, action, params: { title }, describe: `Add a card to the Mission Board: “${title}”` } : refuse('What should the card say?');
+    }
+    case 'log_money': {
+      const entry = text(params.text, 160);
+      return /\d/.test(entry) ? { ok: true, action, params: { text: entry }, describe: `Log in the Wallet: “${entry}”` } : refuse('I need an amount, for example "ăn trưa 45k".');
     }
     case 'floor': {
       const move = text(params.do, 20).toLowerCase();

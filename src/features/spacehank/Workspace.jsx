@@ -6,16 +6,22 @@ import { useInstall, useOnline } from './hooks/useInstall';
 import { clsx } from '../../lib/format';
 import CommandPalette from './components/CommandPalette';
 import GuestLocked from './components/GuestLocked';
+import { LOCKED } from './components/lockedCopy';
 import Sidebar from './components/Sidebar';
 import TaskModal from './components/TaskModal';
 import Topbar from './components/Topbar';
-import { djPick, interpretCommand } from './api/owner';
+import { interpretCommand } from './api/owner';
 import { buildCatalog, validate } from './model/nlcommands';
 import { NAVIGATION } from './navigation';
 import { sendIntent } from './notes/library';
+import { useShellContext, playMood } from './hooks/useShellContext';
+import { missions } from './missions/store';
+import { newCard } from './missions/model';
+import { entries } from './wallet/store';
+import { parseEntry } from './wallet/model';
 import { library, loadLibrary } from './music/library';
 import NowPlayingBar from './music/NowPlayingBar';
-import { next, playList, player, previous, setSleepTimer, togglePlay } from './music/player';
+import { next, player, previous, setSleepTimer, togglePlay } from './music/player';
 import { toCss } from './studio/brand';
 import { useStore } from './store';
 import DashboardView from './views/DashboardView';
@@ -28,55 +34,20 @@ const RagView = lazy(() => import('./views/RagView'));
 const MusicView = lazy(() => import('./views/MusicView'));
 const StudioView = lazy(() => import('./views/StudioView'));
 const NotesView = lazy(() => import('./views/NotesView'));
+const ConstellationView = lazy(() => import('./views/ConstellationView'));
+const MissionView = lazy(() => import('./views/MissionView'));
+const StudyView = lazy(() => import('./views/StudyView'));
+const HabitsView = lazy(() => import('./views/HabitsView'));
+const WalletView = lazy(() => import('./views/WalletView'));
+const PulseView = lazy(() => import('./views/PulseView'));
+const ShellView = lazy(() => import('./views/ShellView'));
+const MemosView = lazy(() => import('./views/MemosView'));
 
 const PageLoading = () => (
   <div className="flex items-center gap-3 py-10 font-mono text-fine text-bone-dim">
     <Spinner label="Loading" /> Loading…
   </div>
 );
-
-const LOCKED = {
-  rag: {
-    eyebrow: 'HANK RAG / PRIVATE CHANNEL',
-    title: (
-      <>
-        Hank <em>RAG.</em>
-      </>
-    ),
-    description: 'Ask questions of your own documents and data, with sources.',
-    why: 'It reads private documents, so it is closed in the demo. Sign in to ask Hank.',
-  },
-  docs: {
-    eyebrow: 'KNOWLEDGE',
-    title: (
-      <>
-        Document <em>Vault.</em>
-      </>
-    ),
-    description: 'Upload files and make them searchable.',
-    why: 'The vault holds private files, so it is closed in the demo. Sign in to open it.',
-  },
-  notes: {
-    eyebrow: 'PRIVATE NOTES',
-    title: (
-      <>
-        Second <em>Brain.</em>
-      </>
-    ),
-    description: 'Notes and a daily journal you can ask questions of.',
-    why: 'Notes are personal and live in the owner\'s browser, so there is nothing to show in the demo. Sign in on your own device to use them.',
-  },
-  music: {
-    eyebrow: 'PRIVATE LIBRARY',
-    title: (
-      <>
-        Hank <em>Music.</em>
-      </>
-    ),
-    description: 'A private player for the owner\'s own songs, kept on their device.',
-    why: 'The library lives in the owner\'s browser and is never shared, so there is nothing to show here. Sign in on your own device to use it.',
-  },
-};
 
 export default function Workspace({
   guest = false,
@@ -157,6 +128,8 @@ export default function Workspace({
     return list;
   }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing]);
 
+  const shellTabs = useMemo(() => NAVIGATION.map(({ id, label }) => ({ id, label })), []);
+
   // "Tell Hank what to do": the sentence goes to the server, which only picks from this catalog, and the answer is
   // checked here before it is shown. Nothing runs until the person confirms.
   const interpret = async (text) => {
@@ -186,18 +159,12 @@ export default function Workspace({
         if ((params.do === 'pause') === isPlaying || (params.do === 'resume') === !isPlaying) return togglePlay();
         return undefined;
       }
-      case 'play_mood': {
-        const songs = library.get().tracks;
-        if (!songs.length) return onNotify?.('The music library is empty');
+      case 'play_mood':
         try {
-          const pick = await djPick({ mood: params.mood, tracks: songs.map((t) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre })) });
-          if (!pick.ids.length) return onNotify?.('Nothing in your library fits that');
-          await playList(pick.ids);
-          return onNotify?.(pick.note || 'Mix started');
+          return onNotify?.(await playMood(params.mood));
         } catch (error) {
           return onNotify?.(error.message);
         }
-      }
       case 'sleep_timer':
         setSleepTimer(params.minutes);
         return onNotify?.(`Music will stop in ${params.minutes} minutes`);
@@ -213,6 +180,20 @@ export default function Workspace({
       case 'draft_image':
         sendIntent('studio', { prompt: params.prompt });
         return onTab('studio');
+      case 'new_card': {
+        await missions.load();
+        const cards = missions.store.get().items;
+        await missions.create(newCard(params.title, 'backlog', cards.filter((c) => c.column === 'backlog').length));
+        onNotify?.('Added to the Mission Board');
+        return onTab('missions');
+      }
+      case 'log_money': {
+        const entry = parseEntry(params.text);
+        if (entry.amount <= 0) return onNotify?.('I could not find an amount in that');
+        await entries.create({ ...entry, at: Date.now() });
+        onNotify?.('Logged in the Wallet');
+        return onTab('wallet');
+      }
       case 'floor':
         return (params.do === 'pause') !== paused ? onPause() : undefined;
       default:
@@ -220,13 +201,28 @@ export default function Workspace({
     }
   };
 
+  const shell = useShellContext({ tabs: shellTabs, agents, onTab, onNewTask });
+
   const views = {
     space: <FloorView agents={agents} events={events} selected={selected} onSelect={onSelect} paused={paused} onTab={onTab} />,
     memory: <MemoryView events={events} />,
     studio: <StudioView locked={guest} />,
     ...(guest
       ? Object.fromEntries(Object.entries(LOCKED).map(([id, copy]) => [id, <GuestLocked key={id} {...copy} onSignIn={onLogout} />]))
-      : { rag: <RagView />, docs: <DocumentsView onTab={onTab} />, music: <MusicView />, notes: <NotesView /> }),
+      : {
+          rag: <RagView />,
+          docs: <DocumentsView onTab={onTab} />,
+          music: <MusicView />,
+          notes: <NotesView />,
+          constellation: <ConstellationView onOpenNote={(id) => { sendIntent('notes', { open: id }); onTab('notes'); }} />,
+          memos: <MemosView onNotify={onNotify} />,
+          missions: <MissionView agents={agents} events={events} onNewTask={onNewTask} onNotify={onNotify} connected={connected} />,
+          study: <StudyView onNotify={onNotify} onFocusMusic={() => playMood('deep focus, calm and steady').then(onNotify, (e) => onNotify?.(e.message))} />,
+          habits: <HabitsView />,
+          wallet: <WalletView />,
+          shell: <ShellView ctx={shell} />,
+        }),
+    pulse: <PulseView owner={!guest} />,
   };
   const page = views[tab] || <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
 
