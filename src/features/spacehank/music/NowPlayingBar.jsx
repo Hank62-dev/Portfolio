@@ -1,9 +1,10 @@
+import { useEffect, useRef, useState } from 'react';
 import { Heart, ListMusic, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { useStore } from '../store';
 import Cover from './Cover';
 import { formatTime, library, toggleFavorite } from './library';
-import { cycleRepeat, next, player, previous, seek, setVolume, toggleShuffle, togglePlay } from './player';
+import { cycleRepeat, next, player, previous, seek, setVolume, stop, toggleShuffle, togglePlay } from './player';
 
 const Icon = ({ label, active, onClick, children, className, ...rest }) => (
   <button
@@ -40,6 +41,32 @@ function Slider({ label, value, max, step = 1, onChange, className }) {
 export default function NowPlayingBar({ onOpen, lifted = false }) {
   const { trackId, playing, loading, time, duration, volume, shuffle, repeat, error } = useStore(player);
   const track = useStore(library, (s) => s.tracks.find((t) => t.id === trackId));
+
+  // on a phone, swipe the mini player to the right to put the music away
+  const [slide, setSlide] = useState({ x: 0, dragging: false });
+  const touch = useRef(null);
+  useEffect(() => setSlide({ x: 0, dragging: false }), [trackId]);
+  const onTouchStart = (e) => {
+    touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, locked: false };
+  };
+  const onTouchMove = (e) => {
+    const from = touch.current;
+    if (!from) return;
+    const dx = e.touches[0].clientX - from.x;
+    const dy = e.touches[0].clientY - from.y;
+    if (!from.locked && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.4) from.locked = true;
+    if (from.locked) setSlide({ x: Math.max(0, dx), dragging: true });
+  };
+  const onTouchEnd = () => {
+    const away = touch.current?.locked && slide.x > 90;
+    touch.current = null;
+    if (away) {
+      navigator.vibrate?.(10);
+      setSlide({ x: window.innerWidth, dragging: false });
+      window.setTimeout(stop, 220);
+    } else setSlide({ x: 0, dragging: false });
+  };
+
   if (!track) return null;
 
   const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
@@ -48,13 +75,18 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
     <div
       role="region"
       aria-label="Now playing"
-      className={clsx('fixed inset-x-0 z-30 border-t border-line bg-ink-0/90 backdrop-blur-xl', lifted ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))]' : 'bottom-0')}
+      onTouchStart={lifted ? onTouchStart : undefined}
+      onTouchMove={lifted ? onTouchMove : undefined}
+      onTouchEnd={lifted ? onTouchEnd : undefined}
+      onTouchCancel={lifted ? onTouchEnd : undefined}
+      style={lifted && slide.x ? { transform: `translateX(${slide.x}px)`, opacity: Math.max(0, 1 - slide.x / 280), transition: slide.dragging ? 'none' : 'transform 0.22s ease-out, opacity 0.22s ease-out' } : undefined}
+      className={clsx('fixed z-30 border-line bg-ink-0/90 backdrop-blur-xl', lifted ? 'touch-pan-y inset-x-2.5 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] overflow-hidden rounded-2xl border bg-ink-1/95 shadow-[0_18px_40px_-14px_rgb(0_0_0/0.9)]' : 'inset-x-0 bottom-0 border-t')}
       data-now-playing
     >
-      <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto] items-center gap-3 px-3 py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] md:gap-6 md:px-5">
+      <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 md:py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] md:gap-6 md:px-5">
         <div className="flex min-w-0 items-center gap-3">
           <button type="button" onClick={onOpen} aria-label="Open Hank Music" className="flex min-w-0 items-center gap-3 text-left">
-            <Cover track={track} className="size-12 shadow-lg" rounded="rounded-md" />
+            <Cover track={track} className="size-11 shadow-lg md:size-12" rounded="rounded-md" />
             <span className="min-w-0 leading-tight">
               <b className="block truncate text-fine font-medium text-bone" data-now-title>
                 {track.title}
@@ -72,7 +104,7 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
             <Icon label="Shuffle" active={shuffle} onClick={toggleShuffle} className="max-sm:hidden">
               <Shuffle size={15} aria-hidden="true" />
             </Icon>
-            <Icon label="Previous track" onClick={previous}>
+            <Icon label="Previous track" onClick={previous} className="max-sm:hidden">
               <SkipBack size={17} fill="currentColor" aria-hidden="true" />
             </Icon>
             <button

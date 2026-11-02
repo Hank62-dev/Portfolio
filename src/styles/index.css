@@ -747,6 +747,17 @@ html:has(.app-shell) {
   }
 }
 
+/* The tab bar's notch slides to the active tab: a registered property can be transitioned. */
+@property --notch {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 10%;
+}
+.notch-bar {
+  -webkit-mask-image: radial-gradient(circle 2.3rem at var(--notch) 0.2rem, transparent 97%, #000 100%);
+  mask-image: radial-gradient(circle 2.3rem at var(--notch) 0.2rem, transparent 97%, #000 100%);
+}
+
 /* On a phone every tab is an app of its own, with its own colour: --app-hue is set per tab by the workspace. */
 @media (max-width: 767px) {
   .app-shell {

@@ -457,9 +457,9 @@ export default function StudyView({ onFocusMusic, onNotify }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead eyebrow="Learn" title="Study" accent="Hub." description="Courses and deadlines, flashcards that come back just before you forget, and a focus timer.">
+      <PageHead keepOnPhone eyebrow="Learn" title="Study" accent="Hub." description="Courses and deadlines, flashcards that come back just before you forget, and a focus timer.">
         {hasSample && (
-          <Button variant="ghost" size="sm" onClick={async () => { await Promise.all(courseList.filter((c) => c.sample).map((c) => courses.remove(c.id))); await Promise.all(cardList.filter((c) => c.sample).map((c) => flashcards.remove(c.id))); }}>
+          <Button variant="ghost" size="sm" className="max-md:hidden" onClick={async () => { await Promise.all(courseList.filter((c) => c.sample).map((c) => courses.remove(c.id))); await Promise.all(cardList.filter((c) => c.sample).map((c) => flashcards.remove(c.id))); }}>
             Remove samples
           </Button>
         )}

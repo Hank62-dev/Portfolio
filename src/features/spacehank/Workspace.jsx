@@ -21,6 +21,7 @@ import { parseEntry } from './wallet/model';
 import { library, loadLibrary } from './music/library';
 import Fab from './components/Fab';
 import NowPlayingBar from './music/NowPlayingBar';
+import { openPlayer } from './music/ui';
 import { next, player, previous, setSleepTimer, togglePlay } from './music/player';
 import { toCss } from './studio/brand';
 import { useStore } from './store';
@@ -255,7 +256,7 @@ export default function Workspace({
                 You are offline. Music, notes and pictures still work; AI, the calendar and the realtime link wait for the connection.
               </div>
             )}
-            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack && tab !== 'music' ? 'pb-44' : 'pb-28') : music && hasTrack && tab !== 'music' && 'pb-28')}>
+            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
               <div key={tab} className={clsx('animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
                 <Suspense fallback={<PageLoading />}>{page}</Suspense>
@@ -268,8 +269,8 @@ export default function Workspace({
           </div>
           {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
-          {phone && <Fab raised={hasTrack && tab !== 'music'} />}
-          {music && tab !== 'music' && <NowPlayingBar onOpen={() => onTab('music')} lifted={phone} />}
+          {phone && <Fab raised={hasTrack} />}
+          {music && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => { if (phone) openPlayer(); onTab('music'); }} lifted={phone} />}
           <CommandPalette
             open={paletteOpen}
             onOpenChange={setPaletteOpen}

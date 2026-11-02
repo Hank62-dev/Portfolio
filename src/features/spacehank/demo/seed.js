@@ -1,4 +1,4 @@
-import { addSamples } from '../music/library';
+import { addSamples, loadLibrary } from '../music/library';
 import { habits, sampleHabits } from '../habits/store';
 import { memos } from '../memos/store';
 import { sampleCards, missions } from '../missions/store';
@@ -59,7 +59,10 @@ const sampleMemos = (now = Date.now()) => [
 }));
 
 /** Fills the demo database once. Safe to call every time; it does nothing when the demo has been set up already. */
-export const seedDemo = async () => {
+let inflight = null;
+export const seedDemo = () => (inflight ??= setUp());
+
+const setUp = async () => {
   if (seeded()) return;
   for (const n of sampleNotes()) await createNote(n.text, { sample: true });
   await missions.putMany(sampleCards());
@@ -75,6 +78,7 @@ export const seedDemo = async () => {
   } catch {
     /* the pictures are a nicety; the demo works without them */
   }
+  await loadLibrary();
   await addSamples();
   try {
     localStorage.setItem(MARK, '1');

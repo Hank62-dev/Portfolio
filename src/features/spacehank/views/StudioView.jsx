@@ -274,7 +274,7 @@ function Create({ locked }) {
             id="studio-prompt"
             ref={field}
             aria-label="Describe the picture"
-            rows={4}
+            rows={3}
             maxLength={600}
             disabled={locked}
             value={text}

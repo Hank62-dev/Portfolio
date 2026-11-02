@@ -78,7 +78,7 @@ export default function PulseView({ owner }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead eyebrow="Build" title="Dev" accent="Pulse." description="Is everything up, and what has been happening in your repositories? Checked from your browser, nothing stored.">
+      <PageHead keepOnPhone eyebrow="Build" title="Dev" accent="Pulse." description="Is everything up, and what has been happening in your repositories? Checked from your browser, nothing stored.">
         <Button variant="ghost" size="sm" loading={busy} onClick={refresh}>
           <RefreshCw size={14} aria-hidden="true" /> Check now
         </Button>

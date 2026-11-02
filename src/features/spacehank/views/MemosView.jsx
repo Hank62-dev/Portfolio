@@ -240,7 +240,7 @@ export default function MemosView({ onNotify }) {
               type="button"
               onClick={recording ? stop : start}
               aria-label={recording ? 'Stop recording' : 'Start recording'}
-              className={clsx('relative grid size-24 place-items-center rounded-full text-ink-0 shadow-[0_14px_40px_-10px_rgb(255_91_46/0.7)] transition-transform hover:scale-105 active:scale-95', recording ? 'bg-danger' : 'bg-gradient-to-br from-signal to-[#ff8a5c]')}
+              className={clsx('relative grid size-24 place-items-center rounded-full text-ink-0 max-md:size-20 shadow-[0_14px_40px_-10px_rgb(255_91_46/0.7)] transition-transform hover:scale-105 active:scale-95', recording ? 'bg-danger' : 'bg-gradient-to-br from-signal to-[#ff8a5c]')}
             >
               {recording ? <Square size={26} fill="currentColor" aria-hidden="true" /> : <Mic size={30} aria-hidden="true" />}
             </button>

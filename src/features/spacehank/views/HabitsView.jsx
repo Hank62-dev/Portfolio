@@ -19,7 +19,7 @@ function Plant({ stage, wilting, hue }) {
   const dark = `hsl(${hue} 60% 38%)`;
   const lean = wilting ? 14 : 0;
   return (
-    <svg viewBox="0 0 100 110" className={clsx('h-28 w-24 origin-bottom', !wilting && 'animate-[sway_5s_ease-in-out_infinite]')} role="img" aria-label={`A ${['seed', 'sprout', 'seedling', 'plant', 'plant in bloom', 'tree'][stage]}${wilting ? ', wilting' : ''}`} style={{ filter: wilting ? 'saturate(0.35)' : undefined }}>
+    <svg viewBox="0 0 100 110" className={clsx('h-28 w-24 origin-bottom max-md:h-[4.6rem] max-md:w-16', !wilting && 'animate-[sway_5s_ease-in-out_infinite]')} role="img" aria-label={`A ${['seed', 'sprout', 'seedling', 'plant', 'plant in bloom', 'tree'][stage]}${wilting ? ', wilting' : ''}`} style={{ filter: wilting ? 'saturate(0.35)' : undefined }}>
       <ellipse cx="50" cy="104" rx="26" ry="5" fill="rgb(0 0 0 / 0.35)" />
       <path d="M22 98 Q50 108 78 98 L72 86 Q50 92 28 86 Z" fill="#3a2a22" />
       <g transform={`rotate(${lean} 50 88)`}>
@@ -60,7 +60,7 @@ function Heat({ days, hue }) {
   return (
     <div className="flex gap-[3px]" role="img" aria-label="The last 20 weeks">
       {weeks.map((week, i) => (
-        <div key={i} className="flex flex-col gap-[3px]">
+        <div key={i} className={clsx('flex flex-col gap-[3px]', i < weeks.length - 9 && 'max-md:hidden')}>
           {week.map((cell) => (
             <i key={cell.day} title={cell.day} className={clsx('block size-[10px] rounded-[3px]', cell.future ? 'opacity-0' : cell.done ? '' : 'bg-white/8')} style={cell.done ? { background: `hsl(${hue} 70% 58%)` } : undefined} />
           ))}
@@ -76,7 +76,7 @@ function HabitCard({ habit, mood }) {
   const { stage, name, wilting, streak: run } = stageOf(habit.days);
   const lift = moodLift(habit.days, mood);
   return (
-    <section className="flex flex-col gap-4 rounded-3xl border border-line bg-ink-1 p-5" data-habit={habit.name}>
+    <section className="flex flex-col gap-4 rounded-3xl border border-line bg-ink-1 p-5 max-md:gap-3 max-md:p-4" data-habit={habit.name}>
       <div className="flex items-start gap-3">
         <div className="relative shrink-0 rounded-2xl bg-[radial-gradient(80%_80%_at_50%_100%,rgb(255_255_255/0.07),transparent)] px-1 pt-2">
           <Plant stage={stage} wilting={wilting} hue={habit.hue} />
@@ -96,8 +96,8 @@ function HabitCard({ habit, mood }) {
             <Badge tone={run ? 'signal' : 'default'}>
               <Flame size={11} aria-hidden="true" /> {run} day{run === 1 ? '' : 's'}
             </Badge>
-            <Badge>{rate(habit.days)}% of 30 days</Badge>
-            <Badge>best {longestStreak(habit.days)}</Badge>
+            <Badge className="max-md:hidden">{rate(habit.days)}% of 30 days</Badge>
+            <Badge className="max-md:hidden">best {longestStreak(habit.days)}</Badge>
           </div>
         </div>
         <button type="button" aria-label={`Delete ${habit.name}`} onClick={() => habits.remove(habit.id)} className="text-bone-faint hover:text-danger">
@@ -112,7 +112,7 @@ function HabitCard({ habit, mood }) {
           aria-checked={done}
           aria-label={`${habit.name}: ${done ? 'done today' : 'mark done today'}`}
           onClick={() => habits.update(habit.id, { days: toggleDay(habit.days, today) })}
-          className={clsx('inline-flex h-11 items-center gap-2 rounded-full px-5 font-mono text-fine font-medium transition-all active:scale-95', done ? 'bg-ok/15 text-ok ring-1 ring-ok/40' : 'bg-bone text-ink-0 hover:bg-signal')}
+          className={clsx('inline-flex h-11 items-center gap-2 rounded-full px-5 font-mono text-fine font-medium transition-all active:scale-95 max-md:w-full max-md:justify-center', done ? 'bg-ok/15 text-ok ring-1 ring-ok/40' : 'bg-bone text-ink-0 hover:bg-signal')}
         >
           <Check size={16} strokeWidth={done ? 3 : 2} aria-hidden="true" /> {done ? 'Done today' : 'Water it'}
         </button>

@@ -5,6 +5,7 @@ import { clsx } from '../../../lib/format';
 import { askNotes } from '../api/owner';
 import { MOODS, excerpt, hueOf, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
 import { createNote, deleteNote, exportNotes, importNotes, intents, loadNotes, notesStore, openJournal } from '../notes/library';
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { PageHead } from '../components/Page';
 import { useFab } from '../fab';
 import { useStore } from '../store';
@@ -68,27 +69,28 @@ function NoteCard({ note, query, onOpen, grid }) {
   const hue = hueOf(tags[0] ?? (note.day ? 'journal' : titleOf(note.text)[0]));
   const mood = note.mood ? MOODS[note.mood - 1].label : '';
   return (
-    <li className={clsx(grid && 'mb-3 break-inside-avoid')} data-note-row>
+    <li className={clsx(grid && 'mb-3 break-inside-avoid max-md:mb-2.5')} data-note-row>
       <button
         type="button"
         onClick={() => onOpen(note.id)}
-        className="group relative flex w-full flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-ink-1 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_18px_40px_-20px_rgb(0_0_0/0.9)]"
+        className="group relative flex w-full flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-ink-1 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_18px_40px_-20px_rgb(0_0_0/0.9)] max-md:gap-1.5 max-md:rounded-xl max-md:p-3 max-md:active:scale-[0.98]"
+        style={{ backgroundImage: `linear-gradient(160deg, hsl(${hue} 55% 50% / 0.13), transparent 70%)` }}
       >
         <i className="absolute inset-x-0 top-0 h-0.5 opacity-80" style={{ background: `linear-gradient(90deg, hsl(${hue} 80% 60%), transparent)` }} aria-hidden="true" />
         <span className="flex items-start gap-2">
-          <b className="min-w-0 flex-1 font-display text-lead leading-snug text-bone">{titleOf(note.text)}</b>
+          <b className="min-w-0 flex-1 font-display text-lead leading-snug text-bone max-md:line-clamp-2 max-md:text-[1.02rem]">{titleOf(note.text)}</b>
           {note.pinned && <Pin size={13} className="mt-1.5 shrink-0 text-signal" aria-label="Pinned" />}
         </span>
-        <span className={clsx('text-fine leading-relaxed text-bone-dim', grid ? 'line-clamp-6' : 'line-clamp-2')}>{excerpt(note.text.replace(/^.*\n/, '') || note.text, query, 220)}</span>
-        <span className="mt-1 flex flex-wrap items-center gap-1.5">
+        <span className={clsx('text-fine leading-relaxed text-bone-dim max-md:text-[0.8rem] max-md:leading-snug', grid ? 'line-clamp-6 max-md:line-clamp-5' : 'line-clamp-2')}>{excerpt((note.text.replace(/^.*\n/, '') || note.text).replace(/(^|\s)#[\p{L}\p{N}_-]+/gu, '$1').trim(), query, 220)}</span>
+        <span className="mt-1 flex flex-wrap items-center gap-1.5 max-md:mt-0.5 max-md:gap-1">
           {note.day && <Badge tone="signal">JOURNAL</Badge>}
-          {mood && <Badge>{mood}</Badge>}
+          {mood && <Badge className="max-md:hidden">{mood}</Badge>}
           {tags.slice(0, 3).map((t) => (
             <span key={t} className="rounded-full px-2 py-0.5 font-mono text-[0.68rem]" style={{ background: `hsl(${hueOf(t)} 60% 50% / 0.16)`, color: `hsl(${hueOf(t)} 80% 78%)` }}>
               #{t}
             </span>
           ))}
-          <span className="ml-auto font-mono text-[0.68rem] text-bone-faint">
+          <span className="ml-auto font-mono text-[0.68rem] text-bone-faint max-md:hidden">
             {ago(note.updatedAt)} · {words(note.text)} w
           </span>
         </span>
@@ -181,6 +183,19 @@ export default function NotesView() {
 
   const newNote = async () => setSelected((await createNote('')).id);
   const today = async () => setSelected((await openJournal()).id);
+  const [askOpen, setAskOpen] = useState(false); // phones: the Ask card opens from a button
+  const [tagsOpen, setTagsOpen] = useState(false);
+  const phone = !useMediaQuery('(min-width: 768px)');
+  const gridView = layout === 'grid' || phone;
+  const pinnedNotes = visible.filter((n) => n.pinned);
+  const groups = scope === 'all' && !query.trim() && pinnedNotes.length > 0 && pinnedNotes.length < visible.length;
+  const list = (items) => (
+    <ul className={clsx(gridView ? 'columns-2 gap-2.5 xl:columns-3 xl:gap-3' : 'flex flex-col gap-2')} aria-label="Notes">
+      {items.map((note) => (
+        <NoteCard key={note.id} note={note} query={query} onOpen={setSelected} grid={gridView} />
+      ))}
+    </ul>
+  );
   useFab(selected ? null : { label: 'New note', icon: Plus, onPress: newNote });
   const remove = async () => {
     await deleteNote(current.id);
@@ -215,13 +230,16 @@ export default function NotesView() {
         <Button variant="ghost" size="sm" onClick={today}>
           <BookOpen size={15} aria-hidden="true" /> Today's journal
         </Button>
+        <Button variant="ghost" size="sm" aria-expanded={askOpen} onClick={() => setAskOpen((open) => !open)} className="md:hidden">
+          <Sparkles size={15} aria-hidden="true" /> Ask your notes
+        </Button>
         <Button size="sm" onClick={newNote} className="max-md:hidden">
           <Plus size={15} aria-hidden="true" /> New note
         </Button>
       </PageHead>
 
       {/* ask + journal, as a bento */}
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className={clsx('grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]', !askOpen && 'max-md:hidden')}>
         <section className="relative overflow-hidden rounded-3xl border border-signal/25 bg-[radial-gradient(90%_120%_at_0%_0%,rgb(255_91_46/0.16),transparent_60%),radial-gradient(70%_100%_at_100%_100%,rgb(91_43_255/0.16),transparent_60%),var(--color-ink-1)] p-5 sm:p-6">
           <div className="flex items-center gap-2.5">
             <span className="grid size-8 place-items-center rounded-full bg-signal text-ink-0">
@@ -320,17 +338,17 @@ export default function NotesView() {
             </button>
           ))}
         </div>
-        <div className="relative min-w-44 flex-1 sm:max-w-xs">
+        <div className="relative min-w-44 flex-1 max-md:order-first max-md:basis-full sm:max-w-xs">
           <Search size={14} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-bone-faint" aria-hidden="true" />
           <input
             aria-label="Search notes"
             placeholder="Search notes…"
-            className="h-10 w-full rounded-full border border-line bg-ink-1 pr-4 pl-10 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none"
+            className="h-10 w-full rounded-full border border-line bg-ink-1 pr-4 pl-10 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none max-md:h-11 max-md:bg-ink-2"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-1.5 max-md:hidden">
           <div className="flex rounded-full border border-line bg-ink-1 p-1">
             {[
               ['grid', LayoutGrid, 'Grid view'],
@@ -368,8 +386,8 @@ export default function NotesView() {
       </div>
 
       {tags.length > 0 && (
-        <div className="-mt-3 flex flex-wrap gap-1.5" aria-label="Tags">
-          {tags.map((t) => (
+        <div className="-mt-3 flex flex-wrap gap-1.5 max-md:mt-0" aria-label="Tags">
+          {(phone && !tagsOpen ? tags.slice(0, 4) : tags).map((t) => (
             <button
               key={t}
               type="button"
@@ -381,6 +399,11 @@ export default function NotesView() {
               #{t}
             </button>
           ))}
+          {phone && tags.length > 4 && (
+            <button type="button" onClick={() => setTagsOpen((open) => !open)} className="rounded-full border border-dashed border-line px-3 py-1 font-mono text-[0.72rem] text-bone-faint">
+              {tagsOpen ? 'Less' : `+${tags.length - 4}`}
+            </button>
+          )}
         </div>
       )}
 
@@ -390,11 +413,22 @@ export default function NotesView() {
       ) : error ? (
         <p className="font-mono text-fine text-danger">{error}</p>
       ) : visible.length ? (
-        <ul className={clsx(layout === 'grid' ? 'columns-1 gap-3 sm:columns-2 xl:columns-3' : 'flex flex-col gap-2')} aria-label="Notes">
-          {visible.map((note) => (
-            <NoteCard key={note.id} note={note} query={query} onOpen={setSelected} grid={layout === 'grid'} />
-          ))}
-        </ul>
+        <div className="flex flex-col gap-5">
+          {groups ? (
+            <>
+              <section aria-label="Pinned notes">
+                <h2 className="mb-2 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">Pinned</h2>
+                {list(pinnedNotes)}
+              </section>
+              <section aria-label="Other notes">
+                <h2 className="mb-2 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">Others</h2>
+                {list(visible.filter((n) => !n.pinned))}
+              </section>
+            </>
+          ) : (
+            list(visible)
+          )}
+        </div>
       ) : (
         <div className="grid min-h-[260px] place-items-center rounded-3xl border border-dashed border-line text-center">
           <div className="flex max-w-sm flex-col items-center gap-3 p-6">

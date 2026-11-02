@@ -90,8 +90,8 @@ export default function MemoryView({ events }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <header className="flex flex-wrap items-end justify-between gap-4 max-md:justify-end">
+        <div className="max-md:hidden">
           <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">Long-term context</span>
           <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone">
             Memory <em className="serif-accent">Stream.</em>
@@ -127,7 +127,7 @@ export default function MemoryView({ events }) {
           )}
         </section>
 
-        <section className="flex items-center gap-4 rounded-3xl border border-line bg-ink-1 p-5">
+        <section className="flex items-center gap-4 rounded-3xl border border-line bg-ink-1 p-5 max-md:hidden">
           <Ring value={events.length} max={spacehankConfig.maxEvents} />
           <div className="leading-tight">
             <h2 className="font-display text-lead text-bone">Memory</h2>

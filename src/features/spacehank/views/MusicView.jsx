@@ -1,5 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
+  AudioLines,
+  ChevronDown,
+  ChevronRight,
   FolderPlus,
   Heart,
   ListMusic,
@@ -23,6 +27,7 @@ import {
   X,
 } from 'lucide-react';
 import { Button, Menu } from '../../../design-system';
+import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { clsx } from '../../../lib/format';
 import { djPick } from '../api/owner';
 import { activeLine, parseLrc } from '../music/lrc';
@@ -45,6 +50,7 @@ import {
 } from '../music/library';
 import { cycleRepeat, next, playList, player, playTrack, previous, queueLast, queueNext, seek, setSleepTimer, setVolume, toggleShuffle, togglePlay } from '../music/player';
 import RadialVisualizer from '../music/RadialVisualizer';
+import { closePlayer, musicUi } from '../music/ui';
 import { storageEstimate } from '../storage';
 import { useStore } from '../store';
 
@@ -171,7 +177,11 @@ function SheetRow({ track, index, ids, playlists, inPlaylist, onRemoveFromPlayli
   );
 }
 
+/** Renders its children inside the app shell instead of in place, so a full-screen layer can sit above the title bar and tab bar. */
+const Layer = ({ when, children }) => (when ? createPortal(children, document.querySelector('.app-shell') ?? document.body) : children);
+
 export default function MusicView() {
+  const phone = !useMediaQuery('(min-width: 768px)');
   const { loaded, tracks, playlists, error } = useStore(library);
   const { trackId, playing, loading, time, duration, volume, shuffle, repeat, sleepAt, queue } = useStore(player);
   const current = useMemo(() => tracks.find((t) => t.id === trackId) ?? null, [tracks, trackId]);
@@ -188,6 +198,8 @@ export default function MusicView() {
   const [dj, setDj] = useState({ busy: false, note: '', error: '' });
   const [sampling, setSampling] = useState(false);
   const [newPlaylist, setNewPlaylist] = useState(null);
+  const full = useStore(musicUi, (s) => s.full); // phones: the full-screen player is open
+  const [djOpen, setDjOpen] = useState(false);
   const filePicker = useRef(null);
   const folderPicker = useRef(null);
   const lyricsInput = useRef(null);
@@ -287,7 +299,7 @@ export default function MusicView() {
 
   return (
     <div
-      className="relative isolate min-h-[calc(100vh-10rem)] overflow-hidden rounded-[2rem] border border-line bg-ink-1"
+      className="relative isolate min-h-[calc(100vh-10rem)] overflow-hidden rounded-[2rem] border border-line bg-ink-1 max-md:-mx-5 max-md:min-h-0 max-md:rounded-none max-md:border-0 max-md:bg-transparent"
       onDragOver={(e) => {
         if ([...e.dataTransfer.types].includes('Files')) {
           e.preventDefault();
@@ -318,7 +330,7 @@ export default function MusicView() {
       )}
 
       {/* top bar */}
-      <div className="flex flex-wrap items-center gap-2 px-5 pt-5 sm:px-7">
+      <div className="flex flex-wrap items-center gap-2 px-5 pt-5 max-md:pt-1 sm:px-7">
         <h1 className="flex items-center gap-2 font-display text-lead text-bone max-md:sr-only">
           <Music2 size={18} className="text-signal" aria-hidden="true" /> Hank Music
         </h1>
@@ -366,7 +378,23 @@ export default function MusicView() {
       )}
 
       {/* the stage */}
-      <div className="grid grid-cols-1 items-center gap-8 px-5 py-10 sm:px-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-12">
+      <Layer when={full && phone}>
+      <div
+        className={clsx(
+          'grid grid-cols-1 items-center gap-8 px-5 py-10 sm:px-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-12',
+          full ? 'max-md:fixed max-md:inset-0 max-md:z-[60] max-md:animate-sheet-up max-md:content-start max-md:overflow-x-hidden max-md:overflow-y-auto max-md:pt-[calc(1rem+env(safe-area-inset-top))] max-md:pb-10' : !empty && 'max-md:hidden'
+        )}
+        style={full ? { background: `linear-gradient(180deg, rgb(${tint} / 0.6), transparent 72%), var(--color-ink-0)` } : undefined}
+      >
+        {full && (
+          <div className="flex items-center justify-between md:hidden">
+            <button type="button" aria-label="Close the player" onClick={closePlayer} className="grid size-10 place-items-center rounded-full bg-white/10 text-bone active:scale-95">
+              <ChevronDown size={22} aria-hidden="true" />
+            </button>
+            <span className="font-mono text-[0.68rem] tracking-[0.16em] text-bone-dim uppercase">Now playing</span>
+            <span className="size-10" aria-hidden="true" />
+          </div>
+        )}
         <div className="flex flex-col items-center gap-7">
           <Disc track={current} playing={playing} tint={tint} onEmpty={() => filePicker.current?.click()} />
 
@@ -475,7 +503,7 @@ export default function MusicView() {
                 e.preventDefault();
                 void askDj();
               }}
-              className="flex flex-col gap-3 rounded-[1.75rem] border border-white/10 bg-black/20 p-4 backdrop-blur-xl"
+              className="flex flex-col gap-3 rounded-[1.75rem] border border-white/10 bg-black/20 p-4 backdrop-blur-xl max-md:hidden"
             >
               <div className="flex items-center gap-2.5">
                 <span className="grid size-8 place-items-center rounded-full bg-signal text-ink-0">
@@ -523,19 +551,20 @@ export default function MusicView() {
           )}
         </div>
       </div>
+      </Layer>
 
       {/* the orbit rail */}
       {!empty && (
         <section className="relative pb-6" aria-label="Library">
           <div className="flex flex-wrap items-center gap-2 px-5 pb-4 sm:px-7">
-            <div className="flex gap-1 rounded-full border border-white/10 bg-black/25 p-1 backdrop-blur" role="tablist" aria-label="Library shelves">
+            <div className="flex flex-wrap gap-1 rounded-[1.5rem] border border-white/10 bg-black/25 p-1 backdrop-blur max-md:border-0 max-md:bg-transparent max-md:p-0" role="tablist" aria-label="Library shelves">
               {SHELVES.map(({ id, label }) => (
-                <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => { setShelf(id); setSheet(null); }} className={clsx('rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors', shelf === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
+                <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => { setShelf(id); setSheet(null); }} className={clsx('rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors max-md:py-1.5', shelf === id ? 'bg-bone text-ink-0 max-md:bg-signal' : 'text-bone-dim hover:text-bone max-md:bg-white/8')}>
                   {label}
                 </button>
               ))}
             </div>
-            <span className="ml-auto font-mono text-[0.68rem] text-bone-faint">
+            <span className="ml-auto font-mono text-[0.68rem] text-bone-faint max-md:hidden">
               {tracks.length} songs · {playlists.length} playlists{usage ? ` · ${(usage.used / 1024 / 1024).toFixed(1)} MB` : ''}
             </span>
           </div>
@@ -549,7 +578,89 @@ export default function MusicView() {
             </form>
           )}
 
-          <ul className="grid grid-cols-3 gap-x-4 gap-y-6 px-5 pb-3 sm:flex sm:snap-x sm:gap-5 sm:overflow-x-auto sm:px-7" aria-label={SHELVES.find((s) => s.id === shelf)?.label}>
+          {/* phones: shuffle everything, ask the DJ, then the list, as in a music app's library */}
+          <div className="flex items-center gap-3 px-5 pb-3 md:hidden">
+            <button type="button" aria-label="Shuffle play" onClick={() => void playList(tracks.map((t) => t.id), { shuffle: true })} className="grid size-12 shrink-0 place-items-center rounded-full bg-signal text-ink-0 shadow-[0_10px_24px_-10px_var(--color-signal)] active:scale-95">
+              <Play size={20} fill="currentColor" className="translate-x-px" aria-hidden="true" />
+            </button>
+            <span className="min-w-0 flex-1 leading-tight">
+              <b className="block text-fine font-medium text-bone">Shuffle play</b>
+              <small className="font-mono text-[0.7rem] text-bone-faint">{tracks.length} songs</small>
+            </span>
+            <button type="button" aria-expanded={djOpen} onClick={() => setDjOpen((open) => !open)} className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/6 px-3.5 py-2 font-mono text-[0.76rem] text-bone active:scale-95">
+              <Sparkles size={14} className="text-signal" aria-hidden="true" /> Hank DJ <ChevronDown size={13} className={clsx('transition-transform', djOpen && 'rotate-180')} aria-hidden="true" />
+            </button>
+          </div>
+          {djOpen && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void askDj();
+              }}
+              className="mx-5 mb-4 flex animate-fade-in flex-col gap-3 rounded-3xl border border-white/10 bg-white/6 p-4 md:hidden"
+            >
+              <div className="flex flex-wrap gap-1.5">
+                {MOODS.map((m) => (
+                  <button key={m} type="button" onClick={() => void askDj(m)} className="rounded-full border border-white/10 bg-white/6 px-3.5 py-1.5 font-mono text-[0.78rem] text-bone active:bg-signal/20">
+                    {m}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input aria-label="Tell Hank DJ what to play (phone)" placeholder="or say it in your own words…" value={mood} onChange={(e) => setMood(e.target.value)} className="h-10 min-w-0 flex-1 rounded-full border border-white/10 bg-black/25 px-4 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
+                <Button type="submit" size="sm" loading={dj.busy} disabled={!mood.trim()}>
+                  Play
+                </Button>
+              </div>
+              {(dj.note || dj.error) && <p className={clsx('font-mono text-fine', dj.error ? 'text-danger' : 'text-bone-dim')}>{dj.error || dj.note}</p>}
+            </form>
+          )}
+
+          <ul className="flex flex-col pb-2 md:hidden" aria-label={SHELVES.find((s) => s.id === shelf)?.label}>
+            {shelf === 'playlists' && (
+              <li className="px-3">
+                <button type="button" onClick={() => setNewPlaylist('')} className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-white/6">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-white/8 text-bone-dim">
+                    <Plus size={22} aria-hidden="true" />
+                  </span>
+                  <b className="text-fine font-medium text-bone">New playlist</b>
+                </button>
+              </li>
+            )}
+            {items.map((item) =>
+              item.track ? (
+                <li key={item.key} className="flex items-center px-3" data-track={item.track.title}>
+                  <button type="button" onClick={() => (item.track.id === trackId ? togglePlay() : playTrack(item.track.id, tracks.map((t) => t.id)))} aria-label={`${item.track.id === trackId && playing ? 'Pause' : 'Play'} ${item.track.title}`} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-white/6">
+                    <Cover track={item.track} className="size-12 shrink-0" rounded="rounded-lg" />
+                    <span className="min-w-0 flex-1 leading-tight">
+                      <b className={clsx('block truncate text-fine font-medium', item.track.id === trackId ? 'text-signal' : 'text-bone')}>{item.track.title}</b>
+                      <small className="mt-0.5 flex items-center gap-1.5 font-mono text-[0.7rem] text-bone-faint">
+                        {item.track.id === trackId && playing && <AudioLines size={12} className="shrink-0 text-signal" aria-hidden="true" />}
+                        <span className="truncate">{item.track.artist || 'Unknown artist'}</span>
+                      </small>
+                    </span>
+                  </button>
+                  <button type="button" aria-label={item.track.favorite ? `Remove ${item.track.title} from favorites` : `Add ${item.track.title} to favorites`} aria-pressed={item.track.favorite} onClick={() => toggleFavorite(item.track.id)} className={clsx('grid size-11 shrink-0 place-items-center rounded-full active:scale-90', item.track.favorite ? 'text-signal' : 'text-bone-faint')}>
+                    <Heart size={18} fill={item.track.favorite ? 'currentColor' : 'none'} aria-hidden="true" />
+                  </button>
+                </li>
+              ) : (
+                <li key={item.key} className="px-3">
+                  <button type="button" onClick={() => setSheet(item.open)} aria-label={`Open ${item.title}`} className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-white/6">
+                    <Orbit tracks={item.tracks} liked={item.liked} className="size-12 shrink-0" />
+                    <span className="min-w-0 flex-1 leading-tight">
+                      <b className="block truncate text-fine font-medium text-bone">{item.title}</b>
+                      <small className="font-mono text-[0.7rem] text-bone-faint">{item.sub}</small>
+                    </span>
+                    <ChevronRight size={16} className="shrink-0 text-bone-faint" aria-hidden="true" />
+                  </button>
+                </li>
+              )
+            )}
+            {!items.length && <li className="px-5 py-6 font-mono text-fine text-bone-faint">{shelf === 'liked' ? 'Nothing liked yet. Tap a heart.' : 'Nothing here yet.'}</li>}
+          </ul>
+
+          <ul className="grid grid-cols-3 gap-x-4 gap-y-6 px-5 pb-3 max-md:hidden sm:flex sm:snap-x sm:gap-5 sm:overflow-x-auto sm:px-7" aria-label={SHELVES.find((s) => s.id === shelf)?.label}>
             {shelf === 'playlists' && (
               <li className="sm:w-28 sm:shrink-0 sm:snap-start">
                 <button type="button" onClick={() => setNewPlaylist('')} className="grid aspect-square w-full place-items-center rounded-full border-2 border-dashed border-white/20 text-bone-dim transition-colors hover:border-signal hover:text-signal" aria-label="New playlist">
