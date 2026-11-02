@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import LoginScreen, { AuthLoading } from './components/LoginScreen';
 import { Toast } from '../../design-system';
 import { DEMO_URL, WORKSPACE_URL, isDemo } from './demo/mode';
@@ -8,9 +9,9 @@ import { useRealtime } from './hooks/useRealtime';
 import { DEFAULT_AGENT_ID } from './model/agents';
 import { DEFAULT_TAB, NAVIGATION } from './navigation';
 
-// an installed app's shortcuts open /spacehank?tab=notes and the like
-const startTab = () => {
-  const wanted = new URLSearchParams(window.location.search).get('tab');
+// the open tab lives in the address (/spacehank?tab=notes), which is also what an installed app's shortcuts use
+const tabOf = (params) => {
+  const wanted = params.get('tab');
   return NAVIGATION.some((item) => item.id === wanted) ? wanted : DEFAULT_TAB;
 };
 import Workspace from './Workspace';
@@ -21,7 +22,17 @@ export default function SpaceHank() {
   const guest = isDemo();
   const [ready, setReady] = useState(!guest);
   const demo = useDemo(guest, live.notify);
-  const [tab, setTab] = useState(startTab);
+  const [params, setParams] = useSearchParams();
+  const tab = tabOf(params);
+  // each tab is its own history entry, so the browser's Back button returns to the tab you came from
+  const setTab = (next) => {
+    if (next === tab) return;
+    setParams((previous) => {
+      const search = new URLSearchParams(previous);
+      search.set('tab', next);
+      return search;
+    });
+  };
   const [selected, setSelected] = useState(DEFAULT_AGENT_ID);
   const [paused, setPaused] = useState(false);
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AudioLines,
   ChevronDown,
@@ -200,6 +201,30 @@ export default function MusicView() {
   const [newPlaylist, setNewPlaylist] = useState(null);
   const full = useStore(musicUi, (s) => s.full); // phones: the full-screen player is open
   const [djOpen, setDjOpen] = useState(false);
+
+  // The full-screen player is a layer on top of the page, so it gets its own history entry: the Back button closes it
+  // (and the tab underneath stays), instead of leaving the screen.
+  const navigate = useNavigate();
+  const location = useLocation();
+  const pushed = useRef(false);
+  const layered = full && phone;
+  useEffect(() => {
+    if (layered && !pushed.current) {
+      pushed.current = true;
+      navigate(`${location.pathname}${location.search}`, { state: { player: true } });
+    }
+    if (!layered) pushed.current = false;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the layer opens or closes
+  }, [layered]);
+  const armed = useRef(false); // true once the address really carries the player's entry
+  useEffect(() => {
+    if (location.state?.player) armed.current = true;
+    else if (armed.current && layered) {
+      armed.current = false;
+      closePlayer();
+    }
+  }, [layered, location]);
+  const leavePlayer = () => (armed.current ? navigate(-1) : closePlayer());
   const filePicker = useRef(null);
   const folderPicker = useRef(null);
   const lyricsInput = useRef(null);
@@ -388,7 +413,7 @@ export default function MusicView() {
       >
         {full && (
           <div className="flex items-center justify-between md:hidden">
-            <button type="button" aria-label="Close the player" onClick={closePlayer} className="grid size-10 place-items-center rounded-full bg-white/10 text-bone active:scale-95">
+            <button type="button" aria-label="Close the player" onClick={leavePlayer} className="grid size-10 place-items-center rounded-full bg-white/10 text-bone active:scale-95">
               <ChevronDown size={22} aria-hidden="true" />
             </button>
             <span className="font-mono text-[0.68rem] tracking-[0.16em] text-bone-dim uppercase">Now playing</span>
