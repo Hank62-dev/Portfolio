@@ -7,7 +7,7 @@ export const NAVIGATION = [
   { id: 'space', label: 'SpaceWorkAI', icon: Boxes, section: 'WORKSPACE', keywords: 'floor company agents office 3d' },
   { id: 'rag', label: 'Hank RAG', icon: BrainCircuit, section: 'WORKSPACE', badge: 'AI', keywords: 'chat ask question search knowledge' },
   { id: 'pulse', label: 'Dev Pulse', icon: HeartPulse, section: 'WORKSPACE', keywords: 'github repos commits status uptime health deploy actions' },
-  { id: 'shell', label: 'Hank Shell', icon: Terminal, section: 'WORKSPACE', keywords: 'terminal command line console cli type' },
+  { id: 'shell', label: 'Git Bash', icon: Terminal, section: 'WORKSPACE', keywords: 'terminal command line console cli type' },
   { id: 'docs', label: 'Document Vault', icon: FolderOpen, section: 'KNOWLEDGE', keywords: 'files upload pdf documents' },
   { id: 'notes', label: 'Second Brain', icon: NotebookPen, section: 'KNOWLEDGE', keywords: 'notes journal diary write ideas memory' },
   { id: 'constellation', label: 'Constellation', icon: Orbit, section: 'KNOWLEDGE', keywords: 'graph map stars notes links sky connections' },

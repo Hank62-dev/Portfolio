@@ -50,6 +50,20 @@ describe('stepLayout', () => {
     expect(linked.nodes.every((n) => Number.isFinite(n.x) && Number.isFinite(n.y))).toBe(true);
   });
 
+  it('leaves a fixed star where it was put while the others move around it', () => {
+    const nodes = [{ id: 'a', x: 10, y: 20, vx: 0, vy: 0, fixed: true }, { id: 'b', x: 12, y: 20, vx: 0, vy: 0 }];
+    for (let i = 0; i < 50; i += 1) stepLayout(nodes, []);
+    expect([nodes[0].x, nodes[0].y]).toEqual([10, 20]);
+    expect(Math.abs(nodes[1].x - 10)).toBeGreaterThan(2);
+  });
+
+  it('keeps a pile of stars that all start on the same spot within reach', () => {
+    const nodes = Array.from({ length: 8 }, (_, i) => ({ id: `n${i}`, x: 40, y: 0, vx: 0, vy: 0 }));
+    const edges = nodes.slice(1).map((n) => ({ a: 'n0', b: n.id, weight: 1 }));
+    for (let i = 0; i < 400; i += 1) stepLayout(nodes, edges, { repulsion: 5200, rest: 130 });
+    expect(Math.max(...nodes.map((n) => Math.hypot(n.x, n.y)))).toBeLessThan(600);
+  });
+
   it('does not blow up when two stars start on the same spot', () => {
     const nodes = [{ id: 'a', x: 0, y: 0, vx: 0, vy: 0 }, { id: 'b', x: 0, y: 0, vx: 0, vy: 0 }];
     stepLayout(nodes, []);

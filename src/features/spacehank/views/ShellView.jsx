@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, CornerDownLeft } from 'lucide-react';
 import { clsx } from '../../../lib/format';
-import { PageHead } from '../components/Page';
 import { complete, parseLine, runLine } from '../shell/commands';
 
 const TONE = { ok: 'text-ok', err: 'text-danger', dim: 'text-bone-faint' };
 const QUICK = ['help', 'agents', 'tabs', 'habits', 'weather'];
 const BANNER = [
-  { id: 'b1', kind: 'out', text: 'Hank Shell. Everything the workspace does, from the keyboard.', tone: 'ok' },
+  { id: 'b1', kind: 'out', text: 'Git Bash. Everything the workspace does, from the keyboard.', tone: 'ok' },
   { id: 'b2', kind: 'out', text: 'Type help for the commands. Up and down arrows bring back earlier lines, Tab completes, Ctrl+L clears.', tone: 'dim' },
 ];
 
@@ -70,27 +69,26 @@ export default function ShellView({ ctx }) {
   };
 
   return (
-    <div className="flex flex-col gap-5">
-      <PageHead eyebrow="Build" title="Hank" accent="Shell." description="For people who like typing. Give tasks, play music, log money and tick habits without leaving the keyboard." />
-
-      <div className="flex flex-wrap gap-1.5" aria-label="Try one">
-        {QUICK.map((q) => (
-          <button key={q} type="button" onClick={() => run(q)} className="rounded-full border border-line bg-ink-1 px-3 py-1 font-mono text-[0.78rem] text-bone-dim transition-colors hover:border-signal/60 hover:text-bone">
-            {q}
-          </button>
-        ))}
-      </div>
-
+    <div className="flex min-h-0 flex-1 flex-col">
       <section
-        className="flex h-[calc(100vh-17rem)] min-h-[380px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(80%_60%_at_0%_0%,rgb(255_91_46/0.1),transparent_60%),radial-gradient(60%_60%_at_100%_100%,rgb(91_43_255/0.12),transparent_60%),#08080b] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.9)]"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(80%_60%_at_0%_0%,rgb(255_91_46/0.1),transparent_60%),radial-gradient(60%_60%_at_100%_100%,rgb(91_43_255/0.12),transparent_60%),#08080b] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.9)]"
         onClick={() => window.getSelection()?.isCollapsed && field.current?.focus()}
         aria-label="Shell"
       >
-        <div className="flex items-center gap-1.5 border-b border-white/8 px-4 py-2.5" aria-hidden="true">
-          <i className="size-2.5 rounded-full bg-[#ff5f57]" />
-          <i className="size-2.5 rounded-full bg-[#febc2e]" />
-          <i className="size-2.5 rounded-full bg-[#28c840]" />
-          <span className="ml-3 font-mono text-[0.72rem] text-bone-faint">hank@62: ~</span>
+        <div className="flex items-center gap-1.5 border-b border-white/8 px-4 py-2.5">
+          <span className="flex items-center gap-1.5" aria-hidden="true">
+            <i className="size-2.5 rounded-full bg-[#ff5f57]" />
+            <i className="size-2.5 rounded-full bg-[#febc2e]" />
+            <i className="size-2.5 rounded-full bg-[#28c840]" />
+            <span className="ml-3 font-mono text-[0.72rem] text-bone-faint">hank@62: ~</span>
+          </span>
+          <div className="no-scrollbar ml-auto flex gap-1.5 overflow-x-auto" aria-label="Try one">
+            {QUICK.map((q) => (
+              <button key={q} type="button" onClick={() => run(q)} className="shrink-0 rounded-full border border-white/10 px-2.5 py-0.5 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/60 hover:text-bone">
+                {q}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 font-mono text-[0.84rem] leading-relaxed" role="log" aria-live="polite" data-shell-output>

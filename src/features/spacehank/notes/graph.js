@@ -62,10 +62,10 @@ export const radiusOf = (node) => 5 + Math.min(9, Math.sqrt(node.words) * 0.55) 
 
 /**
  * One step of a force layout, changing the nodes' positions in place: every star pushes the others away, each line
- * pulls its two ends together, and a faint pull to the middle keeps the cloud from drifting off. Returns the
- * movement left, which falls towards zero as the picture settles.
+ * pulls its two ends together, and a faint pull to the middle keeps the cloud from drifting off. A star with `fixed`
+ * set stays exactly where it was put (the others still feel it). Returns the movement left, which falls towards zero as the picture settles.
  */
-export const stepLayout = (nodes, edges, { repulsion = 2600, spring = 0.02, rest = 90, gravity = 0.012, damping = 0.82 } = {}) => {
+export const stepLayout = (nodes, edges, { repulsion = 2600, spring = 0.02, rest = 90, gravity = 0.012, damping = 0.82, maxSpeed = 30 } = {}) => {
   const byId = new Map(nodes.map((n) => [n.id, n]));
   for (let i = 0; i < nodes.length; i += 1) {
     for (let j = i + 1; j < nodes.length; j += 1) {
@@ -101,8 +101,19 @@ export const stepLayout = (nodes, edges, { repulsion = 2600, spring = 0.02, rest
   }
   let energy = 0;
   for (const n of nodes) {
+    if (n.fixed) {
+      n.vx = 0;
+      n.vy = 0;
+      continue;
+    }
     n.vx = (n.vx - n.x * gravity) * damping;
     n.vy = (n.vy - n.y * gravity) * damping;
+    // two stars that start on the same spot push each other with a huge force; a speed limit keeps that from flinging them off
+    const speed = Math.hypot(n.vx, n.vy);
+    if (speed > maxSpeed) {
+      n.vx *= maxSpeed / speed;
+      n.vy *= maxSpeed / speed;
+    }
     n.x += n.vx;
     n.y += n.vy;
     energy += n.vx * n.vx + n.vy * n.vy;

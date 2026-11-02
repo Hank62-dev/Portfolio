@@ -1,4 +1,4 @@
-// Hank Shell: a command line for the workspace. The parser and every command are plain functions that talk to the
+// Git Bash: a command line for the workspace. The parser and every command are plain functions that talk to the
 // app through a `ctx` object (see CTX below), so the whole thing can be tested without a browser.
 //
 // CTX the shell is given:

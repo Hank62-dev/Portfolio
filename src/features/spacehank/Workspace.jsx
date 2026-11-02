@@ -226,12 +226,13 @@ export default function Workspace({
         }),
     pulse: <PulseView owner={!guest} />,
   };
+  const fit = tab === 'shell' && !guest; // Git Bash fills the screen and scrolls inside itself, not the page
   const page = views[tab] || <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
 
   return (
     <SoftContext.Provider value>
       <TooltipProvider>
-        <div className="flex min-h-screen bg-ink-0 text-bone">
+        <div className={clsx('flex bg-ink-0 text-bone', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')}>
           {!phone && (
             <Sidebar
               tab={tab}
@@ -245,7 +246,7 @@ export default function Workspace({
               onLogout={onLogout}
             />
           )}
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <Topbar tab={tab} connected={connected} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
             {!online && (
               <div className="border-b border-line bg-ink-2 px-gutter py-2 font-mono text-fine text-bone-dim" role="status" data-offline>
@@ -260,7 +261,7 @@ export default function Workspace({
                 </Button>
               </div>
             )}
-            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-6 md:py-8', phone ? (music && hasTrack && tab !== 'music' ? 'pb-44' : 'pb-28') : music && hasTrack && tab !== 'music' && 'pb-28')}>
+            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-6 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack && tab !== 'music' ? 'pb-44' : 'pb-28') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               <Suspense fallback={<PageLoading />}>{page}</Suspense>
             </main>
             <footer className="flex flex-wrap max-md:hidden justify-between gap-2 border-t border-line px-gutter py-4 font-mono text-fine text-bone-faint">
