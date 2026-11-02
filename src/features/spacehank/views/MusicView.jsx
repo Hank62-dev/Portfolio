@@ -549,9 +549,9 @@ export default function MusicView() {
             </form>
           )}
 
-          <ul className="flex snap-x gap-5 overflow-x-auto px-5 pb-3 sm:px-7" aria-label={SHELVES.find((s) => s.id === shelf)?.label}>
+          <ul className="grid grid-cols-3 gap-x-4 gap-y-6 px-5 pb-3 sm:flex sm:snap-x sm:gap-5 sm:overflow-x-auto sm:px-7" aria-label={SHELVES.find((s) => s.id === shelf)?.label}>
             {shelf === 'playlists' && (
-              <li className="w-28 shrink-0 snap-start">
+              <li className="sm:w-28 sm:shrink-0 sm:snap-start">
                 <button type="button" onClick={() => setNewPlaylist('')} className="grid aspect-square w-full place-items-center rounded-full border-2 border-dashed border-white/20 text-bone-dim transition-colors hover:border-signal hover:text-signal" aria-label="New playlist">
                   <Plus size={26} aria-hidden="true" />
                 </button>
@@ -560,7 +560,7 @@ export default function MusicView() {
             )}
             {items.map((item) =>
               item.track ? (
-                <li key={item.key} className="group relative w-28 shrink-0 snap-start" data-track={item.track.title}>
+                <li key={item.key} className="group relative sm:w-28 sm:shrink-0 sm:snap-start" data-track={item.track.title}>
                   <button type="button" onClick={() => (item.track.id === trackId ? togglePlay() : playTrack(item.track.id, tracks.map((t) => t.id)))} aria-label={`${item.track.id === trackId && playing ? 'Pause' : 'Play'} ${item.track.title}`} className="block w-full text-center">
                     <span className={clsx('relative block aspect-square overflow-hidden rounded-full ring-2 ring-offset-4 ring-offset-transparent transition-all duration-300 group-hover:scale-105', item.track.id === trackId ? 'ring-signal' : 'ring-transparent')}>
                       <Cover track={item.track} className="size-full" rounded="rounded-none" />
@@ -576,7 +576,7 @@ export default function MusicView() {
                   </button>
                 </li>
               ) : (
-                <li key={item.key} className="group w-28 shrink-0 snap-start">
+                <li key={item.key} className="group sm:w-28 sm:shrink-0 sm:snap-start">
                   <button type="button" onClick={() => setSheet(item.open)} aria-label={`Open ${item.title}`} className="block w-full text-center">
                     <Orbit tracks={item.tracks} liked={item.liked} className="w-full ring-2 ring-transparent ring-offset-4 ring-offset-transparent transition-all duration-300 group-hover:scale-105" />
                     <b className="mt-2 block truncate text-fine font-medium text-bone">{item.title}</b>

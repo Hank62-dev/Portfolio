@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpenCheck, CalendarClock, CheckCircle2, Layers, Pause, Play, Plus, RotateCcw, Sparkles, Timer, Trash2 } from 'lucide-react';
-import { Badge, Button, Input, Select, Textarea } from '../../../design-system';
+import { Badge, Button, DatePicker, Input, Select, Textarea } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { generateCards } from '../api/owner';
 import { Figure, PageHead, Segmented, Tile } from '../components/Page';
@@ -148,7 +148,7 @@ function CourseCard({ course, due, onAdd }) {
           </div>
         </div>
         <Input aria-label="What" placeholder="What is it?" value={title} onChange={(e) => setTitle(e.target.value)} compact className="min-w-40 flex-1" />
-        <Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} compact className="w-40" />
+        <DatePicker aria-label="Date" value={date} onChange={setDate} compact clearable={false} className="w-44" />
         <Button type="submit" size="sm" disabled={!title.trim() || !date} className="h-10">
           <Plus size={14} aria-hidden="true" /> Add
         </Button>

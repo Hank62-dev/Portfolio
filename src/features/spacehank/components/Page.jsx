@@ -19,7 +19,7 @@ export function PageHead({ eyebrow, title, accent, description, children }) {
 /** A row of pill buttons where one is chosen (a tab strip, or a filter). */
 export function Segmented({ value, onChange, options, label }) {
   return (
-    <div className="no-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-full border border-line bg-ink-1 p-1" role="tablist" aria-label={label}>
+    <div className="flex max-w-full flex-wrap gap-1 rounded-[1.5rem] border border-line bg-ink-1 p-1" role="tablist" aria-label={label}>
       {options.map(({ id, label: text, icon: Icon }) => (
         <button
           key={id}
@@ -27,7 +27,7 @@ export function Segmented({ value, onChange, options, label }) {
           role="tab"
           aria-selected={value === id}
           onClick={() => onChange(id)}
-          className={clsx('inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors', value === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}
+          className={clsx('inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors', value === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}
         >
           {Icon && <Icon size={13} aria-hidden="true" />} {text}
         </button>

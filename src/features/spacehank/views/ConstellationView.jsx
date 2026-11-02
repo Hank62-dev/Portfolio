@@ -530,9 +530,9 @@ export default function ConstellationView({ onOpenNote }) {
       <h2 className="mt-2 font-display text-h3 leading-tight text-bone">{pickedNode?.title}</h2>
       <p className="mt-2 line-clamp-3 text-fine leading-relaxed text-bone-dim">{excerpt(picked.text.replace(/^.*\n/, '') || picked.text, '', 200)}</p>
       {linked.length > 0 && (
-        <div className="no-scrollbar -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-0.5 lg:flex-wrap">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {linked.slice(0, 8).map((n) => (
-            <button key={n.id} type="button" onClick={() => setSelected(n.id)} className="shrink-0 rounded-full border border-line px-2.5 py-1 font-mono text-[0.68rem] text-bone-dim hover:border-signal hover:text-bone">
+            <button key={n.id} type="button" onClick={() => setSelected(n.id)} className="rounded-full border border-line px-2.5 py-1 font-mono text-[0.68rem] text-bone-dim hover:border-signal hover:text-bone">
               {n.title}
             </button>
           ))}
@@ -585,9 +585,9 @@ export default function ConstellationView({ onOpenNote }) {
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3">
             {picked && <div className="lg:hidden">{card}</div>}
             {tags.length > 0 && !picked && (
-              <div className="no-scrollbar -mx-3 flex gap-1.5 overflow-x-auto px-3" role="group" aria-label="Filter by tag">
+              <div className="flex flex-wrap gap-1.5 max-sm:[&>button:nth-child(n+7)]:hidden" role="group" aria-label="Filter by tag">
                 {tags.slice(0, 14).map((t) => (
-                  <button key={t} type="button" aria-pressed={tag === t} onClick={() => setTag(tag === t ? '' : t)} className={clsx('shrink-0 rounded-full border px-3 py-1 font-mono text-[0.7rem] backdrop-blur transition-colors', tag === t ? 'border-transparent bg-bone text-ink-0' : 'border-white/10 bg-black/45 text-bone-dim hover:text-bone')}>
+                  <button key={t} type="button" aria-pressed={tag === t} onClick={() => setTag(tag === t ? '' : t)} className={clsx('rounded-full border px-3 py-1 font-mono text-[0.7rem] backdrop-blur transition-colors', tag === t ? 'border-transparent bg-bone text-ink-0' : 'border-white/10 bg-black/45 text-bone-dim hover:text-bone')}>
                     #{t}
                   </button>
                 ))}

@@ -36,7 +36,7 @@ const Cover = ({ project, parallax = false }) =>
   );
 
 // Table cells share one look; the header row and the row-header override a few properties.
-const CELL = 'border-t border-line py-3.5 pr-4 text-left align-top font-normal';
+const CELL = 'border-line py-3.5 pr-4 text-left align-top font-normal md:border-t max-md:block max-md:py-0.5 max-md:pr-0';
 const HEAD =
   'border-b border-line-strong py-3.5 pr-4 text-left align-top font-mono text-[0.72rem] font-normal tracking-[0.08em] text-bone-faint uppercase';
 const EXT_LINK = 'border-b border-line-strong text-bone hover:border-signal hover:text-signal';
@@ -195,9 +195,9 @@ const Work = () => {
         <div className="mt-[clamp(72px,9vw,128px)]">
           <h3 className="font-display text-h3">{c.work.also}</h3>
           <p className="mt-2 mb-7 text-bone-dim">{c.work.alsoLede}</p>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] border-collapse text-fine">
-              <thead>
+          <div className="md:overflow-x-auto">
+            <table className="w-full border-collapse text-fine max-md:block md:min-w-[720px]">
+              <thead className="max-md:hidden">
                 <tr>
                   <th scope="col" className={HEAD}>{c.work.colName}</th>
                   <th scope="col" className={HEAD}>{c.work.colWhat}</th>
@@ -206,10 +206,10 @@ const Work = () => {
                   <th scope="col" className={HEAD}>{c.work.colLinks}</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="max-md:block">
                 {archive.map((p) => (
-                  <tr key={p.slug} data-archive-row className="transition-colors duration-300 hover:bg-ink-1/70">
-                    <th scope="row" className={clsx(CELL, 'font-medium whitespace-nowrap text-bone')}>
+                  <tr key={p.slug} data-archive-row className="transition-colors duration-300 hover:bg-ink-1/70 max-md:block max-md:border-t max-md:border-line max-md:py-4">
+                    <th scope="row" className={clsx(CELL, 'font-medium text-bone md:whitespace-nowrap')}>
                       {p.decisions.length > 0 ? (
                         <Link to={projectHref(p)} className={EXT_LINK}>
                           {p.name}

@@ -1,4 +1,5 @@
-import { Download, LockKeyhole, LogIn, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ChevronDown, Download, LockKeyhole, LogIn, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
 import { Avatar, Badge, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { owner } from '../config';
@@ -25,8 +26,29 @@ function NavButton({ rail, active, label, icon: Icon, badge, onClick }) {
   );
 }
 
+/** True while the list can be scrolled further and has not been touched yet; false once it moves. */
+function useMoreBelow(ref) {
+  const [more, setMore] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const check = () => setMore(el.scrollTop < 8 && el.scrollHeight - el.clientHeight > 24);
+    check();
+    el.addEventListener('scroll', check, { passive: true });
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener('scroll', check);
+      observer.disconnect();
+    };
+  }, [ref]);
+  return more;
+}
+
 export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCollapse, onCollapse, onLogout }) {
   const toggleLabel = rail ? 'Expand sidebar' : 'Collapse sidebar';
+  const list = useRef(null);
+  const more = useMoreBelow(list);
   return (
     <aside
       className={clsx(
@@ -48,18 +70,35 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
         )}
       </div>
 
-      <nav aria-label="Workspace" className="flex flex-1 flex-col gap-5 overflow-y-auto">
-        {NAV_SECTIONS.map((section) => (
-          <div className="flex flex-col gap-1" key={section}>
-            {!rail && (
-              <span className="px-3 pb-1 font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">{section}</span>
-            )}
-            {NAVIGATION.filter((item) => item.section === section).map((item) => (
-              <NavButton key={item.id} rail={rail} active={tab === item.id} onClick={() => onTab(item.id)} {...item} />
-            ))}
-          </div>
-        ))}
-      </nav>
+      <div className="relative min-h-0 flex-1">
+        <nav ref={list} aria-label="Workspace" className="no-scrollbar flex h-full flex-col gap-5 overflow-y-auto">
+          {NAV_SECTIONS.map((section) => (
+            <div className="flex flex-col gap-1" key={section}>
+              {!rail && (
+                <span className="px-3 pb-1 font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">{section}</span>
+              )}
+              {NAVIGATION.filter((item) => item.section === section).map((item) => (
+                <NavButton key={item.id} rail={rail} active={tab === item.id} onClick={() => onTab(item.id)} {...item} />
+              ))}
+            </div>
+          ))}
+        </nav>
+        <span aria-hidden="true" className={clsx('pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-ink-1 via-ink-1/80 to-transparent transition-opacity duration-300', more ? 'opacity-100' : 'opacity-0')} />
+        <button
+          type="button"
+          tabIndex={more ? 0 : -1}
+          aria-hidden={!more}
+          aria-label="Scroll down for more"
+          onClick={() => list.current?.scrollBy({ top: 200, behavior: 'smooth' })}
+          className={clsx(
+            'absolute bottom-1 left-1/2 grid size-8 -translate-x-1/2 place-items-center rounded-full border border-line bg-ink-2/85 text-bone-dim shadow-[0_8px_20px_-8px_rgb(0_0_0/0.8)] backdrop-blur transition-all duration-300 hover:text-bone',
+            more ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0'
+          )}
+          data-scroll-hint
+        >
+          <ChevronDown size={15} className="animate-nudge" aria-hidden="true" />
+        </button>
+      </div>
 
       <div className="flex flex-col gap-1 border-t border-line pt-4">
         {(app?.canInstall || app?.ios) && (

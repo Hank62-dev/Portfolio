@@ -47,9 +47,13 @@ describe('Field', () => {
     expect(withError).toMatch(/aria-describedby="[^"]+-error"/);
   });
 
-  it('renders a native select with a decorative chevron', () => {
-    const markup = html(<Select defaultValue="a"><option value="a">A</option></Select>);
-    expect(markup).toContain('<select');
+  it('shows the chosen option on a menu button with a decorative chevron, not the browser list', () => {
+    const markup = html(<Select value="b" aria-label="Pick"><option value="a">Alpha</option><option value="b">Beta</option></Select>);
+    expect(markup).not.toContain('<select');
+    expect(markup).toContain('aria-haspopup="menu"');
+    expect(markup).toContain('aria-label="Pick"');
+    expect(markup).toContain('Beta');
+    expect(markup).not.toContain('Alpha');
     expect(markup).toContain('aria-hidden="true"');
   });
 });

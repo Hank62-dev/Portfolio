@@ -6,6 +6,7 @@ export { default as Button } from './Button';
 export { Card, CardHeader, Eyebrow, PageHeader, Stat } from './Card';
 export { Dialog, DialogClose } from './Dialog';
 export { EmptyState, ErrorState, Skeleton, Spinner, StatusDot, Toast } from './Feedback';
+export { DatePicker, Calendar } from './DatePicker';
 export { Field, Input, Select, Textarea } from './Field';
 export { SoftContext, useSoft } from './soft';
 export { Menu } from './Menu';

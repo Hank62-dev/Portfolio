@@ -374,14 +374,14 @@ export default function NotesView() {
       </div>
 
       {tags.length > 0 && (
-        <div className="-mt-3 flex gap-1.5 overflow-x-auto pb-1" aria-label="Tags">
+        <div className="-mt-3 flex flex-wrap gap-1.5" aria-label="Tags">
           {tags.map((t) => (
             <button
               key={t}
               type="button"
               aria-pressed={tag === t}
               onClick={() => setTag(tag === t ? '' : t)}
-              className={clsx('shrink-0 rounded-full border px-3 py-1 font-mono text-[0.72rem] transition-colors', tag === t ? 'border-transparent text-ink-0' : 'border-line text-bone-dim hover:border-line-strong')}
+              className={clsx('rounded-full border px-3 py-1 font-mono text-[0.72rem] transition-colors', tag === t ? 'border-transparent text-ink-0' : 'border-line text-bone-dim hover:border-line-strong')}
               style={tag === t ? { background: `hsl(${hueOf(t)} 80% 70%)` } : undefined}
             >
               #{t}

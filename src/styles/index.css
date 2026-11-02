@@ -78,6 +78,13 @@
   --animate-aurora: aurora 28s ease-in-out infinite alternate;
   --animate-grain: grain 0.9s steps(1) infinite;
   --animate-orbit: orbit 32s linear infinite;
+  --animate-nudge: nudge 1.9s ease-in-out infinite;
+
+  @keyframes nudge {
+    50% {
+      transform: translateY(3px);
+    }
+  }
 
   @keyframes orbit {
     to {
@@ -709,28 +716,6 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-/* Date and time fields: follow the theme, keep the picker icon visible on dark, and sit on one line. */
-input[type='date'],
-input[type='time'] {
-  color-scheme: dark;
-  min-width: 0;
-  font-variant-numeric: tabular-nums;
-}
-:root[data-theme='light'] input[type='date'],
-:root[data-theme='light'] input[type='time'] {
-  color-scheme: light;
-}
-input[type='date']::-webkit-calendar-picker-indicator,
-input[type='time']::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.55;
-  transition: opacity 0.2s;
-}
-input[type='date']::-webkit-calendar-picker-indicator:hover,
-input[type='time']::-webkit-calendar-picker-indicator:hover {
-  opacity: 1;
 }
 
 /* A strip that scrolls sideways without showing its bar (tab strips, tag rows on a phone). */

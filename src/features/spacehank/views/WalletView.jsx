@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Banknote, Bus, ChevronLeft, ChevronRight, CircleEllipsis, Download, Gamepad2, GraduationCap, HeartPulse, House, ShoppingBag, Sparkles, Target, Trash2, TrendingDown, TrendingUp, Utensils, Wallet as WalletIcon } from 'lucide-react';
-import { Badge, Button } from '../../../design-system';
+import { Banknote, Bus, Check, ChevronLeft, ChevronRight, CircleEllipsis, Download, Gamepad2, GraduationCap, HeartPulse, House, Plus, ShoppingBag, Sparkles, Target, Trash2, TrendingDown, TrendingUp, Utensils, Wallet as WalletIcon } from 'lucide-react';
+import { Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
-import { PageHead, Tile } from '../components/Page';
+import { PageHead, Segmented, Tile } from '../components/Page';
 import { useStore } from '../store';
 import { CATEGORIES, categoryOf, compact, formatVnd, inMonth, monthKey, parseEntry, summarize, toCsv } from '../wallet/model';
 import { budgets, entries, sampleEntries } from '../wallet/store';
@@ -19,6 +19,8 @@ function CatIcon({ id, size = 16, className = 'size-9' }) {
     </span>
   );
 }
+
+const EXAMPLES = ['ăn trưa 45k', 'grab 38 nghìn', 'cà phê 30k', 'lương 8tr'];
 
 const monthLabel = (key) => {
   const [y, m] = key.split('-').map(Number);
@@ -99,9 +101,19 @@ export default function WalletView() {
 
   const understand = (e) => {
     e.preventDefault();
+    if (draft) {
+      // Enter once more on a line that has been understood saves it
+      void save();
+      return;
+    }
     if (!text.trim()) return;
     setDraft(parseEntry(text));
   };
+  const tryExample = (example) => {
+    setText(example);
+    setDraft(parseEntry(example));
+  };
+  const retype = (type) => setDraft({ ...draft, type, category: type === 'income' ? 'income' : draft.category === 'income' ? 'other' : draft.category });
 
   const save = async () => {
     if (!draft || draft.amount <= 0) return;
@@ -122,45 +134,76 @@ export default function WalletView() {
         </Button>
       </PageHead>
 
-      <form onSubmit={understand} className="rounded-3xl border border-signal/25 bg-[radial-gradient(70%_120%_at_0%_0%,rgb(255_91_46/0.14),transparent_60%),var(--color-ink-1)] p-4 sm:p-5">
-        <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-black/30 p-1.5 pl-4 focus-within:border-signal/60">
-          <WalletIcon size={17} className="shrink-0 text-signal" aria-hidden="true" />
-          <input aria-label="Log money" placeholder="ăn trưa 45k" value={text} onChange={(e) => { setText(e.target.value); setDraft(null); }} className="h-10 min-w-0 flex-1 bg-transparent text-body text-bone placeholder:text-bone-faint focus-visible:outline-none" />
-          <Button type="submit" size="sm" disabled={!text.trim()}>
-            Add
+      <form onSubmit={understand} className="rounded-[2rem] border border-white/10 bg-[radial-gradient(70%_130%_at_0%_0%,rgb(255_91_46/0.13),transparent_60%),radial-gradient(60%_120%_at_100%_100%,rgb(91_43_255/0.1),transparent_60%),var(--color-ink-1)] p-3 sm:p-4">
+        <div className="flex items-center gap-2.5 rounded-full bg-black/35 p-1.5 pl-2 ring-1 ring-white/10 transition-shadow focus-within:ring-2 focus-within:ring-signal/55">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">
+            <WalletIcon size={18} aria-hidden="true" />
+          </span>
+          <input aria-label="Log money" placeholder="ăn trưa 45k" autoComplete="off" value={text} onChange={(e) => { setText(e.target.value); setDraft(null); }} className="h-11 min-w-0 flex-1 bg-transparent text-lead text-bone placeholder:text-bone-faint focus-visible:outline-none" />
+          <Button type="submit" className="shrink-0" disabled={!text.trim()}>
+            <Plus size={15} aria-hidden="true" /> Add
           </Button>
         </div>
+
+        {!draft && !text && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 px-1" aria-label="Examples">
+            <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Try</span>
+            {EXAMPLES.map((example) => (
+              <button key={example} type="button" onClick={() => tryExample(example)} className="rounded-full border border-white/10 px-3 py-1 font-mono text-[0.74rem] text-bone-dim transition-colors hover:border-signal/50 hover:text-bone">
+                {example}
+              </button>
+            ))}
+          </div>
+        )}
+
         {draft && (
-          <div className="mt-3 flex flex-wrap items-center gap-2" data-draft>
-            <Badge tone={draft.type === 'income' ? 'ok' : 'default'}>{draft.type === 'income' ? 'Income' : 'Expense'}</Badge>
-            <b className="font-display text-lead text-bone tabular-nums">{draft.amount ? formatVnd(draft.amount) : 'No amount found'}</b>
-            <select aria-label="Category" value={draft.category} onChange={(e) => setDraft({ ...draft, category: e.target.value })} className="h-8 rounded-full border border-line bg-ink-2 px-3 font-mono text-[0.78rem] text-bone">
-              {CATEGORIES.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.label}
-                </option>
+          <div className="mt-4 flex animate-fade-in flex-col gap-3.5 border-t border-white/8 px-1 pt-4" data-draft>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
+              <Segmented value={draft.type} onChange={retype} label="Type" options={[{ id: 'expense', label: 'Expense' }, { id: 'income', label: 'Income' }]} />
+              {draft.amount ? (
+                <b className={clsx('font-display text-h3 leading-none tabular-nums', draft.type === 'income' ? 'text-ok' : 'text-bone')}>{draft.type === 'income' ? '+' : ''}{formatVnd(draft.amount)}</b>
+              ) : (
+                <span className="text-fine text-danger">No amount found. Add one like 45k.</span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Category">
+              {CATEGORIES.filter((c) => (draft.type === 'income' ? c.id === 'income' || c.id === 'other' : c.id !== 'income')).map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={draft.category === c.id}
+                  onClick={() => setDraft({ ...draft, category: c.id })}
+                  className={clsx('inline-flex items-center gap-2 rounded-full border py-1 pr-3.5 pl-1 text-fine transition-colors', draft.category === c.id ? 'border-transparent bg-white/12 text-bone' : 'border-white/10 text-bone-dim hover:border-white/25 hover:text-bone')}
+                >
+                  <CatIcon id={c.id} size={13} className="size-6" /> {c.label}
+                </button>
               ))}
-            </select>
-            <span className="min-w-0 flex-1 truncate text-fine text-bone-dim">{draft.note}</span>
-            <Button size="sm" onClick={save} disabled={draft.amount <= 0}>
-              Save
-            </Button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="min-w-0 flex-1 truncate text-fine text-bone-dim">{draft.note}</span>
+              <Button type="button" onClick={save} disabled={draft.amount <= 0}>
+                <Check size={15} aria-hidden="true" /> Save
+              </Button>
+            </div>
           </div>
         )}
       </form>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <button type="button" aria-label="Previous month" onClick={() => setMonth(shift(month, -1))} className="grid size-9 place-items-center rounded-full border border-line text-bone-dim hover:text-bone">
           <ChevronLeft size={16} aria-hidden="true" />
         </button>
-        <h2 className="min-w-40 text-center font-display text-lead text-bone" data-month>
+        <h2 className="min-w-0 flex-1 text-center font-display text-lead text-bone sm:min-w-40 sm:flex-none" data-month>
           {monthLabel(month)}
         </h2>
         <button type="button" aria-label="Next month" onClick={() => setMonth(shift(month, 1))} disabled={month >= monthKey()} className="grid size-9 place-items-center rounded-full border border-line text-bone-dim hover:text-bone disabled:opacity-35">
           <ChevronRight size={16} aria-hidden="true" />
         </button>
         {items.some((e) => e.sample) && (
-          <Button variant="ghost" size="sm" className="ml-auto" onClick={() => Promise.all(items.filter((e) => e.sample).map((e) => entries.remove(e.id)))}>
+          <Button variant="ghost" size="sm" className="max-sm:basis-full sm:ml-auto" onClick={() => Promise.all(items.filter((e) => e.sample).map((e) => entries.remove(e.id)))}>
             Remove samples
           </Button>
         )}

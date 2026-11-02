@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bot, CalendarDays, Check, CircleCheck, Hourglass, Inbox, ListChecks, MoreHorizontal, Plus, Sparkles, Trash2, X } from 'lucide-react';
-import { Badge, Button, Dialog, Input, Menu, Select, Textarea } from '../../../design-system';
+import { Badge, Button, DatePicker, Dialog, Input, Menu, Select, Textarea } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { PageHead } from '../components/Page';
 import { COLUMNS, dueLabel, dueState, inColumn, moveCard, newCard, progress } from '../missions/model';
@@ -117,7 +117,7 @@ function CardDialog({ card, agents, onClose, onHand }) {
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1 font-mono text-fine text-bone-dim">
             Due
-            <Input type="date" value={draft.due} onChange={(e) => save({ due: e.target.value })} />
+            <DatePicker value={draft.due} onChange={(due) => save({ due })} placeholder="No date" />
           </label>
           <label className="flex flex-col gap-1 font-mono text-fine text-bone-dim">
             Labels
@@ -263,7 +263,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
         </div>
       )}
 
-      <div className="flex snap-x gap-3 overflow-x-auto pb-3 lg:grid lg:grid-cols-4 lg:overflow-visible">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
         {COLUMNS.map((column) => (
           <section
             key={column.id}
@@ -275,7 +275,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
             }}
             onDragLeave={(e) => e.currentTarget.contains(e.relatedTarget) || setOver(null)}
             onDrop={(e) => onDrop(e, column.id)}
-            className={clsx('flex min-h-[320px] w-[78vw] shrink-0 snap-start flex-col gap-3 rounded-[1.75rem] border p-3.5 transition-colors sm:w-72 lg:w-auto', over === column.id ? 'border-signal bg-signal-soft' : 'border-line bg-ink-1')}
+            className={clsx('flex min-h-28 flex-col gap-3 rounded-[1.75rem] border p-3.5 transition-colors md:min-h-[320px]', over === column.id ? 'border-signal bg-signal-soft' : 'border-line bg-ink-1')}
           >
             <header className="flex items-center gap-2 px-1.5 pt-1">
               <span className="grid size-7 place-items-center rounded-full" style={{ background: `hsl(${COLUMN_STYLE[column.id].hue} 60% 50% / 0.18)`, color: `hsl(${COLUMN_STYLE[column.id].hue} 85% 76%)` }}>

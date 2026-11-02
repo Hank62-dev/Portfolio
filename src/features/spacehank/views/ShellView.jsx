@@ -75,16 +75,16 @@ export default function ShellView({ ctx }) {
         onClick={() => window.getSelection()?.isCollapsed && field.current?.focus()}
         aria-label="Shell"
       >
-        <div className="flex items-center gap-1.5 border-b border-white/8 px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 border-b border-white/8 px-4 py-2.5">
           <span className="flex items-center gap-1.5" aria-hidden="true">
             <i className="size-2.5 rounded-full bg-[#ff5f57]" />
             <i className="size-2.5 rounded-full bg-[#febc2e]" />
             <i className="size-2.5 rounded-full bg-[#28c840]" />
             <span className="ml-3 font-mono text-[0.72rem] text-bone-faint">hank@62: ~</span>
           </span>
-          <div className="no-scrollbar ml-auto flex gap-1.5 overflow-x-auto" aria-label="Try one">
+          <div className="ml-auto flex flex-wrap gap-1.5" aria-label="Try one">
             {QUICK.map((q) => (
-              <button key={q} type="button" onClick={() => run(q)} className="shrink-0 rounded-full border border-white/10 px-2.5 py-0.5 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/60 hover:text-bone">
+              <button key={q} type="button" onClick={() => run(q)} className="rounded-full border border-white/10 px-2.5 py-0.5 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/60 hover:text-bone">
                 {q}
               </button>
             ))}
