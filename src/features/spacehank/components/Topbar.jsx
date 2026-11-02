@@ -1,55 +1,121 @@
+import { useEffect, useState } from 'react';
 import { ChevronRight, Command, Pause, Play, Plus, Search } from 'lucide-react';
 import { Avatar, Badge, Button, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { owner } from '../config';
-import { NAVIGATION } from '../navigation';
+import { NAVIGATION, tabHue } from '../navigation';
 
 const isMac = typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(navigator.platform ?? '');
+
+
+/** True once the page has scrolled a little, so the phone's title bar can fold down to a compact one. */
+function useScrolled(distance = 12) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > distance);
+    on();
+    window.addEventListener('scroll', on, { passive: true });
+    return () => window.removeEventListener('scroll', on);
+  }, [distance]);
+  return scrolled;
+}
+
+/**
+ * The phone's title bar, as in a native app: the screen's icon and name in large type that folds down to a compact bar
+ * when you scroll, the colour of the screen glowing behind it, and only the actions that belong to this screen.
+ */
+function PhoneBar({ tab, current, connected, guest, paused, onPause, onNewTask, onPalette }) {
+  const scrolled = useScrolled();
+  const hue = tabHue(tab);
+  const Icon = current.icon;
+  const agentsScreen = tab === 'hank' || tab === 'space';
+  return (
+    // the box keeps its height, and sticks 1.1rem above the top once scrolled, so folding never moves the page
+    <header
+      className={clsx('sticky top-[-1.1rem] z-20 flex h-[calc(4.4rem+env(safe-area-inset-top))] items-end px-gutter pb-2.5 transition-[background-color,box-shadow,backdrop-filter] duration-300 md:hidden', scrolled ? 'bg-ink-0/80 shadow-[0_1px_0_var(--color-line)] backdrop-blur-xl' : 'bg-transparent')}
+      data-phone-bar
+    >
+      <span aria-hidden="true" className={clsx('pointer-events-none absolute inset-0 transition-opacity duration-500', scrolled ? 'opacity-40' : 'opacity-100')} style={{ background: `radial-gradient(80% 140% at 0% 0%, hsl(${hue} 80% 55% / 0.24), transparent 70%)` }} />
+      <div className="relative flex w-full items-center gap-3">
+        <span
+          className={clsx('grid shrink-0 place-items-center text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_8px_18px_-8px_var(--color-signal)] transition-all duration-300', scrolled ? 'size-8 rounded-[0.7rem]' : 'size-11 rounded-[1rem]')}
+          style={{ background: `linear-gradient(150deg, hsl(${hue} 72% 48%), hsl(${(hue + 40) % 360} 66% 32%))` }}
+          aria-hidden="true"
+        >
+          <Icon size={scrolled ? 16 : 22} strokeWidth={1.8} />
+        </span>
+        <h1 className="min-w-0 flex-1 leading-none">
+          <small className={clsx('block overflow-hidden font-mono text-[0.58rem] tracking-[0.18em] text-signal uppercase transition-all duration-300', scrolled ? 'mb-0 max-h-0 opacity-0' : 'mb-1.5 max-h-4 opacity-100')}>{current.section}</small>
+          <b className={clsx('block truncate font-display font-normal tracking-tight text-bone transition-[font-size] duration-300', scrolled ? 'text-[1.2rem]' : 'text-[1.65rem]')}>{current.label}</b>
+        </h1>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {guest ? (
+            <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-warn/40 bg-warn/10 px-2.5 font-mono text-[0.62rem] tracking-[0.12em] text-warn">
+              <i className="size-1.5 rounded-full bg-warn" aria-hidden="true" /> DEMO
+            </span>
+          ) : (
+            <span role="status" className="grid size-7 place-items-center" title={connected ? 'Realtime link' : 'Server offline'}>
+              <i className={clsx('size-2 rounded-full', connected ? 'bg-ok shadow-[0_0_0_4px_rgb(60_200_130/0.18)]' : 'bg-danger')} aria-hidden="true" />
+              <span className="sr-only">{connected ? 'REALTIME LINK' : 'SERVER OFFLINE'}</span>
+            </span>
+          )}
+          {tab === 'space' && (
+            <button type="button" aria-label={paused ? 'Resume floor' : 'Pause floor'} onClick={onPause} className="grid size-10 place-items-center rounded-full bg-white/7 text-bone-dim active:scale-90">
+              {paused ? <Play size={17} aria-hidden="true" /> : <Pause size={17} aria-hidden="true" />}
+            </button>
+          )}
+          <button type="button" aria-label="Open the command palette" onClick={onPalette} className="grid size-10 place-items-center rounded-full bg-white/7 text-bone active:scale-90" data-palette-button>
+            <Search size={18} aria-hidden="true" />
+          </button>
+          {agentsScreen && (
+            <button type="button" aria-label="New task" onClick={onNewTask} className="grid size-10 place-items-center rounded-full bg-signal text-ink-0 shadow-[0_8px_18px_-8px_var(--color-signal)] active:scale-90">
+              <Plus size={19} strokeWidth={2.2} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}
 
 export default function Topbar({ tab, connected, guest, paused, onPause, onNewTask, onPalette }) {
   const current = NAVIGATION.find((item) => item.id === tab) || NAVIGATION[0];
   const pauseLabel = paused ? 'Resume floor' : 'Pause floor';
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line bg-ink-0/85 px-gutter backdrop-blur max-md:h-[calc(4rem+env(safe-area-inset-top))] max-md:border-b-0 max-md:bg-ink-0/90 max-md:pt-[env(safe-area-inset-top)]">
+    <>
+      <PhoneBar tab={tab} current={current} connected={connected} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} />
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line bg-ink-0/85 px-gutter backdrop-blur max-md:hidden">
       <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 font-mono text-fine text-bone-faint">
-        <span className="max-md:hidden">HANK62</span>
-        <ChevronRight size={14} aria-hidden="true" className="shrink-0 max-md:hidden" />
-        {/* on a phone the bar is an app's title bar: the screen's name, set large */}
-        <b className="truncate font-medium text-bone max-md:font-display max-md:text-[1.55rem] max-md:leading-none max-md:font-normal max-md:tracking-tight max-md:[font-feature-settings:normal]">
-          <span className="flex flex-col gap-1 md:hidden">
-            <small className="font-mono text-[0.6rem] leading-none font-normal tracking-[0.16em] text-signal uppercase">{current.section}</small>
-            {current.label}
-          </span>
-          <span className="max-md:hidden">{current.label.toUpperCase()}</span>
-        </b>
+        <span>HANK62</span>
+        <ChevronRight size={14} aria-hidden="true" className="shrink-0" />
+        <b className="truncate font-medium text-bone">{current.label.toUpperCase()}</b>
       </nav>
       <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={onPalette}
           aria-label="Open the command palette"
-          className="flex h-9 items-center gap-2 rounded-sm border border-line bg-ink-2 px-3 font-mono text-fine text-bone-dim transition-colors hover:border-line-strong hover:text-bone max-md:size-10 max-md:justify-center max-md:rounded-full max-md:border-0 max-md:bg-white/6 max-md:p-0"
+          className="flex h-9 items-center gap-2 rounded-sm border border-line bg-ink-2 px-3 font-mono text-fine text-bone-dim transition-colors hover:border-line-strong hover:text-bone"
           data-palette-button
         >
-          <Command size={14} aria-hidden="true" className="max-md:hidden" />
-          <Search size={18} aria-hidden="true" className="md:hidden" />
-          <span className="max-md:hidden">Search</span>
-          <kbd className="rounded-sm border border-line px-1 text-[0.68rem] text-bone-faint max-md:hidden">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+          <Command size={14} aria-hidden="true" />
+          <span>Search</span>
+          <kbd className="rounded-sm border border-line px-1 text-[0.68rem] text-bone-faint">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
         </button>
-        {/* On narrow screens only the status dot stays visible; the text remains for screen readers. */}
         <Badge tone={guest ? 'warn' : connected ? 'ok' : 'danger'} dot>
-          <span className={guest ? undefined : 'max-sm:sr-only'}>{guest ? 'DEMO' : connected ? 'REALTIME LINK' : 'SERVER OFFLINE'}</span>
+          {guest ? 'DEMO' : connected ? 'REALTIME LINK' : 'SERVER OFFLINE'}
         </Badge>
         <Tooltip content={pauseLabel} side="bottom">
-          <Button variant="secondary" size="icon" aria-label={pauseLabel} onClick={onPause} className={tab === 'space' ? undefined : 'max-md:hidden'}>
+          <Button variant="secondary" size="icon" aria-label={pauseLabel} onClick={onPause}>
             {paused ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}
           </Button>
         </Tooltip>
-        <Button size="sm" onClick={onNewTask} aria-label="New task" className={clsx('max-md:size-10 max-md:p-0', tab !== 'hank' && tab !== 'space' && 'max-md:hidden')}>
-          <Plus size={15} aria-hidden="true" /> <span className="max-sm:sr-only">New task</span>
+        <Button size="sm" onClick={onNewTask} aria-label="New task">
+          <Plus size={15} aria-hidden="true" /> New task
         </Button>
-        <Avatar className="max-sm:hidden">{guest ? 'G' : owner.initials}</Avatar>
+        <Avatar>{guest ? 'G' : owner.initials}</Avatar>
       </div>
     </header>
+    </>
   );
 }
