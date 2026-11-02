@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Eraser, Lightbulb, RotateCcw } from 'lucide-react';
-import { Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
 import { clashes, makeSudoku } from './logic';
-import { Result, Stat, seconds, useBest } from './shared';
+import { INK, InkBox, InkButton, Note, PENCIL, RED, Score } from './ink';
+import { seconds, useBest } from './shared';
 
 const LEVELS = [
-  { id: 'easy', label: 'Easy', blanks: 34 },
-  { id: 'medium', label: 'Medium', blanks: 44 },
-  { id: 'hard', label: 'Hard', blanks: 52 },
+  { id: 'easy', label: 'Dễ', blanks: 34 },
+  { id: 'medium', label: 'Vừa', blanks: 44 },
+  { id: 'hard', label: 'Khó', blanks: 52 },
 ];
+const CELL = 40;
 
-/** Sudoku: a puzzle with one answer. Tap a cell, then a digit; clashes turn red; a hint fills the chosen cell. */
+/** Sudoku on squared paper: printed digits in pencil, yours in blue pen, clashes in red, the chosen square in highlighter. */
 export default function Sudoku() {
   const [level, setLevel] = useState('easy');
-  const [game, setGame] = useState(null); // { puzzle, solution }
+  const [game, setGame] = useState(null);
   const [grid, setGrid] = useState([]);
   const [chosen, setChosen] = useState(null);
   const [started, setStarted] = useState(0);
@@ -25,7 +25,6 @@ export default function Sudoku() {
 
   const deal = (id = level) => {
     setGame(null);
-    // the puzzle takes a moment to make: let the screen say so first
     window.setTimeout(() => {
       const made = makeSudoku(LEVELS.find((l) => l.id === id).blanks);
       setGame(made);
@@ -65,78 +64,88 @@ export default function Sudoku() {
     setHints((n) => n + 1);
   };
   const same = chosen !== null && grid[chosen] ? grid[chosen] : 0;
+  const side = CELL * 9;
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-1.5" role="radiogroup" aria-label="Level">
         {LEVELS.map((l) => (
-          <button key={l.id} type="button" role="radio" aria-checked={level === l.id} onClick={() => setLevel(l.id)} className={clsx('flex-1 rounded-full py-2 font-mono text-[0.78rem] transition-colors', level === l.id ? 'bg-signal text-ink-0' : 'bg-white/8 text-bone-dim')}>
+          <InkButton key={l.id} role="radio" aria-checked={level === l.id} solid={level === l.id} onClick={() => setLevel(l.id)} className="flex-1" tone={level === l.id ? RED : INK}>
             {l.label}
-          </button>
+          </InkButton>
         ))}
       </div>
       <div className="flex gap-2">
-        <Stat label="Time" value={seconds(time)} />
-        <Stat label="Hints" value={hints} />
-        <Stat label="Best" value={best === null ? '-' : seconds(best)} />
+        <Score label="thời gian" value={seconds(time)} />
+        <Score label="gợi ý" value={hints} tone={RED} />
+        <Score label="kỷ lục" value={best === null ? '-' : seconds(best)} />
       </div>
 
       {!game ? (
-        <p className="grid aspect-square place-items-center rounded-3xl border border-line bg-ink-1 font-mono text-fine text-bone-dim" role="status">
-          Making a puzzle…
+        <p className="grid aspect-square place-items-center font-pen text-[1.6rem]" style={{ color: INK }} role="status">
+          Đang kẻ đề…
         </p>
       ) : (
-        <div className="grid aspect-square grid-cols-9 overflow-hidden rounded-2xl border-2 border-line-strong bg-ink-1" role="grid" aria-label="Sudoku board">
+        <svg viewBox={`-4 -4 ${side + 8} ${side + 8}`} className="block w-full" role="grid" aria-label="Sudoku board">
+          {chosen !== null &&
+            Array.from({ length: 81 }, (_, i) => {
+              const inLine = Math.floor(i / 9) === Math.floor(chosen / 9) || i % 9 === chosen % 9;
+              const alike = same && grid[i] === same;
+              if (i !== chosen && !inLine && !alike) return null;
+              return <rect key={i} x={(i % 9) * CELL} y={Math.floor(i / 9) * CELL} width={CELL} height={CELL} fill={i === chosen ? '#ffe27a' : alike ? '#ffe9a0' : '#fff3c2'} opacity={i === chosen ? 0.9 : 0.55} />;
+            })}
+          <g stroke={PENCIL} strokeWidth="1" opacity="0.6">
+            {Array.from({ length: 10 }, (_, k) => (
+              <path key={k} d={`M${k * CELL} 0V${side}M0 ${k * CELL}H${side}`} />
+            ))}
+          </g>
+          <g filter="url(#pen)" stroke={INK} strokeWidth="2.6" strokeLinecap="round" fill="none">
+            {[0, 3, 6, 9].map((k) => (
+              <path key={k} d={`M${k * CELL} 0V${side}M0 ${k * CELL}H${side}`} />
+            ))}
+          </g>
           {grid.map((digit, i) => {
             const r = Math.floor(i / 9);
             const c = i % 9;
             const given = Boolean(game.puzzle[i]);
             return (
-              <button
-                key={i}
-                type="button"
-                role="gridcell"
-                aria-label={`Row ${r + 1}, column ${c + 1}${digit ? `, ${digit}` : ', empty'}`}
-                onClick={() => setChosen(i)}
-                className={clsx(
-                  'grid place-items-center border-line font-display text-[1.25rem] transition-colors',
-                  c % 3 === 2 && c !== 8 ? 'border-r-2 border-r-line-strong' : 'border-r',
-                  r % 3 === 2 && r !== 8 ? 'border-b-2 border-b-line-strong' : 'border-b',
-                  chosen === i ? 'bg-signal/30' : chosen !== null && (Math.floor(chosen / 9) === r || chosen % 9 === c) ? 'bg-white/5' : same && digit === same ? 'bg-signal/15' : '',
-                  bad.has(i) ? 'text-danger' : given ? 'text-bone' : 'text-signal'
-                )}
-              >
-                {digit || ''}
-              </button>
+              <g key={i}>
+                {digit ? (
+                  <text x={c * CELL + CELL / 2} y={r * CELL + CELL / 2 + 9} textAnchor="middle" fontSize="28" fontWeight="700" className="font-pen" fill={bad.has(i) ? RED : given ? PENCIL : INK}>
+                    {digit}
+                  </text>
+                ) : null}
+                <rect x={c * CELL} y={r * CELL} width={CELL} height={CELL} fill="transparent" role="gridcell" aria-label={`Row ${r + 1}, column ${c + 1}${digit ? `, ${digit}` : ', empty'}`} tabIndex={0} className="cursor-pointer" onClick={() => setChosen(i)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setChosen(i)} />
+              </g>
             );
           })}
-        </div>
+        </svg>
       )}
 
       <div className="grid grid-cols-9 gap-1.5" role="group" aria-label="Digits">
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => (
-          <button key={d} type="button" onClick={() => put(d)} className="grid aspect-[3/4] place-items-center rounded-xl border border-line bg-ink-2 font-display text-[1.3rem] text-bone active:scale-90">
-            {d}
-          </button>
+          <InkBox key={d} as="button" type="button" onClick={() => put(d)} className="aspect-[3/4] transition-transform active:scale-90">
+            <span className="grid aspect-[3/4] place-items-center font-pen text-[1.7rem] font-bold" style={{ color: INK }}>
+              {d}
+            </span>
+          </InkBox>
         ))}
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" onClick={() => put(0)}>
-          <Eraser size={14} aria-hidden="true" /> Erase
-        </Button>
-        <Button variant="ghost" size="sm" onClick={hint}>
-          <Lightbulb size={14} aria-hidden="true" /> Hint
-        </Button>
-        <Button variant="ghost" size="sm" onClick={() => deal()} className="ml-auto">
-          <RotateCcw size={14} aria-hidden="true" /> New
-        </Button>
+        <InkButton onClick={() => put(0)}>
+          <Eraser size={15} aria-hidden="true" /> Tẩy
+        </InkButton>
+        <InkButton onClick={hint}>
+          <Lightbulb size={15} aria-hidden="true" /> Gợi ý
+        </InkButton>
+        <InkButton className="ml-auto" tone={RED} onClick={() => deal()}>
+          <RotateCcw size={15} aria-hidden="true" /> Đề mới
+        </InkButton>
       </div>
       {solved && (
-        <Result title={record ? 'A new record' : 'Solved'} detail={`${seconds(time)} · ${hints} hints`}>
-          <Button size="sm" onClick={() => deal()}>
-            Another puzzle
-          </Button>
-        </Result>
+        <Note title={record ? 'Kỷ lục mới!' : 'Giải xong rồi!'} detail={`${seconds(time)} · ${hints} gợi ý`}>
+          <InkButton onClick={() => deal()}>Đề khác</InkButton>
+        </Note>
       )}
     </div>
   );

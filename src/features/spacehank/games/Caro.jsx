@@ -1,16 +1,16 @@
 import { useRef, useState } from 'react';
-import { Circle, RotateCcw, Undo2, X } from 'lucide-react';
-import { Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { RotateCcw, Undo2 } from 'lucide-react';
 import { CARO, caroMove, caroWin } from './logic';
-import { Result, Stat, useBest } from './shared';
+import { INK, InkButton, Note, RED, Score } from './ink';
+import { useBest } from './shared';
 
 const blank = () => Array(CARO * CARO).fill(0);
+const CELL = 28;
 
-/** Cờ caro: five in a row on a 12 by 12 board. You are X and go first; the computer is O. */
+/** Cờ caro, as it is played in the back row of a classroom: X and O on squared paper, five in a row wins. */
 export default function Caro() {
   const [board, setBoard] = useState(blank);
-  const [moves, setMoves] = useState([]); // cell indexes in the order they were played
+  const [moves, setMoves] = useState([]);
   const [line, setLine] = useState(null);
   const [winner, setWinner] = useState(0);
   const [thinking, setThinking] = useState(false);
@@ -19,11 +19,9 @@ export default function Caro() {
   const timer = useRef(0);
 
   const finish = (next, index, who) => {
-    const row = Math.floor(index / CARO);
-    const col = index % CARO;
-    const found = caroWin(next, row, col);
+    const found = caroWin(next, Math.floor(index / CARO), index % CARO);
     if (found) {
-      setLine(new Set(found.map(([r, c]) => r * CARO + c)));
+      setLine(found);
       setWinner(who);
       if (who === 1) {
         setWins((w) => w + 1);
@@ -72,39 +70,56 @@ export default function Caro() {
     setWinner(0);
     setThinking(false);
   };
+  const side = CARO * CELL;
+  const last = moves[moves.length - 1];
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Stat label="You" value="X" tone="text-signal" />
-        <Stat label="Computer" value="O" />
-        <Stat label="Wins" value={wins} />
-        <Stat label="Best" value={best ?? '-'} />
+        <Score label="bạn (X)" value={wins} />
+        <Score label="máy (O)" value={winner === 2 ? 1 : 0} tone={RED} />
+        <Score label="kỷ lục" value={best ?? '-'} />
       </div>
-      <div className="grid aspect-square overflow-hidden rounded-2xl border border-line-strong bg-ink-1" style={{ gridTemplateColumns: `repeat(${CARO}, minmax(0, 1fr))` }} role="grid" aria-label="Caro board">
-        {board.map((who, i) => (
-          <button key={i} type="button" role="gridcell" aria-label={`Row ${Math.floor(i / CARO) + 1}, column ${(i % CARO) + 1}${who ? (who === 1 ? ', X' : ', O') : ''}`} onClick={() => play(i)} disabled={Boolean(who) || Boolean(winner)} className={clsx('grid place-items-center border-r border-b border-line transition-colors', line?.has(i) ? 'bg-signal/25' : moves[moves.length - 1] === i ? 'bg-white/8' : '')}>
-            {who === 1 ? <X size={18} strokeWidth={2.6} className="text-signal" aria-hidden="true" /> : who === 2 ? <Circle size={15} strokeWidth={2.6} className="text-bone" aria-hidden="true" /> : null}
-          </button>
-        ))}
-      </div>
-      <p className="h-5 text-center font-mono text-fine text-bone-dim" role="status">
-        {thinking ? 'The computer is thinking…' : winner ? '' : 'Your move'}
+      <svg viewBox={`-4 -4 ${side + 8} ${side + 8}`} className="block w-full touch-manipulation rounded-sm bg-[#fdfaf0]" role="grid" aria-label="Caro board">
+        <g stroke={INK} strokeWidth="1" opacity="0.38">
+          {Array.from({ length: CARO + 1 }, (_, k) => (
+            <path key={k} d={`M${k * CELL} 0V${side}M0 ${k * CELL}H${side}`} />
+          ))}
+        </g>
+        <g filter="url(#pen)" fill="none" strokeLinecap="round" strokeWidth="2.8">
+          {board.map((who, i) => {
+            const x = (i % CARO) * CELL + CELL / 2;
+            const y = Math.floor(i / CARO) * CELL + CELL / 2;
+            if (who === 1) return <path key={i} d={`M${x - 7} ${y - 7}L${x + 7} ${y + 7}M${x + 7} ${y - 7}L${x - 7} ${y + 7}`} stroke={INK} />;
+            if (who === 2) return <circle key={i} cx={x} cy={y} r="8" stroke={RED} />;
+            return null;
+          })}
+          {line && (
+            <path d={`M${line[0][1] * CELL + CELL / 2} ${line[0][0] * CELL + CELL / 2}L${line[line.length - 1][1] * CELL + CELL / 2} ${line[line.length - 1][0] * CELL + CELL / 2}`} stroke="#e6b800" strokeWidth="9" opacity="0.55" />
+          )}
+        </g>
+        {last !== undefined && <rect x={(last % CARO) * CELL + 2} y={Math.floor(last / CARO) * CELL + 2} width={CELL - 4} height={CELL - 4} fill="none" stroke="#e6b800" strokeWidth="1.6" strokeDasharray="3 3" />}
+        {board.map((who, i) =>
+          who || winner ? null : (
+            <rect key={i} x={(i % CARO) * CELL} y={Math.floor(i / CARO) * CELL} width={CELL} height={CELL} fill="transparent" className="cursor-pointer" role="gridcell" aria-label={`Row ${Math.floor(i / CARO) + 1}, column ${(i % CARO) + 1}`} tabIndex={0} onClick={() => play(i)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && play(i)} />
+          )
+        )}
+      </svg>
+      <p className="h-7 text-center font-pen text-[1.4rem] leading-none font-semibold" style={{ color: INK }} role="status">
+        {thinking ? 'Máy đang nghĩ…' : winner ? '' : 'Đến lượt bạn (X)'}
       </p>
       <div className="flex gap-2">
-        <Button variant="ghost" size="sm" onClick={undo} disabled={moves.length < 2 || thinking || Boolean(winner)}>
-          <Undo2 size={14} aria-hidden="true" /> Undo
-        </Button>
-        <Button variant="ghost" size="sm" onClick={again} className="ml-auto">
-          <RotateCcw size={14} aria-hidden="true" /> New game
-        </Button>
+        <InkButton onClick={undo} disabled={moves.length < 2 || thinking || Boolean(winner)}>
+          <Undo2 size={15} aria-hidden="true" /> Đi lại
+        </InkButton>
+        <InkButton className="ml-auto" tone={RED} onClick={again}>
+          <RotateCcw size={15} aria-hidden="true" /> Ván mới
+        </InkButton>
       </div>
       {winner > 0 && (
-        <Result title={winner === 1 ? 'You win' : winner === 2 ? 'The computer wins' : 'A draw'} detail={winner === 1 ? 'Five in a row.' : 'Try again.'}>
-          <Button size="sm" onClick={again}>
-            Play again
-          </Button>
-        </Result>
+        <Note title={winner === 1 ? 'Bạn thắng!' : winner === 2 ? 'Máy thắng…' : 'Hòa nhau'} detail={winner === 1 ? 'Năm quân liền nhau.' : 'Thử lại nhé.'}>
+          <InkButton onClick={again}>Chơi lại</InkButton>
+        </Note>
       )}
     </div>
   );

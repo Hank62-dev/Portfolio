@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Pause, Play, RotateCcw } from 'lucide-react';
-import { Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
 import { newSnake, stepSnake } from './logic';
-import { Result, Stat, useBest } from './shared';
+import { INK, InkBox, InkButton, Note, RED, Score } from './ink';
+import { useBest } from './shared';
 
 const KEYS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right' };
 const SIZE = 14;
+const CELL = 24;
 
-/** Rắn săn mồi: swipe on the board, press the arrows, or use the keys; eat, grow, do not hit a wall or yourself. */
+/** Rắn săn mồi: a snake drawn in one thick pen stroke. Swipe the page, press the arrows, or use the keys. */
 export default function Snake() {
   const [state, setState] = useState(() => newSnake(SIZE));
   const [running, setRunning] = useState(false);
@@ -58,18 +58,20 @@ export default function Snake() {
     setState(newSnake(SIZE));
     setRunning(false);
   };
-  const cells = new Map(state.body.map(([r, c], i) => [r * SIZE + c, i === 0 ? 'head' : 'body']));
-  const food = state.food[0] * SIZE + state.food[1];
+  const side = SIZE * CELL;
+  const centre = ([r, c]) => `${c * CELL + CELL / 2},${r * CELL + CELL / 2}`;
+  const [head] = state.body;
+  const [fr, fc] = state.food;
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Stat label="Score" value={state.score} tone="text-signal" />
-        <Stat label="Best" value={best ?? '-'} />
+        <Score label="điểm" value={state.score} tone={RED} />
+        <Score label="kỷ lục" value={best ?? '-'} />
       </div>
-      <div
-        className="grid aspect-square touch-none overflow-hidden rounded-2xl border border-line-strong bg-ink-1"
-        style={{ gridTemplateColumns: `repeat(${SIZE}, minmax(0, 1fr))` }}
+      <svg
+        viewBox={`-4 -4 ${side + 8} ${side + 8}`}
+        className="block w-full touch-none rounded-sm bg-[#fdfaf0]"
         role="img"
         aria-label={`Snake board, score ${state.score}`}
         onTouchStart={(e) => {
@@ -85,30 +87,42 @@ export default function Snake() {
           turn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : dy > 0 ? 'down' : 'up');
         }}
       >
-        {Array.from({ length: SIZE * SIZE }, (_, i) => {
-          const part = cells.get(i);
-          return <i key={i} className={clsx('m-px block rounded-[3px]', part === 'head' ? 'bg-signal' : part === 'body' ? 'bg-signal/55' : i === food ? 'rounded-full bg-danger' : (Math.floor(i / SIZE) + (i % SIZE)) % 2 ? 'bg-white/[0.03]' : 'bg-transparent')} />;
-        })}
-      </div>
+        <g stroke={INK} strokeWidth="1" opacity="0.32">
+          {Array.from({ length: SIZE + 1 }, (_, k) => (
+            <path key={k} d={`M${k * CELL} 0V${side}M0 ${k * CELL}H${side}`} />
+          ))}
+        </g>
+        <g filter="url(#pen)" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx={fc * CELL + CELL / 2} cy={fr * CELL + CELL / 2} r="8" fill="rgb(207 59 51 / 0.25)" stroke={RED} strokeWidth="2.4" />
+          <path d={`M${fc * CELL + CELL / 2} ${fr * CELL + 5}c0-4 3-5 5-4`} fill="none" stroke="#1f7a3a" strokeWidth="2.2" />
+          <polyline points={state.body.map(centre).join(' ')} fill="none" stroke={INK} strokeWidth="11" opacity="0.9" />
+          <polyline points={state.body.map(centre).join(' ')} fill="none" stroke="#fdfaf0" strokeWidth="3.5" strokeDasharray="1 9" opacity="0.8" />
+          <circle cx={head[1] * CELL + CELL / 2} cy={head[0] * CELL + CELL / 2} r="9" fill={INK} />
+        </g>
+        <circle cx={head[1] * CELL + CELL / 2 - 3} cy={head[0] * CELL + CELL / 2 - 2} r="1.8" fill="#fdfaf0" />
+        <circle cx={head[1] * CELL + CELL / 2 + 3} cy={head[0] * CELL + CELL / 2 - 2} r="1.8" fill="#fdfaf0" />
+      </svg>
       <div className="mx-auto grid grid-cols-3 gap-1.5">
         <span />
         <Pad dir="up" icon={ArrowUp} turn={turn} />
         <span />
         <Pad dir="left" icon={ArrowLeft} turn={turn} />
-        <button type="button" aria-label={running ? 'Pause' : 'Start'} onClick={() => setRunning((r) => !r)} className="grid size-14 place-items-center rounded-2xl border border-line bg-ink-1 text-bone-dim active:scale-90">
-          {running ? <Pause size={20} aria-hidden="true" /> : <Play size={20} aria-hidden="true" />}
-        </button>
+        <InkBox as="button" type="button" aria-label={running ? 'Pause' : 'Start'} onClick={() => setRunning((r) => !r)} className="size-14 transition-transform active:scale-90" tone={RED}>
+          <span className="grid size-14 place-items-center" style={{ color: RED }}>
+            {running ? <Pause size={22} aria-hidden="true" /> : <Play size={22} aria-hidden="true" />}
+          </span>
+        </InkBox>
         <Pad dir="right" icon={ArrowRight} turn={turn} />
         <span />
         <Pad dir="down" icon={ArrowDown} turn={turn} />
         <span />
       </div>
       {state.over && (
-        <Result title="Game over" detail={`${state.score} eaten`}>
-          <Button size="sm" onClick={again}>
-            <RotateCcw size={14} aria-hidden="true" /> Play again
-          </Button>
-        </Result>
+        <Note title="Hết rồi!" detail={`Ăn được ${state.score} con mồi`}>
+          <InkButton onClick={again}>
+            <RotateCcw size={15} aria-hidden="true" /> Chơi lại
+          </InkButton>
+        </Note>
       )}
     </div>
   );
@@ -116,8 +130,10 @@ export default function Snake() {
 
 function Pad({ dir, icon: Icon, turn }) {
   return (
-    <button type="button" aria-label={`Go ${dir}`} onClick={() => turn(dir)} className="grid size-14 place-items-center rounded-2xl border border-line bg-ink-2 text-bone active:scale-90">
-      <Icon size={22} aria-hidden="true" />
-    </button>
+    <InkBox as="button" type="button" aria-label={`Go ${dir}`} onClick={() => turn(dir)} className="size-14 transition-transform active:scale-90">
+      <span className="grid size-14 place-items-center" style={{ color: INK }}>
+        <Icon size={22} strokeWidth={2.4} aria-hidden="true" />
+      </span>
+    </InkBox>
   );
 }
