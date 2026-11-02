@@ -19,6 +19,7 @@ import { newCard } from './missions/model';
 import { entries } from './wallet/store';
 import { parseEntry } from './wallet/model';
 import { library, loadLibrary } from './music/library';
+import { syncBundledMusic } from './music/bundled';
 import Fab from './components/Fab';
 import NowPlayingBar from './music/NowPlayingBar';
 import { openPlayer } from './music/ui';
@@ -82,7 +83,7 @@ export default function Workspace({
   const online = useOnline();
 
   useEffect(() => {
-    if (music) void loadLibrary();
+    if (music) void loadLibrary().then(syncBundledMusic);
   }, [music]);
 
   useEffect(() => {

@@ -2,11 +2,39 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
-import { resolve } from 'path'
+import { resolve, extname } from 'path'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+
+// Songs dropped into src/assets/music ship with the app. Their file names can hold anything (spaces, accents, "#", brackets),
+// so they are not imported as modules: a virtual module lists the names, and the files are served at /music/<name>
+// (by a middleware in dev, copied into the build otherwise) and fetched by the encoded name.
+const MUSIC_DIR = resolve(__dirname, 'src/assets/music')
+const MUSIC_FILE = /\.(mp3|m4a|aac|flac|ogg|oga|opus|wav|webm|lrc)$/i
+const MUSIC_TYPE = { mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', flac: 'audio/flac', ogg: 'audio/ogg', oga: 'audio/ogg', opus: 'audio/ogg', wav: 'audio/wav', webm: 'audio/webm', lrc: 'text/plain; charset=utf-8' }
+const musicFiles = () => (existsSync(MUSIC_DIR) ? readdirSync(MUSIC_DIR).filter((name) => MUSIC_FILE.test(name)).sort() : [])
+
+const bundledMusic = () => ({
+  name: 'bundled-music',
+  resolveId: (id) => (id === 'virtual:bundled-music' ? '\0virtual:bundled-music' : undefined),
+  load: (id) => (id === '\0virtual:bundled-music' ? `export default ${JSON.stringify(musicFiles())}` : undefined),
+  configureServer(server) {
+    server.middlewares.use('/music', (req, res, next) => {
+      const name = decodeURIComponent((req.url ?? '').split('?')[0].replace(/^\//, ''))
+      const file = resolve(MUSIC_DIR, name)
+      if (!file.startsWith(MUSIC_DIR) || !MUSIC_FILE.test(file) || !existsSync(file) || !statSync(file).isFile()) return next()
+      res.setHeader('Content-Type', MUSIC_TYPE[extname(file).slice(1).toLowerCase()] ?? 'application/octet-stream')
+      res.end(readFileSync(file))
+    })
+  },
+  generateBundle() {
+    for (const name of musicFiles()) this.emitFile({ type: 'asset', fileName: `music/${name}`, source: readFileSync(resolve(MUSIC_DIR, name)) })
+  },
+})
 
 export default defineConfig({
   plugins: [
     react(),
+    bundledMusic(),
     tailwindcss(),
     // The workspace can be installed as an app. The service worker keeps the shell and every page the visitor has
     // opened, so it still opens offline; the API calls (realtime, RAG, AI) are never cached.

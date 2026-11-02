@@ -71,6 +71,49 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
 
   const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
 
+  // on a phone: a glass capsule with the record turning inside a ring of progress; swipe it right to put the music away
+  if (lifted) {
+    const ratio = duration > 0 ? Math.min(1, time / duration) : 0;
+    return (
+      <div
+        role="region"
+        aria-label="Now playing"
+        data-now-playing
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchEnd}
+        style={slide.x ? { transform: `translateX(${slide.x}px)`, opacity: Math.max(0, 1 - slide.x / 280), transition: slide.dragging ? 'none' : 'transform 0.22s ease-out, opacity 0.22s ease-out' } : undefined}
+        className="fixed inset-x-3 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] z-30 touch-pan-y"
+      >
+        <div className="flex items-center gap-2.5 rounded-full border border-white/12 bg-ink-1/80 p-1.5 pr-2 shadow-[0_20px_44px_-16px_rgb(0_0_0/0.95)] backdrop-blur-2xl">
+          <button type="button" onClick={onOpen} aria-label="Open Hank Music" className="flex min-w-0 flex-1 items-center gap-3 text-left">
+            <span className="relative size-[3.1rem] shrink-0">
+              <svg viewBox="0 0 100 100" className="absolute inset-0 size-full -rotate-90" aria-hidden="true">
+                <circle cx="50" cy="50" r="47" fill="none" stroke="rgb(255 255 255 / 0.12)" strokeWidth="3" />
+                <circle cx="50" cy="50" r="47" fill="none" stroke="var(--color-signal)" strokeWidth="4" strokeLinecap="round" pathLength="100" strokeDasharray={`${Math.max(0.01, ratio * 100)} 100`} />
+              </svg>
+              <Cover track={track} className={clsx('absolute inset-[9%] [animation:disc_14s_linear_infinite]', !playing && '[animation-play-state:paused]')} rounded="rounded-full" />
+              <i className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-0 ring-1 ring-white/30" aria-hidden="true" />
+            </span>
+            <span className="min-w-0 leading-tight">
+              <b className="block truncate font-display text-[1.02rem] font-normal text-bone" data-now-title>
+                {track.title}
+              </b>
+              <small className="block truncate font-mono text-[0.68rem] text-bone-faint">{error || track.artist || 'Unknown artist'}</small>
+            </span>
+          </button>
+          <button type="button" aria-label={playing ? 'Pause' : 'Play'} onClick={togglePlay} className={clsx('grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_10px_22px_-10px_var(--color-signal)] active:scale-90', loading && 'animate-pulse')}>
+            {playing ? <Pause size={18} fill="currentColor" aria-hidden="true" /> : <Play size={18} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
+          </button>
+          <button type="button" aria-label="Next track" onClick={next} className="grid size-9 shrink-0 place-items-center rounded-full text-bone-dim active:scale-90">
+            <SkipForward size={18} fill="currentColor" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       role="region"

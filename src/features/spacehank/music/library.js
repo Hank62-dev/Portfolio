@@ -7,13 +7,50 @@ export const isAudioFile = (file) => file.type.startsWith('audio/') || AUDIO_EXT
 export const isLyricsFile = (file) => /\.lrc$/i.test(file.name);
 
 const baseName = (name) => name.replace(/\.[^.]+$/, '');
-const signature = (file) => `${file.name}|${file.size}|${file.lastModified}`;
+
+/**
+ * A readable title from a file name that has no tags: songs saved from a video site are called things like
+ * "Artist - Song _ Official Lyric Video #music". Hashtags and the video-site trailers are dropped.
+ */
+export const tidyText = (text) => {
+  const base = String(text).replace(/\s*#[^\s#]+/gu, '').trim();
+  const parts = base.split(/\s+[_|]\s+|\s+I\s+(?=official)/i).map((part) => part.trim()).filter(Boolean);
+  const keep = parts.filter((part, i) => i === 0 || !/(official|lyric|video|\bmv\b|audio|visuali[sz]er|the album|\bcover\b|speed ?up|remix version)/i.test(part));
+  return keep.join(' - ') || base || text;
+};
+export const tidyName = (name) => tidyText(baseName(name));
+
+/** "Artist - Song" in a file name with no tags becomes { artist, title }; any other name is just a title. */
+export const parseName = (name) => {
+  const tidy = tidyName(name);
+  const at = tidy.indexOf(' - ');
+  return at > 0 && at < tidy.length - 3 ? { artist: tidy.slice(0, at).trim(), title: tidy.slice(at + 3).trim() } : { artist: '', title: tidy };
+};
+
+export const signature = (file) => `${file.name}|${file.size}|${file.lastModified}`;
 
 // The library as a store: tracks and playlists in memory (the records are small), files fetched on demand.
 export const library = createStore({ loaded: false, tracks: [], playlists: [], error: '' });
 
 const byAdded = (a, b) => b.addedAt - a.addedAt;
 const covers = new Map(); // track id -> object URL
+
+// Songs that ship with the app (see assets/music) are copied in on start. One the owner deletes is remembered here, so it stays gone.
+const REMOVED = 'hank62.music.removed';
+export const readRemoved = () => {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(REMOVED) ?? '[]'));
+  } catch {
+    return new Set();
+  }
+};
+const rememberRemoved = (sigs) => {
+  try {
+    localStorage.setItem(REMOVED, JSON.stringify([...new Set([...readRemoved(), ...sigs.filter(Boolean)])]));
+  } catch {
+    /* without storage a deleted bundled song simply comes back on the next start */
+  }
+};
 
 /** Loads the library from this device. Safe to call more than once. */
 export const loadLibrary = async () => {
@@ -26,17 +63,23 @@ export const loadLibrary = async () => {
   }
 };
 
+// A title tag copied from a video site ("… | Official Lyric Video #music") is worse than a tidy file name.
+const NOISY_TITLE = /(official|lyric video|#[^\s#]|\s[|_]\s)/i;
+
 /** Reads tags and the cover from one audio file. Never throws: an unreadable file still gets a name. */
 const readTags = async (file) => {
-  const fallback = { title: baseName(file.name), artist: '', album: '', genre: '', year: 0, duration: 0, cover: null };
+  const parsed = parseName(file.name);
+  const fallback = { title: parsed.title, artist: parsed.artist, album: '', genre: '', year: 0, duration: 0, cover: null };
   try {
     const { parseBlob } = await import('music-metadata');
     const { common, format } = await parseBlob(file, { skipPostHeaders: true });
     const picture = common.picture?.[0];
+    const goodTitle = common.title && !NOISY_TITLE.test(common.title);
     return {
-      title: common.title || fallback.title,
-      artist: common.artist || common.albumartist || '',
-      album: common.album || '',
+      title: goodTitle ? common.title : fallback.title,
+      // when the file's own title was unusable the name "Artist - Song" says who made it
+      artist: common.artist || common.albumartist || (goodTitle ? '' : fallback.artist),
+      album: NOISY_TITLE.test(common.album ?? '') ? tidyText(common.album) : common.album || '',
       genre: common.genre?.[0] || '',
       year: common.year || 0,
       duration: format.duration || 0,
@@ -121,6 +164,7 @@ export const countPlay = (id) => update(id, { plays: (library.get().tracks.find(
 
 export const removeTracks = async (ids) => {
   const gone = new Set(ids);
+  rememberRemoved(library.get().tracks.filter((t) => gone.has(t.id)).map((t) => t.sig));
   for (const id of gone) {
     await Promise.all([storage.tracks.remove(id), storage.blobs.remove(id), storage.covers.remove(id)]);
     const url = covers.get(id);
