@@ -288,7 +288,9 @@ library.subscribe(() => {
   else player.set({ queue: prune(queue, stillThere) });
 });
 
-if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+/** Points the system's media keys (lock screen, headset, notification card) at the music player. */
+export const bindSystemKeys = () => {
+  if (typeof navigator === 'undefined' || !('mediaSession' in navigator)) return;
   const handlers = {
     play: () => resume(),
     pause: () => pause(),
@@ -306,4 +308,5 @@ if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
       /* this browser does not support that action */
     }
   }
-}
+};
+bindSystemKeys();

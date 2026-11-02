@@ -65,6 +65,7 @@ export default defineConfig({
         ],
       },
       workbox: {
+        importScripts: ['sw-focus.js'],
         // the app's own code is precached, so the first install already works offline; the synthetic XR rooms and the
         // headset emulator (several MB, never loaded for a visitor) are left out
         // (the manifest's icons are added to the precache by the plugin itself, so they are not listed here)

@@ -1,4 +1,4 @@
-import { Activity, BrainCircuit, Boxes, FolderOpen, GraduationCap, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet } from 'lucide-react';
+import { Activity, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet } from 'lucide-react';
 
 export const NAV_SECTIONS = ['WORKSPACE', 'KNOWLEDGE', 'CREATE', 'LIFE'];
 
@@ -19,6 +19,7 @@ export const NAVIGATION = [
   { id: 'study', label: 'Study Hub', icon: GraduationCap, section: 'LIFE', keywords: 'courses exams deadlines flashcards pomodoro focus learn school' },
   { id: 'habits', label: 'Habit Garden', icon: Sprout, section: 'LIFE', keywords: 'habits streak plants routine daily' },
   { id: 'wallet', label: 'Wallet', icon: Wallet, section: 'LIFE', keywords: 'money spending expenses budget finance income' },
+  { id: 'play', label: 'Ra chơi', icon: Gamepad2, section: 'LIFE', keywords: 'games play fun break puzzle sudoku caro snake boats tim so bau cua chơi' },
 ];
 
 export const DEFAULT_TAB = 'hank';

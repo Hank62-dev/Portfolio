@@ -21,6 +21,7 @@ import { parseEntry } from './wallet/model';
 import { library, loadLibrary } from './music/library';
 import { syncBundledMusic } from './music/bundled';
 import Fab from './components/Fab';
+import FocusWidget from './components/FocusWidget';
 import NowPlayingBar from './music/NowPlayingBar';
 import { openPlayer } from './music/ui';
 import { next, player, previous, setSleepTimer, togglePlay } from './music/player';
@@ -44,6 +45,7 @@ const WalletView = lazy(() => import('./views/WalletView'));
 const PulseView = lazy(() => import('./views/PulseView'));
 const ShellView = lazy(() => import('./views/ShellView'));
 const MemosView = lazy(() => import('./views/MemosView'));
+const GamesView = lazy(() => import('./views/GamesView'));
 
 const PageLoading = () => (
   <div className="flex items-center gap-3 py-10 font-mono text-fine text-bone-dim">
@@ -226,6 +228,7 @@ export default function Workspace({
     study: <StudyView onNotify={onNotify} onFocusMusic={() => playMood('deep focus, calm and steady').then(onNotify, (e) => onNotify?.(e.message))} />,
     habits: <HabitsView />,
     wallet: <WalletView />,
+    play: <GamesView />,
     shell: <ShellView ctx={shell} />,
     pulse: <PulseView owner />,
   };
@@ -270,6 +273,7 @@ export default function Workspace({
           </div>
           {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
+          {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}
           {phone && <Fab raised={hasTrack} />}
           {music && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => { if (phone) openPlayer(); onTab('music'); }} lifted={phone} />}
           <CommandPalette

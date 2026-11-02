@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, X } from 'lucide-react';
+import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, X } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { NAVIGATION, NAV_SECTIONS } from '../navigation';
 
@@ -14,6 +14,11 @@ const SLOT = 'relative flex min-w-0 flex-col items-center justify-end gap-1 pb-2
 /** The navigation on a phone: a bar at the thumb's reach, and a sheet with every tab, grouped. */
 export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, onResetDemo }) {
   const [open, setOpen] = useState(false);
+  // the sheet follows a finger that drags it down, and closes when let go far enough
+  const [drag, setDrag] = useState({ y: 0, active: false });
+  const start = useRef(null);
+  const scroller = useRef(null);
+  const [more, setMore] = useState(false); // there is more of the list below
   const pinned = PINNED.map((id) => NAVIGATION.find((item) => item.id === id));
 
   const go = (id) => {
@@ -23,6 +28,39 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
     if (id === tab) window.scrollTo({ top: 0, behavior: 'smooth' });
     else onTab(id);
   };
+
+  const begin = (y) => {
+    start.current = y;
+  };
+  const follow = (y, atTop = true) => {
+    if (start.current === null || !atTop) return;
+    const dy = Math.max(0, y - start.current);
+    if (dy > 0) setDrag({ y: dy, active: true });
+  };
+  const release = () => {
+    const far = drag.y > 110;
+    start.current = null;
+    setDrag({ y: 0, active: false });
+    if (far) setOpen(false);
+  };
+
+  useEffect(() => {
+    if (!open) return undefined;
+    let el;
+    let on;
+    // the list is in a portal that mounts with the sheet, so look for it on the next frame
+    const frame = requestAnimationFrame(() => {
+      el = scroller.current;
+      if (!el) return;
+      on = () => setMore(el.scrollTop < 8 && el.scrollHeight - el.clientHeight > 24);
+      on();
+      el.addEventListener('scroll', on, { passive: true });
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      if (el && on) el.removeEventListener('scroll', on);
+    };
+  }, [open]);
 
   // the bubble and the notch in the bar follow the active slot (0..4); --notch is animated, see @property in index.css
   const slot = pinned.findIndex((item) => item.id === tab);
@@ -67,17 +105,38 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
         <Dialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/65 backdrop-blur-sm" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-x-0 bottom-0 z-50 flex max-h-[86dvh] flex-col rounded-t-[2rem] border border-b-0 border-line bg-ink-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-30px_80px_-30px_rgb(0_0_0/0.9)]"
+          className="fixed inset-x-0 bottom-0 z-50 flex max-h-[86dvh] flex-col rounded-t-[2rem] border border-b-0 border-line bg-ink-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-30px_80px_-30px_rgb(0_0_0/0.9)] [animation:sheet-up_0.38s_cubic-bezier(0.16,1,0.3,1)_backwards]"
+          style={{ transform: drag.y ? `translateY(${drag.y}px)` : undefined, transition: drag.active ? 'none' : 'transform 0.28s cubic-bezier(0.16,1,0.3,1)' }}
         >
-          <span className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-line-strong" aria-hidden="true" />
-          <div className="flex items-center justify-between px-5 pt-3 pb-2">
-            <Dialog.Title className="font-display text-lead text-bone">Everything in Hank62</Dialog.Title>
-            <Dialog.Close aria-label="Close" className="grid size-9 place-items-center rounded-full text-bone-dim hover:bg-white/5 hover:text-bone">
-              <X size={18} aria-hidden="true" />
-            </Dialog.Close>
+          {/* hold the handle or the title and pull down to put the sheet away */}
+          <div
+            className="touch-none select-none"
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              begin(e.clientY);
+            }}
+            onPointerMove={(e) => follow(e.clientY)}
+            onPointerUp={release}
+            onPointerCancel={release}
+          >
+            <span className="mx-auto mt-2.5 block h-1 w-10 rounded-full bg-line-strong" aria-hidden="true" />
+            <div className="flex items-center justify-between px-5 pt-3 pb-2">
+              <Dialog.Title className="font-display text-lead text-bone">Everything in Hank62</Dialog.Title>
+              <Dialog.Close aria-label="Close" className="grid size-9 place-items-center rounded-full text-bone-dim hover:bg-white/5 hover:text-bone">
+                <X size={18} aria-hidden="true" />
+              </Dialog.Close>
+            </div>
           </div>
 
-          <div className="flex flex-col gap-5 overflow-y-auto px-5 pt-1 pb-5">
+          <div className="relative flex min-h-0 flex-col">
+          <div
+            ref={scroller}
+            className="no-scrollbar flex flex-col gap-5 overflow-y-auto overscroll-contain px-5 pt-1 pb-5"
+            onTouchStart={(e) => begin(e.touches[0].clientY)}
+            onTouchMove={(e) => follow(e.touches[0].clientY, (scroller.current?.scrollTop ?? 0) <= 0)}
+            onTouchEnd={release}
+            onTouchCancel={release}
+          >
             {NAV_SECTIONS.map((section) => (
               <section key={section} aria-label={section}>
                 <h2 className="mb-2 font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">{section}</h2>
@@ -118,6 +177,18 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
                 {guest ? <LogOut size={15} aria-hidden="true" /> : <LockKeyhole size={15} aria-hidden="true" />} {guest ? 'Exit demo' : 'Lock workspace'}
               </button>
             </div>
+          </div>
+          <button
+            type="button"
+            tabIndex={more ? 0 : -1}
+            aria-hidden={!more}
+            aria-label="Scroll down for more"
+            onClick={() => scroller.current?.scrollBy({ top: 240, behavior: 'smooth' })}
+            className={clsx('absolute bottom-2 left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full border border-line bg-ink-2/90 text-bone-dim shadow-[0_8px_20px_-8px_rgb(0_0_0/0.8)] backdrop-blur transition-all duration-300 active:scale-90', more ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0')}
+            data-sheet-scroll-hint
+          >
+            <ChevronDown size={16} className="animate-nudge" aria-hidden="true" />
+          </button>
           </div>
         </Dialog.Content>
       </Dialog.Portal>

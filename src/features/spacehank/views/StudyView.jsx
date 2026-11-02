@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpenCheck, CalendarClock, CheckCircle2, Layers, Pause, Play, Plus, RotateCcw, Sparkles, Timer, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { BellOff, BookOpenCheck, CalendarClock, CheckCircle2, Layers, Pause, Play, Plus, RotateCcw, Sparkles, Timer, Trash2 } from 'lucide-react';
 import { Badge, Button, DatePicker, Input, Select, Textarea } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { generateCards } from '../api/owner';
+import { MODES, dismiss, focus, pause, reset, setMode, start } from '../focus/store';
 import { Figure, PageHead, Segmented, Tile } from '../components/Page';
 import { loadNotes, notesStore } from '../notes/library';
 import { titleOf } from '../notes/notes';
@@ -329,69 +330,10 @@ function Cards({ list, cardList }) {
   );
 }
 
-const MODES = [
-  { id: 'focus', label: 'Focus', minutes: 25 },
-  { id: 'short', label: 'Short break', minutes: 5 },
-  { id: 'long', label: 'Long break', minutes: 15 },
-];
-const SESSIONS = 'hank62.study.sessions';
-const today = () => new Date().toDateString();
-const loadSessions = () => {
-  try {
-    const saved = JSON.parse(localStorage.getItem(SESSIONS) ?? 'null');
-    return saved?.day === today() ? saved.count : 0;
-  } catch {
-    return 0;
-  }
-};
-
-function Focus({ onFocusMusic, onNotify }) {
-  const [mode, setMode] = useState('focus');
-  const total = MODES.find((m) => m.id === mode).minutes * 60;
-  const [left, setLeft] = useState(total);
-  const [running, setRunning] = useState(false);
-  const [sessions, setSessions] = useState(loadSessions);
-  const endsAt = useRef(0);
-
-  useEffect(() => {
-    setLeft(total);
-    setRunning(false);
-  }, [total]);
-
-  useEffect(() => {
-    if (!running) return undefined;
-    const timer = window.setInterval(() => {
-      const remaining = Math.max(0, Math.round((endsAt.current - Date.now()) / 1000));
-      setLeft(remaining);
-      if (remaining === 0) {
-        setRunning(false);
-        if (mode === 'focus') {
-          setSessions((n) => {
-            try {
-              localStorage.setItem(SESSIONS, JSON.stringify({ day: today(), count: n + 1 }));
-            } catch {
-              /* private mode: the count just will not persist */
-            }
-            return n + 1;
-          });
-          onNotify?.('Focus session done. Take a short break.');
-        } else onNotify?.('Break over.');
-      }
-    }, 250);
-    return () => window.clearInterval(timer);
-  }, [running, mode, onNotify]);
-
-  useEffect(() => {
-    document.title = running ? `${clock(left)} · Hank62` : document.title.replace(/^\d\d:\d\d · /, '');
-    return () => {
-      document.title = document.title.replace(/^\d\d:\d\d · /, '');
-    };
-  }, [running, left]);
-
-  const toggle = () => {
-    if (!running) endsAt.current = Date.now() + left * 1000;
-    setRunning(!running);
-  };
+function Focus({ onFocusMusic }) {
+  const { mode, status, total, left, sessions } = useStore(focus);
+  const running = status === 'running';
+  const ringing = status === 'done';
   const r = 96;
   const c = 2 * Math.PI * r;
 
@@ -411,22 +353,28 @@ function Focus({ onFocusMusic, onNotify }) {
             </defs>
           </svg>
           <span className="absolute inset-0 grid place-items-center">
-            <b className="font-display text-display leading-none text-bone tabular-nums [font-size:clamp(3rem,7vw,4.4rem)]" data-clock>
+            <b className={clsx('font-display text-display leading-none text-bone tabular-nums [font-size:clamp(3rem,7vw,4.4rem)]', ringing && 'animate-pulse text-signal')} data-clock>
               {clock(left)}
             </b>
           </span>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" aria-label="Reset the timer" onClick={() => { setRunning(false); setLeft(total); }}>
-            <RotateCcw size={15} aria-hidden="true" />
+        {ringing ? (
+          <Button onClick={dismiss}>
+            <BellOff size={16} aria-hidden="true" /> Stop the alarm
           </Button>
-          <button type="button" onClick={toggle} aria-label={running ? 'Pause the timer' : 'Start the timer'} className="grid size-16 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-[0_10px_30px_-8px_rgb(255_91_46/0.8)] transition-transform hover:scale-105 active:scale-95">
-            {running ? <Pause size={24} fill="currentColor" aria-hidden="true" /> : <Play size={24} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
-          </button>
-          <Button variant="ghost" size="sm" onClick={onFocusMusic}>
-            <Sparkles size={14} aria-hidden="true" /> Focus music
-          </Button>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" aria-label="Reset the timer" onClick={reset}>
+              <RotateCcw size={15} aria-hidden="true" />
+            </Button>
+            <button type="button" onClick={running ? pause : start} aria-label={running ? 'Pause the timer' : 'Start the timer'} className="grid size-16 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-[0_10px_30px_-8px_rgb(255_91_46/0.8)] transition-transform hover:scale-105 active:scale-95">
+              {running ? <Pause size={24} fill="currentColor" aria-hidden="true" /> : <Play size={24} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
+            </button>
+            <Button variant="ghost" size="sm" onClick={onFocusMusic}>
+              <Sparkles size={14} aria-hidden="true" /> Focus music
+            </Button>
+          </div>
+        )}
       </section>
       <div className="flex flex-col gap-3">
         <Figure value={sessions} label="Focus sessions today" tone="text-signal" />
@@ -434,7 +382,7 @@ function Focus({ onFocusMusic, onNotify }) {
           <ol className="flex list-decimal flex-col gap-1.5 pl-5 text-fine text-bone-dim">
             <li>Focus for 25 minutes on one thing.</li>
             <li>Take a 5 minute break. After four sessions, a longer one.</li>
-            <li>“Focus music” asks Hank DJ for something from your library that suits deep work.</li>
+            <li>The timer floats above every screen while it runs, shows on your lock screen, and rings when the time is up.</li>
           </ol>
         </Tile>
       </div>
@@ -442,10 +390,10 @@ function Focus({ onFocusMusic, onNotify }) {
   );
 }
 
-export default function StudyView({ onFocusMusic, onNotify }) {
+export default function StudyView({ onFocusMusic }) {
   const { items: courseList } = useStore(courses.store);
   const { items: cardList } = useStore(flashcards.store);
-  const [tab, setTab] = useState('overview');
+  const [tab, setTab] = useState(() => (focus.get().status === 'idle' ? 'overview' : 'focus'));
 
   useEffect(() => {
     void courses.load();
@@ -480,7 +428,7 @@ export default function StudyView({ onFocusMusic, onNotify }) {
 
       {tab === 'overview' && <Overview list={courseList} cardList={cardList} />}
       {tab === 'cards' && <Cards list={courseList} cardList={cardList} />}
-      {tab === 'focus' && <Focus onFocusMusic={onFocusMusic} onNotify={onNotify} />}
+      {tab === 'focus' && <Focus onFocusMusic={onFocusMusic} />}
     </div>
   );
 }
