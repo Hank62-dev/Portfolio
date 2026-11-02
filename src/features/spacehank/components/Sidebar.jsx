@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Download, LockKeyhole, LogIn, PanelLeftClose, PanelLeftOpen, Sparkles } from 'lucide-react';
+import { ChevronDown, Download, LockKeyhole, LogOut, PanelLeftClose, PanelLeftOpen, RotateCcw, Sparkles } from 'lucide-react';
 import { Avatar, Badge, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { owner } from '../config';
@@ -45,7 +45,7 @@ function useMoreBelow(ref) {
   return more;
 }
 
-export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCollapse, onCollapse, onLogout }) {
+export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCollapse, onCollapse, onLogout, onResetDemo }) {
   const toggleLabel = rail ? 'Expand sidebar' : 'Collapse sidebar';
   const list = useRef(null);
   const more = useMoreBelow(list);
@@ -109,7 +109,8 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
             onClick={() => (app.canInstall ? app.install() : onNotify?.('On iPhone: tap Share, then Add to Home Screen'))}
           />
         )}
-        <NavButton rail={rail} label={guest ? 'Sign in' : 'Lock workspace'} icon={guest ? LogIn : LockKeyhole} onClick={onLogout} />
+        {guest && <NavButton rail={rail} label="Reset demo data" icon={RotateCcw} onClick={onResetDemo} />}
+        <NavButton rail={rail} label={guest ? 'Exit demo' : 'Lock workspace'} icon={guest ? LogOut : LockKeyhole} onClick={onLogout} />
         {canCollapse && (
           <NavButton
             rail={rail}
@@ -123,7 +124,7 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
           {!rail && (
             <span className="leading-tight">
               <b className="block text-fine font-medium">{guest ? 'Guest' : owner.name}</b>
-              <small className="font-mono text-[0.7rem] text-bone-faint">{guest ? 'Viewing the demo' : 'Owner online'}</small>
+              <small className="font-mono text-[0.7rem] text-bone-faint">{guest ? 'Sample data' : 'Owner online'}</small>
             </span>
           )}
         </div>

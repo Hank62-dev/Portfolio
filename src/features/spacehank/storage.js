@@ -1,7 +1,10 @@
 // The workspace's private, on-device storage: music files, covers, playlists, generated pictures and saved
 // prompts live in this browser's IndexedDB and never leave it. Small promise wrappers, no dependency.
 
-const NAME = 'hank62-workspace';
+import { isDemo } from './demo/mode';
+
+// the demo keeps its made-up data in a database of its own, so it can never touch the owner's real one
+const name = () => (isDemo() ? 'hank62-demo' : 'hank62-workspace');
 const VERSION = 3;
 // tracks / playlists / images / prompts / notes hold records; blobs / covers hold the raw files, keyed by the owner id.
 const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos'];
@@ -11,7 +14,7 @@ let opening = null;
 const open = () => {
   if (!opening) {
     opening = new Promise((resolve, reject) => {
-      const request = indexedDB.open(NAME, VERSION);
+      const request = indexedDB.open(name(), VERSION);
       request.onupgradeneeded = () => {
         for (const store of STORES) {
           if (!request.result.objectStoreNames.contains(store)) request.result.createObjectStore(store, { keyPath: 'id' });

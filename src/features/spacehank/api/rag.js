@@ -1,4 +1,6 @@
 import { spacehankConfig } from '../config';
+import { isDemo } from '../demo/mode';
+import * as demo from '../demo/mock';
 
 const { ragApiUrl, ragUserId, maxUploadBytes } = spacehankConfig;
 
@@ -30,6 +32,7 @@ const toSource = (citation) => {
  * An empty answer throws an Error with an empty message so the caller can show its own copy.
  */
 export const askRag = async ({ sessionId, message, mode, history, web = 'auto' }) => {
+  if (isDemo()) return demo.askRag({ message, web });
   const { response, data } = await post('/api/chat', {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -56,6 +59,7 @@ export const askRag = async ({ sessionId, message, mode, history, web = 'auto' }
 
 /** The documents in the shared library: [{ id, name, chunks }]. */
 export const listDocuments = async (scope = spacehankConfig.libraryScope) => {
+  if (isDemo()) return demo.listDocuments();
   let response;
   try {
     response = await fetch(`${ragApiUrl}/api/docs/${encodeURIComponent(scope)}`);
@@ -69,6 +73,7 @@ export const listDocuments = async (scope = spacehankConfig.libraryScope) => {
 
 /** Removes one document from the shared library. */
 export const deleteDocument = async (docId, scope = spacehankConfig.libraryScope) => {
+  if (isDemo()) return demo.deleteDocument(docId);
   let response;
   try {
     response = await fetch(`${ragApiUrl}/api/docs/${encodeURIComponent(scope)}/${encodeURIComponent(docId)}`, { method: 'DELETE' });
@@ -81,6 +86,7 @@ export const deleteDocument = async (docId, scope = spacehankConfig.libraryScope
 /** Uploads one document into the RAG index. Resolves to the number of chunks created. */
 export const uploadDocument = async ({ file, conversationId }) => {
   if (file.size > maxUploadBytes) throw new Error(`${file.name} is larger than ${maxUploadBytes / 1024 / 1024} MB.`);
+  if (isDemo()) return demo.uploadDocument({ file });
   const form = new FormData();
   form.append('file', file);
   form.append('conversation_id', conversationId);

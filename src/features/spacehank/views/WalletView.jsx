@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Banknote, Bus, Check, ChevronLeft, ChevronRight, CircleEllipsis, Download, Gamepad2, GraduationCap, HeartPulse, House, Plus, ShoppingBag, Sparkles, Target, Trash2, TrendingDown, TrendingUp, Utensils, Wallet as WalletIcon } from 'lucide-react';
 import { Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { PageHead, Segmented, Tile } from '../components/Page';
+import { useFab } from '../fab';
 import { useStore } from '../store';
 import { CATEGORIES, categoryOf, compact, formatVnd, inMonth, monthKey, parseEntry, summarize, toCsv } from '../wallet/model';
 import { budgets, entries, sampleEntries } from '../wallet/store';
@@ -81,6 +82,8 @@ export default function WalletView() {
   const [text, setText] = useState('');
   const [draft, setDraft] = useState(null); // what the line was understood as, before it is saved
   const [editing, setEditing] = useState(false);
+  const field = useRef(null);
+  useFab({ label: 'Log money', icon: Plus, onPress: () => { window.scrollTo({ top: 0, behavior: 'smooth' }); field.current?.focus(); } });
 
   useEffect(() => {
     void entries.load();
@@ -139,7 +142,7 @@ export default function WalletView() {
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">
             <WalletIcon size={18} aria-hidden="true" />
           </span>
-          <input aria-label="Log money" placeholder="ăn trưa 45k" autoComplete="off" value={text} onChange={(e) => { setText(e.target.value); setDraft(null); }} className="h-11 min-w-0 flex-1 bg-transparent text-lead text-bone placeholder:text-bone-faint focus-visible:outline-none" />
+          <input ref={field} aria-label="Log money" placeholder="ăn trưa 45k" autoComplete="off" value={text} onChange={(e) => { setText(e.target.value); setDraft(null); }} className="h-11 min-w-0 flex-1 bg-transparent text-lead text-bone placeholder:text-bone-faint focus-visible:outline-none" />
           <Button type="submit" className="shrink-0" disabled={!text.trim()}>
             <Plus size={15} aria-hidden="true" /> Add
           </Button>
@@ -203,7 +206,7 @@ export default function WalletView() {
           <ChevronRight size={16} aria-hidden="true" />
         </button>
         {items.some((e) => e.sample) && (
-          <Button variant="ghost" size="sm" className="max-sm:basis-full sm:ml-auto" onClick={() => Promise.all(items.filter((e) => e.sample).map((e) => entries.remove(e.id)))}>
+          <Button variant="ghost" size="sm" className="max-md:hidden sm:ml-auto" onClick={() => Promise.all(items.filter((e) => e.sample).map((e) => entries.remove(e.id)))}>
             Remove samples
           </Button>
         )}
@@ -212,14 +215,14 @@ export default function WalletView() {
       <section className="relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(90%_140%_at_0%_0%,rgb(255_91_46/0.2),transparent_55%),radial-gradient(70%_120%_at_100%_100%,rgb(91_43_255/0.2),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" data-figures aria-label="This month">
         <span className="font-mono text-[0.68rem] tracking-[0.14em] text-bone-dim uppercase">Balance this month</span>
         <b className={clsx('mt-2 block font-display leading-none tabular-nums [font-size:clamp(2.4rem,6vw,4rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(sum.balance)}</b>
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
           {[
             ['Spent', formatVnd(sum.spent), 'text-bone', TrendingDown],
             ['Income', formatVnd(sum.income), 'text-ok', TrendingUp],
             ['Biggest', lead ? categoryOf(lead.category).label : '-', 'text-bone', Target],
           ].map(([label, value, tone, Icon]) => (
-            <div key={label} className="flex items-center gap-3 rounded-2xl bg-black/25 px-4 py-3 backdrop-blur">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/8 text-bone-dim">
+            <div key={label} className="flex items-center gap-3 rounded-2xl bg-black/25 px-4 py-3 backdrop-blur max-md:flex-col max-md:items-start max-md:gap-1.5 max-md:px-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/8 text-bone-dim max-md:size-7">
                 <Icon size={16} aria-hidden="true" />
               </span>
               <span className="min-w-0 leading-tight">

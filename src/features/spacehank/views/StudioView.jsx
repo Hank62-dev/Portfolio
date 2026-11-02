@@ -445,8 +445,8 @@ export default function StudioView({ locked = false }) {
   const [tab, setTab] = useState('images');
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
+      <header className="flex flex-wrap items-end justify-between gap-4 max-md:justify-start">
+        <div className="max-md:hidden">
           <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">Design / Studio</span>
           <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone">
             Image <em className="serif-accent">Studio.</em>

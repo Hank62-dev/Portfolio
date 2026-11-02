@@ -1,4 +1,6 @@
 import { spacehankConfig } from '../config';
+import { isDemo } from '../demo/mode';
+import * as demo from '../demo/mock';
 
 const { realtimeApiUrl } = spacehankConfig;
 
@@ -23,13 +25,13 @@ const call = async (path, { method = 'GET', body } = {}) => {
   return data;
 };
 
-export const aiUsage = () => call('/api/ai/usage');
-export const djPick = ({ mood, tracks }) => call('/api/ai/dj', { method: 'POST', body: { mood, tracks } });
-export const aiNote = ({ context, language }) => call('/api/ai/note', { method: 'POST', body: { context, language } });
-export const askNotes = ({ question, notes }) => call('/api/ai/ask', { method: 'POST', body: { question, notes } });
-export const interpretCommand = ({ text, catalog, context }) => call('/api/ai/command', { method: 'POST', body: { text, catalog, context } });
-export const generateCards = ({ text, limit }) => call('/api/ai/cards', { method: 'POST', body: { text, limit } });
-export const generateImage = (prompt) => call('/api/ai/image', { method: 'POST', body: { prompt } });
+export const aiUsage = () => (isDemo() ? demo.aiUsage() : call('/api/ai/usage'));
+export const djPick = ({ mood, tracks }) => (isDemo() ? demo.djPick({ mood, tracks }) : call('/api/ai/dj', { method: 'POST', body: { mood, tracks } }));
+export const aiNote = ({ context, language }) => (isDemo() ? demo.aiNote({ context, language }) : call('/api/ai/note', { method: 'POST', body: { context, language } }));
+export const askNotes = ({ question, notes }) => (isDemo() ? demo.askNotes({ question, notes }) : call('/api/ai/ask', { method: 'POST', body: { question, notes } }));
+export const interpretCommand = ({ text, catalog, context }) => (isDemo() ? demo.interpretCommand({ text, catalog, context }) : call('/api/ai/command', { method: 'POST', body: { text, catalog, context } }));
+export const generateCards = ({ text, limit }) => (isDemo() ? demo.generateCards({ text, limit }) : call('/api/ai/cards', { method: 'POST', body: { text, limit } }));
+export const generateImage = (prompt) => (isDemo() ? demo.generateImage(prompt) : call('/api/ai/image', { method: 'POST', body: { prompt } }));
 export const calendarBetween = (from, to) =>
   call(`/api/briefing/calendar?from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`);
 

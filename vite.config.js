@@ -19,6 +19,15 @@ export default defineConfig({
         start_url: '/spacehank',
         scope: '/',
         display: 'standalone',
+        orientation: 'portrait',
+        categories: ['productivity', 'utilities'],
+        // long-press the app icon to jump straight to a tab
+        shortcuts: [
+          { name: 'Hank RAG', short_name: 'Hank', url: '/spacehank?tab=rag' },
+          { name: 'Second Brain', short_name: 'Notes', url: '/spacehank?tab=notes' },
+          { name: 'Wallet', short_name: 'Wallet', url: '/spacehank?tab=wallet' },
+          { name: 'Hank Music', short_name: 'Music', url: '/spacehank?tab=music' },
+        ],
         background_color: '#0b0c0e',
         theme_color: '#0b0c0e',
         icons: [

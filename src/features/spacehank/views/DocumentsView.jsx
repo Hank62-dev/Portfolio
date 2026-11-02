@@ -4,6 +4,8 @@ import { Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { deleteDocument, listDocuments, uploadDocument } from '../api/rag';
 import { spacehankConfig } from '../config';
+import { PageHead } from '../components/Page';
+import { useFab } from '../fab';
 
 const sizeLabel = (bytes) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(bytes / 1024))} KB`);
 
@@ -94,23 +96,17 @@ export default function DocumentsView({ onTab }) {
   };
 
   const choose = () => inputRef.current?.click();
+  useFab({ label: 'Add documents', icon: Upload, onPress: choose });
   const chunks = library.reduce((sum, doc) => sum + doc.chunks, 0);
   const pending = files.filter((f) => f.status === 'uploading');
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">Knowledge vault</span>
-          <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone">
-            Document <em className="serif-accent">Vault.</em>
-          </h1>
-          <p className="mt-2 max-w-[60ch] text-bone-dim">Drop documents in and Hank answers from them in every chat, with sources. It still answers everything else too.</p>
-        </div>
+      <PageHead eyebrow="Knowledge vault" title="Document" accent="Vault." description="Drop documents in and Hank answers from them in every chat, with sources. It still answers everything else too.">
         <Button variant="ghost" size="sm" onClick={() => onTab('rag')}>
           Ask Hank RAG <ArrowUpRight size={14} aria-hidden="true" />
         </Button>
-      </header>
+      </PageHead>
 
       <input ref={inputRef} hidden type="file" multiple accept={spacehankConfig.uploadAccept} onChange={onUpload} />
 

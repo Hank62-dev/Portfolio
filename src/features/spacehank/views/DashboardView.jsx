@@ -3,6 +3,7 @@ import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, PageHeade
 import BriefingCard from '../components/BriefingCard';
 import { greetingFor, owner } from '../config';
 import { isWorking } from '../model/agents';
+import { NAVIGATION, tabHue } from '../navigation';
 
 function LayerRow({ icon: Icon, label, value }) {
   return (
@@ -11,6 +12,29 @@ function LayerRow({ icon: Icon, label, value }) {
       <span className="flex-1 text-bone-dim">{label}</span>
       <b className="font-mono text-fine font-medium">{value}</b>
     </div>
+  );
+}
+
+/** A phone's home screen: every part of the workspace as an app icon, like a launcher. */
+function Launcher({ onTab }) {
+  return (
+    <nav aria-label="All apps" className="md:hidden" data-launcher>
+      <ul className="grid grid-cols-4 gap-x-2 gap-y-5">
+        {NAVIGATION.filter((item) => item.id !== 'hank').map(({ id, label, icon: Icon }) => {
+          const hue = tabHue(id);
+          return (
+            <li key={id}>
+              <button type="button" onClick={() => onTab(id)} className="group flex w-full flex-col items-center gap-1.5 active:scale-95">
+                <span className="grid size-[3.6rem] place-items-center rounded-[1.25rem] shadow-[inset_0_1px_0_rgb(255_255_255/0.12)] transition-transform" style={{ background: `linear-gradient(150deg, hsl(${hue} 70% 46% / 0.9), hsl(${(hue + 40) % 360} 65% 30% / 0.95))`, color: `hsl(${hue} 100% 92%)` }}>
+                  <Icon size={25} strokeWidth={1.7} aria-hidden="true" />
+                </span>
+                <span className="line-clamp-2 w-full text-center font-mono text-[0.64rem] leading-tight text-bone-dim">{label}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
   );
 }
 
@@ -32,6 +56,7 @@ export default function DashboardView({ agents, events, connected, onTab, owner:
           </Button>
         }
       />
+      <Launcher onTab={onTab} />
       <BriefingCard owner={isOwner} agents={agents} connected={connected} />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat icon={Users} label="AI WORKFORCE" value={active} note="agents active" />

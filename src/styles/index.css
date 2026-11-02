@@ -79,6 +79,13 @@
   --animate-grain: grain 0.9s steps(1) infinite;
   --animate-orbit: orbit 32s linear infinite;
   --animate-nudge: nudge 1.9s ease-in-out infinite;
+  --animate-sheet-up: sheet-up 0.38s var(--ease-out-expo) both;
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+  }
 
   @keyframes nudge {
     50% {
@@ -715,6 +722,40 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* The workspace on a phone behaves like an app: no tap flash, no double-tap zoom, no page bounce, text you type never zooms the page. */
+.app-shell {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+.app-shell button,
+.app-shell nav,
+.app-shell header {
+  -webkit-user-select: none;
+  user-select: none;
+}
+html:has(.app-shell) {
+  overscroll-behavior-y: none;
+}
+@media (max-width: 767px) {
+  .app-shell input:not([type='checkbox']):not([type='radio']):not([type='range']),
+  .app-shell textarea {
+    font-size: 16px;
+  }
+}
+
+/* On a phone every tab is an app of its own, with its own colour: --app-hue is set per tab by the workspace. */
+@media (max-width: 767px) {
+  .app-shell {
+    --color-signal: hsl(var(--app-hue, 18) 88% 62%);
+    --color-signal-soft: hsl(var(--app-hue, 18) 88% 62% / 0.15);
+  }
+  :root[data-theme='light'] .app-shell {
+    --color-signal: hsl(var(--app-hue, 18) 78% 40%);
+    --color-signal-soft: hsl(var(--app-hue, 18) 78% 40% / 0.12);
   }
 }
 

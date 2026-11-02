@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bot, CalendarDays, Check, CircleCheck, Hourglass, Inbox, ListChecks, MoreHorizontal, Plus, Sparkles, Trash2, X } from 'lucide-react';
 import { Badge, Button, DatePicker, Dialog, Input, Menu, Select, Textarea } from '../../../design-system';
 import { clsx } from '../../../lib/format';
-import { PageHead } from '../components/Page';
+import { PageHead, Segmented } from '../components/Page';
+import { useFab } from '../fab';
 import { COLUMNS, dueLabel, dueState, inColumn, moveCard, newCard, progress } from '../missions/model';
 import { missions, sampleCards } from '../missions/store';
 import { hueOf } from '../notes/notes';
@@ -173,6 +174,8 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
   const [title, setTitle] = useState('');
   const [open, setOpen] = useState(null);
   const [over, setOver] = useState(null);
+  const [col, setCol] = useState(COLUMNS[0].id); // phones show one column at a time
+  const swipe = useRef(null);
   const lastEvent = useRef(events[0]);
 
   useEffect(() => {
@@ -234,6 +237,8 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
   };
 
   const addSamples = () => missions.putMany(sampleCards());
+  useFab(open ? null : { label: 'Add a card', icon: Plus, onPress: () => setAdding(col) });
+  const turn = (by) => setCol((now) => COLUMNS[Math.max(0, Math.min(COLUMNS.length - 1, COLUMNS.findIndex((c) => c.id === now) + by))].id);
   const total = cards.length;
   const doneCount = byColumn.done.length;
 
@@ -263,7 +268,22 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+      <div className="md:hidden">
+        <Segmented value={col} onChange={setCol} label="Column" options={COLUMNS.map((c) => ({ id: c.id, label: `${c.label.replace('With an agent', 'Agent').replace('In progress', 'Doing')} ${byColumn[c.id].length}` }))} />
+      </div>
+
+      <div
+        className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4"
+        onTouchStart={(e) => { swipe.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }; }}
+        onTouchEnd={(e) => {
+          const from = swipe.current;
+          swipe.current = null;
+          if (!from) return;
+          const dx = e.changedTouches[0].clientX - from.x;
+          const dy = e.changedTouches[0].clientY - from.y;
+          if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.6) turn(dx < 0 ? 1 : -1);
+        }}
+      >
         {COLUMNS.map((column) => (
           <section
             key={column.id}
@@ -275,7 +295,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
             }}
             onDragLeave={(e) => e.currentTarget.contains(e.relatedTarget) || setOver(null)}
             onDrop={(e) => onDrop(e, column.id)}
-            className={clsx('flex min-h-28 flex-col gap-3 rounded-[1.75rem] border p-3.5 transition-colors md:min-h-[320px]', over === column.id ? 'border-signal bg-signal-soft' : 'border-line bg-ink-1')}
+            className={clsx('flex min-h-28 flex-col gap-3 rounded-[1.75rem] border p-3.5 transition-colors md:min-h-[320px]', col !== column.id && 'max-md:hidden', over === column.id ? 'border-signal bg-signal-soft' : 'border-line bg-ink-1')}
           >
             <header className="flex items-center gap-2 px-1.5 pt-1">
               <span className="grid size-7 place-items-center rounded-full" style={{ background: `hsl(${COLUMN_STYLE[column.id].hue} 60% 50% / 0.18)`, color: `hsl(${COLUMN_STYLE[column.id].hue} 85% 76%)` }}>

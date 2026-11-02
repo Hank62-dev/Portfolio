@@ -22,3 +22,6 @@ export const NAVIGATION = [
 ];
 
 export const DEFAULT_TAB = 'hank';
+
+/** Each tab's own colour on a phone, so every one feels like an app of its own (the home tab keeps the brand orange). */
+export const tabHue = (id) => (id === 'hank' ? 18 : (((NAVIGATION.findIndex((item) => item.id === id) - 1) * 47 + 12) % 360 + 360) % 360);

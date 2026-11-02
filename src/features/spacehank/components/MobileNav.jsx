@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Download, LockKeyhole, LogIn, MoreHorizontal, X } from 'lucide-react';
+import { Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, X } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { NAVIGATION, NAV_SECTIONS } from '../navigation';
 
@@ -12,14 +12,17 @@ const SHORT = { hank: 'Home', rag: 'Hank', notes: 'Notes', music: 'Music' };
 const SLOT = 'relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 py-2 font-mono text-[0.66rem] transition-colors';
 
 /** The navigation on a phone: a bar at the thumb's reach, and a sheet with every tab, grouped. */
-export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout }) {
+export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, onResetDemo }) {
   const [open, setOpen] = useState(false);
   const pinned = PINNED.map((id) => NAVIGATION.find((item) => item.id === id));
   const inMore = !PINNED.includes(tab);
 
   const go = (id) => {
     setOpen(false);
-    onTab(id);
+    navigator.vibrate?.(6);
+    // tapping the tab you are on scrolls it back to the top, as in a native app
+    if (id === tab) window.scrollTo({ top: 0, behavior: 'smooth' });
+    else onTab(id);
   };
 
   return (
@@ -93,8 +96,13 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout }
                   <Download size={15} aria-hidden="true" /> Install app
                 </button>
               )}
+              {guest && (
+                <button type="button" onClick={onResetDemo} className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim">
+                  <RotateCcw size={15} aria-hidden="true" /> Reset demo data
+                </button>
+              )}
               <button type="button" onClick={onLogout} className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim">
-                {guest ? <LogIn size={15} aria-hidden="true" /> : <LockKeyhole size={15} aria-hidden="true" />} {guest ? 'Sign in' : 'Lock workspace'}
+                {guest ? <LogOut size={15} aria-hidden="true" /> : <LockKeyhole size={15} aria-hidden="true" />} {guest ? 'Exit demo' : 'Lock workspace'}
               </button>
             </div>
           </div>

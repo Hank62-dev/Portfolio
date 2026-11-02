@@ -5,11 +5,11 @@ import { Button, Card, ErrorState, Eyebrow, Field, Input, Spinner } from '../../
 const messageFor = (error) =>
   error.message === 'Failed to fetch' ? 'Realtime server is unreachable. Check that it is running.' : error.message;
 
-export function AuthLoading() {
+export function AuthLoading({ label = 'Securing workspace' }) {
   return (
     <div className="grid min-h-screen place-items-center bg-ink-0 text-bone-dim">
       <div className="flex items-center gap-3 font-mono text-fine">
-        <Spinner label="Securing workspace" /> Securing workspace…
+        <Spinner label={label} /> {label}…
       </div>
     </div>
   );

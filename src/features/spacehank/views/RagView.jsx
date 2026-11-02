@@ -158,22 +158,22 @@ export default function RagView() {
         <span className="flex items-center gap-2.5 font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase max-sm:hidden">
           <i className="size-1.5 shrink-0 animate-pulse rounded-full bg-ok" aria-hidden="true" /> {t('rag.channel')}
         </span>
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
-          <div className="flex flex-1 items-center rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur sm:flex-none" role="radiogroup" aria-label={t('rag.web')}>
-            <Globe size={13} className="mr-1 ml-2 text-bone-faint" aria-hidden="true" />
+        <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
+          <div className="flex min-w-0 flex-1 items-center rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur sm:flex-none" role="radiogroup" aria-label={t('rag.web')}>
+            <Globe size={13} className="mr-1 ml-2 text-bone-faint max-sm:hidden" aria-hidden="true" />
             {WEB_CHOICES.map(([id, key]) => (
-              <button key={id} type="button" role="radio" aria-checked={web === id} onClick={() => setWeb(id)} className={clsx('whitespace-nowrap max-sm:flex-1 rounded-full px-2.5 py-1 font-mono text-[0.78rem] transition-colors', web === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
+              <button key={id} type="button" role="radio" aria-checked={web === id} onClick={() => setWeb(id)} className={clsx('whitespace-nowrap max-sm:flex-1 rounded-full px-2.5 py-1 font-mono text-[0.78rem] transition-colors max-sm:px-1.5 max-sm:text-[0.74rem]', web === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
                 {t(key)}
               </button>
             ))}
           </div>
-        <div className="flex flex-1 rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur sm:flex-none" role="radiogroup" aria-label="Retrieval mode">
+        <div className="flex shrink-0 rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur sm:flex-none" role="radiogroup" aria-label="Retrieval mode">
           {[
             ['fast', t('rag.fast'), Gauge],
             ['reasoning', t('rag.deep'), BrainCircuit],
           ].map(([id, label, Icon]) => (
-            <button key={id} type="button" role="radio" aria-checked={mode === id} onClick={() => setMode(id)} className={clsx('whitespace-nowrap max-sm:flex-1 max-sm:justify-center inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[0.78rem] transition-colors', mode === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
-              <Icon size={13} aria-hidden="true" /> {label}
+            <button key={id} type="button" role="radio" aria-checked={mode === id} aria-label={label} title={label} onClick={() => setMode(id)} className={clsx('whitespace-nowrap max-sm:size-8 max-sm:justify-center max-sm:px-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[0.78rem] transition-colors', mode === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
+              <Icon size={13} aria-hidden="true" /> <span className="max-sm:sr-only">{label}</span>
             </button>
           ))}
         </div>

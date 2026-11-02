@@ -1,15 +1,16 @@
 import { clsx } from '../../../lib/format';
 
 /** The heading every tab opens with: a small label, a serif title with an italic accent word, and room for actions. */
-export function PageHead({ eyebrow, title, accent, description, children }) {
+export function PageHead({ eyebrow, title, accent, description, children, keepOnPhone = false }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4">
-      <div>
+    <header className={clsx('flex flex-wrap items-end justify-between gap-3 md:gap-4 max-md:justify-end', (!children || !keepOnPhone) && 'max-md:hidden')}>
+      {/* on a phone the title bar above already names the screen, so only the actions stay */}
+      <div className="max-md:hidden">
         <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{eyebrow}</span>
-        <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone">
+        <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone max-md:mt-1 max-md:text-[2rem]">
           {title} <em className="serif-accent">{accent}</em>
         </h1>
-        {description && <p className="mt-2 max-w-[60ch] text-bone-dim">{description}</p>}
+        {description && <p className="mt-2 max-w-[60ch] text-bone-dim max-md:line-clamp-2 max-md:text-fine">{description}</p>}
       </div>
       {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </header>
@@ -19,7 +20,7 @@ export function PageHead({ eyebrow, title, accent, description, children }) {
 /** A row of pill buttons where one is chosen (a tab strip, or a filter). */
 export function Segmented({ value, onChange, options, label }) {
   return (
-    <div className="flex max-w-full flex-wrap gap-1 rounded-[1.5rem] border border-line bg-ink-1 p-1" role="tablist" aria-label={label}>
+    <div className={clsx('flex max-w-full gap-1 rounded-[1.5rem] border border-line bg-ink-1 p-1', options.length > 3 && 'flex-wrap')} role="tablist" aria-label={label}>
       {options.map(({ id, label: text, icon: Icon }) => (
         <button
           key={id}

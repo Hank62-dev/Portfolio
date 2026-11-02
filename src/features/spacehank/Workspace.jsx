@@ -1,19 +1,17 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Copy, Download, Pause, Play, Plus, SkipBack, SkipForward, Users } from 'lucide-react';
-import { Button, SoftContext, Spinner, TooltipProvider } from '../../design-system';
+import { SoftContext, Spinner, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useInstall, useOnline } from './hooks/useInstall';
 import { clsx } from '../../lib/format';
 import CommandPalette from './components/CommandPalette';
-import GuestLocked from './components/GuestLocked';
-import { LOCKED } from './components/lockedCopy';
 import MobileNav from './components/MobileNav';
 import Sidebar from './components/Sidebar';
 import TaskModal from './components/TaskModal';
 import Topbar from './components/Topbar';
 import { interpretCommand } from './api/owner';
 import { buildCatalog, validate } from './model/nlcommands';
-import { NAVIGATION } from './navigation';
+import { NAVIGATION, tabHue } from './navigation';
 import { sendIntent } from './notes/library';
 import { useShellContext, playMood } from './hooks/useShellContext';
 import { missions } from './missions/store';
@@ -21,6 +19,7 @@ import { newCard } from './missions/model';
 import { entries } from './wallet/store';
 import { parseEntry } from './wallet/model';
 import { library, loadLibrary } from './music/library';
+import Fab from './components/Fab';
 import NowPlayingBar from './music/NowPlayingBar';
 import { next, player, previous, setSleepTimer, togglePlay } from './music/player';
 import { toCss } from './studio/brand';
@@ -63,6 +62,7 @@ export default function Workspace({
   events,
   onNewTask,
   onLogout,
+  onResetDemo,
   onNotify,
   activeAgent,
 }) {
@@ -76,7 +76,7 @@ export default function Workspace({
   const hasTrack = useStore(player, (s) => Boolean(s.trackId));
   const playing = useStore(player, (s) => s.playing);
   const trackCount = useStore(library, (s) => s.tracks.length);
-  const music = !guest;
+  const music = true;
   const app = useInstall();
   const online = useOnline();
 
@@ -203,36 +203,37 @@ export default function Workspace({
     }
   };
 
+  // a new tab starts at its top, like opening a screen
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [tab]);
+
   const shell = useShellContext({ tabs: shellTabs, agents, onTab, onNewTask });
 
   const views = {
     space: <FloorView agents={agents} events={events} selected={selected} onSelect={onSelect} paused={paused} onTab={onTab} />,
     memory: <MemoryView events={events} />,
-    studio: <StudioView locked={guest} />,
-    ...(guest
-      ? Object.fromEntries(Object.entries(LOCKED).map(([id, copy]) => [id, <GuestLocked key={id} {...copy} onSignIn={onLogout} />]))
-      : {
-          rag: <RagView />,
-          docs: <DocumentsView onTab={onTab} />,
-          music: <MusicView />,
-          notes: <NotesView />,
-          constellation: <ConstellationView onOpenNote={(id) => { sendIntent('notes', { open: id }); onTab('notes'); }} />,
-          memos: <MemosView onNotify={onNotify} />,
-          missions: <MissionView agents={agents} events={events} onNewTask={onNewTask} onNotify={onNotify} connected={connected} />,
-          study: <StudyView onNotify={onNotify} onFocusMusic={() => playMood('deep focus, calm and steady').then(onNotify, (e) => onNotify?.(e.message))} />,
-          habits: <HabitsView />,
-          wallet: <WalletView />,
-          shell: <ShellView ctx={shell} />,
-        }),
-    pulse: <PulseView owner={!guest} />,
+    studio: <StudioView />,
+    rag: <RagView />,
+    docs: <DocumentsView onTab={onTab} />,
+    music: <MusicView />,
+    notes: <NotesView />,
+    constellation: <ConstellationView onOpenNote={(id) => { sendIntent('notes', { open: id }); onTab('notes'); }} />,
+    memos: <MemosView onNotify={onNotify} />,
+    missions: <MissionView agents={agents} events={events} onNewTask={onNewTask} onNotify={onNotify} connected={connected} />,
+    study: <StudyView onNotify={onNotify} onFocusMusic={() => playMood('deep focus, calm and steady').then(onNotify, (e) => onNotify?.(e.message))} />,
+    habits: <HabitsView />,
+    wallet: <WalletView />,
+    shell: <ShellView ctx={shell} />,
+    pulse: <PulseView owner />,
   };
-  const fit = tab === 'shell' && !guest; // Git Bash fills the screen and scrolls inside itself, not the page
+  const fit = tab === 'shell'; // Git Bash fills the screen and scrolls inside itself, not the page
   const page = views[tab] || <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
 
   return (
     <SoftContext.Provider value>
       <TooltipProvider>
-        <div className={clsx('flex bg-ink-0 text-bone', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')}>
+        <div className={clsx('app-shell flex bg-ink-0 text-bone', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab) }}>
           {!phone && (
             <Sidebar
               tab={tab}
@@ -244,6 +245,7 @@ export default function Workspace({
               canCollapse={wide}
               onCollapse={() => setCollapsed((value) => !value)}
               onLogout={onLogout}
+              onResetDemo={onResetDemo}
             />
           )}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
@@ -253,16 +255,11 @@ export default function Workspace({
                 You are offline. Music, notes and pictures still work; AI, the calendar and the realtime link wait for the connection.
               </div>
             )}
-            {guest && (
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-warn/30 bg-warn/10 px-gutter py-2 font-mono text-fine text-warn" role="status" data-demo-banner>
-                <span>You are viewing a demo with sample data. Nothing here is real, and nothing you do is sent anywhere.</span>
-                <Button variant="ghost" size="sm" onClick={onLogout}>
-                  Sign in
-                </Button>
+            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack && tab !== 'music' ? 'pb-44' : 'pb-28') : music && hasTrack && tab !== 'music' && 'pb-28')}>
+              {/* keyed by tab, so each tab eases in like a new screen in an app */}
+              <div key={tab} className={clsx('animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
+                <Suspense fallback={<PageLoading />}>{page}</Suspense>
               </div>
-            )}
-            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-6 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack && tab !== 'music' ? 'pb-44' : 'pb-28') : music && hasTrack && tab !== 'music' && 'pb-28')}>
-              <Suspense fallback={<PageLoading />}>{page}</Suspense>
             </main>
             <footer className="flex flex-wrap max-md:hidden justify-between gap-2 border-t border-line px-gutter py-4 font-mono text-fine text-bone-faint">
               <span>HANK62 PRIVATE OS</span>
@@ -270,14 +267,15 @@ export default function Workspace({
             </footer>
           </div>
           {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
-          {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} />}
+          {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
+          {phone && <Fab raised={hasTrack && tab !== 'music'} />}
           {music && tab !== 'music' && <NowPlayingBar onOpen={() => onTab('music')} lifted={phone} />}
           <CommandPalette
             open={paletteOpen}
             onOpenChange={setPaletteOpen}
             commands={commands}
             music={music && trackCount > 0}
-            onInterpret={guest ? undefined : interpret}
+            onInterpret={interpret}
             onRun={execute}
           />
         </div>

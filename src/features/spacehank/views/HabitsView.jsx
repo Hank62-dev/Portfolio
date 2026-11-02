@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Apple, Bike, BookOpen, Brain, Check, Coffee, Droplets, Dumbbell, Flame, Footprints, Moon, Music2, PenLine, Plus, Sparkles, Sprout, Trash2 } from 'lucide-react';
+import { Apple, Bike, BookOpen, Brain, Check, Coffee, Droplets, Dumbbell, Flame, Footprints, Moon, Music2, PenLine, Plus, Sparkles, Sprout, Trash2, X } from 'lucide-react';
 import { Badge, Button, Input } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { Figure, PageHead, Tile } from '../components/Page';
 import { HABIT_ICONS, dayKey, heatmap, longestStreak, moodLift, newHabit, rate, stageOf, streak, toggleDay } from '../habits/model';
 import { habits, sampleHabits } from '../habits/store';
 import { loadNotes, notesStore } from '../notes/library';
+import { useFab } from '../fab';
 import { useStore } from '../store';
 
 // each habit picks one of these; they are drawn with the icon library, never as emoji
@@ -131,6 +132,8 @@ export default function HabitsView() {
   const { notes } = useStore(notesStore);
   const [name, setName] = useState('');
   const [icon, setIcon] = useState(HABIT_ICONS[0]);
+  const [planting, setPlanting] = useState(false); // phones only: the form is hidden until the round button asks for it
+  useFab({ label: planting ? 'Close' : 'Plant a habit', icon: planting ? X : Plus, onPress: () => setPlanting((open) => !open) });
 
   useEffect(() => {
     void habits.load();
@@ -147,6 +150,7 @@ export default function HabitsView() {
     if (!name.trim()) return;
     await habits.create({ ...newHabit(name, icon, (items.length * 53 + 130) % 360) });
     setName('');
+    setPlanting(false);
   };
 
   return (
@@ -165,7 +169,7 @@ export default function HabitsView() {
         <Figure value={items.length} label="Plants" />
       </div>
 
-      <form onSubmit={add} className="flex flex-wrap items-center gap-2 rounded-3xl border border-line bg-ink-1 p-3">
+      <form onSubmit={add} className={clsx('flex flex-wrap items-center gap-2 rounded-3xl border border-line bg-ink-1 p-3', !planting && 'max-md:hidden')}>
         <div className="flex flex-wrap gap-1" role="radiogroup" aria-label="Icon">
           {HABIT_ICONS.map((id) => (
             <button key={id} type="button" role="radio" aria-checked={icon === id} aria-label={`Icon: ${ICON_LABEL[id]}`} title={ICON_LABEL[id]} onClick={() => setIcon(id)} className={clsx('grid size-9 place-items-center rounded-full transition-all', icon === id ? 'bg-signal text-ink-0' : 'text-bone-dim hover:bg-white/10 hover:text-bone')}>

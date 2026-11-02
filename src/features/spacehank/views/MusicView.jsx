@@ -319,7 +319,7 @@ export default function MusicView() {
 
       {/* top bar */}
       <div className="flex flex-wrap items-center gap-2 px-5 pt-5 sm:px-7">
-        <h1 className="flex items-center gap-2 font-display text-lead text-bone">
+        <h1 className="flex items-center gap-2 font-display text-lead text-bone max-md:sr-only">
           <Music2 size={18} className="text-signal" aria-hidden="true" /> Hank Music
         </h1>
         <div className={clsx('relative ml-auto transition-all', searching || query ? 'w-full max-w-xs' : 'w-10')}>

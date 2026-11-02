@@ -7,6 +7,7 @@ import { LANGUAGES, asNote, bars, canTranscribe, formatDuration, titleFrom } fro
 import { memos } from '../memos/store';
 import { createNote } from '../notes/library';
 import { textToHtml } from '../notes/notes';
+import { useFab } from '../fab';
 import { useStore } from '../store';
 
 const PEAKS = 64;
@@ -14,7 +15,7 @@ const PEAKS = 64;
 /** The bars of a memo, filled up to how far playback has got. Clicking one seeks. */
 function Wave({ peaks, progress, onSeek, live }) {
   return (
-    <div className="flex h-12 flex-1 items-center gap-[3px]" role={onSeek ? 'slider' : 'img'} aria-label="Waveform" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} onClick={(e) => onSeek?.((e.clientX - e.currentTarget.getBoundingClientRect().left) / e.currentTarget.clientWidth)}>
+    <div className="flex h-12 min-w-0 flex-1 items-center gap-[3px] max-sm:order-1 max-sm:basis-full" role={onSeek ? 'slider' : 'img'} aria-label="Waveform" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} onClick={(e) => onSeek?.((e.clientX - e.currentTarget.getBoundingClientRect().left) / e.currentTarget.clientWidth)}>
       {peaks.map((p, i) => (
         <i key={i} className={clsx('block flex-1 rounded-full transition-colors', live ? 'bg-signal' : i / peaks.length <= progress ? 'bg-signal' : 'bg-white/20')} style={{ height: `${Math.max(8, p * 100)}%` }} />
       ))}
@@ -39,7 +40,7 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify }) {
   };
   return (
     <li className="rounded-3xl border border-line bg-ink-1 p-4" data-memo={memo.title}>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
         <button type="button" onClick={() => onPlay(memo)} aria-label={`${playing ? 'Pause' : 'Play'} ${memo.title}`} className="grid size-11 shrink-0 place-items-center rounded-full bg-bone text-ink-0 transition-transform hover:scale-105 active:scale-95">
           {playing ? <Pause size={17} fill="currentColor" aria-hidden="true" /> : <Play size={17} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
         </button>
@@ -50,7 +51,7 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify }) {
           </small>
         </div>
         <Wave peaks={memo.peaks} progress={progress} onSeek={(f) => onSeek(memo, f)} />
-        <span className="flex shrink-0 items-center gap-0.5">
+        <span className="flex shrink-0 items-center gap-0.5 max-sm:order-2 max-sm:basis-full max-sm:justify-end max-sm:gap-1.5">
           <Button variant="secondary" size="icon" aria-label="Show the transcript" aria-pressed={open} onClick={() => setOpen(!open)}>
             <FileText size={14} aria-hidden="true" />
           </Button>
@@ -225,6 +226,7 @@ export default function MemosView({ onNotify }) {
   };
 
   const recording = status === 'recording';
+  useFab({ label: recording ? 'Stop recording' : 'Record', icon: recording ? Square : Mic, onPress: recording ? stop : start });
 
   return (
     <div className="flex flex-col gap-6">

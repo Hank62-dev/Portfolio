@@ -5,6 +5,8 @@ import { clsx } from '../../../lib/format';
 import { askNotes } from '../api/owner';
 import { MOODS, excerpt, hueOf, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
 import { createNote, deleteNote, exportNotes, importNotes, intents, loadNotes, notesStore, openJournal } from '../notes/library';
+import { PageHead } from '../components/Page';
+import { useFab } from '../fab';
 import { useStore } from '../store';
 
 const Markdown = lazy(() => import('../components/Markdown'));
@@ -179,6 +181,7 @@ export default function NotesView() {
 
   const newNote = async () => setSelected((await createNote('')).id);
   const today = async () => setSelected((await openJournal()).id);
+  useFab(selected ? null : { label: 'New note', icon: Plus, onPress: newNote });
   const remove = async () => {
     await deleteNote(current.id);
     setSelected(null);
@@ -208,23 +211,14 @@ export default function NotesView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">Private notes</span>
-          <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone">
-            Second <em className="serif-accent">Brain.</em>
-          </h1>
-          <p className="mt-2 max-w-[60ch] text-bone-dim">Notes and a daily journal, kept on this device. Ask them a question and Hank answers from what you wrote.</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={today}>
-            <BookOpen size={15} aria-hidden="true" /> Today's journal
-          </Button>
-          <Button size="sm" onClick={newNote}>
-            <Plus size={15} aria-hidden="true" /> New note
-          </Button>
-        </div>
-      </header>
+      <PageHead keepOnPhone eyebrow="Private notes" title="Second" accent="Brain." description="Notes and a daily journal, kept on this device. Ask them a question and Hank answers from what you wrote.">
+        <Button variant="ghost" size="sm" onClick={today}>
+          <BookOpen size={15} aria-hidden="true" /> Today's journal
+        </Button>
+        <Button size="sm" onClick={newNote} className="max-md:hidden">
+          <Plus size={15} aria-hidden="true" /> New note
+        </Button>
+      </PageHead>
 
       {/* ask + journal, as a bento */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
@@ -292,7 +286,7 @@ export default function NotesView() {
           )}
         </section>
 
-        <section className="flex flex-col justify-between gap-4 rounded-3xl border border-line bg-ink-1 p-5 sm:p-6" aria-label="Journal">
+        <section className="flex flex-col justify-between gap-4 rounded-3xl border border-line bg-ink-1 p-5 max-md:hidden sm:p-6" aria-label="Journal">
           <div className="flex items-start justify-between gap-3">
             <div>
               <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Journal</span>
@@ -311,7 +305,7 @@ export default function NotesView() {
         </section>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-3 max-md:hidden">
         <Stat value={notes.length} label="Notes" />
         <Stat value={totalWords.toLocaleString()} label="Words" />
         <Stat value={tags.length} label="Tags" />
