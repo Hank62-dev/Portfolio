@@ -39,7 +39,7 @@ export default function DashboardView({ agents, events, connected, onTab, owner:
         <Stat icon={Gauge} label="WORKSPACE LOAD" value="-" note="telemetry unavailable" />
         <Stat icon={Wifi} label="SYSTEM LINK" value={connected ? 'LIVE' : 'OFFLINE'} note="realtime channel" />
       </div>
-      <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_1fr_1fr]">
         <Card className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <Eyebrow>TODAY'S COMMAND</Eyebrow>

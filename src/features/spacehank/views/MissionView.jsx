@@ -253,7 +253,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
 
       {loaded && total === 0 && (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-[min(100%,15rem)] flex-1">
             <h2 className="font-display text-lead text-bone">The board is empty</h2>
             <p className="text-fine text-bone-dim">Add a card in any column below, or start from a few examples.</p>
           </div>
@@ -292,7 +292,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
             </header>
             {adding === column.id && (
               <form onSubmit={add} className="flex gap-1.5">
-                <Input autoFocus aria-label={`New card in ${column.label}`} placeholder="Card title" value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setAdding(null)} className="h-9 py-1" />
+                <Input autoFocus aria-label={`New card in ${column.label}`} placeholder="Card title" value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setAdding(null)} compact />
                 <Button type="submit" size="sm" disabled={!title.trim()}>
                   Add
                 </Button>

@@ -204,7 +204,7 @@ export default function BriefingCard({ owner, agents, connected }) {
   };
 
   return (
-    <div className="grid gap-3 lg:grid-cols-[1.1fr_1fr_1fr]" aria-label="Today's briefing" data-briefing>
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.1fr_1fr_1fr]" aria-label="Today's briefing" data-briefing>
       <Card className={TILE}>
         <div className="flex items-center justify-between gap-2">
           <Eyebrow>{now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}</Eyebrow>

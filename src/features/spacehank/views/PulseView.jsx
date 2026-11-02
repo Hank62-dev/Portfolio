@@ -92,7 +92,7 @@ export default function PulseView({ owner }) {
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {SERVICES.map((s, i) => {
           const state = states[i];
           const check = checks[s.id];
@@ -144,12 +144,12 @@ export default function PulseView({ owner }) {
         </div>
         {problem && <p className="rounded-2xl border border-warn/40 bg-warn/10 px-4 py-3 font-mono text-fine text-warn">{problem}</p>}
         {repos === null ? (
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <Skeleton className="h-40 w-full rounded-3xl" />
             <Skeleton className="h-40 w-full rounded-3xl" />
           </div>
         ) : (
-          <div className="grid gap-3 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {repos.map((r) => {
               const run = runTone(r.run);
               return (

@@ -227,7 +227,7 @@ export default function NotesView() {
       </header>
 
       {/* ask + journal, as a bento */}
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <section className="relative overflow-hidden rounded-3xl border border-signal/25 bg-[radial-gradient(90%_120%_at_0%_0%,rgb(255_91_46/0.16),transparent_60%),radial-gradient(70%_100%_at_100%_100%,rgb(91_43_255/0.16),transparent_60%),var(--color-ink-1)] p-5 sm:p-6">
           <div className="flex items-center gap-2.5">
             <span className="grid size-8 place-items-center rounded-full bg-signal text-ink-0">

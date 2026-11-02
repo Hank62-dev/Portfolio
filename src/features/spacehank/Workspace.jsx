@@ -1,12 +1,13 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Copy, Download, Pause, Play, Plus, SkipBack, SkipForward, Users } from 'lucide-react';
-import { Button, Spinner, TooltipProvider } from '../../design-system';
+import { Button, SoftContext, Spinner, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useInstall, useOnline } from './hooks/useInstall';
 import { clsx } from '../../lib/format';
 import CommandPalette from './components/CommandPalette';
 import GuestLocked from './components/GuestLocked';
 import { LOCKED } from './components/lockedCopy';
+import MobileNav from './components/MobileNav';
 import Sidebar from './components/Sidebar';
 import TaskModal from './components/TaskModal';
 import Topbar from './components/Topbar';
@@ -68,8 +69,9 @@ export default function Workspace({
   const [collapsed, setCollapsed] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  // Narrow screens always get the icon rail; the collapse toggle only matters on wide ones.
+  // Tablets get the icon rail; phones get a bottom bar instead; the collapse toggle only matters on wide screens.
   const wide = useMediaQuery('(min-width: 1000px)');
+  const phone = !useMediaQuery('(min-width: 768px)');
   const rail = collapsed || !wide;
   const hasTrack = useStore(player, (s) => Boolean(s.trackId));
   const playing = useStore(player, (s) => s.playing);
@@ -227,53 +229,58 @@ export default function Workspace({
   const page = views[tab] || <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
 
   return (
-    <TooltipProvider>
-      <div className="flex min-h-screen bg-ink-0 text-bone">
-        <Sidebar
-          tab={tab}
-          onTab={onTab}
-          rail={rail}
-          guest={guest}
-          app={app}
-          onNotify={onNotify}
-          canCollapse={wide}
-          onCollapse={() => setCollapsed((value) => !value)}
-          onLogout={onLogout}
-        />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Topbar tab={tab} connected={connected} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
-          {!online && (
-            <div className="border-b border-line bg-ink-2 px-gutter py-2 font-mono text-fine text-bone-dim" role="status" data-offline>
-              You are offline. Music, notes and pictures still work; AI, the calendar and the realtime link wait for the connection.
-            </div>
+    <SoftContext.Provider value>
+      <TooltipProvider>
+        <div className="flex min-h-screen bg-ink-0 text-bone">
+          {!phone && (
+            <Sidebar
+              tab={tab}
+              onTab={onTab}
+              rail={rail}
+              guest={guest}
+              app={app}
+              onNotify={onNotify}
+              canCollapse={wide}
+              onCollapse={() => setCollapsed((value) => !value)}
+              onLogout={onLogout}
+            />
           )}
-          {guest && (
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-warn/30 bg-warn/10 px-gutter py-2 font-mono text-fine text-warn" role="status" data-demo-banner>
-              <span>You are viewing a demo with sample data. Nothing here is real, and nothing you do is sent anywhere.</span>
-              <Button variant="ghost" size="sm" onClick={onLogout}>
-                Sign in
-              </Button>
-            </div>
-          )}
-          <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-8', music && hasTrack && tab !== 'music' && 'pb-28')}>
-            <Suspense fallback={<PageLoading />}>{page}</Suspense>
-          </main>
-          <footer className="flex flex-wrap justify-between gap-2 border-t border-line px-gutter py-4 font-mono text-fine text-bone-faint">
-            <span>HANK62 PRIVATE OS</span>
-            <span>{activeAgent ? `Focused: ${activeAgent.name}` : 'All systems nominal'}</span>
-          </footer>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <Topbar tab={tab} connected={connected} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
+            {!online && (
+              <div className="border-b border-line bg-ink-2 px-gutter py-2 font-mono text-fine text-bone-dim" role="status" data-offline>
+                You are offline. Music, notes and pictures still work; AI, the calendar and the realtime link wait for the connection.
+              </div>
+            )}
+            {guest && (
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-warn/30 bg-warn/10 px-gutter py-2 font-mono text-fine text-warn" role="status" data-demo-banner>
+                <span>You are viewing a demo with sample data. Nothing here is real, and nothing you do is sent anywhere.</span>
+                <Button variant="ghost" size="sm" onClick={onLogout}>
+                  Sign in
+                </Button>
+              </div>
+            )}
+            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-6 md:py-8', phone ? (music && hasTrack && tab !== 'music' ? 'pb-44' : 'pb-28') : music && hasTrack && tab !== 'music' && 'pb-28')}>
+              <Suspense fallback={<PageLoading />}>{page}</Suspense>
+            </main>
+            <footer className="flex flex-wrap max-md:hidden justify-between gap-2 border-t border-line px-gutter py-4 font-mono text-fine text-bone-faint">
+              <span>HANK62 PRIVATE OS</span>
+              <span>{activeAgent ? `Focused: ${activeAgent.name}` : 'All systems nominal'}</span>
+            </footer>
+          </div>
+          {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
+          {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} />}
+          {music && tab !== 'music' && <NowPlayingBar onOpen={() => onTab('music')} lifted={phone} />}
+          <CommandPalette
+            open={paletteOpen}
+            onOpenChange={setPaletteOpen}
+            commands={commands}
+            music={music && trackCount > 0}
+            onInterpret={guest ? undefined : interpret}
+            onRun={execute}
+          />
         </div>
-        {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
-        {music && tab !== 'music' && <NowPlayingBar onOpen={() => onTab('music')} />}
-        <CommandPalette
-          open={paletteOpen}
-          onOpenChange={setPaletteOpen}
-          commands={commands}
-          music={music && trackCount > 0}
-          onInterpret={guest ? undefined : interpret}
-          onRun={execute}
-        />
-      </div>
-    </TooltipProvider>
+      </TooltipProvider>
+    </SoftContext.Provider>
   );
 }

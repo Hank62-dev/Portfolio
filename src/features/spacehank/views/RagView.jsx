@@ -154,25 +154,25 @@ export default function RagView() {
     <div className="relative mx-auto flex min-h-[calc(100vh-11rem)] w-full max-w-[860px] flex-col">
       <div className="pointer-events-none absolute -top-10 left-1/2 h-72 w-[min(720px,100%)] -translate-x-1/2 bg-[radial-gradient(50%_60%_at_50%_0%,rgb(255_91_46/0.16),transparent),radial-gradient(40%_50%_at_80%_20%,rgb(91_43_255/0.14),transparent)] blur-2xl" aria-hidden="true" />
 
-      <header className="relative flex items-center justify-between gap-3 pb-4">
-        <span className="flex items-center gap-2.5 font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">
+      <header className="relative flex flex-wrap items-center justify-between gap-3 pb-4">
+        <span className="flex items-center gap-2.5 font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase max-sm:hidden">
           <i className="size-1.5 shrink-0 animate-pulse rounded-full bg-ok" aria-hidden="true" /> {t('rag.channel')}
         </span>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <div className="flex items-center rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur" role="radiogroup" aria-label={t('rag.web')}>
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+          <div className="flex flex-1 items-center rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur sm:flex-none" role="radiogroup" aria-label={t('rag.web')}>
             <Globe size={13} className="mr-1 ml-2 text-bone-faint" aria-hidden="true" />
             {WEB_CHOICES.map(([id, key]) => (
-              <button key={id} type="button" role="radio" aria-checked={web === id} onClick={() => setWeb(id)} className={clsx('rounded-full px-2.5 py-1 font-mono text-[0.78rem] transition-colors', web === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
+              <button key={id} type="button" role="radio" aria-checked={web === id} onClick={() => setWeb(id)} className={clsx('whitespace-nowrap max-sm:flex-1 rounded-full px-2.5 py-1 font-mono text-[0.78rem] transition-colors', web === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
                 {t(key)}
               </button>
             ))}
           </div>
-        <div className="flex rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur" role="radiogroup" aria-label="Retrieval mode">
+        <div className="flex flex-1 rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur sm:flex-none" role="radiogroup" aria-label="Retrieval mode">
           {[
             ['fast', t('rag.fast'), Gauge],
             ['reasoning', t('rag.deep'), BrainCircuit],
           ].map(([id, label, Icon]) => (
-            <button key={id} type="button" role="radio" aria-checked={mode === id} onClick={() => setMode(id)} className={clsx('inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[0.78rem] transition-colors', mode === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
+            <button key={id} type="button" role="radio" aria-checked={mode === id} onClick={() => setMode(id)} className={clsx('whitespace-nowrap max-sm:flex-1 max-sm:justify-center inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[0.78rem] transition-colors', mode === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
               <Icon size={13} aria-hidden="true" /> {label}
             </button>
           ))}
@@ -188,7 +188,7 @@ export default function RagView() {
               <h1 className="font-display text-h2 leading-[1.05] text-bone">{t('rag.welcomeTitle')}</h1>
               <p className="mt-2 text-bone-dim">{t('rag.welcomeText')}</p>
             </div>
-            <div className="grid w-full gap-2.5 sm:grid-cols-3">
+            <div className="grid grid-cols-1 w-full gap-2.5 sm:grid-cols-3">
               {ideas.map(({ icon: Icon, label, text }) => (
                 <button key={label} type="button" onClick={() => setComposer(text)} className="group flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.04] p-4 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-signal/40 hover:bg-white/[0.07]">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">

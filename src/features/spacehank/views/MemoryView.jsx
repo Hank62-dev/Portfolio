@@ -103,7 +103,7 @@ export default function MemoryView({ events }) {
       </header>
 
       {/* the glance: the newest signal, how full the memory is, and who has been talking */}
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
         <section className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(80%_120%_at_0%_0%,rgb(255_91_46/0.12),transparent_60%),var(--color-ink-1)] p-5" aria-label="Latest signal">
           <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Latest signal</span>
           {latest ? (

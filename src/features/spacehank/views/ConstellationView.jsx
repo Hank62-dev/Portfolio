@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, Crosshair, Minus, Plus, Sparkles } from 'lucide-react';
-import { Badge, Button } from '../../../design-system';
+import { ArrowUpRight, Crosshair, Hand, Minus, Plus, Search, Sparkles, X } from 'lucide-react';
+import { Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { PageHead } from '../components/Page';
 import { buildGraph, radiusOf, sampleNotes, stepLayout } from '../notes/graph';
@@ -17,10 +17,12 @@ const reduced = () => typeof window !== 'undefined' && window.matchMedia('(prefe
 export default function ConstellationView({ onOpenNote }) {
   const { loaded, notes } = useStore(notesStore);
   const canvas = useRef(null);
-  const frame = useRef({ nodes: [], edges: [], energy: 1, view: { x: 0, y: 0, k: 1 }, hover: null, selected: null, drag: null, size: { w: 600, h: 400 }, dirty: true });
+  const frame = useRef({ nodes: [], edges: [], energy: 1, view: { x: 0, y: 0, k: 1 }, hover: null, selected: null, drag: null, pointers: new Map(), pinch: null, size: { w: 600, h: 400 }, dirty: true });
   const [selected, setSelected] = useState(null);
   const [tag, setTag] = useState('');
   const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState('');
+  const [touched, setTouched] = useState(false);
 
   useEffect(() => {
     void loadNotes();
@@ -172,12 +174,37 @@ export default function ConstellationView({ onOpenNote }) {
     raf = requestAnimationFrame(draw);
 
     const rect = () => el.getBoundingClientRect();
+    const zoomAt = (k, sx, sy) => {
+      const before = toWorld(sx, sy);
+      f.view.k = Math.max(0.25, Math.min(3, k));
+      f.view.x = sx - f.size.w / 2 - before.x * f.view.k;
+      f.view.y = sy - f.size.h / 2 - before.y * f.view.k;
+      f.dirty = true;
+    };
+    const spread = () => {
+      const [a, b] = [...f.pointers.values()];
+      return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+    };
     const down = (e) => {
-      f.drag = { x: e.clientX, y: e.clientY, moved: false };
+      setTouched(true);
+      f.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (f.pointers.size === 2) {
+        // a second finger: stop dragging and start pinching
+        f.pinch = { d: spread().d, k: f.view.k };
+        if (f.drag) f.drag.moved = true;
+      } else {
+        f.drag = { x: e.clientX, y: e.clientY, moved: false };
+      }
       el.setPointerCapture?.(e.pointerId);
     };
     const move = (e) => {
       const r = rect();
+      if (f.pointers.has(e.pointerId)) f.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (f.pinch && f.pointers.size === 2) {
+        const now = spread();
+        zoomAt(f.pinch.k * (now.d / f.pinch.d), now.x - r.left, now.y - r.top);
+        return;
+      }
       if (f.drag) {
         const dx = e.clientX - f.drag.x;
         const dy = e.clientY - f.drag.y;
@@ -199,11 +226,18 @@ export default function ConstellationView({ onOpenNote }) {
     };
     const up = (e) => {
       const r = rect();
-      if (f.drag && !f.drag.moved) {
+      f.pointers.delete(e.pointerId);
+      if (f.pointers.size < 2) f.pinch = null;
+      if (f.drag && !f.drag.moved && f.pointers.size === 0) {
         const hit = pick(e.clientX - r.left, e.clientY - r.top);
         setSelected(hit ? (hit.id === f.selected ? null : hit.id) : null);
       }
-      f.drag = null;
+      if (f.pointers.size === 0) f.drag = null;
+      else if (f.pointers.size === 1) {
+        // one finger left after a pinch: carry on dragging from where it is
+        const [rest] = f.pointers.values();
+        f.drag = { x: rest.x, y: rest.y, moved: true };
+      }
     };
     const wheel = (e) => {
       e.preventDefault();
@@ -217,6 +251,7 @@ export default function ConstellationView({ onOpenNote }) {
     el.addEventListener('pointerdown', down);
     el.addEventListener('pointermove', move);
     el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
     el.addEventListener('wheel', wheel, { passive: false });
     return () => {
       cancelAnimationFrame(raf);
@@ -224,6 +259,7 @@ export default function ConstellationView({ onOpenNote }) {
       el.removeEventListener('pointerdown', down);
       el.removeEventListener('pointermove', move);
       el.removeEventListener('pointerup', up);
+      el.removeEventListener('pointercancel', up);
       el.removeEventListener('wheel', wheel);
     };
   }, []);
@@ -248,6 +284,10 @@ export default function ConstellationView({ onOpenNote }) {
     return graph.nodes.filter((n) => ids.includes(n.id));
   }, [graph, selected]);
   const stars = useMemo(() => [...graph.nodes].sort((a, b) => b.degree - a.degree || b.words - a.words), [graph]);
+  const shownStars = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? stars.filter((n) => n.title.toLowerCase().includes(q)) : stars;
+  }, [stars, query]);
 
   const addSamples = async () => {
     setBusy(true);
@@ -260,6 +300,33 @@ export default function ConstellationView({ onOpenNote }) {
   };
   const sparse = loaded && notes.length < 3;
 
+  const card = picked && (
+    <section className="rounded-3xl border border-line bg-ink-1 p-5 shadow-[0_30px_70px_-40px_rgb(0_0_0/0.95)]" data-selected>
+      <div className="flex items-start justify-between gap-3">
+        <span className="flex items-center gap-2 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">
+          <i className="size-2 rounded-full" style={{ background: `hsl(${pickedNode?.hue ?? 30} 90% 70%)` }} aria-hidden="true" /> Selected star
+        </span>
+        <button type="button" onClick={() => setSelected(null)} aria-label="Close" className="-mt-1 -mr-1 grid size-8 place-items-center rounded-full text-bone-faint hover:bg-white/5 hover:text-bone">
+          <X size={15} aria-hidden="true" />
+        </button>
+      </div>
+      <h2 className="mt-2 font-display text-h3 leading-tight text-bone">{pickedNode?.title}</h2>
+      <p className="mt-2 line-clamp-3 text-fine leading-relaxed text-bone-dim">{excerpt(picked.text.replace(/^.*\n/, '') || picked.text, '', 200)}</p>
+      {linked.length > 0 && (
+        <div className="no-scrollbar -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-0.5 lg:flex-wrap">
+          {linked.slice(0, 8).map((n) => (
+            <button key={n.id} type="button" onClick={() => setSelected(n.id)} className="shrink-0 rounded-full border border-line px-2.5 py-1 font-mono text-[0.68rem] text-bone-dim hover:border-signal hover:text-bone">
+              {n.title}
+            </button>
+          ))}
+        </div>
+      )}
+      <Button size="sm" className="mt-4 w-full sm:w-auto" onClick={() => onOpenNote(picked.id)}>
+        Open the note <ArrowUpRight size={14} aria-hidden="true" />
+      </Button>
+    </section>
+  );
+
   return (
     <div className="flex flex-col gap-5">
       <PageHead eyebrow="Knowledge" title="Your" accent="Constellation." description="Your notes as a sky. Notes that share a tag or a [[link]] are drawn together, so the shape of what you know shows itself.">
@@ -270,29 +337,46 @@ export default function ConstellationView({ onOpenNote }) {
         )}
       </PageHead>
 
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="relative overflow-hidden rounded-3xl border border-line bg-[#07070a]">
-          <canvas ref={canvas} className="block h-[min(64vh,560px)] min-h-[360px] w-full cursor-grab touch-none" aria-label="A map of your notes. Use the list beside it for a keyboard-friendly version." data-sky />
+          <canvas ref={canvas} className="block h-[min(66dvh,600px)] min-h-[340px] w-full cursor-grab touch-none max-sm:h-[62dvh]" aria-label="A map of your notes. Use the list beside it for a keyboard-friendly version." data-sky />
+
+          <div className="pointer-events-none absolute top-3 left-3 flex flex-col items-start gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-dim backdrop-blur">
+              <b className="font-medium text-bone">{graph.nodes.length}</b> stars <i className="size-1 rounded-full bg-bone-faint" aria-hidden="true" /> <b className="font-medium text-bone">{graph.edges.length}</b> threads
+            </span>
+            {!touched && !selected && !sparse && (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-faint backdrop-blur" data-hint>
+                <Hand size={12} aria-hidden="true" /> Drag, pinch or scroll, tap a star
+              </span>
+            )}
+          </div>
+
           <div className="absolute top-3 right-3 flex flex-col gap-1.5">
             {[
               ['Zoom in', Plus, () => zoom(1.25)],
               ['Zoom out', Minus, () => zoom(0.8)],
               ['Fit to view', Crosshair, fit],
             ].map(([label, Icon, run]) => (
-              <button key={label} type="button" aria-label={label} onClick={run} className="grid size-9 place-items-center rounded-full border border-white/10 bg-black/40 text-bone-dim backdrop-blur hover:text-bone">
+              <button key={label} type="button" aria-label={label} onClick={run} className="grid size-10 place-items-center rounded-full border border-white/10 bg-black/45 text-bone-dim backdrop-blur transition-colors hover:text-bone active:scale-95 sm:size-9">
                 <Icon size={15} aria-hidden="true" />
               </button>
             ))}
           </div>
-          {tags.length > 0 && (
-            <div className="absolute inset-x-3 bottom-3 flex flex-wrap gap-1.5" aria-label="Filter by tag">
-              {tags.slice(0, 10).map((t) => (
-                <button key={t} type="button" aria-pressed={tag === t} onClick={() => setTag(tag === t ? '' : t)} className={clsx('rounded-full border px-2.5 py-0.5 font-mono text-[0.68rem] backdrop-blur transition-colors', tag === t ? 'border-transparent bg-bone text-ink-0' : 'border-white/10 bg-black/40 text-bone-dim hover:text-bone')}>
-                  #{t}
-                </button>
-              ))}
-            </div>
-          )}
+
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3">
+            {picked && <div className="lg:hidden">{card}</div>}
+            {tags.length > 0 && !picked && (
+              <div className="no-scrollbar -mx-3 flex gap-1.5 overflow-x-auto px-3" role="group" aria-label="Filter by tag">
+                {tags.slice(0, 14).map((t) => (
+                  <button key={t} type="button" aria-pressed={tag === t} onClick={() => setTag(tag === t ? '' : t)} className={clsx('shrink-0 rounded-full border px-3 py-1 font-mono text-[0.7rem] backdrop-blur transition-colors', tag === t ? 'border-transparent bg-bone text-ink-0' : 'border-white/10 bg-black/45 text-bone-dim hover:text-bone')}>
+                    #{t}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {sparse && (
             <div className="absolute inset-0 grid place-items-center bg-black/55 p-6 text-center backdrop-blur-[2px]">
               <div className="flex max-w-sm flex-col items-center gap-3">
@@ -307,49 +391,27 @@ export default function ConstellationView({ onOpenNote }) {
         </div>
 
         <aside className="flex flex-col gap-3" aria-label="Stars">
-          {picked ? (
-            <section className="rounded-3xl border border-line bg-ink-1 p-5" data-selected>
-              <span className="flex items-center gap-2 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">
-                <i className="size-2 rounded-full" style={{ background: `hsl(${pickedNode?.hue ?? 30} 90% 70%)` }} aria-hidden="true" /> Selected star
-              </span>
-              <h2 className="mt-2 font-display text-h3 leading-tight text-bone">{pickedNode?.title}</h2>
-              <p className="mt-2 line-clamp-4 text-fine leading-relaxed text-bone-dim">{excerpt(picked.text.replace(/^.*\n/, '') || picked.text, '', 200)}</p>
-              {linked.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {linked.slice(0, 6).map((n) => (
-                    <button key={n.id} type="button" onClick={() => setSelected(n.id)} className="rounded-full border border-line px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim hover:border-signal hover:text-bone">
-                      {n.title}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <Button size="sm" className="mt-4" onClick={() => onOpenNote(picked.id)}>
-                Open the note <ArrowUpRight size={14} aria-hidden="true" />
-              </Button>
-            </section>
-          ) : (
-            <section className="rounded-3xl border border-line bg-ink-1 p-5">
-              <h2 className="font-display text-lead text-bone">Find your way</h2>
-              <p className="mt-1 text-fine text-bone-dim">Drag to pan, scroll to zoom, click a star. Bigger stars are longer or better-connected notes.</p>
-              <div className="mt-3 flex gap-2 font-mono text-[0.72rem] text-bone-faint">
-                <Badge>{graph.nodes.length} stars</Badge>
-                <Badge>{graph.edges.length} threads</Badge>
-              </div>
-            </section>
-          )}
+          {picked && <div className="max-lg:hidden">{card}</div>}
           <section className="min-h-0 rounded-3xl border border-line bg-ink-1 p-3">
-            <h2 className="px-2 pt-1 pb-2 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">All stars</h2>
-            <ul className="flex max-h-60 flex-col gap-0.5 overflow-y-auto">
-              {stars.map((n) => (
+            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-2">
+              <h2 className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">All stars</h2>
+              <small className="font-mono text-[0.64rem] text-bone-faint">threads</small>
+            </div>
+            <label className="relative mb-2 block">
+              <Search size={14} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-bone-faint" aria-hidden="true" />
+              <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Find a star" aria-label="Find a star" className="h-10 w-full rounded-full border border-line bg-ink-2 pr-4 pl-9 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
+            </label>
+            <ul className="flex max-h-72 flex-col gap-0.5 overflow-y-auto">
+              {shownStars.map((n) => (
                 <li key={n.id}>
-                  <button type="button" onClick={() => setSelected(n.id === selected ? null : n.id)} aria-pressed={n.id === selected} className={clsx('flex w-full items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-left text-fine transition-colors hover:bg-white/5', n.id === selected ? 'bg-white/10 text-bone' : 'text-bone-dim')}>
+                  <button type="button" onClick={() => setSelected(n.id === selected ? null : n.id)} aria-pressed={n.id === selected} className={clsx('flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-fine transition-colors hover:bg-white/5', n.id === selected ? 'bg-white/10 text-bone' : 'text-bone-dim')}>
                     <i className="size-2 shrink-0 rounded-full" style={{ background: `hsl(${n.hue} 90% 70%)` }} aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate">{n.title}</span>
                     <small className="font-mono text-[0.64rem] text-bone-faint">{n.degree}</small>
                   </button>
                 </li>
               ))}
-              {!stars.length && <li className="px-2 py-3 font-mono text-fine text-bone-faint">No notes yet.</li>}
+              {!shownStars.length && <li className="px-2 py-3 font-mono text-fine text-bone-faint">{stars.length ? 'No star matches.' : 'No notes yet.'}</li>}
             </ul>
           </section>
         </aside>

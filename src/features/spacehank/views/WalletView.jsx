@@ -169,7 +169,7 @@ export default function WalletView() {
       <section className="relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(90%_140%_at_0%_0%,rgb(255_91_46/0.2),transparent_55%),radial-gradient(70%_120%_at_100%_100%,rgb(91_43_255/0.2),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" data-figures aria-label="This month">
         <span className="font-mono text-[0.68rem] tracking-[0.14em] text-bone-dim uppercase">Balance this month</span>
         <b className={clsx('mt-2 block font-display leading-none tabular-nums [font-size:clamp(2.4rem,6vw,4rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(sum.balance)}</b>
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
             ['Spent', formatVnd(sum.spent), 'text-bone', TrendingDown],
             ['Income', formatVnd(sum.income), 'text-ok', TrendingUp],
@@ -190,7 +190,7 @@ export default function WalletView() {
 
       {empty ? (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-[min(100%,15rem)] flex-1">
             <h2 className="font-display text-lead text-bone">Nothing logged yet</h2>
             <p className="text-fine text-bone-dim">Type your first expense above, or look at a month of examples.</p>
           </div>
@@ -200,7 +200,7 @@ export default function WalletView() {
         </div>
       ) : (
         <>
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
             <Tile title="By category" aside={<button type="button" onClick={() => setEditing(!editing)} className="inline-flex items-center gap-1 font-mono text-[0.72rem] text-bone-dim hover:text-bone"><Target size={12} aria-hidden="true" /> {editing ? 'Done' : 'Budgets'}</button>}>
               {sum.byCategory.length ? (
                 <div className="flex flex-wrap items-center gap-5">
@@ -234,7 +234,7 @@ export default function WalletView() {
                 <p className="font-mono text-fine text-bone-faint">Nothing spent this month.</p>
               )}
               {editing && (
-                <div className="mt-4 grid gap-2 border-t border-line pt-4 sm:grid-cols-2" aria-label="Monthly budgets">
+                <div className="mt-4 grid grid-cols-1 gap-2 border-t border-line pt-4 sm:grid-cols-2" aria-label="Monthly budgets">
                   {CATEGORIES.filter((c) => c.id !== 'income').map((c) => (
                     <label key={c.id} className="flex items-center gap-2 font-mono text-[0.72rem] text-bone-dim">
                       <span className="w-24 truncate">{c.label}</span>

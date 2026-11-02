@@ -37,7 +37,7 @@ function Slider({ label, value, max, step = 1, onChange, className }) {
 }
 
 /** The player: track on the left, transport and progress in the middle, queue and volume on the right. */
-export default function NowPlayingBar({ onOpen }) {
+export default function NowPlayingBar({ onOpen, lifted = false }) {
   const { trackId, playing, loading, time, duration, volume, shuffle, repeat, error } = useStore(player);
   const track = useStore(library, (s) => s.tracks.find((t) => t.id === trackId));
   if (!track) return null;
@@ -48,7 +48,7 @@ export default function NowPlayingBar({ onOpen }) {
     <div
       role="region"
       aria-label="Now playing"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ink-0/90 backdrop-blur-xl"
+      className={clsx('fixed inset-x-0 z-30 border-t border-line bg-ink-0/90 backdrop-blur-xl', lifted ? 'bottom-[calc(4rem+env(safe-area-inset-bottom))]' : 'bottom-0')}
       data-now-playing
     >
       <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto] items-center gap-3 px-3 py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] md:gap-6 md:px-5">

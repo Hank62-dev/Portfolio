@@ -181,7 +181,7 @@ export default function HabitsView() {
 
       {loaded && items.length === 0 ? (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-[min(100%,15rem)] flex-1">
             <h2 className="font-display text-lead text-bone">The garden is empty</h2>
             <p className="text-fine text-bone-dim">Plant your first habit above, or look at a garden that has been growing for a while.</p>
           </div>
@@ -190,7 +190,7 @@ export default function HabitsView() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-3 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
           {items.map((h) => (
             <HabitCard key={h.id} habit={h} mood={mood} />
           ))}

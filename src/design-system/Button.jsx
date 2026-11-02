@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { clsx } from '../lib/format';
 import { useMagnetic } from '../hooks/useMotion';
 import { Spinner } from './Feedback';
+import { useSoft } from './soft';
 
 const BASE =
   'group inline-flex items-center justify-center gap-2.5 font-mono text-fine font-medium tracking-[0.02em] whitespace-nowrap transition-[background-color,color,border-color,transform,scale] duration-300 ease-out-expo active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50';
@@ -32,7 +33,9 @@ const SIZES = {
  *   loading  shows a spinner and disables the button
  */
 const Button = ({ variant = 'primary', size = 'md', to, href, children, className, icon, loading = false, ...rest }) => {
-  const cls = clsx(BASE, VARIANTS[variant], variant !== 'link' && SIZES[size], className);
+  const soft = useSoft();
+  const look = soft ? VARIANTS[variant].replace('rounded-sm', 'rounded-full') : VARIANTS[variant];
+  const cls = clsx(BASE, look, variant !== 'link' && SIZES[size], className);
   // The pointer-follow effect belongs to full-size calls to action only.
   const magnet = useMagnetic(variant !== 'link' && size === 'md');
   const content = (

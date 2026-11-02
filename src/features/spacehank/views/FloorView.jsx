@@ -25,7 +25,7 @@ export default function FloorView({ agents, events, selected, onSelect, paused, 
           </>
         }
       />
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat icon={Users} label="REGISTERED AGENTS" value={agents.length} note="configured workforce" />
         <Stat icon={BrainCircuit} label="WORKING NOW" value={agents.filter(isWorking).length} note="from realtime state" />
         <Stat icon={Network} label="DEPARTMENTS" value={String(ROOMS.length).padStart(2, '0')} note="connected rooms" />

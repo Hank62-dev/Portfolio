@@ -260,7 +260,7 @@ function Create({ locked }) {
   const budget = usage?.limit ? Math.min(100, (usage.used / usage.limit) * 100) : 0;
 
   return (
-    <div className="grid items-start gap-5 lg:grid-cols-[400px_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[400px_minmax(0,1fr)]">
       {/* ───────── composer ───────── */}
       <form onSubmit={generate} className="flex flex-col gap-5 rounded-2xl border border-line bg-ink-1/80 p-5 backdrop-blur lg:sticky lg:top-24">
         <div>

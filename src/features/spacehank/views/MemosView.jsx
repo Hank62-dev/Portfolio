@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Download, FileText, Mic, Pause, Play, Square, Trash2 } from 'lucide-react';
-import { Badge, Button, Select } from '../../../design-system';
+import { AudioLines, Download, FileText, Languages, Mic, Pause, Play, Square, Trash2 } from 'lucide-react';
+import { Badge, Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
-import { PageHead } from '../components/Page';
+import { PageHead, Segmented } from '../components/Page';
 import { LANGUAGES, asNote, bars, canTranscribe, formatDuration, titleFrom } from '../memos/model';
 import { memos } from '../memos/store';
 import { createNote } from '../notes/library';
@@ -243,9 +243,12 @@ export default function MemosView({ onNotify }) {
               {recording ? <Square size={26} fill="currentColor" aria-hidden="true" /> : <Mic size={30} aria-hidden="true" />}
             </button>
           </div>
-          <b className="font-display text-h2 leading-none text-bone tabular-nums" data-timer>
-            {formatDuration(seconds)}
-          </b>
+          <div className="flex flex-col items-center gap-1.5">
+            <b className="font-display text-h2 leading-none text-bone tabular-nums" data-timer>
+              {formatDuration(seconds)}
+            </b>
+            <small className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{recording ? 'Recording, tap to stop' : 'Tap to record'}</small>
+          </div>
           {recording && (
             <div className="flex h-14 w-full items-center gap-[3px]" aria-hidden="true">
               <Wave peaks={live.length ? live : [0.05]} progress={1} live />
@@ -259,16 +262,12 @@ export default function MemosView({ onNotify }) {
           {!recording && (
             <div className="flex flex-wrap items-center justify-center gap-3 text-fine text-bone-dim">
               {transcribes ? (
-                <label className="flex items-center gap-2 font-mono text-[0.78rem]">
-                  Speaking
-                  <Select aria-label="Language" value={lang} onChange={(e) => setLang(e.target.value)} className="h-9 w-36 py-1">
-                    {LANGUAGES.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.label}
-                      </option>
-                    ))}
-                  </Select>
-                </label>
+                <div className="flex items-center gap-2.5">
+                  <span className="inline-flex items-center gap-1.5 font-mono text-[0.78rem]">
+                    <Languages size={14} aria-hidden="true" /> Speaking
+                  </span>
+                  <Segmented label="Language" value={lang} onChange={setLang} options={LANGUAGES.map((l) => ({ id: l.id, label: l.label }))} />
+                </div>
               ) : (
                 <Badge tone="warn">No speech-to-text in this browser, recording only</Badge>
               )}
@@ -283,7 +282,13 @@ export default function MemosView({ onNotify }) {
       </section>
 
       {loaded && items.length === 0 ? (
-        <p className="rounded-3xl border border-dashed border-line-strong p-6 text-center text-fine text-bone-dim">No memos yet. The first one you record shows up here.</p>
+        <div className="flex flex-col items-center gap-2 rounded-3xl border border-dashed border-line-strong px-6 py-10 text-center">
+          <span className="grid size-12 place-items-center rounded-full bg-signal-soft text-signal">
+            <AudioLines size={22} aria-hidden="true" />
+          </span>
+          <h2 className="font-display text-lead text-bone">No memos yet</h2>
+          <p className="max-w-sm text-fine text-bone-dim">The first one you record shows up here, with its waveform and the words you said.</p>
+        </div>
       ) : (
         <ul className="flex flex-col gap-3" aria-label="Memos">
           {items.map((m) => (

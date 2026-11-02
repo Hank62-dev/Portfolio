@@ -158,7 +158,7 @@ export default function DocumentsView({ onTab }) {
       </div>
 
       {files.length + library.length ? (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Documents">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Documents">
           {files.map((file, index) => {
             const kind = kindOf(file.name);
             const state = STATUS[file.status];

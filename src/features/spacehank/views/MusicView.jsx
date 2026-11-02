@@ -366,7 +366,7 @@ export default function MusicView() {
       )}
 
       {/* the stage */}
-      <div className="grid items-center gap-8 px-5 py-10 sm:px-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-12">
+      <div className="grid grid-cols-1 items-center gap-8 px-5 py-10 sm:px-7 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-12">
         <div className="flex flex-col items-center gap-7">
           <Disc track={current} playing={playing} tint={tint} onEmpty={() => filePicker.current?.click()} />
 

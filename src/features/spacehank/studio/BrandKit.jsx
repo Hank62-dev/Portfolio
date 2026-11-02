@@ -113,7 +113,7 @@ export default function BrandKit() {
           <p className="font-display text-h3 leading-tight">The quick brown fox</p>
           <p className="mt-1 text-body">Jumps over the lazy dog, 0123456789.</p>
         </div>
-        <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {pairs.map(([a, b]) => {
             const r = contrast(hex(a), hex(b));
             return (
@@ -129,7 +129,7 @@ export default function BrandKit() {
 
       <Card>
         <CardHeader eyebrow="TYPE" title="Typefaces" />
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {FONTS.map((f) => (
             <div key={f.name} className="rounded-sm border border-line p-3">
               <p className={clsx('text-h3 leading-tight text-bone')} style={{ fontFamily: `'${f.family}', ${f.fallback}` }}>Aa Bb Cc</p>

@@ -229,7 +229,7 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
         </span>
       </div>
 
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
         <article className="flex min-w-0 flex-col gap-4">
           {editor && <Toolbar editor={editor} />}
 

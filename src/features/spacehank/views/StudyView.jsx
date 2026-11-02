@@ -42,13 +42,13 @@ function Overview({ list, cardList }) {
   };
 
   return (
-    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
       <div className="flex flex-col gap-3">
-        <form onSubmit={addCourse} className="flex flex-wrap gap-2 rounded-3xl border border-line bg-ink-1 p-3">
-          <Input aria-label="Course name" placeholder="Add a course, e.g. Database Systems" value={name} onChange={(e) => setName(e.target.value)} className="min-w-48 flex-1" />
-          <Input aria-label="Course code" placeholder="Code" value={code} onChange={(e) => setCode(e.target.value)} className="w-28" />
-          <Button type="submit" disabled={!name.trim()}>
-            <Plus size={15} aria-hidden="true" /> Add
+        <form onSubmit={addCourse} className="flex flex-wrap items-center gap-2 rounded-[1.75rem] border border-line bg-ink-1 p-2.5">
+          <Input aria-label="Course name" placeholder="Add a course, e.g. Database Systems" value={name} onChange={(e) => setName(e.target.value)} className="min-w-0 flex-1 basis-full border-transparent bg-transparent sm:basis-0" />
+          <Input aria-label="Course code" placeholder="Code" value={code} onChange={(e) => setCode(e.target.value)} className="min-w-0 flex-1 border-transparent bg-transparent sm:w-24 sm:flex-none" />
+          <Button type="submit" size="sm" disabled={!name.trim()} className="h-10">
+            <Plus size={15} aria-hidden="true" /> Add course
           </Button>
         </form>
         {list.map((course) => {
@@ -132,16 +132,25 @@ function CourseCard({ course, due, onAdd }) {
           void onAdd(course, kind, title, date);
           setTitle('');
         }}
-        className="mt-3 flex flex-wrap gap-2 border-t border-line pt-3"
+        className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4"
       >
-        <Select aria-label="Type" value={kind} onChange={(e) => setKind(e.target.value)} className="h-9 w-32 py-1">
-          <option value="deadlines">Deadline</option>
-          <option value="exams">Exam</option>
-        </Select>
-        <Input aria-label="What" placeholder="What is it?" value={title} onChange={(e) => setTitle(e.target.value)} className="h-9 min-w-36 flex-1 py-1" />
-        <Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-9 w-40 py-1" />
-        <Button type="submit" size="sm" disabled={!title.trim() || !date}>
-          Add
+        <div className="basis-full">
+          <div className="w-fit">
+            <Segmented
+              label="Type"
+              value={kind}
+              onChange={setKind}
+              options={[
+                { id: 'deadlines', label: 'Deadline', icon: CalendarClock },
+                { id: 'exams', label: 'Exam', icon: BookOpenCheck },
+              ]}
+            />
+          </div>
+        </div>
+        <Input aria-label="What" placeholder="What is it?" value={title} onChange={(e) => setTitle(e.target.value)} compact className="min-w-40 flex-1" />
+        <Input aria-label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} compact className="w-40" />
+        <Button type="submit" size="sm" disabled={!title.trim() || !date} className="h-10">
+          <Plus size={14} aria-hidden="true" /> Add
         </Button>
       </form>
     </section>
@@ -225,7 +234,7 @@ function Cards({ list, cardList }) {
         <Figure value={mastered} label="Well known" tone="text-ok" />
       </div>
       <div className="flex items-center gap-2">
-        <Select aria-label="Deck" value={deck} onChange={(e) => { setDeck(e.target.value); setShown(false); }} className="h-10 w-56 py-1">
+        <Select aria-label="Deck" value={deck} onChange={(e) => { setDeck(e.target.value); setShown(false); }} compact wrapperClassName="w-56">
           {decks.map((d) => (
             <option key={d.id} value={d.id}>
               {d.name}
@@ -272,7 +281,7 @@ function Cards({ list, cardList }) {
         )}
       </section>
 
-      <div className="grid gap-3 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Tile title="Add a card">
           <form onSubmit={add} className="flex flex-col gap-2">
             <Input aria-label="Front" placeholder="Question or term" value={front} onChange={(e) => setFront(e.target.value)} />
@@ -284,7 +293,7 @@ function Cards({ list, cardList }) {
         </Tile>
         <Tile title="Make cards from your text" aside={<Badge tone="signal">AI</Badge>}>
           <div className="flex flex-col gap-2">
-            <Select aria-label="Use a note" value="" onChange={(e) => { const n = notes.find((x) => x.id === e.target.value); if (n) setSource(n.text); }} className="h-9 py-1">
+            <Select aria-label="Use a note" value="" onChange={(e) => { const n = notes.find((x) => x.id === e.target.value); if (n) setSource(n.text); }} compact>
               <option value="">Use a note…</option>
               {notes.map((n) => (
                 <option key={n.id} value={n.id}>
@@ -387,7 +396,7 @@ function Focus({ onFocusMusic, onNotify }) {
   const c = 2 * Math.PI * r;
 
   return (
-    <div className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
       <section className="flex flex-col items-center gap-6 rounded-3xl border border-line bg-[radial-gradient(70%_100%_at_50%_0%,rgb(255_91_46/0.14),transparent_60%),var(--color-ink-1)] p-8">
         <Segmented value={mode} onChange={setMode} options={MODES.map((m) => ({ id: m.id, label: m.label }))} label="Timer mode" />
         <div className="relative size-60" role="timer" aria-live="off" aria-label={`${clock(left)} left`}>
@@ -459,7 +468,7 @@ export default function StudyView({ onFocusMusic, onNotify }) {
 
       {empty && tab !== 'focus' && (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
-          <div className="min-w-0 flex-1">
+          <div className="min-w-[min(100%,15rem)] flex-1">
             <h2 className="font-display text-lead text-bone">Nothing here yet</h2>
             <p className="text-fine text-bone-dim">Add a course below, or start with an example course, exam and a few cards.</p>
           </div>
