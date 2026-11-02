@@ -9,7 +9,8 @@ import Workspace from './Workspace';
 
 export default function SpaceHank() {
   const live = useRealtime();
-  const [guest, setGuest] = useState(false);
+  // the portfolio links here with ?demo, to open the guest view straight away
+  const [guest, setGuest] = useState(() => new URLSearchParams(window.location.search).has('demo'));
   const demo = useDemo(guest, live.notify);
   const [tab, setTab] = useState(DEFAULT_TAB);
   const [selected, setSelected] = useState(DEFAULT_AGENT_ID);
