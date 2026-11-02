@@ -39,7 +39,9 @@ export default defineConfig({
     // The workspace can be installed as an app. The service worker keeps the shell and every page the visitor has
     // opened, so it still opens offline; the API calls (realtime, RAG, AI) are never cached.
     VitePWA({
-      registerType: 'autoUpdate',
+      // a new version waits until the visitor taps "Update" (see src/lib/appUpdate.js); registration is done there, not injected
+      registerType: 'prompt',
+      injectRegister: false,
       manifest: {
         name: 'Hank62 Private OS',
         short_name: 'Hank62',
