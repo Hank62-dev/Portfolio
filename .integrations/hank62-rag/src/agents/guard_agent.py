@@ -6,6 +6,15 @@ from src.llm.gemini_client import parse_json_response
 from src.schemas.internal import ExecutionStep, GuardResult
 
 
+ROUTES = {"direct", "general", "rag", "web", "sql", "hybrid"}
+
+
+def normalize_route(value) -> str:
+    """The branch to take; anything the model invents or leaves out becomes a normal answer, never a refusal."""
+    route = str(value or "").strip().lower()
+    return route if route in ROUTES else "general"
+
+
 class GuardAgent(BaseAgent):
     name = "guard"
 
@@ -40,15 +49,15 @@ class GuardAgent(BaseAgent):
 
         parsed = parse_json_response(response["content"])
 
-        # Handle parse errors gracefully
+        # If the router's answer cannot be read, still answer the question as it was asked
         if parsed.get("parse_error"):
             return GuardResult(
                 is_valid=True,
-                task_type="general_chat",
+                task_type="query",
                 cleaned_prompt=raw_message,
                 confidence=0.3,
-                strategy="direct",
-                direct_response="I'm having trouble understanding. Could you rephrase?",
+                route_to="general",
+                is_in_domain=False,
             )
 
         # Defensive: LLM sometimes returns task_type as list for multi-intent
@@ -81,14 +90,15 @@ class GuardAgent(BaseAgent):
             is_valid=parsed.get("is_valid", True),
             task_type=str(raw_task_type),
             sub_types=[str(s) for s in raw_sub_types],
-            is_in_domain=bool(parsed.get("is_in_domain", True)),
+            is_in_domain=bool(parsed.get("is_in_domain", False)),
+            needs_web=bool(parsed.get("needs_web", False)) or normalize_route(parsed.get("route_to")) == "web",
             cleaned_prompt=str(parsed.get("cleaned_prompt", raw_message)),
             requires_clarification=bool(parsed.get("requires_clarification", False)),
             clarification_message=str(parsed.get("clarification_message", "")),
             detected_language=str(parsed.get("detected_language", "vi")),
             extracted_entities=parsed.get("extracted_entities", {}),
             confidence=float(parsed.get("confidence", 0.5)),
-            route_to=str(parsed.get("route_to", "rag")),
+            route_to=normalize_route(parsed.get("route_to")),
             strategy=str(parsed.get("strategy", "simple_rag")),
             retrieval_mode=str(parsed.get("retrieval_mode", "hybrid")),
             estimated_complexity=str(parsed.get("estimated_complexity", "medium")),

@@ -14,11 +14,22 @@ const post = async (path, init) => {
   return { response, data };
 };
 
+const isLink = (value) => /^https?:\/\//i.test(value ?? '');
+
+/** A citation from the service as { name, url }: a web page has a link, a document does not. */
+const toSource = (citation) => {
+  if (typeof citation === 'string') return { name: citation, url: '' };
+  const id = citation?.source_id ?? '';
+  return { name: citation?.source_name || id, url: isLink(id) ? id : '' };
+};
+
 /**
- * Asks Hank RAG a question. Resolves to { text, verified, citations }.
+ * Asks Hank a question. `web` is 'auto' (search when the question needs it), 'on' or 'off'.
+ * Resolves to { text, verified, citations: [{name, url}], source } where source says where the answer came
+ * from: 'rag' (your documents), 'web' or 'general_knowledge'.
  * An empty answer throws an Error with an empty message so the caller can show its own copy.
  */
-export const askRag = async ({ sessionId, message, mode, history }) => {
+export const askRag = async ({ sessionId, message, mode, history, web = 'auto' }) => {
   const { response, data } = await post('/api/chat', {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -27,6 +38,7 @@ export const askRag = async ({ sessionId, message, mode, history }) => {
       session_id: sessionId,
       message,
       mode,
+      web_search: web,
       conversation_history: history.map(({ role, text }) => ({ role, content: text })),
     }),
   });
@@ -37,8 +49,33 @@ export const askRag = async ({ sessionId, message, mode, history }) => {
   return {
     text: data.response.message,
     verified: Boolean(data.verification?.is_verified),
-    citations: data.citations || [],
+    citations: (data.citations || []).map(toSource).filter((source) => source.name),
+    source: data.metadata?.knowledge_source ?? '',
   };
+};
+
+/** The documents in the shared library: [{ id, name, chunks }]. */
+export const listDocuments = async (scope = spacehankConfig.libraryScope) => {
+  let response;
+  try {
+    response = await fetch(`${ragApiUrl}/api/docs/${encodeURIComponent(scope)}`);
+  } catch {
+    throw new Error('Hank RAG offline.');
+  }
+  const data = (await response.json().catch(() => null)) ?? {};
+  if (!response.ok) throw new Error(data.detail || `Could not load documents (${response.status})`);
+  return data.documents ?? [];
+};
+
+/** Removes one document from the shared library. */
+export const deleteDocument = async (docId, scope = spacehankConfig.libraryScope) => {
+  let response;
+  try {
+    response = await fetch(`${ragApiUrl}/api/docs/${encodeURIComponent(scope)}/${encodeURIComponent(docId)}`, { method: 'DELETE' });
+  } catch {
+    throw new Error('Hank RAG offline.');
+  }
+  if (!response.ok) throw new Error(`Could not delete the document (${response.status})`);
 };
 
 /** Uploads one document into the RAG index. Resolves to the number of chunks created. */

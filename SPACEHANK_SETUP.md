@@ -139,6 +139,16 @@ Nếu bỏ qua Redis, RAG chạy bình thường nhưng không có cache và b�
 
 Lần khởi động đầu, RAG tự nạp tài liệu chính sách vào Qdrant ở chế độ nền. Việc này gọi Gemini nhiều lần và có thể mất vài phút đến hàng chục phút. Trong lúc đó `/health` vẫn trả lời bình thường, nhưng câu trả lời dựa trên tài liệu chưa đầy đủ. Xem tiến độ trong **Logs** của service `hank62-rag`. Vì gói free không có ổ đĩa bền vững, dữ liệu đồ thị LightRAG mất khi service ngủ hoặc restart (xem mục 2). Qdrant vẫn giữ vector nên RAG không tự nạp lại.
 
+#### Hank trả lời những gì
+
+Hank không còn bị giới hạn ở logistics. Mỗi câu hỏi được trả lời từ ba nguồn, và nhãn dưới câu trả lời cho biết nguồn nào đã dùng:
+
+- **Kiến thức của Hank**: bất kỳ chủ đề nào, kể cả khi bạn không có tài liệu liên quan.
+- **Tài liệu của bạn**: file thêm trong tab Document Vault được lưu vào một thư viện chung (`LIBRARY_SCOPE`, mặc định `hank62-library`) và mọi cuộc chat đều đọc nó. Có thể xóa từng file trong Vault. Tài liệu tải lên trực tiếp trong một cuộc chat vẫn chỉ thuộc cuộc chat đó.
+- **Web**: dùng Google Search grounding của Gemini, không cần thêm key. Công tắc ở đầu khung chat: Tự động (tìm khi câu hỏi cần thông tin mới), Luôn bật, Tắt. Đặt `WEB_SEARCH_ENABLED=false` trên service `hank62-rag` để tắt hẳn. Nếu tìm kiếm lỗi, Hank vẫn trả lời bằng kiến thức của nó và nói rõ điều đó. Câu trả lời từ web không được cache. Mỗi lần tìm kiếm tính vào hạn mức Gemini của bạn, và hạn mức grounding của gói free có thể khác hạn mức chat thông thường.
+
+Sau khi cập nhật code, redeploy service `hank62-rag` để thay đổi này có hiệu lực.
+
 ## 6. Deploy trên Vercel
 
 1. Vào https://vercel.com/new → import repo `Hank62-dev/Portfolio`.

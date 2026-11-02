@@ -12,6 +12,7 @@ from src.agents.rag_agent import RAGAgent
 from src.agents.sql_agent import SQLAgent
 from src.agents.verification_agent import VerificationAgent
 from src.cache.semantic_cache import SemanticCache
+from src.config import settings
 from src.llm.gemini_client import GeminiClient
 
 from src.schemas.internal import GuardResult
@@ -127,12 +128,16 @@ class AgentPipeline:
                 except Exception as e:
                     logger.error("Document ingestion failed: %s", e)
 
-            # Check if conversation already has indexed documents
-            if self.doc_store and session_id:
-                try:
-                    has_user_docs = await self.doc_store.has_documents(session_id)
-                except Exception:
-                    pass
+            # Does this conversation, or the shared library, have indexed documents?
+            doc_scopes = self._doc_scopes(session_id)
+            if self.doc_store:
+                for scope in doc_scopes:
+                    try:
+                        if await self.doc_store.has_documents(scope):
+                            has_user_docs = True
+                            break
+                    except Exception:
+                        pass
 
             # 1. Guard Agent (Classification, Cleanup, Routing - merged)
             guard_result = await self.guard.run({
@@ -158,13 +163,9 @@ class AgentPipeline:
                     message="Input khong hop le. Vui long thu lai.",
                 )
 
-            # 2. Fast-track Direct Responses (casual chat)
-            # Keep true casual chat on the direct branch, but send out-of-domain
-            # questions such as "React là gì?" through the general-knowledge
-            # responder so they receive a real answer instead of the logistics intro.
-            if guard_result.route_to == "direct" and (
-                guard_result.is_in_domain or guard_result.task_type == "general_chat"
-            ):
+            # 2. Fast-track direct responses: greetings, thanks and questions about Hank itself.
+            # Every other question, whatever its topic, is answered from documents, the web or knowledge.
+            if guard_result.route_to == "direct":
                 return await self._handle_direct(request, guard_result, agents_trace, start_time)
 
             # 3. Compute embedding for semantic cache (Gemini embeddings)
@@ -191,20 +192,18 @@ class AgentPipeline:
             # 5. RAG Agent (with optional user doc context)
             # Check if conversation has user-uploaded documents
             user_doc_chunks = []
-            if self.doc_store and session_id and query_embedding is not None:
+            if self.doc_store and has_user_docs and query_embedding is not None:
                 try:
-                    has_docs = await self.doc_store.has_documents(session_id)
-                    if has_docs:
-                        user_doc_chunks = await self.doc_store.search(
-                            session_id, query_embedding, top_k=5,
-                        )
-                        if user_doc_chunks:
-                            logger.info(
-                                "Found %d user doc chunks for conversation=%s",
-                                len(user_doc_chunks), session_id[:8],
-                            )
+                    found = []
+                    for scope in doc_scopes:
+                        found.extend(await self.doc_store.search(scope, query_embedding, top_k=5))
+                    user_doc_chunks = sorted(found, key=lambda c: c.get("score", 0.0), reverse=True)[:6]
+                    if user_doc_chunks:
+                        logger.info("Found %d user doc chunks across %d scopes", len(user_doc_chunks), len(doc_scopes))
                 except Exception as e:
                     logger.warning("User doc search failed: %s", e)
+
+            use_web = self._wants_web(request, guard_result)
 
             # 5. Execution based on Route
             if guard_result.route_to == "sql":
@@ -244,6 +243,7 @@ class AgentPipeline:
                 "memory_context": request.memory_context,
                 "mode": request.mode,
                 "user_doc_chunks": user_doc_chunks,
+                "use_web": use_web,
             })
             agents_trace.append("rag")
             
@@ -266,20 +266,24 @@ class AgentPipeline:
             # 5. Verification Agent (Optional)
             # Skip if fast mode, or general knowledge, or query is simple
             skip_verification = (
-                request.mode == "fast" or
-                not guard_result.is_in_domain or guard_result.estimated_complexity == "low"
+                request.mode == "fast"
+                or rag_result.knowledge_source != "rag"
+                or guard_result.estimated_complexity == "low"
             )
 
             if skip_verification:
-                logger.info("Skipping verification agent (out-of-domain or low complexity)")
+                logger.info("Skipping verification agent (%s answer, mode=%s)", rag_result.knowledge_source, request.mode)
                 verification_citations = [
                     Citation(
                         source_id=c.get("source", ""),
                         source_name=c.get("source", ""),
                         chunk_text=c.get("text", ""),
-                        relevance_score=c.get("score", 0.0),
+                        relevance_score=min(1.0, max(0.0, c.get("score", 0.0))),
                     )
                     for c in rag_result.retrieved_chunks
+                ] + [
+                    Citation(source_id=w["url"], source_name=w.get("title", w["url"]), chunk_text="", relevance_score=1.0)
+                    for w in rag_result.web_sources
                 ]
 
                 verification_data = Verification(
@@ -353,7 +357,7 @@ class AgentPipeline:
                 and str(guard_result.task_type).lower() in _doc_dependent_tasks
                 and len(rag_result.retrieved_chunks) == 0
             )
-            if session_id and verification_data.is_verified and not _is_doc_dependent_miss:
+            if session_id and verification_data.is_verified and not _is_doc_dependent_miss and not use_web:
                 await self.cache.session_store(
                     session_id=session_id,
                     query=request.message,
@@ -375,6 +379,24 @@ class AgentPipeline:
                 code="INTERNAL_ERROR",
                 message=f"Internal processing error: {str(e)}",
             )
+
+    @staticmethod
+    def _doc_scopes(session_id: str) -> list[str]:
+        """Where documents are read from: this conversation, and the shared library from the vault."""
+        scopes = [settings.library_scope]
+        if session_id and session_id != settings.library_scope:
+            scopes.insert(0, session_id)
+        return scopes
+
+    @staticmethod
+    def _wants_web(request: ChatRequest, guard_result: GuardResult) -> bool:
+        """Should this answer be allowed to search the web? 'off' never, 'on' always, 'auto' when it needs it."""
+        if not settings.web_search_enabled or guard_result.route_to in ("sql", "direct"):
+            return False
+        choice = (getattr(request, "web_search", "auto") or "auto").lower()
+        if choice == "off":
+            return False
+        return choice == "on" or guard_result.needs_web or guard_result.route_to == "web"
 
     async def _handle_direct(
         self,

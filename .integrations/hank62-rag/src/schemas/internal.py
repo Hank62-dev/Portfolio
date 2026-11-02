@@ -32,9 +32,10 @@ class GuardResult(BaseModel):
 
     # Router fields (merged to save an LLM call)
     route_to: str = Field(
-        default="rag",
-        description="Where to route: 'sql', 'rag', 'hybrid', 'direct'"
+        default="general",
+        description="Where to route: 'direct' (small talk), 'general', 'rag' (documents), 'web', 'sql', 'hybrid'"
     )
+    needs_web: bool = Field(default=False, description="The answer needs current or external information")
     strategy: str = Field(
         default="simple_rag",
         description="Execution strategy: simple_rag, multi_step, tool_use, direct",
@@ -66,7 +67,11 @@ class RAGResult(BaseModel):
     token_usage: dict = Field(default_factory=dict)
     knowledge_source: str = Field(
         default="rag",
-        description="Where the answer came from: 'rag' or 'general_knowledge'",
+        description="Where the answer came from: 'rag' (documents), 'web' or 'general_knowledge'",
+    )
+    web_sources: list[dict] = Field(
+        default_factory=list,
+        description="Web pages the answer used: [{title, url}]",
     )
 
 

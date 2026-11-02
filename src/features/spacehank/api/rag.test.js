@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { askRag, uploadDocument } from './rag';
+import { askRag, deleteDocument, listDocuments, uploadDocument } from './rag';
 
 const reply = (status, body) => Promise.resolve({ ok: status < 400, status, json: () => Promise.resolve(body) });
 
@@ -10,13 +10,36 @@ describe('askRag', () => {
 
   it('sends the question with history and returns the answer', async () => {
     const fetchMock = vi.fn(() =>
-      reply(200, { response: { message: 'hello' }, verification: { is_verified: true }, citations: ['c1'] })
+      reply(200, {
+        response: { message: 'hello' },
+        verification: { is_verified: true },
+        citations: [
+          { source_id: 'policy.pdf', source_name: 'policy.pdf' },
+          { source_id: 'https://example.com/a', source_name: 'example.com' },
+        ],
+        metadata: { knowledge_source: 'web' },
+      })
     );
     vi.stubGlobal('fetch', fetchMock);
-    await expect(askRag(args)).resolves.toEqual({ text: 'hello', verified: true, citations: ['c1'] });
+    await expect(askRag(args)).resolves.toEqual({
+      text: 'hello',
+      verified: true,
+      citations: [
+        { name: 'policy.pdf', url: '' },
+        { name: 'example.com', url: 'https://example.com/a' },
+      ],
+      source: 'web',
+    });
     const body = JSON.parse(fetchMock.mock.calls[0][1].body);
-    expect(body).toMatchObject({ session_id: 's1', message: 'hi', mode: 'fast', user_id: 'hank62' });
+    expect(body).toMatchObject({ session_id: 's1', message: 'hi', mode: 'fast', user_id: 'hank62', web_search: 'auto' });
     expect(body.conversation_history).toEqual([{ role: 'user', content: 'earlier' }]);
+  });
+
+  it('passes the web choice on', async () => {
+    const fetchMock = vi.fn(() => reply(200, { response: { message: 'ok' } }));
+    vi.stubGlobal('fetch', fetchMock);
+    await askRag({ ...args, web: 'off' });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).web_search).toBe('off');
   });
 
   it('turns failures into readable errors', async () => {
@@ -47,5 +70,24 @@ describe('uploadDocument', () => {
     const file = { name: 'big.pdf', size: 26 * 1024 * 1024 };
     await expect(uploadDocument({ file, conversationId: 'c' })).rejects.toThrow('larger than 25 MB');
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('the shared library', () => {
+  it('lists documents from the library scope', async () => {
+    const fetchMock = vi.fn(() => reply(200, { documents: [{ id: 'd1', name: 'a.pdf', chunks: 3 }] }));
+    vi.stubGlobal('fetch', fetchMock);
+    await expect(listDocuments()).resolves.toEqual([{ id: 'd1', name: 'a.pdf', chunks: 3 }]);
+    expect(fetchMock.mock.calls[0][0]).toMatch(/\/api\/docs\/hank62-library$/);
+  });
+
+  it('deletes one document and reports failures', async () => {
+    const fetchMock = vi.fn(() => reply(200, { deleted_chunks: 3 }));
+    vi.stubGlobal('fetch', fetchMock);
+    await deleteDocument('d1');
+    expect(fetchMock.mock.calls[0][0]).toMatch(/\/api\/docs\/hank62-library\/d1$/);
+    expect(fetchMock.mock.calls[0][1].method).toBe('DELETE');
+    vi.stubGlobal('fetch', () => reply(500, null));
+    await expect(deleteDocument('d1')).rejects.toThrow('Could not delete');
   });
 });

@@ -38,6 +38,21 @@ def parse_json_response(content: str) -> dict:
         logger.warning(f"Failed to parse JSON response: {content[:200]}")
         return {"raw_content": content, "parse_error": True}
 
+def _web_sources(response) -> list[dict[str, str]]:
+    """The web pages Gemini's Google Search grounding used, as [{title, url}] without repeats."""
+    seen: set[str] = set()
+    sources: list[dict[str, str]] = []
+    for candidate in response.candidates or []:
+        metadata = getattr(candidate, "grounding_metadata", None)
+        for chunk in getattr(metadata, "grounding_chunks", None) or []:
+            web = getattr(chunk, "web", None)
+            url = getattr(web, "uri", None)
+            if url and url not in seen:
+                seen.add(url)
+                sources.append({"title": getattr(web, "title", None) or url, "url": url})
+    return sources
+
+
 class GeminiClient:
     """Class wrapper for Gemini chat that mirrors GroqClient API."""
 
@@ -51,8 +66,13 @@ class GeminiClient:
         temperature: float = 0.5,
         max_tokens: int = 4096,
         json_mode: bool = False,
+        web_search: bool = False,
     ) -> dict[str, Any]:
-        """Send chat completion to Gemini API (async)."""
+        """Send chat completion to Gemini API (async).
+
+        With ``web_search`` the model may search Google while answering (Gemini's built-in grounding). The
+        pages it used come back under ``sources`` as [{title, url}]. It cannot be combined with ``json_mode``.
+        """
         target_model = model or settings.gemini_model
 
         system_instruction = None
@@ -72,8 +92,10 @@ class GeminiClient:
         config = {"temperature": temperature, "max_output_tokens": max_tokens}
         if system_instruction:
             config["system_instruction"] = system_instruction
-        if json_mode:
+        if json_mode and not web_search:
             config["response_mime_type"] = "application/json"
+        if web_search:
+            config["tools"] = [{"google_search": {}}]
 
         max_retries = 5
         for attempt in range(max_retries):
@@ -114,6 +136,7 @@ class GeminiClient:
         # Preserve the pipeline's existing response format.
         return {
             "content": answer,
+            "sources": _web_sources(response) if web_search else [],
             "model": target_model,
             "usage": {
                 "prompt": (usage.prompt_token_count or 0) if usage else 0,
@@ -122,9 +145,9 @@ class GeminiClient:
             },
         }
 
-    async def fast_chat(self, messages: list[dict[str, str]], temperature: float = 0.5, max_tokens: int = 4096, json_mode: bool = False) -> dict[str, Any]:
+    async def fast_chat(self, messages: list[dict[str, str]], temperature: float = 0.5, max_tokens: int = 4096, json_mode: bool = False, web_search: bool = False) -> dict[str, Any]:
         """Fast chat mapped to flash-lite model."""
-        return await self.chat(messages, model=settings.gemini_fast_model, temperature=temperature, max_tokens=max_tokens, json_mode=json_mode)
+        return await self.chat(messages, model=settings.gemini_fast_model, temperature=temperature, max_tokens=max_tokens, json_mode=json_mode, web_search=web_search)
 
 async def gemini_chat(messages, model=None, temperature=0.5, max_tokens=4096, json_mode=False):
     client = GeminiClient()

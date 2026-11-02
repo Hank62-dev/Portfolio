@@ -138,7 +138,7 @@ class ResponseMetadata(BaseModel):
     agents_trace: list[str] = Field(default_factory=list)
     knowledge_source: str = Field(
         default="rag",
-        description="'rag' = from knowledge base, 'general_knowledge' = from LLM general knowledge",
+        description="'rag' = from the user's documents / knowledge base, 'web' = from a web search, 'general_knowledge' = from the model's own knowledge",
     )
     cache_hit: bool = Field(
         default=False,

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUp, BrainCircuit, Check, Copy, FileSearch, Gauge, ListChecks, Scale, Sparkles } from 'lucide-react';
+import { ArrowUp, BookOpen, BrainCircuit, Check, Copy, FileSearch, Gauge, Globe, Lightbulb, Newspaper, Sparkles } from 'lucide-react';
 import { Badge } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { askRag } from '../api/rag';
@@ -26,11 +26,27 @@ function Orb({ busy, size = 40 }) {
   );
 }
 
-const citationLabel = (c) => (typeof c === 'string' ? c : c?.source || c?.title || c?.document || c?.file || c?.doc_id || '');
+// where an answer came from, shown under it
+const ORIGINS = {
+  rag: { icon: FileSearch, key: 'rag.fromDocs' },
+  web: { icon: Globe, key: 'rag.fromWeb' },
+  general_knowledge: { icon: Lightbulb, key: 'rag.fromKnowledge' },
+};
+
+const WEB_CHOICES = [
+  ['auto', 'rag.webAuto'],
+  ['on', 'rag.webOn'],
+  ['off', 'rag.webOff'],
+];
+
+const chip = 'inline-flex max-w-[16rem] items-center gap-1 truncate rounded-full border border-line px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim';
 
 function Message({ message, onCopy }) {
+  const { t } = useTranslation();
   const mine = message.role === 'user';
-  const sources = (message.citations ?? []).map(citationLabel).filter(Boolean);
+  const Origin = ORIGINS[message.source]?.icon;
+  const seen = new Set();
+  const sources = (message.citations ?? []).filter((c) => !seen.has(c.name) && seen.add(c.name));
   if (mine) {
     return (
       <div className="flex justify-end">
@@ -46,16 +62,27 @@ function Message({ message, onCopy }) {
           <Markdown>{message.text}</Markdown>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-1">
+          {Origin && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim">
+              <Origin size={11} aria-hidden="true" /> {t(ORIGINS[message.source].key)}
+            </span>
+          )}
           {message.verified && (
             <Badge tone="ok">
               <Check size={12} aria-hidden="true" /> Sources verified
             </Badge>
           )}
-          {[...new Set(sources)].slice(0, 4).map((s) => (
-            <span key={s} className="inline-flex max-w-[16rem] items-center gap-1 truncate rounded-full border border-line px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim">
-              <FileSearch size={11} className="shrink-0" aria-hidden="true" /> <span className="truncate">{s}</span>
-            </span>
-          ))}
+          {sources.slice(0, 5).map((source) =>
+            source.url ? (
+              <a key={source.name} href={source.url} target="_blank" rel="noopener noreferrer" className={clsx(chip, 'transition-colors hover:border-signal/60 hover:text-bone')}>
+                <Globe size={11} className="shrink-0" aria-hidden="true" /> <span className="truncate">{source.name}</span>
+              </a>
+            ) : (
+              <span key={source.name} className={chip}>
+                <FileSearch size={11} className="shrink-0" aria-hidden="true" /> <span className="truncate">{source.name}</span>
+              </span>
+            )
+          )}
           <button type="button" onClick={() => onCopy(message.text)} aria-label="Copy the answer" className="ml-auto grid size-7 place-items-center rounded-full text-bone-faint transition-colors hover:bg-white/8 hover:text-bone">
             <Copy size={13} aria-hidden="true" />
           </button>
@@ -69,6 +96,7 @@ export default function RagView() {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [mode, setMode] = useState('fast');
+  const [web, setWeb] = useState('auto');
   const [messages, setMessages] = useState([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -100,7 +128,7 @@ export default function RagView() {
     setMessages((old) => [...old, { role: 'user', text }]);
     setBusy(true);
     try {
-      const answer = await askRag({ sessionId: sessionId.current, message: text, mode, history: messages });
+      const answer = await askRag({ sessionId: sessionId.current, message: text, mode, web, history: messages });
       setMessages((old) => [...old, { role: 'assistant', ...answer }]);
     } catch (requestError) {
       setError(requestError.message || t('rag.error'));
@@ -117,8 +145,9 @@ export default function RagView() {
   };
 
   const ideas = [
-    { icon: ListChecks, label: t('rag.promptSummary'), text: t('rag.askSummary') },
-    { icon: Scale, label: t('rag.promptPolicy'), text: t('rag.askPolicy') },
+    { icon: BookOpen, label: t('rag.promptDocs'), text: t('rag.askDocs') },
+    { icon: Newspaper, label: t('rag.promptNews'), text: t('rag.askNews') },
+    { icon: Lightbulb, label: t('rag.promptExplain'), text: t('rag.askExplain') },
   ];
 
   return (
@@ -129,6 +158,15 @@ export default function RagView() {
         <span className="flex items-center gap-2.5 font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">
           <i className="size-1.5 shrink-0 animate-pulse rounded-full bg-ok" aria-hidden="true" /> {t('rag.channel')}
         </span>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <div className="flex items-center rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur" role="radiogroup" aria-label={t('rag.web')}>
+            <Globe size={13} className="mr-1 ml-2 text-bone-faint" aria-hidden="true" />
+            {WEB_CHOICES.map(([id, key]) => (
+              <button key={id} type="button" role="radio" aria-checked={web === id} onClick={() => setWeb(id)} className={clsx('rounded-full px-2.5 py-1 font-mono text-[0.78rem] transition-colors', web === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
+                {t(key)}
+              </button>
+            ))}
+          </div>
         <div className="flex rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur" role="radiogroup" aria-label="Retrieval mode">
           {[
             ['fast', t('rag.fast'), Gauge],
@@ -138,6 +176,7 @@ export default function RagView() {
               <Icon size={13} aria-hidden="true" /> {label}
             </button>
           ))}
+        </div>
         </div>
       </header>
 
@@ -149,7 +188,7 @@ export default function RagView() {
               <h1 className="font-display text-h2 leading-[1.05] text-bone">{t('rag.welcomeTitle')}</h1>
               <p className="mt-2 text-bone-dim">{t('rag.welcomeText')}</p>
             </div>
-            <div className="grid w-full gap-2.5 sm:grid-cols-2">
+            <div className="grid w-full gap-2.5 sm:grid-cols-3">
               {ideas.map(({ icon: Icon, label, text }) => (
                 <button key={label} type="button" onClick={() => setComposer(text)} className="group flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.04] p-4 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-signal/40 hover:bg-white/[0.07]">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">

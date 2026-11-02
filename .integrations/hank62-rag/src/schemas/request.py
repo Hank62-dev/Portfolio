@@ -35,6 +35,10 @@ class ChatRequest(BaseModel):
         default_factory=list,
         description="User-uploaded documents to ingest for this conversation",
     )
+    web_search: str = Field(
+        default="auto",
+        description="Web search: 'auto' (when the question needs it), 'on' (always) or 'off' (never)",
+    )
 
     model_config = {
         "json_schema_extra": {

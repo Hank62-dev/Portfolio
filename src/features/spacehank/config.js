@@ -9,6 +9,8 @@ export const spacehankConfig = {
   ragApiUrl: env.VITE_HANK_RAG_API_URL || 'http://localhost:8000',
   ragUserId: 'hank62',
   sessionPrefix: 'hank62',
+  // The shared library: documents added in the vault live here and every chat reads them (matches LIBRARY_SCOPE on the RAG service).
+  libraryScope: 'hank62-library',
   maxUploadBytes: 25 * 1024 * 1024,
   uploadAccept: '.pdf,.docx,.txt,.md,.csv,.json',
   maxEvents: 40,

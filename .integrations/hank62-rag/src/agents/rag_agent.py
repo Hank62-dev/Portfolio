@@ -5,7 +5,11 @@ from typing import Any
 
 from src.agents.base import BaseAgent
 from src.agents.hank_persona import HANK_PERSONA_CONTEXT
-from src.agents.prompts import FAST_RAG_SYSTEM_PROMPT, GENERAL_KNOWLEDGE_PROMPT, RAG_SYSTEM_PROMPT
+from src.agents.prompts import (
+    ASSISTANT_FAST_ADDENDUM,
+    ASSISTANT_REASONING_ADDENDUM,
+    ASSISTANT_SYSTEM_PROMPT,
+)
 from src.schemas.internal import GuardResult, RAGResult
 
 # Minimum meaningful chunk text length
@@ -41,146 +45,118 @@ class RAGAgent(BaseAgent):
     # ── Main entry ────────────────────────────────────────────────
 
     async def execute(self, input_data: dict[str, Any]) -> RAGResult:
+        """Answer from whatever fits: the user's documents, the web, or the model's own knowledge.
+
+        Documents are offered to the model as context, and the model is told to ignore them when they do not
+        bear on the question, so a general question is never forced through an unrelated file.
+        """
         guard_result: GuardResult = input_data["guard_result"]
         plan: GuardResult = input_data["execution_plan"]
         history: list[dict] = input_data.get("conversation_history", [])
         memory_context: str = input_data.get("memory_context", "")
         mode: str = input_data.get("mode", "reasoning")
-        user_doc_chunks: list[dict] = input_data.get("user_doc_chunks", [])
+        use_web: bool = bool(input_data.get("use_web", False))
 
-        # Priority 1: user-uploaded document chunks
-        if user_doc_chunks and self._has_real_context(user_doc_chunks):
-            self.logger.info(
-                "Using %d user document chunks as context", len(user_doc_chunks)
-            )
-            return await self._generate_rag_response(
-                guard_result, user_doc_chunks, history, memory_context, mode
-            )
+        chunks = [c for c in input_data.get("user_doc_chunks", []) if self._has_real_context([c])]
 
-        # Priority 2: company knowledge base (LightRAG)
+        # The company knowledge base is only consulted for questions that are about it
         if guard_result.is_in_domain:
-            retrieved_chunks = await self._retrieve(
-                query=guard_result.cleaned_prompt,
-                mode=plan.retrieval_mode,
-            )
-            if self._has_real_context(retrieved_chunks):
-                self.logger.info(
-                    "Using %d knowledge-base chunks (mode=%s)",
-                    len(retrieved_chunks), plan.retrieval_mode,
-                )
-                return await self._generate_rag_response(
-                    guard_result, retrieved_chunks, history, memory_context, mode
-                )
+            kb_chunks = await self._retrieve(query=guard_result.cleaned_prompt, mode=plan.retrieval_mode)
+            if self._has_real_context(kb_chunks):
+                chunks = chunks + kb_chunks
 
-        # Priority 3: general-knowledge fallback
         self.logger.info(
-            "No relevant domain context found — falling back to general knowledge"
+            "Answering with %d context chunks, web=%s, route=%s", len(chunks), use_web, guard_result.route_to
         )
-        return await self._generate_general_response(
-            guard_result, history, memory_context, mode
-        )
+        return await self._generate_answer(guard_result, chunks, history, memory_context, mode, use_web)
 
-    # ── RAG response ──────────────────────────────────────────────
+    # ── The answer ────────────────────────────────────────────────
 
-    async def _generate_rag_response(
+    async def _generate_answer(
         self,
         guard_result: GuardResult,
         chunks: list[dict],
         history: list[dict],
-        memory_context: str = "",
-        mode: str = "reasoning",
+        memory_context: str,
+        mode: str,
+        use_web: bool,
+        web_failed: bool = False,
     ) -> RAGResult:
-        context = self._build_context(chunks)
         lang_instruction = self._get_language_instruction(guard_result.detected_language)
 
-        prompt_parts: list[str] = []
+        parts: list[str] = []
         if memory_context:
-            prompt_parts.append(memory_context)
-        prompt_parts.append(
-            f"## Context (Retrieved from Knowledge Base)\n\n"
-            f"{context}\n\n---\n\n"
-            f"## User Request (type: {guard_result.task_type})\n\n"
-            f"{guard_result.cleaned_prompt}\n\n"
+            parts.append(memory_context)
+        if chunks:
+            parts.append(
+                "## Documents (the user's own files and the knowledge base; "
+                "use them only if they bear on the question)\n\n"
+                f"{self._build_context(chunks)}"
+            )
+        else:
+            parts.append("## Documents\n\n(None matched, or none were added.)")
+        if web_failed:
+            parts.append(
+                "## Web search\n\nSearching the web failed just now. "
+                "Say so in one short sentence, then answer from what you know."
+            )
+        elif use_web:
+            parts.append(
+                "## Web search\n\nYou can search the web. Do it when the question needs current or outside "
+                "information, and attribute what you find to the web."
+            )
+        parts.append(
+            f"## User request (type: {guard_result.task_type})\n\n{guard_result.cleaned_prompt}\n\n"
             f"## Language requirement\n{lang_instruction}"
         )
-        user_prompt = "\n\n".join(prompt_parts)
 
-        system_prompt = f"{HANK_PERSONA_CONTEXT}\n\n{FAST_RAG_SYSTEM_PROMPT if mode == 'fast' else RAG_SYSTEM_PROMPT}"
+        addendum = ASSISTANT_FAST_ADDENDUM if mode == "fast" else ASSISTANT_REASONING_ADDENDUM
         messages = self._build_messages(
-            system_prompt=system_prompt,
-            user_message=user_prompt,
+            system_prompt=f"{HANK_PERSONA_CONTEXT}\n\n{ASSISTANT_SYSTEM_PROMPT}\n{addendum}",
+            user_message="\n\n".join(parts),
             history=history[-_MAX_HISTORY_TURNS:] if history else None,
         )
 
-        response = await self._call_llm(messages, mode)
+        try:
+            response = await self._call_llm(messages, mode, web=use_web and not web_failed)
+        except Exception as error:
+            if use_web and not web_failed:
+                # a search that fails must not cost the person their answer
+                self.logger.warning("Web search failed (%s); answering without it", error)
+                return await self._generate_answer(
+                    guard_result, chunks, history, memory_context, mode, use_web, web_failed=True
+                )
+            raise
+
         content = response["content"]
-        self._log_token_usage(response, mode, "rag")
+        self._log_token_usage(response, mode, "answer")
+        sources = response.get("sources", [])
+
+        if sources:
+            knowledge_source = "web"
+        elif chunks and guard_result.route_to in ("rag", "hybrid"):
+            knowledge_source = "rag"
+        else:
+            knowledge_source = "general_knowledge"
 
         return RAGResult(
             response_text=self._strip_thinking(content),
             reasoning_steps=self._extract_thinking(content) if mode != "fast" else [],
-            retrieved_chunks=chunks,
+            retrieved_chunks=chunks if knowledge_source == "rag" else [],
             model_used=response.get("model", ""),
             token_usage=response.get("usage", {}),
-            knowledge_source="rag",
+            knowledge_source=knowledge_source,
             structured_output={},
-        )
-
-    # ── General knowledge response ────────────────────────────────
-
-    async def _generate_general_response(
-        self,
-        guard_result: GuardResult,
-        history: list[dict],
-        memory_context: str = "",
-        mode: str = "reasoning",
-    ) -> RAGResult:
-        lang_instruction = self._get_language_instruction(guard_result.detected_language)
-
-        prompt_parts: list[str] = []
-        if memory_context:
-            prompt_parts.append(memory_context)
-        prompt_parts.append(
-            f"{guard_result.cleaned_prompt}\n\n"
-            f"## Language requirement\n{lang_instruction}"
-        )
-        user_message = "\n\n".join(prompt_parts)
-
-        messages = self._build_messages(
-            system_prompt=f"{HANK_PERSONA_CONTEXT}\n\n{GENERAL_KNOWLEDGE_PROMPT}",
-            user_message=user_message,
-            history=history[-_MAX_HISTORY_TURNS:] if history else None,
-        )
-
-        response = await self._call_llm(messages, mode)
-        content = response["content"]
-        self._log_token_usage(response, mode, "general")
-
-        return RAGResult(
-            response_text=self._strip_thinking(content),
-            reasoning_steps=self._extract_thinking(content) if mode != "fast" else [],
-            retrieved_chunks=[],
-            model_used=response.get("model", ""),
-            token_usage=response.get("usage", {}),
-            knowledge_source="general_knowledge",
-            structured_output={},
+            web_sources=sources,
         )
 
     # ── LLM dispatch ─────────────────────────────────────────────
 
-    async def _call_llm(self, messages: list[dict], mode: str) -> dict:
-        """Unified LLM call — fast model for 'fast', strong model otherwise."""
+    async def _call_llm(self, messages: list[dict], mode: str, web: bool = False) -> dict:
+        """Unified LLM call: the fast model for 'fast', the strong one otherwise; with web search when asked."""
         if mode == "fast":
-            return await self.llm.fast_chat(
-                messages=messages,
-                temperature=0.4,
-                max_tokens=2048,
-            )
-        return await self.llm.chat(
-            messages=messages,
-            temperature=0.2,
-            max_tokens=4096,
-        )
+            return await self.llm.fast_chat(messages=messages, temperature=0.4, max_tokens=2048, web_search=web)
+        return await self.llm.chat(messages=messages, temperature=0.2, max_tokens=4096, web_search=web)
 
     # ── Static helpers ────────────────────────────────────────────
 

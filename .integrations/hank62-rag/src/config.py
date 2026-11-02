@@ -112,6 +112,15 @@ class Settings(BaseSettings):
         description="Overlap characters between chunks",
     )
 
+    library_scope: str = Field(
+        default="hank62-library",
+        description="Document scope shared by every chat: what the owner adds to the vault is searched in all conversations",
+    )
+    web_search_enabled: bool = Field(
+        default=True,
+        description="Allow answers that search the web (Gemini's Google Search grounding)",
+    )
+
     # --- Server ---
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)

@@ -324,6 +324,69 @@ class ConversationDocStore:
             logger.debug("DocStore has_documents check failed: %s", e)
             return False
 
+    async def list_documents(self, conversation_id: str) -> list[dict]:
+        """The documents indexed under one scope: [{id, name, chunks}], newest names last."""
+        try:
+            await self.ensure_collection()
+            from qdrant_client.models import FieldCondition, Filter, MatchValue
+
+            client = self._get_client()
+            scope = Filter(must=[FieldCondition(key="conversation_id", match=MatchValue(value=conversation_id))])
+            documents: dict[str, dict] = {}
+            offset = None
+            while True:
+                points, offset = await asyncio.to_thread(
+                    client.scroll,
+                    collection_name=settings.user_docs_collection,
+                    scroll_filter=scope,
+                    limit=256,
+                    offset=offset,
+                    with_payload=["doc_id", "doc_name"],
+                    with_vectors=False,
+                )
+                for point in points:
+                    payload = point.payload or {}
+                    doc_id = payload.get("doc_id", "")
+                    entry = documents.setdefault(doc_id, {"id": doc_id, "name": payload.get("doc_name", "document"), "chunks": 0})
+                    entry["chunks"] += 1
+                if offset is None:
+                    break
+            return sorted(documents.values(), key=lambda d: d["name"].lower())
+        except Exception as e:
+            logger.error("DocStore list_documents failed: %s", e)
+            return []
+
+    async def delete_document(self, conversation_id: str, doc_id: str) -> int:
+        """Remove one document (all its chunks) from a scope. Returns how many chunks were removed."""
+        try:
+            await self.ensure_collection()
+            from qdrant_client.models import FieldCondition, Filter, FilterSelector, MatchValue
+
+            client = self._get_client()
+            selector = Filter(
+                must=[
+                    FieldCondition(key="conversation_id", match=MatchValue(value=conversation_id)),
+                    FieldCondition(key="doc_id", match=MatchValue(value=doc_id)),
+                ]
+            )
+            count = (await asyncio.to_thread(client.count, collection_name=settings.user_docs_collection, count_filter=selector, exact=True)).count
+            if count:
+                await asyncio.to_thread(
+                    client.delete,
+                    collection_name=settings.user_docs_collection,
+                    points_selector=FilterSelector(filter=selector),
+                )
+            redis = get_redis()
+            if redis is not None:
+                try:
+                    await redis.delete(f"{_CHUNKED_PREFIX}{doc_id}")
+                except Exception:
+                    pass
+            return count
+        except Exception as e:
+            logger.error("DocStore delete_document failed: %s", e)
+            return 0
+
     async def delete_conversation_docs(self, conversation_id: str) -> int:
         """Delete all documents for a conversation from Qdrant.
 

@@ -370,6 +370,22 @@ async def test_upload_document(
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
+@app.get("/api/docs/{scope}")
+async def list_documents(scope: str):
+    """The documents indexed under a scope. The vault uses the shared library scope, which every chat reads."""
+    if not pipeline or not pipeline.doc_store:
+        raise HTTPException(status_code=503, detail="DocStore not initialized")
+    return {"scope": scope, "documents": await pipeline.doc_store.list_documents(scope)}
+
+
+@app.delete("/api/docs/{scope}/{doc_id}")
+async def delete_document(scope: str, doc_id: str):
+    """Remove one document from a scope."""
+    if not pipeline or not pipeline.doc_store:
+        raise HTTPException(status_code=503, detail="DocStore not initialized")
+    return {"deleted_chunks": await pipeline.doc_store.delete_document(scope, doc_id)}
+
+
 @app.get("/api/test/docs/{conversation_id}")
 async def test_list_documents(conversation_id: str):
     """List indexed documents for a conversation (demo testing)."""
