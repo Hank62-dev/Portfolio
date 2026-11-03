@@ -48,7 +48,6 @@ function RobotModel({ color }) {
         <capsuleGeometry args={[0.075, 0.38, 5, 10]} />
         <meshStandardMaterial color="#7d786c" roughness={0.42} />
       </mesh>
-      <pointLight color={color} intensity={0.18} distance={1.4} />
     </group>
   );
 }
@@ -83,7 +82,12 @@ export function Character({ agent, selected, onSelect, paused }) {
   return (
     <group ref={ref} position={route[0]} onClick={select}>
       <RobotModel color={agent.color} />
-      {selected && <pointLight color={agent.color} intensity={2} distance={2.2} position={[0, 1, 0]} />}
+      {selected && (
+        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+          <ringGeometry args={[0.55, 0.72, 40]} />
+          <meshBasicMaterial color={agent.color} transparent opacity={0.9} />
+        </mesh>
+      )}
       <Html position={[0, 2, 0]} center distanceFactor={9}>
         <button
           onClick={select}
