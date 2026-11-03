@@ -40,15 +40,16 @@ export default function SpaceHank() {
     if (guest) seedDemo().catch(() => {}).finally(() => setReady(true));
   }, [guest]);
 
-  const { authenticated, toast } = live;
+  const { authenticated } = live;
   if (guest && !ready) return <AuthLoading label="Setting up the demo" />;
-  if (!guest && authenticated === null) return <AuthLoading />;
+  if (!guest && authenticated === null) return <AuthLoading label={live.waking ? 'Waking the server (a free server can take up to a minute)' : undefined} />;
   // a full page load, so the demo's storage and the real one are never open at the same time
   if (!guest && !authenticated) return <LoginScreen onLogin={live.login} onGuest={() => window.location.assign(DEMO_URL)} />;
 
   // A guest sees the same workspace driven by a local script; the owner sees the real server.
   const { agents, events, dispatchTask } = guest ? demo : live;
   const connected = guest ? true : live.connected;
+  const link = guest ? 'online' : live.link;
   const activeAgent = agents.find((agent) => agent.id === selected) || agents[0];
 
   const submitTask = (text, agentId) => {
@@ -78,6 +79,7 @@ export default function SpaceHank() {
         paused={paused}
         onPause={() => setPaused((value) => !value)}
         connected={connected}
+        link={link}
         events={events}
         onNewTask={submitTask}
         onLogout={leave}
@@ -85,7 +87,7 @@ export default function SpaceHank() {
         onNotify={live.notify}
         activeAgent={activeAgent}
       />
-      <Toast message={toast} />
+      <Toast />
     </>
   );
 }

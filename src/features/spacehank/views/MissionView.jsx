@@ -5,7 +5,7 @@ import { clsx } from '../../../lib/format';
 import { PageHead, Segmented } from '../components/Page';
 import { useFab } from '../fab';
 import { COLUMNS, dueLabel, dueState, inColumn, moveCard, newCard, progress } from '../missions/model';
-import { missions, sampleCards } from '../missions/store';
+import { missions } from '../missions/store';
 import { hueOf } from '../notes/notes';
 import { useStore } from '../store';
 
@@ -236,7 +236,6 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
     if (column === 'agent' && !card.agent) setOpen({ ...card, column });
   };
 
-  const addSamples = () => missions.putMany(sampleCards());
   useFab(open ? null : { label: 'Add a card', icon: Plus, onPress: () => setAdding(col) });
   const turn = (by) => setCol((now) => COLUMNS[Math.max(0, Math.min(COLUMNS.length - 1, COLUMNS.findIndex((c) => c.id === now) + by))].id);
   const total = cards.length;
@@ -260,11 +259,8 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
           <div className="min-w-[min(100%,15rem)] flex-1">
             <h2 className="font-display text-lead text-bone">The board is empty</h2>
-            <p className="text-fine text-bone-dim">Add a card in any column below, or start from a few examples.</p>
+            <p className="text-fine text-bone-dim">Add a card in any column below.</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={addSamples}>
-            <Sparkles size={14} aria-hidden="true" /> Try with sample cards
-          </Button>
         </div>
       )}
 

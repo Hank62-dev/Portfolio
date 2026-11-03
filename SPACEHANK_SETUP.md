@@ -94,22 +94,18 @@ Các biến đã có sẵn trong `render.yaml`: `PYTHON_VERSION`, `GEMINI_MODEL`
 
 Không cần tạo collection. RAG tự tạo khi khởi động.
 
-### 4.2. Postgres (dữ liệu kho và lịch sử chat)
+### 4.2. Postgres (cuộc trò chuyện và tài liệu)
 
 Ví dụ dùng Neon, bạn cũng có thể dùng Render Postgres hoặc Supabase.
 
 1. Vào https://neon.tech, tạo project và database.
 2. Ở trang **Connection Details**, copy connection string. Đó là `DATABASE_URL`. Giữ `?sslmode=require` ở cuối.
-3. Mở **SQL Editor**, dán toàn bộ nội dung file `.integrations/hank62-rag/scripts/sql/warehouse_schema.sql` rồi chạy, để tạo bảng.
-4. Nạp dữ liệu kho (không bắt buộc, chỉ cần nếu dùng tính năng hỏi đáp trên dữ liệu kho). Chạy trên máy bạn:
-   ```powershell
-   Set-Location .integrations\hank62-rag
-   $env:DATABASE_URL = "<connection-string>"
-   uv sync
-   uv run python -m scripts.import_warehouse_to_postgres
-   ```
+3. Mở **SQL Editor**, dán toàn bộ nội dung file `.integrations/hank62-rag/scripts/sql/warehouse_schema.sql` rồi bấm **Run**. File tạo 3 bảng `conversations`, `messages`, `documents` (đúng những bảng code RAG đọc trong `src/db/postgres.py`). Chạy lại nhiều lần vẫn an toàn, không xoá dữ liệu.
+4. Kiểm tra: chạy `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY 1;`, phải thấy 3 bảng trên.
 
-Nếu bỏ qua Postgres, RAG vẫn chạy nhưng không có lịch sử hội thoại và không hỏi được dữ liệu kho.
+Nếu bỏ qua Postgres, RAG vẫn chạy nhưng không đọc được lịch sử hội thoại lưu trong database (bộ nhớ ngắn hạn vẫn ở Redis, vector tài liệu vẫn ở Qdrant).
+
+File kho vận cũ (giao hàng, chuyến bay, hải quan) được giữ ở `scripts/sql/logistics_demo_schema.sql`, chỉ dùng nếu bạn muốn chạy lại bản demo kho vận với `scripts/import_warehouse_to_postgres.py`. Hank chung chung không cần nó.
 
 ### 4.3. Redis (cache và bộ nhớ hội thoại)
 

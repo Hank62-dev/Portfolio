@@ -73,7 +73,8 @@ The battle and the login use the same `SPACEHANK_ORIGIN`, so one value covers bo
 - It installs from the production URL over HTTPS. Share-into-app is Android Chrome only; the fingerprint lock for the diary needs HTTPS (or localhost) and a phone with a screen lock.
 - A new deploy shows an "Update" notice inside the app. On Chrome Android it can also arrive as a phone notification once the visitor has allowed notifications; that is not guaranteed when the app is fully closed.
 - Notes, diary pages, photos, drafts and Mơ live only in the browser of each device (IndexedDB and localStorage). Clearing site data or uninstalling the app erases them, and nothing is backed up.
-- `/spacehank?demo` opens a public demo with made-up data. It sends nothing to a server and is separate from the real workspace.
+- `/spacehank?demo` is the guest mode: the home screen, Habit Garden (two plants), Study Hub (one course, three cards, focus timer) and Games. Every other tab shows a one-line introduction and asks for the password, so a visitor does not see what the workspace holds. It sends nothing to a server and is separate from the real workspace. A signed-in owner never sees sample data.
+- Sign-in lasts: a short access token (30 minutes) renewed from a refresh token (30 days, sliding), both signed, so they survive the free Render service sleeping or restarting. If the realtime link drops (phone locked, server asleep) the app reconnects by itself and the status dot turns amber, then green.
 
 ## Required post-deploy checks
 
@@ -94,5 +95,6 @@ Then, on the production URL:
 - Use HTTPS/WSS only.
 - Set SPACEHANK_ORIGIN to the exact Vercel origin. It is the only thing that keeps other sites from opening battle rooms from a visitor's browser.
 - The diary fingerprint lock only hides the diary on screen. It does not encrypt what is stored on the device.
+- Session tokens are signed with a key made from `SPACEHANK_PASSWORD`, so changing the password signs every device out. Set `SPACEHANK_SESSION_SECRET` to sign with a separate key instead. Logging out clears the cookies on that device only; a token cannot be taken back before it runs out (30 min for access, 30 days for refresh).
 - Set a long random password and rotate it if exposed.
 - Configure database/vector/Redis backups before indexing production documents.

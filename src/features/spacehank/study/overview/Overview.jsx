@@ -8,6 +8,7 @@ import { countdown } from '../model';
 import { agenda, columnItems, courseProgress, saveItem, stepsProgress, weekSummary } from '../planner';
 import { courses, flashcards, sampleStudy } from '../store';
 import { CourseSheet, ItemSheet } from './Sheets';
+import { isDemo } from '../../demo/mode';
 
 const TONE = { past: 'danger', soon: 'warn', later: 'default' };
 const VIEWS = [
@@ -242,9 +243,11 @@ export default function Overview({ list, cardList, onTab }) {
           <Button size="sm" onClick={() => setSheet({ type: 'course' })}>
             <Plus size={14} aria-hidden="true" /> Add a course
           </Button>
-          <Button variant="ghost" size="sm" onClick={addSample}>
-            <Sparkles size={14} aria-hidden="true" /> Try a sample course
-          </Button>
+          {isDemo() && (
+            <Button variant="ghost" size="sm" onClick={addSample}>
+              <Sparkles size={14} aria-hidden="true" /> Try a sample course
+            </Button>
+          )}
         </div>
       </div>
     );

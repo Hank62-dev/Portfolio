@@ -23,17 +23,66 @@ describe('loadConfig', () => {
 });
 
 describe('auth', () => {
-  const options = { password: PASSWORD, sessionTtlMs: 1000, secureCookie: true, loginLimit: { maxFailures: 2, windowMs: 5000 } };
+  const options = { password: PASSWORD, accessTtlMs: 1000, refreshTtlMs: 10000, secureCookie: true, loginLimit: { maxFailures: 2, windowMs: 5000 } };
+  const pair = (cookies) => Object.fromEntries(cookies.map((c) => c.split(';')[0].split('=')));
+  const request = (cookies) => ({ headers: { cookie: Object.entries(pair(cookies)).map(([k, v]) => `${k}=${v}`).join('; ') } });
 
-  it('issues sessions that expire', () => {
+  it('issues a short access token that expires', () => {
     let now = 0;
     const auth = createAuth({ ...options, now: () => now });
-    const { ok, token } = auth.login('ip', PASSWORD);
+    const { ok, cookies } = auth.login('ip', PASSWORD);
     expect(ok).toBe(true);
-    const req = { headers: { cookie: `spacehank_session=${token}` } };
+    expect(cookies).toHaveLength(2);
+    const req = request(cookies);
     expect(auth.isAuthorized(req)).toBe(true);
     now = 1001;
     expect(auth.isAuthorized(req)).toBe(false);
+  });
+
+  it('trades a refresh token for a new pair, and the 30 days start over', () => {
+    let now = 0;
+    const auth = createAuth({ ...options, now: () => now });
+    const { cookies } = auth.login('ip', PASSWORD);
+    now = 1500; // the access token has run out, the refresh token has not
+    expect(auth.isAuthorized(request(cookies))).toBe(false);
+    const renewed = auth.refresh(request(cookies));
+    expect(renewed.ok).toBe(true);
+    expect(auth.isAuthorized(request(renewed.cookies))).toBe(true);
+    now = 9000; // past the first refresh token's 10 s, but the renewed one was issued at 1500
+    expect(auth.refresh(request(renewed.cookies)).ok).toBe(true);
+    now = 20000;
+    expect(auth.refresh(request(renewed.cookies)).ok).toBe(false);
+  });
+
+  it('keeps working after the server restarts, because the tokens are signed rather than remembered', () => {
+    const before = createAuth(options);
+    const { cookies } = before.login('ip', PASSWORD);
+    const after = createAuth(options); // a new process, with no memory of the first
+    expect(after.isAuthorized(request(cookies))).toBe(true);
+  });
+
+  it('refuses forged, tampered, mixed-up and other-password tokens', () => {
+    const auth = createAuth(options);
+    const { cookies } = auth.login('ip', PASSWORD);
+    const { spacehank_session: access, spacehank_refresh: refresh } = pair(cookies);
+    const [body, signature] = access.split('.');
+    expect(auth.isAuthorized({ headers: { cookie: `spacehank_session=${body}.${signature.slice(0, -2)}AA` } })).toBe(false);
+    expect(auth.isAuthorized({ headers: { cookie: `spacehank_session=${body}` } })).toBe(false);
+    expect(auth.isAuthorized({ headers: { cookie: 'spacehank_session=garbage' } })).toBe(false);
+    // a refresh token is not an access token, and the other way round
+    expect(auth.isAuthorized({ headers: { cookie: `spacehank_session=${refresh}` } })).toBe(false);
+    expect(auth.refresh({ headers: { cookie: `spacehank_refresh=${access}` } }).ok).toBe(false);
+    // another password means another key
+    const other = createAuth({ ...options, password: 'a-different-password-entirely' });
+    expect(other.isAuthorized(request(cookies))).toBe(false);
+    expect(other.refresh(request(cookies)).ok).toBe(false);
+  });
+
+  it('lets a separate session secret sign the tokens', () => {
+    const one = createAuth({ ...options, sessionSecret: 'one' });
+    const { cookies } = one.login('ip', PASSWORD);
+    expect(createAuth({ ...options, sessionSecret: 'one' }).isAuthorized(request(cookies))).toBe(true);
+    expect(createAuth({ ...options, sessionSecret: 'two' }).isAuthorized(request(cookies))).toBe(false);
   });
 
   it('locks a client out after repeated failures, then lets it retry', () => {
@@ -50,8 +99,8 @@ describe('auth', () => {
   });
 
   it('sets cross-site cookie attributes only for https origins', () => {
-    expect(createAuth(options).sessionCookie('t')).toContain('SameSite=None; Secure');
-    expect(createAuth({ ...options, secureCookie: false }).sessionCookie('t')).toContain('SameSite=Lax');
+    expect(createAuth(options).accessCookie('t')).toContain('SameSite=None; Secure');
+    expect(createAuth({ ...options, secureCookie: false }).accessCookie('t')).toContain('SameSite=Lax');
   });
 });
 
@@ -144,8 +193,36 @@ describe('realtime server', () => {
     expect(state.tasks.find((t) => t.id === task.id).status).toBe('completed');
     expect(state.events.some((event) => event.action === 'output' && event.text === 'hello worker')).toBe(true);
 
-    await call('/api/auth/logout', { method: 'POST', headers: { Cookie: cookie } });
-    expect((await call('/api/state', { headers: { Cookie: cookie } })).status).toBe(401);
+    const out = await call('/api/auth/logout', { method: 'POST', headers: { Cookie: cookie } });
+    const cleared = out.headers.getSetCookie().join('\n');
+    expect(cleared).toMatch(/spacehank_session=; .*Max-Age=0/);
+    expect(cleared).toMatch(/spacehank_refresh=; .*Max-Age=0/);
+  });
+
+  it('renews the session from the refresh cookie, on its own and when asked', async () => {
+    const login = await call('/api/auth/login', { method: 'POST', body: { password: PASSWORD } });
+    const jar = Object.fromEntries(login.headers.getSetCookie().map((c) => c.split(';')[0].split('=')));
+    const refreshOnly = `spacehank_refresh=${jar.spacehank_refresh}`;
+    expect(login.headers.getSetCookie().find((c) => c.startsWith('spacehank_refresh='))).toMatch(/Path=\/api\/auth/);
+
+    // an access token that is gone (it ran out, or the server slept): asking who is signed in renews it
+    const session = await call('/api/auth/session', { headers: { Cookie: refreshOnly } });
+    expect((await session.json()).authenticated).toBe(true);
+    const renewed = session.headers.getSetCookie();
+    expect(renewed.some((c) => c.startsWith('spacehank_session='))).toBe(true);
+    const fresh = renewed.find((c) => c.startsWith('spacehank_session=')).split(';')[0];
+    expect((await call('/api/state', { headers: { Cookie: fresh } })).status).toBe(200);
+
+    // the explicit call does the same
+    const refreshed = await call('/api/auth/refresh', { method: 'POST', headers: { Cookie: refreshOnly } });
+    expect(refreshed.status).toBe(200);
+    expect(refreshed.headers.getSetCookie()).toHaveLength(2);
+
+    // nothing to renew from
+    const none = await call('/api/auth/refresh', { method: 'POST' });
+    expect(none.status).toBe(401);
+    expect(none.headers.getSetCookie().join('\n')).toMatch(/Max-Age=0/);
+    expect((await (await call('/api/auth/session', { headers: { Cookie: 'spacehank_refresh=garbage' } })).json()).authenticated).toBe(false);
   });
 
   it('only upgrades WebSockets from the allowed origin with a session', async () => {

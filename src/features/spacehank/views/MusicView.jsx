@@ -34,7 +34,6 @@ import { djPick } from '../api/owner';
 import { activeLine, parseLrc } from '../music/lrc';
 import Cover, { useCoverTint } from '../music/Cover';
 import {
-  addSamples,
   createPlaylist,
   deletePlaylist,
   formatTime,
@@ -109,7 +108,6 @@ function MusicDesktop() {
   const [usage, setUsage] = useState(null);
   const [mood, setMood] = useState('');
   const [dj, setDj] = useState({ busy: false, note: '', error: '' });
-  const [sampling, setSampling] = useState(false);
   const [newPlaylist, setNewPlaylist] = useState(null);
   const full = useStore(musicUi, (s) => s.full); // phones: the full-screen player is open
   const [djOpen, setDjOpen] = useState(false);
@@ -158,13 +156,6 @@ function MusicDesktop() {
     if (result.failed) parts.push(`${result.failed} could not be read`);
     if (result.lyrics) parts.push(`${result.lyrics} lyrics attached`);
     setNotice(parts.join(' · '));
-  };
-
-  const trySamples = async () => {
-    setSampling(true);
-    const added = await addSamples();
-    setSampling(false);
-    setNotice(added ? `${added} sample songs added. They are original and made in your browser.` : 'The sample songs are already here.');
   };
 
   const askDj = async (wish) => {
@@ -342,9 +333,6 @@ function MusicDesktop() {
               <div className="flex flex-wrap justify-center gap-2">
                 <Button size="sm" onClick={() => filePicker.current?.click()}>
                   Add songs
-                </Button>
-                <Button variant="ghost" size="sm" loading={sampling} onClick={trySamples}>
-                  <Sparkles size={14} aria-hidden="true" /> Try with sample songs
                 </Button>
               </div>
             </div>
@@ -637,13 +625,9 @@ function MusicDesktop() {
           </ul>
 
           <div className="flex flex-wrap gap-2 px-5 pt-1 sm:px-7">
-            {hasSamples ? (
+            {hasSamples && (
               <Button variant="ghost" size="sm" onClick={() => removeSamples()}>
                 <Trash2 size={14} aria-hidden="true" /> Remove the sample songs
-              </Button>
-            ) : (
-              <Button variant="ghost" size="sm" loading={sampling} onClick={trySamples}>
-                <Sparkles size={14} aria-hidden="true" /> Add sample songs
               </Button>
             )}
             <span className="self-center font-mono text-[0.68rem] text-bone-faint">Kept on this device. Only titles go to Hank DJ, never audio.</span>

@@ -244,7 +244,7 @@ export default function BriefingCard({ owner, agents, connected }) {
         ) : events.length ? (
           <Schedule events={events} next={next} now={now} />
         ) : (
-          <EmptyDay connected={calendarConfigured} onPreview={owner ? () => setPreview(true) : undefined} />
+          <EmptyDay connected={calendarConfigured} onPreview={undefined} />
         )}
       </Card>
 

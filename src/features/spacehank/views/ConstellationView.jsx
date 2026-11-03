@@ -3,8 +3,8 @@ import { ArrowUpRight, Crosshair, Hand, Minus, Plus, RotateCcw, Search, Sparkles
 import { Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { PageHead } from '../components/Page';
-import { buildGraph, radiusOf, sampleNotes, stepLayout } from '../notes/graph';
-import { createNote, deleteNote, loadNotes, notesStore } from '../notes/library';
+import { buildGraph, radiusOf, stepLayout } from '../notes/graph';
+import { deleteNote, loadNotes, notesStore } from '../notes/library';
 import { useReadableNotes } from '../diary/useLock';
 import { excerpt } from '../notes/notes';
 import { useStore } from '../store';
@@ -44,7 +44,6 @@ export default function ConstellationView({ onOpenNote }) {
   const frame = useRef({ nodes: [], edges: [], energy: 1, view: { x: 0, y: 0, k: 1 }, hover: null, selected: null, drag: null, pointers: new Map(), pinch: null, goal: null, glide: null, autoFit: true, size: { w: 600, h: 400 }, dirty: true });
   const [selected, setSelected] = useState(null);
   const [tag, setTag] = useState('');
-  const [busy, setBusy] = useState(false);
   const [query, setQuery] = useState('');
   const [touched, setTouched] = useState(false);
 
@@ -508,11 +507,6 @@ export default function ConstellationView({ onOpenNote }) {
     return q ? stars.filter((n) => n.title.toLowerCase().includes(q)) : stars;
   }, [stars, query]);
 
-  const addSamples = async () => {
-    setBusy(true);
-    for (const n of sampleNotes()) await createNote(n.text, { sample: true });
-    setBusy(false);
-  };
   const removeSamples = async () => {
     for (const n of notes.filter((x) => x.sample)) await deleteNote(n.id);
     setSelected(null);
@@ -601,10 +595,7 @@ export default function ConstellationView({ onOpenNote }) {
             <div className="absolute inset-0 grid place-items-center bg-black/55 p-6 text-center backdrop-blur-[2px]">
               <div className="flex max-w-sm flex-col items-center gap-3">
                 <h2 className="font-display text-h3 leading-tight text-bone">The sky is nearly empty</h2>
-                <p className="text-fine text-bone-dim">It needs a few notes to draw. Write some in Second Brain, or light up a small example sky.</p>
-                <Button size="sm" loading={busy} onClick={addSamples}>
-                  <Sparkles size={14} aria-hidden="true" /> Try with sample notes
-                </Button>
+                <p className="text-fine text-bone-dim">It needs a few notes to draw. Write some in Second Brain.</p>
               </div>
             </div>
           )}

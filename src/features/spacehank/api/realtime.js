@@ -5,9 +5,26 @@ const { realtimeApiUrl, realtimeWsUrl } = spacehankConfig;
 // The session lives in an HttpOnly cookie, so every call must send credentials.
 const request = (path, init) => fetch(`${realtimeApiUrl}${path}`, { credentials: 'include', ...init });
 
+/**
+ * Whether the owner is signed in. The server renews a lapsed access token from the refresh cookie while it answers, so a page
+ * that wakes up later is still signed in. Throws when the server cannot be reached (a free server that is still waking up
+ * answers 502/503), which is not the same as "not signed in".
+ */
 export const fetchSession = async () => {
   const response = await request('/api/auth/session');
-  return Boolean((await response.json()).authenticated);
+  if (!response.ok) throw new Error(`Server not ready (${response.status})`);
+  const data = await response.json().catch(() => null);
+  if (!data) throw new Error('Server not ready');
+  return Boolean(data.authenticated);
+};
+
+/** Asks for a new access token from the refresh cookie. Resolves true when the session is renewed. */
+export const refreshSession = async () => {
+  try {
+    return (await request('/api/auth/refresh', { method: 'POST' })).ok;
+  } catch {
+    return false;
+  }
 };
 
 export const login = async (password) => {

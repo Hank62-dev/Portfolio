@@ -12,7 +12,9 @@ import TaskModal from './components/TaskModal';
 import Topbar from './components/Topbar';
 import { interpretCommand } from './api/owner';
 import { buildCatalog, validate } from './model/nlcommands';
-import { NAVIGATION, tabHue } from './navigation';
+import { DEFAULT_TAB, NAVIGATION, tabHue } from './navigation';
+import { guestCan } from './demo/mode';
+import PrivateTab from './components/PrivateTab';
 import { sendIntent } from './notes/library';
 import { useShellContext, playMood } from './hooks/useShellContext';
 import { missions } from './missions/store';
@@ -72,6 +74,7 @@ export default function Workspace({
   paused,
   onPause,
   connected,
+  link,
   events,
   onNewTask,
   onLogout,
@@ -260,7 +263,9 @@ export default function Workspace({
     pulse: <PulseView owner />,
   };
   const fit = tab === 'shell'; // Git Bash fills the screen and scrolls inside itself, not the page
-  const page = views[tab] || <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
+  const home = <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
+  // a guest only gets a few light places; the owner's own tabs say they are private
+  const page = guest && tab !== DEFAULT_TAB && !guestCan(tab) ? <PrivateTab tab={tab} onHome={() => onTab(DEFAULT_TAB)} onSignIn={onLogout} /> : views[tab] || home;
 
   return (
     <SoftContext.Provider value>
@@ -281,7 +286,7 @@ export default function Workspace({
             />
           )}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <Topbar tab={tab} connected={connected} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
+            <Topbar tab={tab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
             {!online && (
               <div className="border-b border-line bg-ink-2 px-gutter py-2 font-mono text-fine text-bone-dim" role="status" data-offline>
                 You are offline. Music, notes and pictures still work; AI, the calendar and the realtime link wait for the connection.

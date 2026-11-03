@@ -7,3 +7,10 @@ export const isDemo = () => typeof window !== 'undefined' && new URLSearchParams
 /** Where the demo and the real workspace live. A full page load (not a client-side route change) switches between them. */
 export const DEMO_URL = '/spacehank?demo';
 export const WORKSPACE_URL = '/spacehank';
+
+/**
+ * What a guest may open. Most of the workspace is the owner's own (notes, diary, documents, the AI helpers), so a guest gets
+ * the home screen and a few light places to look around; the rest shows a short introduction and asks for the password.
+ */
+export const GUEST_TABS = ['hank', 'play', 'habits', 'study'];
+export const guestCan = (tab) => GUEST_TABS.includes(tab);

@@ -5,6 +5,14 @@ import { clsx } from '../../../lib/format';
 import { owner } from '../config';
 import { NAVIGATION, tabHue } from '../navigation';
 
+// the realtime link: green when open, amber while it is being (re)opened, red when it is not coming back
+const LINK = {
+  online: { tone: 'ok', dot: 'bg-ok shadow-[0_0_0_4px_rgb(60_200_130/0.18)]', text: 'REALTIME LINK', title: 'Realtime link' },
+  connecting: { tone: 'warn', dot: 'bg-warn', text: 'RECONNECTING', title: 'Reconnecting to the server' },
+  offline: { tone: 'danger', dot: 'bg-danger', text: 'SERVER OFFLINE', title: 'Server offline' },
+};
+const linkOf = (connected, link) => (connected ? 'online' : link === 'connecting' ? 'connecting' : 'offline');
+
 const isMac = typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(navigator.platform ?? '');
 
 
@@ -24,7 +32,7 @@ function useScrolled(distance = 12) {
  * The phone's title bar, as in a native app: the screen's icon and name in large type that folds down to a compact bar
  * when you scroll, the colour of the screen glowing behind it, and only the actions that belong to this screen.
  */
-function PhoneBar({ tab, current, connected, guest, paused, onPause, onNewTask, onPalette }) {
+function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNewTask, onPalette }) {
   const scrolled = useScrolled();
   const hue = tabHue(tab);
   const Icon = current.icon;
@@ -54,9 +62,9 @@ function PhoneBar({ tab, current, connected, guest, paused, onPause, onNewTask, 
               <i className="size-1.5 rounded-full bg-warn" aria-hidden="true" /> DEMO
             </span>
           ) : (
-            <span role="status" className="grid size-7 place-items-center" title={connected ? 'Realtime link' : 'Server offline'}>
-              <i className={clsx('size-2 rounded-full', connected ? 'bg-ok shadow-[0_0_0_4px_rgb(60_200_130/0.18)]' : 'bg-danger')} aria-hidden="true" />
-              <span className="sr-only">{connected ? 'REALTIME LINK' : 'SERVER OFFLINE'}</span>
+            <span role="status" className="grid size-7 place-items-center" title={LINK[linkOf(connected, link)].title}>
+              <i className={clsx('size-2 rounded-full', LINK[linkOf(connected, link)].dot, linkOf(connected, link) === 'connecting' && 'animate-pulse')} aria-hidden="true" />
+              <span className="sr-only">{LINK[linkOf(connected, link)].text}</span>
             </span>
           )}
           {tab === 'space' && (
@@ -78,12 +86,12 @@ function PhoneBar({ tab, current, connected, guest, paused, onPause, onNewTask, 
   );
 }
 
-export default function Topbar({ tab, connected, guest, paused, onPause, onNewTask, onPalette }) {
+export default function Topbar({ tab, connected, link, guest, paused, onPause, onNewTask, onPalette }) {
   const current = NAVIGATION.find((item) => item.id === tab) || NAVIGATION[0];
   const pauseLabel = paused ? 'Resume floor' : 'Pause floor';
   return (
     <>
-      <PhoneBar tab={tab} current={current} connected={connected} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} />
+      <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} />
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line bg-ink-0/85 px-gutter backdrop-blur max-md:hidden">
       <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 font-mono text-fine text-bone-faint">
         <span>HANK62</span>
@@ -102,8 +110,8 @@ export default function Topbar({ tab, connected, guest, paused, onPause, onNewTa
           <span>Search</span>
           <kbd className="rounded-sm border border-line px-1 text-[0.68rem] text-bone-faint">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
         </button>
-        <Badge tone={guest ? 'warn' : connected ? 'ok' : 'danger'} dot>
-          {guest ? 'DEMO' : connected ? 'REALTIME LINK' : 'SERVER OFFLINE'}
+        <Badge tone={guest ? 'warn' : LINK[linkOf(connected, link)].tone} dot>
+          {guest ? 'DEMO' : LINK[linkOf(connected, link)].text}
         </Badge>
         <Tooltip content={pauseLabel} side="bottom">
           <Button variant="secondary" size="icon" aria-label={pauseLabel} onClick={onPause}>

@@ -46,7 +46,20 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
         configuredWorkers: configuredWorkers(config.env, agents),
       }),
 
-    'GET /api/auth/session': (req, res) => json(res, 200, { authenticated: auth.isAuthorized(req) }),
+    // Asking who is signed in also renews a lapsed access token from the refresh token, so a page that wakes up after a while
+    // (or after the server slept) gets a fresh session in the same call.
+    'GET /api/auth/session': (req, res) => {
+      if (auth.isAuthorized(req)) return json(res, 200, { authenticated: true });
+      const renewed = auth.refresh(req);
+      if (renewed.ok) return json(res, 200, { authenticated: true }, { 'Set-Cookie': renewed.cookies });
+      return json(res, 200, { authenticated: false });
+    },
+
+    'POST /api/auth/refresh': (req, res) => {
+      const renewed = auth.refresh(req);
+      if (!renewed.ok) return json(res, 401, { authenticated: false }, { 'Set-Cookie': auth.clearCookies() });
+      return json(res, 200, { authenticated: true }, { 'Set-Cookie': renewed.cookies });
+    },
 
     'POST /api/auth/login': async (req, res) => {
       const input = await readJson(req, config.maxBodyBytes);
@@ -55,12 +68,11 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
         return json(res, 429, { error: 'Too many attempts' }, { 'Retry-After': String(result.retryAfterSeconds) });
       }
       if (!result.ok) return json(res, 401, { error: 'Invalid password' });
-      return json(res, 200, { authenticated: true }, { 'Set-Cookie': auth.sessionCookie(result.token) });
+      return json(res, 200, { authenticated: true }, { 'Set-Cookie': result.cookies });
     },
 
     'POST /api/auth/logout': (req, res) => {
-      auth.logout(req);
-      json(res, 200, { authenticated: false }, { 'Set-Cookie': auth.clearCookie() });
+      json(res, 200, { authenticated: false }, { 'Set-Cookie': auth.clearCookies() });
     },
 
     'GET /api/state': (req, res) => {

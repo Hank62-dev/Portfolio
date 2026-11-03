@@ -8,6 +8,7 @@ import { habits, sampleHabits } from '../habits/store';
 import { loadNotes, notesStore } from '../notes/library';
 import { useFab } from '../fab';
 import { useStore } from '../store';
+import { isDemo } from '../demo/mode';
 
 // each habit picks one of these; they are drawn with the icon library, never as emoji
 const ICONS = { sprout: Sprout, book: BookOpen, run: Dumbbell, water: Droplets, mind: Brain, write: PenLine, music: Music2, sleep: Moon, walk: Footprints, eat: Apple, ride: Bike, coffee: Coffee };
@@ -352,15 +353,17 @@ export default function HabitsView() {
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
           <div className="min-w-[min(100%,15rem)] flex-1">
             <h2 className="font-display text-lead text-bone">The garden is empty</h2>
-            <p className="text-fine text-bone-dim">Plant your first habit, or look at a garden that has been growing for a while.</p>
+            <p className="text-fine text-bone-dim">Plant your first habit.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" onClick={() => setEditing({})}>
               <Plus size={14} aria-hidden="true" /> Plant a habit
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => habits.putMany(sampleHabits())}>
-              <Sparkles size={14} aria-hidden="true" /> Try a sample garden
-            </Button>
+            {isDemo() && (
+              <Button variant="ghost" size="sm" onClick={() => habits.putMany(sampleHabits())}>
+                <Sparkles size={14} aria-hidden="true" /> Try a sample garden
+              </Button>
+            )}
           </div>
         </div>
       ) : (

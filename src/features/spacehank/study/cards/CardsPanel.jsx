@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Flame, Layers, Play, Plus, Search, Sparkles } from 'lucide-react';
-import { Badge, Button, Input } from '../../../../design-system';
+import { Badge, Button, Input, pushToast } from '../../../../design-system';
 import { clsx } from '../../../../lib/format';
 import { useFab } from '../../fab';
 import { loadNotes } from '../../notes/library';
@@ -12,6 +12,7 @@ import { answeredOn, reviewLog, studyStreak } from './log';
 import MakeCards from './MakeCards';
 import Session from './Session';
 import { cardState, clozeFront, deckStats, dueIn, forecast, searchCards, sessionCards } from './states';
+import { isDemo } from '../../demo/mode';
 
 const STATE_TONE = { new: 'signal', learning: 'warn', mature: 'ok' };
 const STATE_NAME = { new: 'New', learning: 'Learning', mature: 'Mature' };
@@ -68,9 +69,11 @@ function Empty({ onAdd, onMake, onSample }) {
         <Button variant="ghost" size="sm" onClick={onMake}>
           <Sparkles size={14} aria-hidden="true" /> From my notes
         </Button>
-        <Button variant="ghost" size="sm" onClick={onSample}>
-          Try a sample deck
-        </Button>
+        {isDemo() && (
+          <Button variant="ghost" size="sm" onClick={onSample}>
+            Try a sample deck
+          </Button>
+        )}
       </div>
     </div>
   );
@@ -88,7 +91,6 @@ export default function CardsPanel() {
   const [session, setSession] = useState(null); // { key, cards }
   const [editor, setEditor] = useState(null); // null, {} (new) or a card
   const [making, setMaking] = useState(false);
-  const [toast, setToast] = useState('');
   useFab({ label: 'Add a card', icon: Plus, onPress: () => setEditor({}) });
 
   useEffect(() => {
@@ -109,10 +111,6 @@ export default function CardsPanel() {
   const study = (ahead = false) => {
     const cards = sessionCards(inDeck, { ahead, limit: ahead ? 10 : SESSION_MAX });
     if (cards.length) setSession({ key: Date.now(), cards });
-  };
-  const note = (text) => {
-    setToast(text);
-    window.setTimeout(() => setToast(''), 2600);
   };
   const addSample = async () => {
     const s = sampleStudy();
@@ -270,15 +268,9 @@ export default function CardsPanel() {
         )}
       </section>
 
-      {toast && (
-        <p className="fixed bottom-24 left-1/2 z-[60] -translate-x-1/2 animate-fade-in rounded-full border border-line-strong bg-ink-2 px-4 py-2 text-fine text-bone shadow-pop" role="status">
-          {toast}
-        </p>
-      )}
-
       {session && <Session key={session.key} cards={session.cards} onClose={() => setSession(null)} onMore={() => study(false)} />}
       {editor && <CardEditor key={editor.id ?? 'new'} card={editor.id ? editor : null} decks={[{ id: '', name: 'General' }, ...list.map((c) => ({ id: c.id, name: c.name }))]} deck={deck === 'all' ? '' : deck} onClose={() => setEditor(null)} />}
-      {making && <MakeCards notes={notes} deck={deck === 'all' ? '' : deck} onClose={() => setMaking(false)} onAdded={(n) => note(`${n} ${n === 1 ? 'card' : 'cards'} added`)} />}
+      {making && <MakeCards notes={notes} deck={deck === 'all' ? '' : deck} onClose={() => setMaking(false)} onAdded={(n) => pushToast(`${n} ${n === 1 ? 'card' : 'cards'} added`)} />}
     </div>
   );
 }

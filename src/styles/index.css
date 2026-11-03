@@ -90,6 +90,19 @@
     }
   }
 
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-14px) scale(0.97);
+    }
+  }
+
+  @keyframes toast-life {
+    to {
+      transform: scaleX(0);
+    }
+  }
+
   @keyframes nudge {
     50% {
       transform: translateY(3px);

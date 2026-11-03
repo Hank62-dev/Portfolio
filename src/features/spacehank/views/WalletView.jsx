@@ -6,7 +6,7 @@ import { PageHead, Segmented, Tile } from '../components/Page';
 import { useFab } from '../fab';
 import { useStore } from '../store';
 import { CATEGORIES, categoryOf, compact, formatVnd, inMonth, monthKey, parseEntry, summarize, toCsv } from '../wallet/model';
-import { budgets, entries, sampleEntries } from '../wallet/store';
+import { budgets, entries } from '../wallet/store';
 
 const CAT_ICONS = { utensils: Utensils, bus: Bus, home: House, study: GraduationCap, fun: Gamepad2, health: HeartPulse, bag: ShoppingBag, cash: Banknote, other: CircleEllipsis };
 
@@ -238,11 +238,8 @@ export default function WalletView() {
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
           <div className="min-w-[min(100%,15rem)] flex-1">
             <h2 className="font-display text-lead text-bone">Nothing logged yet</h2>
-            <p className="text-fine text-bone-dim">Type your first expense above, or look at a month of examples.</p>
+            <p className="text-fine text-bone-dim">Type your first expense above.</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => entries.putMany(sampleEntries())}>
-            <Sparkles size={14} aria-hidden="true" /> Try with sample data
-          </Button>
         </div>
       ) : (
         <>

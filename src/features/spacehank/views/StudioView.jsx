@@ -164,7 +164,6 @@ function Create({ locked }) {
   const [usage, setUsage] = useState(null);
   const [selectedId, setSelectedId] = useState(null);
   const [only, setOnly] = useState('all');
-  const [sampling, setSampling] = useState(false);
   const field = useRef(null);
 
   // "Draft a picture of…" from the command palette lands here with the description filled in
@@ -222,19 +221,6 @@ function Create({ locked }) {
   const keepPrompt = async () => {
     const record = await savePrompt(text);
     setPrompts((list) => [record, ...list]);
-  };
-
-  const addSamplePictures = async () => {
-    setSampling(true);
-    try {
-      const { drawSamplePictures } = await import('../studio/sample');
-      const saved = [];
-      for (const { prompt, blob } of await drawSamplePictures()) saved.push(await saveImage({ prompt, blob, sample: true }));
-      setImages((list) => [...saved.reverse(), ...list]);
-      setSelectedId((id) => id ?? saved[0]?.id ?? null);
-    } finally {
-      setSampling(false);
-    }
   };
 
   const removeSamplePictures = async () => {
@@ -425,10 +411,7 @@ function Create({ locked }) {
           ) : (
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line p-8 text-center">
               <Shapes size={22} className="text-bone-faint" aria-hidden="true" />
-              <p className="max-w-xs text-fine text-bone-dim">Pictures you make are kept in this browser only, and are never shown to guests.</p>
-              <Button variant="ghost" size="sm" loading={sampling} onClick={addSamplePictures}>
-                <Sparkles size={14} aria-hidden="true" /> Try with sample pictures
-              </Button>
+              <p className="max-w-xs text-fine text-bone-dim">Pictures you make are kept in this browser only.</p>
             </div>
           )}
         </section>

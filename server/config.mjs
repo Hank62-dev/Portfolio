@@ -19,7 +19,10 @@ export const loadConfig = (env = process.env) => {
     // Cross-site cookies (Vercel -> Render) need SameSite=None, which browsers only accept with Secure.
     secureCookie: normalizedOrigin.startsWith('https://'),
     workdir: env.SPACEHANK_WORKDIR || process.cwd(),
-    sessionTtlMs: 12 * HOUR,
+    // a short access token, and a long refresh token that renews it (see auth.mjs)
+    accessTtlMs: 30 * MINUTE,
+    refreshTtlMs: 30 * 24 * HOUR,
+    sessionSecret: env.SPACEHANK_SESSION_SECRET || '', // empty: the tokens are signed with a key made from the password
     maxBodyBytes: 64 * 1024,
     maxAiBodyBytes: 128 * 1024, // a music library's track list rides along with a DJ request
     ai: {

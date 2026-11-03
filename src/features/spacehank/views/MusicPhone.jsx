@@ -34,7 +34,6 @@ import { greetingFor, owner } from '../config';
 import Cover, { useCoverTint } from '../music/Cover';
 import { activeLine, parseLrc } from '../music/lrc';
 import {
-  addSamples,
   createPlaylist,
   deletePlaylist,
   formatTime,
@@ -362,7 +361,6 @@ export default function MusicPhone() {
   const [notice, setNotice] = useState('');
   const [dj, setDj] = useState({ busy: false, note: '', error: '', text: '' });
   const [newPlaylist, setNewPlaylist] = useState(null);
-  const [sampling, setSampling] = useState(false);
   const filePicker = useRef(null);
   const folderPicker = useRef(null);
 
@@ -410,12 +408,6 @@ export default function MusicPhone() {
     setNotice('Reading your files…');
     const result = await importFiles(files, () => {});
     setNotice([`${result.added} added`, result.skipped && `${result.skipped} already there`, result.failed && `${result.failed} could not be read`].filter(Boolean).join(' · '));
-  };
-  const trySamples = async () => {
-    setSampling(true);
-    const added = await addSamples();
-    setSampling(false);
-    setNotice(added ? `${added} sample songs added` : 'The sample songs are already here');
   };
   const askDj = async (wish) => {
     const text = (wish ?? dj.text).trim();
@@ -474,7 +466,7 @@ export default function MusicPhone() {
             { id: 'songs', label: 'Add songs', icon: Upload, onSelect: () => filePicker.current?.click() },
             { id: 'folder', label: 'Add a folder', icon: FolderPlus, onSelect: () => folderPicker.current?.click() },
             { id: 'playlist', label: 'New playlist', icon: ListMusic, onSelect: () => { setSection('library'); setShelf('playlists'); setNewPlaylist(''); } },
-            hasSamples ? { id: 'rm', label: 'Remove the sample songs', icon: Trash2, onSelect: () => removeSamples() } : { id: 'samples', label: 'Add sample songs', icon: Sparkles, onSelect: trySamples },
+            ...(hasSamples ? [{ id: 'rm', label: 'Remove the sample songs', icon: Trash2, onSelect: () => removeSamples() }] : []),
           ]}
         />
       </div>
@@ -492,9 +484,6 @@ export default function MusicPhone() {
           <div className="flex flex-wrap justify-center gap-2">
             <Button size="sm" onClick={() => filePicker.current?.click()}>
               Add songs
-            </Button>
-            <Button variant="ghost" size="sm" loading={sampling} onClick={trySamples}>
-              <Sparkles size={14} aria-hidden="true" /> Try sample songs
             </Button>
           </div>
         </section>

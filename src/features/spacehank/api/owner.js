@@ -1,19 +1,25 @@
 import { spacehankConfig } from '../config';
+import { refreshSession } from './realtime';
 import { isDemo } from '../demo/mode';
 import * as demo from '../demo/mock';
 
 const { realtimeApiUrl } = spacehankConfig;
 
 // Owner-only helpers on the realtime server (AI and calendar). The session cookie authorises them.
+const send = (path, method, body) =>
+  fetch(`${realtimeApiUrl}${path}`, {
+    method,
+    credentials: 'include',
+    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
 const call = async (path, { method = 'GET', body } = {}) => {
   let response;
   try {
-    response = await fetch(`${realtimeApiUrl}${path}`, {
-      method,
-      credentials: 'include',
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+    response = await send(path, method, body);
+    // the short access token ran out: renew it from the refresh cookie and try once more
+    if (response.status === 401 && (await refreshSession())) response = await send(path, method, body);
   } catch {
     throw new Error('The realtime server is unreachable. Check that it is running.');
   }
