@@ -1,7 +1,9 @@
 """Gemini LLM client using google-genai SDK."""
 
+import asyncio
 import json
 import logging
+import random
 import re
 from typing import Any
 
@@ -10,6 +12,15 @@ from google import genai
 from src.config import settings
 
 logger = logging.getLogger(__name__)
+
+
+RATE_LIMIT_RETRIES = 4  # waits as long as Gemini says to
+BUSY_RETRIES = 2  # a short pause each time, doubling
+
+
+def is_busy(error_text: str) -> bool:
+    """Whether Gemini failed for a reason that is likely to pass by itself: overloaded (503), a server error, or a timeout."""
+    return bool(re.search(r"\b(500|503|504)\b|UNAVAILABLE|INTERNAL|DEADLINE_EXCEEDED|high demand", error_text))
 
 _client = None
 
@@ -59,6 +70,31 @@ class GeminiClient:
     def __init__(self):
         self.client = _get_client()
 
+    async def _generate(self, model: str, contents: list, config: dict):
+        """One call to Gemini, waiting out a rate limit (429) and pausing briefly when the model is overloaded (503)."""
+        rate_waits = 0
+        busy_waits = 0
+        while True:
+            try:
+                return await self.client.aio.models.generate_content(model=model, contents=contents, config=config)
+            except Exception as e:
+                err_str = str(e)
+                if ("429" in err_str or "RESOURCE_EXHAUSTED" in err_str) and rate_waits < RATE_LIMIT_RETRIES:
+                    match = re.search(r"retry in (\d+(?:\.\d+)?)s", err_str, re.IGNORECASE)
+                    wait_time = float(match.group(1)) + 2.0 if match else 20.0
+                    rate_waits += 1
+                    logger.warning("Gemini Rate Limit (429) hit for model '%s'. Waiting %.1fs before retry (%d/%d)...", model, wait_time, rate_waits, RATE_LIMIT_RETRIES)
+                    await asyncio.sleep(wait_time)
+                    continue
+                if is_busy(err_str) and busy_waits < BUSY_RETRIES:
+                    wait_time = 1.5 * 2**busy_waits + random.uniform(0, 0.5)
+                    busy_waits += 1
+                    logger.warning("Gemini model '%s' is busy (%s). Waiting %.1fs before retry (%d/%d)...", model, err_str[:60], wait_time, busy_waits, BUSY_RETRIES)
+                    await asyncio.sleep(wait_time)
+                    continue
+                logger.error("Gemini API Error: %s", e)
+                raise
+
     async def chat(
         self,
         messages: list[dict[str, str]],
@@ -97,33 +133,24 @@ class GeminiClient:
         if web_search:
             config["tools"] = [{"google_search": {}}]
 
-        max_retries = 5
-        for attempt in range(max_retries):
+        # An overloaded model (503) is usually over in seconds: try it again, and if it stays busy try the fallback model.
+        models = [target_model]
+        fallback = settings.gemini_fallback_model.strip()
+        if fallback and fallback != target_model:
+            models.append(fallback)
+
+        response = None
+        for index, candidate in enumerate(models):
             try:
-                response = await self.client.aio.models.generate_content(
-                    model=target_model,
-                    contents=gemini_contents,
-                    config=config,
-                )
-                answer = response.text
+                response = await self._generate(candidate, gemini_contents, config)
+                target_model = candidate
                 break
             except Exception as e:
-                err_str = str(e)
-                if ("429" in err_str or "RESOURCE_EXHAUSTED" in err_str) and attempt < max_retries - 1:
-                    match = re.search(r"retry in (\d+(?:\.\d+)?)s", err_str, re.IGNORECASE)
-                    wait_time = float(match.group(1)) + 2.0 if match else 20.0
-                    logger.warning(
-                        "Gemini Rate Limit (429) hit for model '%s'. Waiting %.1fs before retry (%d/%d)...",
-                        target_model,
-                        wait_time,
-                        attempt + 1,
-                        max_retries,
-                    )
-                    import asyncio
-                    await asyncio.sleep(wait_time)
+                if index + 1 < len(models) and is_busy(str(e)):
+                    logger.warning("Gemini model '%s' is busy; trying '%s' instead.", candidate, models[index + 1])
                     continue
-                logger.error("Gemini API Error: %s", e)
-                raise e
+                raise
+        answer = response.text
 
         if not answer or not answer.strip():
             block_reason = response.prompt_feedback.block_reason if response.prompt_feedback else None

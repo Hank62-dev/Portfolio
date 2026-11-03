@@ -44,6 +44,9 @@ services:
         value: gemini-3.8-flash
       - key: GEMINI_FAST_MODEL
         value: gemini-3.8-flash
+      # tried when the main model stays overloaded (503) after a few retries; if this name is wrong the original error is raised
+      - key: GEMINI_FALLBACK_MODEL
+        value: gemini-3.5-flash-lite
       - key: DATABASE_URL
         sync: false
       - key: QDRANT_URL
