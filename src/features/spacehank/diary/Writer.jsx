@@ -3,6 +3,7 @@ import { ImagePlus, Trash2 } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import MoodFace from './MoodFace';
 import { MOOD_WORDS, bodyOf, dayLabel, promptsFor } from './model';
+import { clearDraft, readDraft, writeDraft } from './draft';
 import { addPhoto, removePhoto } from './photos';
 import { removeEntry, saveEntry } from './store';
 import { PaperSheet, SheetClose, SoftButton, Thumb } from './ui';
@@ -14,9 +15,10 @@ const MAX_PHOTOS = 4;
  * kept), so nothing is lost by leaving; "Lưu" just says so out loud.
  */
 export default function Writer({ day, entry, onClose, onNotify }) {
-  const [mood, setMood] = useState(entry?.mood ?? null);
-  const [body, setBody] = useState(() => bodyOf(entry?.text));
-  const [photos, setPhotos] = useState(entry?.photos ?? []);
+  const [draft] = useState(() => readDraft(day)); // what was being written when the diary last closed on its own
+  const [mood, setMood] = useState(() => (draft ? draft.mood : entry?.mood ?? null));
+  const [body, setBody] = useState(() => (draft ? draft.body : bodyOf(entry?.text)));
+  const [photos, setPhotos] = useState(() => (draft ? draft.photos : entry?.photos ?? []));
   const [added, setAdded] = useState([]); // pictures added in this sitting: they go if the page is thrown away
   const [busy, setBusy] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -34,6 +36,12 @@ export default function Writer({ day, entry, onClose, onNotify }) {
 
   const hasContent = Boolean(mood || body.trim() || photos.length);
 
+  // kept on the side as it goes, so a lock, a call or a killed app loses nothing
+  useEffect(() => {
+    if (hasContent) writeDraft(day, { mood, body, photos });
+    else clearDraft();
+  }, [day, mood, body, photos, hasContent]);
+
   const keep = async (message) => {
     setBusy(true);
     try {
@@ -47,6 +55,7 @@ export default function Writer({ day, entry, onClose, onNotify }) {
     } catch {
       onNotify?.('Không lưu được trang này trên máy.');
     }
+    clearDraft();
     setBusy(false);
     onClose();
   };
@@ -91,6 +100,7 @@ export default function Writer({ day, entry, onClose, onNotify }) {
     } catch {
       onNotify?.('Không xoá được.');
     }
+    clearDraft();
     setBusy(false);
     onClose();
   };

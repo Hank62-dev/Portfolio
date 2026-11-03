@@ -9,6 +9,7 @@ import { forecastUrl, parseForecast, summarize } from '../model/weather';
 import { library } from '../music/library';
 import { next, playList, player, previous, togglePlay } from '../music/player';
 import { createNote, notesStore } from '../notes/library';
+import { readable } from '../diary/lock';
 import { searchNotes, textToHtml, titleOf } from '../notes/notes';
 import { formatVnd, categoryOf, parseEntry } from '../wallet/model';
 import { entries } from '../wallet/store';
@@ -69,9 +70,9 @@ export function useShellContext({ tabs, agents, onTab, onNewTask }) {
         void habits.update(habit.id, { days });
         return days.includes(dayKey()) ? `Watered ${habit.name}` : `Unticked ${habit.name}`;
       },
-      search: (query) => searchNotes(notesStore.get().notes, query, 8).map((r) => ({ title: titleOf(r.note.text) })),
+      search: (query) => searchNotes(readable(notesStore.get().notes), query, 8).map((r) => ({ title: titleOf(r.note.text) })),
       ask: async (question) => {
-        const found = searchNotes(notesStore.get().notes, question, 6);
+        const found = searchNotes(readable(notesStore.get().notes), question, 6);
         if (!found.length) return 'None of your notes mention that.';
         const { answer } = await askNotes({ question, notes: found.map(({ note }) => ({ title: titleOf(note.text), text: note.text })) });
         return answer;

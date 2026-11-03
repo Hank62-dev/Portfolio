@@ -5,6 +5,8 @@ import { clsx } from '../../../lib/format';
 import { askNotes } from '../api/owner';
 import { MOODS, excerpt, hueOf, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
 import { createNote, deleteNote, exportNotes, importNotes, intents, loadNotes, notesStore, openJournal } from '../notes/library';
+import { ensureUnlocked, readable } from '../diary/lock';
+import { useReadableNotes } from '../diary/useLock';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { PageHead } from '../components/Page';
 import { useFab } from '../fab';
@@ -100,7 +102,8 @@ function NoteCard({ note, query, onOpen, grid }) {
 }
 
 export default function NotesView() {
-  const { loaded, notes, error } = useStore(notesStore);
+  const { loaded, error } = useStore(notesStore);
+  const notes = useReadableNotes();
   const intent = useStore(intents, (s) => s.notes);
   const [selected, setSelected] = useState(null);
   const [scope, setScope] = useState('all');
@@ -125,7 +128,7 @@ export default function NotesView() {
       setProblem('');
       setAnswer(null);
       try {
-        const found = searchNotes(notesStore.get().notes, q, 6);
+        const found = searchNotes(readable(notesStore.get().notes), q, 6);
         if (!found.length) {
           setAnswer({ question: q, text: 'None of your notes mention that, so there is nothing to answer from.', sources: [] });
           return;
@@ -182,7 +185,9 @@ export default function NotesView() {
   }, [current, notes]);
 
   const newNote = async () => setSelected((await createNote('')).id);
-  const today = async () => setSelected((await openJournal()).id);
+  const today = async () => {
+    if (await ensureUnlocked()) setSelected((await openJournal()).id);
+  };
   const [askOpen, setAskOpen] = useState(false); // phones: the Ask card opens from a button
   const [tagsOpen, setTagsOpen] = useState(false);
   const phone = !useMediaQuery('(min-width: 768px)');

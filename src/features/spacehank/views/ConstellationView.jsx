@@ -5,6 +5,7 @@ import { clsx } from '../../../lib/format';
 import { PageHead } from '../components/Page';
 import { buildGraph, radiusOf, sampleNotes, stepLayout } from '../notes/graph';
 import { createNote, deleteNote, loadNotes, notesStore } from '../notes/library';
+import { useReadableNotes } from '../diary/useLock';
 import { excerpt } from '../notes/notes';
 import { useStore } from '../store';
 
@@ -37,7 +38,8 @@ const reduced = () => typeof window !== 'undefined' && window.matchMedia('(prefe
  * by themselves into clusters; drag to look around, scroll to zoom, click a star to read what it is.
  */
 export default function ConstellationView({ onOpenNote }) {
-  const { loaded, notes } = useStore(notesStore);
+  const { loaded } = useStore(notesStore);
+  const notes = useReadableNotes();
   const canvas = useRef(null);
   const frame = useRef({ nodes: [], edges: [], energy: 1, view: { x: 0, y: 0, k: 1 }, hover: null, selected: null, drag: null, pointers: new Map(), pinch: null, goal: null, glide: null, autoFit: true, size: { w: 600, h: 400 }, dirty: true });
   const [selected, setSelected] = useState(null);

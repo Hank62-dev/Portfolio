@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Footprints, PenLine } from 'lucide-react';
+import { Footprints, Lock, PenLine, ShieldCheck } from 'lucide-react';
 import { Loading, Skeleton } from '../../../design-system';
 import { useFab } from '../fab';
 import { loadNotes, notesStore } from '../notes/library';
 import { dayKey } from '../notes/notes';
+import DiaryLock from '../diary/DiaryLock';
 import EntrySheet from '../diary/EntrySheet';
 import Journey from '../diary/Journey';
+import LockSettings from '../diary/LockSettings';
+import { diaryLock, lockDiary } from '../diary/lock';
 import MoodFace from '../diary/MoodFace';
+import { useDiaryLocked } from '../diary/useLock';
 import Writer from '../diary/Writer';
 import { Thumb, SoftButton } from '../diary/ui';
 import { bodyOf, dayLabel, encouragement, entryOf, excerptOf, journeyDays, journeyStats, memories, milestonesOf, moodWord, shortLabel, weekMoods } from '../diary/model';
@@ -24,6 +28,9 @@ export default function DiaryView({ onNotify }) {
   const pet = usePet();
   const [shown, setShown] = useState(PAGE);
   const [sheet, setSheet] = useState(null); // { mode: 'write' | 'read', day, label? }
+  const [settings, setSettings] = useState(false);
+  const locked = useDiaryLocked();
+  const lockOn = useStore(diaryLock, (s) => s.enabled);
   const today = dayKey();
 
   useEffect(() => {
@@ -39,16 +46,46 @@ export default function DiaryView({ onNotify }) {
 
   const write = (day) => setSheet({ mode: 'write', day });
   const read = (day, label) => setSheet({ mode: 'read', day, label });
-  useFab({ label: 'Viết nhật ký hôm nay', icon: PenLine, onPress: () => write(today) });
+  useFab(locked ? null : { label: 'Viết nhật ký hôm nay', icon: PenLine, onPress: () => write(today) });
+
+  // a locked diary closes whatever was open on it (a page being written is kept as a draft)
+  useEffect(() => {
+    if (locked) {
+      setSheet(null);
+      setSettings(false);
+    }
+  }, [locked]);
 
   const entry = sheet ? entryOf(notes, sheet.day) : null;
+
+  if (locked) {
+    return (
+      <div data-sky className="sky -mx-5 -mt-4 min-h-[80vh] px-4 py-6 md:mx-0 md:mt-0 md:rounded-[2rem] md:px-8 md:py-10" data-diary>
+        <div className="mx-auto w-full max-w-[34rem]">
+          <DiaryLock />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div data-sky className="sky -mx-5 -mt-4 min-h-[80vh] px-4 py-6 md:mx-0 md:mt-0 md:rounded-[2rem] md:px-8 md:py-10" data-diary>
       <div className="mx-auto flex w-full max-w-[34rem] flex-col gap-5">
-        <header className="px-1">
-          <h1 className="font-display text-[2.6rem] leading-none text-[#eef3f7]">Hành trình của bạn</h1>
-          <p className="mt-1 font-body text-[1rem] text-[#eef3f7]/85">Mỗi ngày một dấu chân, mỗi dấu chân một kỷ niệm.</p>
+        <header className="flex items-start justify-between gap-3 px-1">
+          <div>
+            <h1 className="font-display text-[2.6rem] leading-none text-[#eef3f7]">Hành trình của bạn</h1>
+            <p className="mt-1 font-body text-[1rem] text-[#eef3f7]/85">Mỗi ngày một dấu chân, mỗi dấu chân một kỷ niệm.</p>
+          </div>
+          <div className="flex shrink-0 gap-2 pt-1">
+            {lockOn && (
+              <button type="button" onClick={() => lockDiary({ quiet: true })} aria-label="Khoá nhật ký ngay" className="grid size-10 place-items-center rounded-full border border-white/25 bg-white/10 text-[#eef3f7] backdrop-blur active:scale-90" data-lock-now>
+                <Lock size={17} aria-hidden="true" />
+              </button>
+            )}
+            <button type="button" onClick={() => setSettings(true)} aria-label="Cài đặt khoá nhật ký" className="grid size-10 place-items-center rounded-full border border-white/25 bg-white/10 text-[#eef3f7] backdrop-blur active:scale-90" data-lock-settings-open>
+              <ShieldCheck size={17} aria-hidden="true" />
+            </button>
+          </div>
         </header>
 
         {!loaded ? (
@@ -157,6 +194,7 @@ export default function DiaryView({ onNotify }) {
         )}
       </div>
 
+      {settings && <LockSettings onClose={() => setSettings(false)} onNotify={onNotify} />}
       {sheet?.mode === 'write' && <Writer key={`w-${sheet.day}`} day={sheet.day} entry={entry} onClose={() => setSheet(null)} onNotify={onNotify} />}
       {sheet?.mode === 'read' && entry && <EntrySheet key={`r-${sheet.day}`} entry={entry} label={sheet.label} onClose={() => setSheet(null)} onEdit={() => write(sheet.day)} />}
     </div>

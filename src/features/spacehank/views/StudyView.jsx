@@ -6,7 +6,8 @@ import { generateCards } from '../api/owner';
 import { MODES, dismiss, focus, pause, reset, setMode, start } from '../focus/store';
 import FocusStats from '../components/FocusStats';
 import { Figure, PageHead, Segmented, Tile } from '../components/Page';
-import { loadNotes, notesStore } from '../notes/library';
+import { loadNotes } from '../notes/library';
+import { useReadableNotes } from '../diary/useLock';
 import { titleOf } from '../notes/notes';
 import { GRADES, clock, countdown, dueCards, newFlashcard, nextLabels, review, upcoming } from '../study/model';
 import { courses, flashcards, sampleStudy } from '../study/store';
@@ -160,7 +161,7 @@ function CourseCard({ course, due, onAdd }) {
 }
 
 function Cards({ list, cardList }) {
-  const { notes } = useStore(notesStore);
+  const notes = useReadableNotes();
   const [deck, setDeck] = useState('all');
   const [shown, setShown] = useState(false);
   const [front, setFront] = useState('');
