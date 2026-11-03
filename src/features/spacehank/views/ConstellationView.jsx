@@ -511,7 +511,7 @@ export default function ConstellationView({ onOpenNote }) {
     for (const n of notes.filter((x) => x.sample)) await deleteNote(n.id);
     setSelected(null);
   };
-  const sparse = loaded && notes.length < 3;
+  const sparse = loaded && notes.length < 1; // one note is already a star
 
   const card = picked && (
     <section key={picked.id} className="animate-fade-in rounded-3xl border border-line bg-ink-1 p-5 shadow-[0_30px_70px_-40px_rgb(0_0_0/0.95)]" data-selected>
@@ -556,7 +556,7 @@ export default function ConstellationView({ onOpenNote }) {
 
           <div className="pointer-events-none absolute top-3 left-3 flex flex-col items-start gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-dim backdrop-blur">
-              <b className="font-medium text-bone">{graph.nodes.length}</b> stars <i className="size-1 rounded-full bg-bone-faint" aria-hidden="true" /> <b className="font-medium text-bone">{graph.edges.length}</b> threads
+              <b className="font-medium text-bone">{graph.nodes.length}</b> {graph.nodes.length === 1 ? 'star' : 'stars'} <i className="size-1 rounded-full bg-bone-faint" aria-hidden="true" /> <b className="font-medium text-bone">{graph.edges.length}</b> {graph.edges.length === 1 ? 'thread' : 'threads'}
             </span>
             {!touched && !selected && !sparse && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-faint backdrop-blur" data-hint>
@@ -594,8 +594,8 @@ export default function ConstellationView({ onOpenNote }) {
           {sparse && (
             <div className="absolute inset-0 grid place-items-center bg-black/55 p-6 text-center backdrop-blur-[2px]">
               <div className="flex max-w-sm flex-col items-center gap-3">
-                <h2 className="font-display text-h3 leading-tight text-bone">The sky is nearly empty</h2>
-                <p className="text-fine text-bone-dim">It needs a few notes to draw. Write some in Second Brain.</p>
+                <h2 className="font-display text-h3 leading-tight text-bone">The sky is empty</h2>
+                <p className="text-fine text-bone-dim">Every note is a star. Write one in Second Brain and it appears here.</p>
               </div>
             </div>
           )}

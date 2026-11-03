@@ -7,6 +7,7 @@ import { resetDemo, seedDemo } from './demo/seed';
 import { useDemo } from './hooks/useDemo';
 import { useRealtime } from './hooks/useRealtime';
 import { startSync } from './sync';
+import { useAppViewport } from './hooks/useAppViewport';
 import { DEFAULT_AGENT_ID } from './model/agents';
 import { DEFAULT_TAB, NAVIGATION } from './navigation';
 
@@ -18,6 +19,7 @@ const tabOf = (params) => {
 import Workspace from './Workspace';
 
 export default function SpaceHank() {
+  useAppViewport(); // the workspace is an app: the page cannot be pinched to zoom
   const live = useRealtime();
   // the portfolio links here with ?demo: the same workspace, filled with made-up data (see ./demo)
   const guest = isDemo();

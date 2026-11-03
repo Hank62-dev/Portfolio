@@ -585,7 +585,7 @@ export default function MusicPhone() {
         <>
           <label className="relative mx-5 block">
             <Search size={18} className="pointer-events-none absolute top-1/2 left-5 -translate-y-1/2 text-signal" aria-hidden="true" />
-            <input type="search" aria-label="Search the library" placeholder="Songs, artists, albums…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-13 w-full rounded-full border border-white/12 bg-white/[0.07] pr-11 pl-13 text-body text-bone backdrop-blur placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
+            <input type="search" aria-label="Search the library" data-own-clear placeholder="Songs, artists, albums…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-13 w-full rounded-full border border-white/12 bg-white/[0.07] pr-11 pl-13 text-body text-bone backdrop-blur placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
             {query && (
               <button type="button" aria-label="Clear the search" onClick={() => setQuery('')} className="absolute top-1/2 right-4 -translate-y-1/2 text-bone-dim">
                 <X size={17} aria-hidden="true" />

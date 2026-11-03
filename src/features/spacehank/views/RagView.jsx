@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUp, BookOpen, BrainCircuit, Check, Copy, FileSearch, Gauge, Globe, Lightbulb, Newspaper, Sparkles } from 'lucide-react';
-import { Badge } from '../../../design-system';
+import { ArrowUp, BookOpen, BrainCircuit, Check, Copy, FileSearch, Gauge, Globe, Lightbulb, Newspaper } from 'lucide-react';
+import { Badge, Dots, Ring, TextShimmer } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { askRag } from '../api/rag';
 import Markdown from '../components/Markdown';
@@ -207,10 +207,8 @@ export default function RagView() {
           <div className="flex items-center gap-3">
             <Orb size={32} busy />
             <span className="flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.04] px-4 py-2.5 font-mono text-fine text-bone-dim" role="status">
-              <i className="size-1.5 animate-bounce rounded-full bg-signal [animation-delay:-0.3s]" />
-              <i className="size-1.5 animate-bounce rounded-full bg-signal [animation-delay:-0.15s]" />
-              <i className="size-1.5 animate-bounce rounded-full bg-signal" />
-              <span className="pl-1.5">{t('rag.thinking')}</span>
+              <Dots size={6} className="text-signal" />
+              <TextShimmer className="pl-1.5">{t('rag.thinking')}</TextShimmer>
             </span>
           </div>
         )}
@@ -239,7 +237,7 @@ export default function RagView() {
           disabled={busy || !query.trim()}
           className="grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-lg transition-all hover:brightness-110 active:scale-95 disabled:opacity-35"
         >
-          {busy ? <Sparkles size={17} className="animate-spin" aria-hidden="true" /> : <ArrowUp size={19} strokeWidth={2.4} aria-hidden="true" />}
+          {busy ? <Ring size={20} thickness={3} /> : <ArrowUp size={19} strokeWidth={2.4} aria-hidden="true" />}
         </button>
       </form>
     </div>

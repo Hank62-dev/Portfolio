@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
-import { Badge, Button, EmptyState, ErrorState, Field, Input, Loading, Select, Skeleton, SkeletonLines } from './index';
+import { Badge, Button, Dots, EmptyState, ErrorState, Field, Input, Loading, Ring, Select, Skeleton, SkeletonLines, TextShimmer } from './index';
 
 const html = (node) => renderToStaticMarkup(<MemoryRouter>{node}</MemoryRouter>);
 
@@ -71,16 +71,24 @@ describe('feedback states', () => {
     expect(html(<Skeleton />)).toContain('aria-hidden="true"');
     expect(html(<Skeleton />)).toContain('rounded-sm');
     expect(html(<Skeleton className="rounded-3xl h-4" />)).not.toContain('rounded-sm');
-    expect((html(<SkeletonLines lines={3} />).match(/animate-pulse/g) ?? []).length).toBe(3);
+    expect((html(<SkeletonLines lines={3} />).match(/skeleton/g) ?? []).length).toBe(3);
   });
 
-  it('shows a busy button as a pulsing bar over its hidden label', () => {
+  it('shows a busy button as three waving dots over its faded label, and keeps its size', () => {
     const markup = html(<Button loading>Save</Button>);
     expect(markup).toContain('aria-busy="true"');
     expect(markup).toContain('disabled');
-    expect(markup).toContain('invisible');
-    expect(markup).toContain('animate-pulse');
-    expect(html(<Button>Save</Button>)).not.toContain('animate-pulse');
+    expect(markup).toContain('opacity-0'); // the label stays (so the button does not shrink) but cannot be seen
+    expect(markup.match(/loader-dot/g)).toHaveLength(3);
+    expect(markup).not.toContain('animate-pulse');
+    expect(html(<Button>Save</Button>)).not.toContain('loader-dot');
+  });
+
+  it('draws the loaders so a screen reader hears "Loading", and takes the size asked for', () => {
+    expect(html(<Dots />)).toContain('aria-label="Loading"');
+    expect(html(<Ring size={30} />)).toContain('width:30px');
+    expect(html(<Ring size={30} thickness={4} />)).toContain('--ring:4px');
+    expect(html(<TextShimmer>Thinking</TextShimmer>)).toContain('text-shine');
   });
 
   it('shows the empty-state copy and action', () => {

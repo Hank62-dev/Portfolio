@@ -1,3 +1,4 @@
+import { cropBars } from './coverCrop';
 import { createStore } from '../store';
 import { requestPersistence, storage } from '../storage';
 
@@ -227,7 +228,7 @@ export const getBlob = async (id) => (await storage.blobs.get(id))?.file ?? null
 export const coverUrl = async (id) => {
   if (covers.has(id)) return covers.get(id);
   const row = await storage.covers.get(id);
-  const url = row ? URL.createObjectURL(row.file) : '';
+  const url = row ? URL.createObjectURL(await cropBars(row.file)) : ''; // the plain bars around a thumbnail are cut off
   covers.set(id, url);
   return url;
 };

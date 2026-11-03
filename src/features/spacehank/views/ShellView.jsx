@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, CornerDownLeft } from 'lucide-react';
+import { Dots } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { complete, parseLine, runLine } from '../shell/commands';
 
@@ -104,7 +105,11 @@ export default function ShellView({ ctx }) {
               </p>
             )
           )}
-          {busy && <p className="mt-1 animate-pulse text-bone-faint">working…</p>}
+          {busy && (
+            <p className="mt-1 flex items-center gap-2 text-bone-faint">
+              <Dots size={5} /> working…
+            </p>
+          )}
           <div ref={end} />
         </div>
 

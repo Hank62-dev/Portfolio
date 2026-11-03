@@ -1,9 +1,9 @@
 import { AlertTriangle } from 'lucide-react';
 import { clsx } from '../lib/format';
 
-/** Placeholder block shown while content of a known shape loads. Pass a `rounded-*` class to change the corners. */
+/** Placeholder block shown while content of a known shape loads, with a soft band of light sweeping across it. Pass a `rounded-*` class to change the corners. */
 export const Skeleton = ({ className }) => (
-  <div aria-hidden="true" className={clsx('animate-pulse bg-ink-3', !/(^|\s)rounded/.test(className ?? '') && 'rounded-sm', className)} />
+  <div aria-hidden="true" className={clsx('skeleton bg-ink-3', !/(^|\s)rounded/.test(className ?? '') && 'rounded-sm', className)} />
 );
 
 /** Placeholder for a few lines of text; the last one is shorter, like the end of a paragraph. */

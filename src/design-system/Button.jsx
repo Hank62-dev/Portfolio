@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { clsx } from '../lib/format';
 import { useMagnetic } from '../hooks/useMotion';
+import { Dots } from './Loader';
 import { useSoft } from './soft';
 
 const BASE =
@@ -29,7 +30,7 @@ const SIZES = {
  *   variant  primary | secondary | ghost | danger | link
  *   size     md | sm | icon (icon-only buttons need an aria-label)
  *   icon     trailing arrow-style icon that nudges on hover
- *   loading  hides the label behind a pulsing bar and disables the button
+ *   loading  hides the label behind three waving dots and disables the button
  */
 const Button = ({ variant = 'primary', size = 'md', to, href, children, className, icon, loading = false, ...rest }) => {
   const soft = useSoft();
@@ -39,8 +40,8 @@ const Button = ({ variant = 'primary', size = 'md', to, href, children, classNam
   const magnet = useMagnetic(variant !== 'link' && size === 'md');
   const content = (
     <>
-      <span className={clsx('inline-flex items-center gap-2', loading && 'invisible')}>{children}</span>
-      {loading && <i aria-hidden="true" className="absolute inset-x-4 top-1/2 h-2 -translate-y-1/2 animate-pulse rounded-full bg-current opacity-25" />}
+      <span className={clsx('inline-flex items-center gap-2 transition-opacity', loading && 'opacity-0')}>{children}</span>
+      {loading && <Dots size={6} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />}
       {icon && (
         <span
           className="inline-block transition-transform duration-500 ease-out-expo group-hover:translate-x-1"

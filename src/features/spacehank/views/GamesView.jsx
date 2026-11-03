@@ -24,9 +24,9 @@ const GAMES = [
 /** The page of a game while its code arrives: a few lines in pale ink, where the game will be drawn. */
 const GameLoading = () => (
   <div role="status" aria-busy="true" aria-label="Opening the game" className="flex flex-col gap-3">
-    <i className="block h-5 w-2/3 animate-pulse rounded-full" style={{ background: `${INK}26` }} />
-    <i className="block h-40 animate-pulse rounded-md" style={{ background: `${INK}14` }} />
-    <i className="block h-12 animate-pulse rounded-md" style={{ background: `${INK}1f` }} />
+    <i className="block h-5 w-2/3 skeleton rounded-full" style={{ background: `${INK}26` }} />
+    <i className="block h-40 skeleton rounded-md" style={{ background: `${INK}14` }} />
+    <i className="block h-12 skeleton rounded-md" style={{ background: `${INK}1f` }} />
   </div>
 );
 

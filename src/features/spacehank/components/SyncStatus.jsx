@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Check, CloudOff, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Check, CloudOff } from 'lucide-react';
+import { Ring } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { syncNow } from '../sync';
 import { useSyncStatus } from '../sync/useSync';
@@ -43,7 +44,7 @@ export default function SyncStatus({ compact = false, className }) {
 
   return (
     <button type="button" onClick={() => syncNow()} className={clsx('flex w-full items-start gap-2 rounded-xl px-2 py-1.5 text-left text-[0.76rem] leading-snug transition-colors hover:bg-white/[0.05]', bad ? 'text-danger' : 'text-bone-dim', className)} data-sync={s.state} aria-label={`${label}. Tap to sync now.`}>
-      {busy ? <RefreshCw size={14} className="mt-0.5 shrink-0 animate-spin" aria-hidden="true" /> : bad ? <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden="true" /> : offline ? <CloudOff size={14} className="mt-0.5 shrink-0" aria-hidden="true" /> : <Check size={14} className="mt-0.5 shrink-0 text-ok" aria-hidden="true" />}
+      {busy ? <Ring size={14} thickness={2} className="mt-0.5" /> : bad ? <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden="true" /> : offline ? <CloudOff size={14} className="mt-0.5 shrink-0" aria-hidden="true" /> : <Check size={14} className="mt-0.5 shrink-0 text-ok" aria-hidden="true" />}
       <span className="min-w-0">
         <b className="block font-medium">{label}</b>
         {!compact && detail && <small className="block truncate text-bone-faint">{detail}</small>}

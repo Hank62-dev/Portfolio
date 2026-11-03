@@ -6,6 +6,7 @@ export { default as Button } from './Button';
 export { Card, CardHeader, Eyebrow, PageHeader, Stat } from './Card';
 export { Dialog, DialogClose } from './Dialog';
 export { useSheetDrag } from './useSheetDrag';
+export { Dots, Ring, TextShimmer } from './Loader';
 export { EmptyState, ErrorState, Loading, Skeleton, SkeletonLines, StatusDot } from './Feedback';
 export { Toast, dismissToast, pushToast } from './Toast';
 export { DatePicker, Calendar } from './DatePicker';

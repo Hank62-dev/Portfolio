@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AlertTriangle, ArrowUpRight, Check, FileJson, FileSpreadsheet, FileText, FolderOpen, Loader2, Trash2, Upload } from 'lucide-react';
-import { Button } from '../../../design-system';
+import { AlertTriangle, ArrowUpRight, Check, FileJson, FileSpreadsheet, FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
+import { Button, Ring } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { deleteDocument, listDocuments, uploadDocument } from '../api/rag';
 import { spacehankConfig } from '../config';
@@ -21,7 +21,7 @@ const KINDS = {
 const kindOf = (name) => KINDS[name.split('.').pop().toLowerCase()] ?? { icon: FileText, label: 'FILE', hue: 220 };
 
 const STATUS = {
-  uploading: { icon: Loader2, text: 'Indexing…', tone: 'text-warn', spin: true },
+  uploading: { icon: ({ size }) => <Ring size={size} thickness={2} />, text: 'Indexing…', tone: 'text-warn' },
   indexed: { icon: Check, text: 'Ready', tone: 'text-ok' },
   failed: { icon: AlertTriangle, text: 'Failed', tone: 'text-danger' },
 };
@@ -133,7 +133,7 @@ export default function DocumentsView({ onTab }) {
         >
           <span className="relative grid size-16 place-items-center rounded-full bg-ink-3 text-signal">
             <i className="absolute inset-0 animate-ping rounded-full bg-signal/20 [animation-duration:2.6s]" aria-hidden="true" />
-            {busy ? <Loader2 size={26} className="animate-spin" aria-hidden="true" /> : <Upload size={26} aria-hidden="true" />}
+            {busy ? <Ring size={28} thickness={3} /> : <Upload size={26} aria-hidden="true" />}
           </span>
           <h2 className="font-display text-h3 leading-tight text-bone">{busy ? 'Reading your documents…' : over ? 'Let go to add them' : "Drop documents into Hank's vault"}</h2>
           <p className="text-bone-dim">PDF, DOCX, TXT, MD, CSV or JSON, up to {spacehankConfig.maxUploadBytes / 1024 / 1024} MB each</p>
@@ -172,7 +172,7 @@ export default function DocumentsView({ onTab }) {
                   </small>
                 </div>
                 <span className={clsx('flex items-center gap-1 font-mono text-[0.72rem]', state.tone)}>
-                  <StateIcon size={13} className={state.spin ? 'animate-spin' : ''} aria-hidden="true" /> {state.text}
+                  <StateIcon size={13} aria-hidden="true" /> {state.text}
                 </span>
               </li>
             );
@@ -203,7 +203,7 @@ export default function DocumentsView({ onTab }) {
         </ul>
       ) : (
         <div className="flex flex-col items-center gap-2 rounded-3xl border border-line bg-ink-1 px-6 py-10 text-center">
-          {loading ? <Loader2 size={22} className="animate-spin text-bone-faint" aria-hidden="true" /> : <FolderOpen size={22} className="text-bone-faint" aria-hidden="true" />}
+          {loading ? <Ring size={24} thickness={3} className="text-bone-faint" /> : <FolderOpen size={22} className="text-bone-faint" aria-hidden="true" />}
           <h2 className="font-display text-lead text-bone">{loading ? 'Opening the vault…' : 'The vault is empty'}</h2>
           <p className="max-w-sm text-fine text-bone-dim">What you add here is read, split into chunks and kept for good. Hank looks through it in every chat.</p>
         </div>

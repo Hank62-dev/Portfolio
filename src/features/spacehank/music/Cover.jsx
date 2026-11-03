@@ -3,7 +3,10 @@ import { Music2 } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { coverUrl } from './library';
 
-/** A track's cover art, or a quiet placeholder when the file has none. Square; size comes from the className. */
+/**
+ * A track's cover art, or a quiet placeholder when the file has none. The frame (square, or round with `rounded-full`) comes from the
+ * className and the picture always fills it, cropped from the middle, however wide or tall the original is.
+ */
 export default function Cover({ track, className, rounded = 'rounded-sm' }) {
   const [src, setSrc] = useState('');
   const id = track?.id;
@@ -20,7 +23,7 @@ export default function Cover({ track, className, rounded = 'rounded-sm' }) {
 
   return (
     <span className={clsx('relative grid shrink-0 place-items-center overflow-hidden bg-ink-3 text-bone-faint', rounded, className)}>
-      {src ? <img src={src} alt="" className="size-full object-cover" /> : <Music2 size={18} aria-hidden="true" />}
+      {src ? <img src={src} alt="" draggable={false} className="absolute inset-0 size-full object-cover" /> : <Music2 size={18} aria-hidden="true" />}
     </span>
   );
 }
