@@ -1,7 +1,7 @@
-// A little round face for each mood, drawn in soft colours: tired, a bit sad, so-so, happy, very happy.
+// A little round face for each mood, in muted colours: tired, a bit sad, so-so, content, great.
 
-export const MOOD_COLORS = ['#a9bde6', '#c9b8ea', '#f3dca8', '#ffbf9b', '#ffd35e'];
-const PLUM = '#5a3d5c';
+export const MOOD_COLORS = ['#7d93b5', '#9a92bd', '#bfb094', '#d9a75f', '#e6c25a'];
+const PLUM = '#1b2433';
 
 const FACES = [
   // 1 tired: heavy lids, a flat mouth
@@ -30,9 +30,7 @@ const FACES = [
   // 5 very happy: closed smiling eyes, an open grin, rosy cheeks
   <>
     <path d="M13 21.5 q3.5 -4.5 7 0 M28 21.5 q3.5 -4.5 7 0" />
-    <path d="M15.5 27.5 q8.5 12 17 0 z" fill="#c2554f" stroke={PLUM} />
-    <ellipse cx="11" cy="28" rx="3.2" ry="2" fill="#ff8f8f" stroke="none" opacity="0.55" />
-    <ellipse cx="37" cy="28" rx="3.2" ry="2" fill="#ff8f8f" stroke="none" opacity="0.55" />
+    <path d="M15.5 27.5 q8.5 12 17 0 z" fill="#7d3a32" stroke={PLUM} />
   </>,
 ];
 
@@ -41,14 +39,14 @@ export default function MoodFace({ mood, size = 44, ring = false, className }) {
   if (!mood) {
     return (
       <svg viewBox="0 0 48 48" width={size} height={size} className={className} aria-hidden="true">
-        <circle cx="24" cy="24" r="21" fill="rgb(255 255 255 / 0.18)" stroke="#fff6e8" strokeWidth="2" strokeDasharray="2 5" strokeLinecap="round" />
+        <circle cx="24" cy="24" r="21" fill="rgb(255 255 255 / 0.06)" stroke="#a3bcd9" strokeWidth="2" strokeDasharray="2 5" strokeLinecap="round" />
       </svg>
     );
   }
   return (
     <svg viewBox="0 0 48 48" width={size} height={size} className={className} aria-hidden="true">
-      <circle cx="24" cy="24" r="22" fill={MOOD_COLORS[mood - 1]} stroke={ring ? '#fff6e8' : 'none'} strokeWidth="3" />
-      <ellipse cx="17" cy="12" rx="8" ry="4" fill="#fff" opacity="0.28" transform="rotate(-18 17 12)" />
+      <circle cx="24" cy="24" r="22" fill={MOOD_COLORS[mood - 1]} stroke={ring ? '#eef3f7' : 'none'} strokeWidth="3" />
+      <ellipse cx="17" cy="12" rx="8" ry="4" fill="#fff" opacity="0.18" transform="rotate(-18 17 12)" />
       <g fill="none" stroke={PLUM} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         {FACES[mood - 1]}
       </g>

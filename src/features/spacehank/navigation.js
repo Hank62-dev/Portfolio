@@ -27,5 +27,5 @@ export const DEFAULT_TAB = 'hank';
 
 /** Each tab's own colour on a phone, so every one feels like an app of its own (the home tab keeps the brand orange). */
 // (Hank Music wears a warm gold, the colour of a record label, instead of one from the sequence)
-const HUE_OVERRIDES = { hank: 18, music: 44, diary: 340 };
+const HUE_OVERRIDES = { hank: 18, music: 44, diary: 190 };
 export const tabHue = (id) => HUE_OVERRIDES[id] ?? (((NAVIGATION.findIndex((item) => item.id === id) - 1) * 47 + 12) % 360 + 360) % 360;

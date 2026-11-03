@@ -894,10 +894,10 @@ html:has(.app-shell) {
   }
 }
 
-/* "Nhật ký": a sky at dusk that warms toward dawn at the bottom, the road home. */
+/* "Nhật ký": a clear blue sky for a trail, deeper at the top and lighter toward a warm horizon. */
 .sky {
-  background-color: #3b3566;
-  background-image: radial-gradient(1.5px 1.5px at 12% 8%, rgb(255 255 255 / 0.8), transparent), radial-gradient(1px 1px at 38% 4%, rgb(255 255 255 / 0.7), transparent), radial-gradient(1.5px 1.5px at 72% 10%, rgb(255 255 255 / 0.8), transparent), radial-gradient(1px 1px at 90% 3%, rgb(255 255 255 / 0.6), transparent), linear-gradient(180deg, #34305f 0%, #6b4f86 30%, #c9798f 62%, #f1a47f 86%, #f9cf9a 100%);
+  background-color: #1b3a6e;
+  background-image: radial-gradient(1.5px 1.5px at 12% 8%, rgb(255 255 255 / 0.7), transparent), radial-gradient(1px 1px at 38% 4%, rgb(255 255 255 / 0.6), transparent), radial-gradient(1.5px 1.5px at 72% 10%, rgb(255 255 255 / 0.7), transparent), radial-gradient(1px 1px at 90% 3%, rgb(255 255 255 / 0.5), transparent), linear-gradient(180deg, #1c3f78 0%, #28558f 26%, #3277ab 54%, #4690bb 78%, #6aa7c0 92%, #a3ae86 100%);
   background-attachment: fixed;
 }
 /* on a phone the sky is the whole screen (the workspace paints it behind the bars too) */
@@ -907,8 +907,9 @@ html:has(.app-shell) {
   }
 }
 .paper {
-  color: #4b3454;
-  background: #fff8ee;
-  border: 1px solid #f1dcc4;
-  box-shadow: 0 14px 30px -16px rgb(60 30 70 / 0.55);
+  color: #eef4fb;
+  background: rgb(22 52 96 / 0.9);
+  border: 1px solid #3a629c;
+  box-shadow: 0 14px 30px -16px rgb(5 20 50 / 0.8);
+  backdrop-filter: blur(10px);
 }

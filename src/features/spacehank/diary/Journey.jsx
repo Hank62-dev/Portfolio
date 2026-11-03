@@ -36,32 +36,32 @@ export const layout = (days) => {
 };
 
 const Landmark = ({ kind, className }) => {
-  const common = { fill: 'none', stroke: '#fff6e8', strokeWidth: 2.4, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  const common = { fill: 'none', stroke: '#eef3f7', strokeWidth: 2.4, strokeLinecap: 'round', strokeLinejoin: 'round' };
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
       {kind === 'flag' && (
         <g {...common}>
           <path d="M14 42 V8" />
-          <path d="M14 9 q9 -5 14 0 t12 0 v14 q-6 4 -12 0 t-14 0" fill="#ff9b86" stroke="#fff6e8" />
+          <path d="M14 9 q9 -5 14 0 t12 0 v14 q-6 4 -12 0 t-14 0" fill="#e0a458" stroke="#eef3f7" />
         </g>
       )}
       {kind === 'tent' && (
         <g {...common}>
-          <path d="M5 40 L24 8 L43 40 Z" fill="#ffd9a8" />
+          <path d="M5 40 L24 8 L43 40 Z" fill="#b08a55" />
           <path d="M24 8 V40 M24 40 L17 40 L24 26 L31 40" />
         </g>
       )}
       {kind === 'lighthouse' && (
         <g {...common}>
-          <path d="M18 42 L21 14 H27 L30 42 Z" fill="#fff0dc" />
-          <path d="M19 26 H29 M20 34 H28" stroke="#e8836a" />
+          <path d="M18 42 L21 14 H27 L30 42 Z" fill="#e8f0f8" />
+          <path d="M19 26 H29 M20 34 H28" stroke="#e0a458" />
           <path d="M20 14 L24 7 L28 14" fill="#ffd35e" />
           <path d="M10 10 L16 12 M38 10 L32 12" stroke="#ffd35e" />
         </g>
       )}
       {kind === 'mountain' && (
         <g {...common}>
-          <path d="M3 41 L18 14 L26 28 L31 20 L45 41 Z" fill="#d9c8ff" />
+          <path d="M3 41 L18 14 L26 28 L31 20 L45 41 Z" fill="#7f9fc6" />
           <path d="M18 14 L14 22 L18 20 L22 23 Z" fill="#fff" stroke="none" />
           <path d="M31 20 L28 25 L31 24 L34 26 Z" fill="#fff" stroke="none" />
         </g>
@@ -85,7 +85,7 @@ function Stone({ row, mood, onPress, today }) {
       {written ? (
         <MoodFace mood={mood || 3} size="100%" ring />
       ) : today ? (
-        <span className="grid size-full place-items-center rounded-full bg-[#fff6e8] text-[#e8836a] shadow-[0_0_0_6px_rgb(255_246_232/0.3)] animate-pulse">
+        <span className="grid size-full place-items-center rounded-full bg-[#e0a458] text-[#1b1407] shadow-[0_0_0_6px_rgb(224_164_88/0.28)] animate-pulse">
           <PenLine size={22} aria-hidden="true" />
         </span>
       ) : (
@@ -114,8 +114,8 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
       <svg viewBox={`0 0 ${W} ${height}`} className="absolute inset-0 size-full" aria-hidden="true">
         {segments.map((s, i) => (
           <g key={i}>
-            <path d={s.d} fill="none" stroke="#fff6e8" strokeOpacity="0.5" strokeWidth="4" strokeDasharray="1 11" strokeLinecap="round" />
-            {s.solid && <path d={s.d} fill="none" stroke="#ffe3b8" strokeOpacity="0.9" strokeWidth="5" strokeLinecap="round" />}
+            <path d={s.d} fill="none" stroke="#bcd3ec" strokeOpacity="0.55" strokeWidth="4" strokeDasharray="1 11" strokeLinecap="round" />
+            {s.solid && <path d={s.d} fill="none" stroke="#e0a458" strokeOpacity="0.95" strokeWidth="4.5" strokeLinecap="round" />}
           </g>
         ))}
       </svg>
@@ -123,7 +123,7 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
       {rows.map((row) => {
         if (row.type === 'month') {
           return (
-            <span key={`m-${row.day}`} className="absolute left-1/2 -translate-x-1/2 rounded-full bg-white/20 px-3.5 py-1 font-pen text-[1.15rem] leading-none font-semibold whitespace-nowrap text-[#fff6e8] backdrop-blur" style={{ top: pc(row.y + 10, height) }} data-month>
+            <span key={`m-${row.day}`} className="absolute left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/25 px-3.5 py-1 font-body text-[0.78rem] leading-none font-medium tracking-[0.08em] whitespace-nowrap text-[#e0eaf5] uppercase backdrop-blur" style={{ top: pc(row.y + 10, height) }} data-month>
               {monthLabel(row.day, todayKey)}
             </span>
           );
@@ -144,17 +144,17 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
               {d.written ? (
                 <button type="button" onClick={press} className="paper flex max-h-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl p-2.5 text-left transition-transform active:scale-[0.97]" data-card>
                   <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-1.5 font-mono text-[0.62rem] tracking-[0.06em] text-[#a2819b] uppercase">
+                    <span className="flex flex-wrap items-center gap-x-1.5 font-mono text-[0.62rem] tracking-[0.06em] text-[#a3bcd9] uppercase">
                       {d.isToday ? 'Hôm nay' : shortLabel(d.day)}
-                      {d.mood && <b className="font-hand text-[0.8rem] tracking-normal text-[#e8836a] normal-case">{moodWord(d.mood)}</b>}
+                      {d.mood && <b className="font-body text-[0.72rem] tracking-normal whitespace-nowrap text-[#e0a458] normal-case">{moodWord(d.mood)}</b>}
                     </span>
-                    {mark && <span className="block font-pen text-[0.98rem] leading-tight font-bold text-[#e8836a]">{mark.title}</span>}
-                    <span className="mt-0.5 line-clamp-2 font-hand text-[0.92rem] leading-snug text-[#4b3454]">{excerptOf(body, 80) || 'Một dấu chân không lời.'}</span>
+                    {mark && <span className="block font-display text-[0.98rem] leading-tight text-[#e0a458]">{mark.title}</span>}
+                    <span className="mt-0.5 line-clamp-2 font-body text-[0.82rem] leading-snug text-[#eef4fb]">{excerptOf(body, 80) || 'Một dấu chân không lời.'}</span>
                   </span>
                   {photo && <Thumb id={photo} size={38} className="!rounded-xl" />}
                 </button>
               ) : (
-                <button type="button" onClick={press} className={clsx('self-start rounded-full px-3 py-1.5 text-left font-hand text-[0.95rem] leading-tight transition-transform active:scale-95', d.isToday ? 'bg-[#fff6e8] font-semibold text-[#c8604a] shadow-lg' : 'bg-white/10 text-[#fff6e8]/80')}>
+                <button type="button" onClick={press} className={clsx('self-start rounded-full px-3 py-1.5 text-left font-body text-[0.85rem] leading-tight transition-transform active:scale-95', d.isToday ? 'bg-[#e0a458] font-semibold text-[#1b1407] shadow-lg' : 'bg-white/10 text-[#eef3f7]/80')}>
                   {d.isToday ? 'Hôm nay · viết gì đó nhé' : `${shortLabel(d.day)} · chưa ghi`}
                 </button>
               )}

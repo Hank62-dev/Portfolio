@@ -3,7 +3,7 @@ import { dayKey, textToHtml } from '../notes/notes';
 import { composeText, shiftDay } from './model';
 import { addPhotoBlob } from './photos';
 
-// A month of made-up diary pages for the demo, with a few postcards, so the journey has somewhere to walk the first time.
+// A month of made-up diary pages for the demo, with a few landscape postcards, so the journey has somewhere to walk the first time.
 // `ago` is how many days back; the days not listed are the ones left blank. Today is left empty on purpose, to be written.
 
 export const SAMPLE_PAGES = [
@@ -25,9 +25,9 @@ export const SAMPLE_PAGES = [
 ];
 
 const SKIES = [
-  ['#ffd7b5', '#ffb4a2', '#cdb4db'],
-  ['#d7f0ff', '#ffe5ec', '#ffd6a5'],
-  ['#ffcad4', '#f4acb7', '#9d8189'],
+  ['#c7d9e4', '#7fa3b8', '#35566a'],
+  ['#f2d3a3', '#c99366', '#3a4a5c'],
+  ['#b9c9d6', '#8ea6b4', '#41525f'],
 ];
 
 /** Three small postcards drawn on a canvas: a soft sky, a sun, hills. */
@@ -44,11 +44,11 @@ export const drawPostcards = async () =>
       sky.addColorStop(1, colors[2]);
       g.fillStyle = sky;
       g.fillRect(0, 0, 640, 480);
-      g.fillStyle = 'rgba(255,255,255,0.85)';
+      g.fillStyle = 'rgba(255,238,205,0.92)';
       g.beginPath();
       g.arc(150 + k * 170, 150 + (k % 2) * 30, 56, 0, Math.PI * 2);
       g.fill();
-      for (const [y, fill] of [[330, 'rgba(120,90,140,0.35)'], [380, 'rgba(110,80,130,0.55)'], [430, 'rgba(80,55,100,0.8)']]) {
+      for (const [y, fill] of [[330, 'rgba(24,48,64,0.35)'], [380, 'rgba(18,38,52,0.55)'], [430, 'rgba(12,26,38,0.8)']]) {
         g.fillStyle = fill;
         g.beginPath();
         g.moveTo(0, 480);
