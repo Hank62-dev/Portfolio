@@ -25,7 +25,7 @@ export const loadConfig = (env = process.env) => {
     ai: {
       geminiKey: env.GEMINI_API_KEY || '',
       geminiBase: (env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, ''), // overridable so tests can point at a fake
-      textModel: env.GEMINI_TEXT_MODEL || 'gemini-2.5-flash',
+      textModel: env.GEMINI_TEXT_MODEL || 'gemini-3.8-flash',
       imageModel: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image',
       hfToken: env.HF_TOKEN || '',
       hfImageModel: env.HF_IMAGE_MODEL || 'black-forest-labs/FLUX.1-schnell',
