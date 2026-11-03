@@ -1,4 +1,4 @@
-import { Activity, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet } from 'lucide-react';
+import { Activity, BookHeart, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet } from 'lucide-react';
 
 export const NAV_SECTIONS = ['WORKSPACE', 'KNOWLEDGE', 'CREATE', 'LIFE'];
 
@@ -20,11 +20,12 @@ export const NAVIGATION = [
   { id: 'habits', label: 'Habit Garden', icon: Sprout, section: 'LIFE', keywords: 'habits streak plants routine daily' },
   { id: 'wallet', label: 'Wallet', icon: Wallet, section: 'LIFE', keywords: 'money spending expenses budget finance income' },
   { id: 'play', label: 'Ra chơi', icon: Gamepad2, section: 'LIFE', keywords: 'games play fun break puzzle sudoku caro snake boats tim so bau cua chơi' },
+  { id: 'diary', label: 'Nhật ký', icon: BookHeart, section: 'LIFE', keywords: 'diary journal nhat ky hanh trinh memories kỷ niệm viết mood pet mơ journey' },
 ];
 
 export const DEFAULT_TAB = 'hank';
 
 /** Each tab's own colour on a phone, so every one feels like an app of its own (the home tab keeps the brand orange). */
 // (Hank Music wears a warm gold, the colour of a record label, instead of one from the sequence)
-const HUE_OVERRIDES = { hank: 18, music: 44 };
+const HUE_OVERRIDES = { hank: 18, music: 44, diary: 340 };
 export const tabHue = (id) => HUE_OVERRIDES[id] ?? (((NAVIGATION.findIndex((item) => item.id === id) - 1) * 47 + 12) % 360 + 360) % 360;

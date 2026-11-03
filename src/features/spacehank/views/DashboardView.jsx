@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Activity, ArrowUpRight, BrainCircuit, Boxes, ChevronDown, Database, Gauge, MessageCircle, Network, Users, Wifi } from 'lucide-react';
 import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, PageHeader, Stat } from '../../../design-system';
 import BriefingCard from '../components/BriefingCard';
+import PetCard from '../components/PetCard';
 import { greetingFor, owner } from '../config';
 import { isWorking } from '../model/agents';
 import { NAVIGATION, tabHue } from '../navigation';
@@ -83,6 +84,7 @@ export default function DashboardView({ agents, events, connected, onTab, owner:
         }
       />
       <Launcher onTab={onTab} />
+      <PetCard onTab={onTab} />
       <BriefingCard owner={isOwner} agents={agents} connected={connected} />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat icon={Users} label="AI WORKFORCE" value={active} note="agents active" />

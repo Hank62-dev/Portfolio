@@ -5,9 +5,9 @@ import { isDemo } from './demo/mode';
 
 // the demo keeps its made-up data in a database of its own, so it can never touch the owner's real one
 const name = () => (isDemo() ? 'hank62-demo' : 'hank62-workspace');
-const VERSION = 3;
-// tracks / playlists / images / prompts / notes hold records; blobs / covers hold the raw files, keyed by the owner id.
-const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos'];
+const VERSION = 4;
+// tracks / playlists / images / prompts / notes / photos (a diary's pictures) hold records; blobs / covers hold the raw files, keyed by the owner id.
+const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos', 'photos'];
 
 let opening = null;
 

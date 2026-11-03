@@ -1,6 +1,7 @@
 import { addSamples, loadLibrary } from '../music/library';
 import { habits, sampleHabits } from '../habits/store';
 import { seedDemoLog } from '../focus/log';
+import { seedDiary } from '../diary/sample';
 import { memos } from '../memos/store';
 import { sampleCards, missions } from '../missions/store';
 import { createNote } from '../notes/library';
@@ -13,7 +14,8 @@ import { entries, sampleEntries } from '../wallet/store';
 // The first time someone opens the demo, every tab is filled with made-up data so there is something to use.
 // A marker in localStorage says it was done; "Reset demo" clears the demo database and the marker.
 const MARK = 'hank62.demo.seeded.v1';
-const EXTRA_KEYS = ['hank62.demo.docs', 'hank62.demo.ai', 'spacehank.constellation', 'hank62.demo.focus.log'];
+const DIARY_MARK = 'hank62.demo.diary.v1'; // the diary came later, so it has its own marker and reaches demos that were set up before
+const EXTRA_KEYS = ['hank62.demo.docs', 'hank62.demo.ai', 'spacehank.constellation', 'hank62.demo.focus.log', DIARY_MARK];
 
 const seeded = () => {
   try {
@@ -63,8 +65,26 @@ const sampleMemos = (now = Date.now()) => [
 let inflight = null;
 export const seedDemo = () => (inflight ??= setUp());
 
+const setUpDiary = async () => {
+  try {
+    if (localStorage.getItem(DIARY_MARK)) return;
+  } catch {
+    return;
+  }
+  await seedDiary();
+  try {
+    localStorage.setItem(DIARY_MARK, '1');
+  } catch {
+    /* without storage it is simply added again next time */
+  }
+};
+
 const setUp = async () => {
-  if (seeded()) return;
+  if (!seeded()) await fillDemo();
+  await setUpDiary();
+};
+
+const fillDemo = async () => {
   for (const n of sampleNotes()) await createNote(n.text, { sample: true });
   await missions.putMany(sampleCards());
   await entries.putMany(sampleEntries());

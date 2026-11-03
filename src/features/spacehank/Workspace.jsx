@@ -48,6 +48,7 @@ const PulseView = lazy(() => import('./views/PulseView'));
 const ShellView = lazy(() => import('./views/ShellView'));
 const MemosView = lazy(() => import('./views/MemosView'));
 const GamesView = lazy(() => import('./views/GamesView'));
+const DiaryView = lazy(() => import('./views/DiaryView'));
 
 const PageLoading = () => (
   <Loading label="Loading" className="flex flex-col gap-4 py-4">
@@ -254,6 +255,7 @@ export default function Workspace({
     habits: <HabitsView />,
     wallet: <WalletView />,
     play: <GamesView />,
+    diary: <DiaryView onNotify={onNotify} />,
     shell: <ShellView ctx={shell} />,
     pulse: <PulseView owner />,
   };
@@ -263,7 +265,7 @@ export default function Workspace({
   return (
     <SoftContext.Provider value>
       <TooltipProvider>
-        <div className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab) }}>
+        <div className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', tab === 'diary' && phone && 'sky', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab) }}>
           {!phone && (
             <Sidebar
               tab={tab}
