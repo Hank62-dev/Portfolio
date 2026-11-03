@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CornerDownLeft, Music2, Search, Sparkles } from 'lucide-react';
-import { Button, Spinner } from '../../../design-system';
+import { Button, Loading, SkeletonLines } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { filterCommands } from '../model/commands';
 import { looksLikeRequest } from '../model/nlcommands';
@@ -175,9 +175,9 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
           ) : (
             <div className="flex flex-col gap-4 p-5" role="status" aria-live="polite" data-ask={ask.status}>
               {ask.status === 'thinking' && (
-                <p className="flex items-center gap-3 font-mono text-fine text-bone-dim">
-                  <Spinner label="Hank is thinking" /> Hank is working out what you mean…
-                </p>
+                <Loading label="Hank is working out what you mean">
+                  <SkeletonLines lines={2} />
+                </Loading>
               )}
               {ask.status === 'confirm' && (
                 <>

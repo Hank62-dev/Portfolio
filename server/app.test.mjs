@@ -3,6 +3,7 @@ import WebSocket from 'ws';
 import { createApp } from './app.mjs';
 import { createAuth } from './auth.mjs';
 import { loadConfig } from './config.mjs';
+import { randomFleet } from '../src/features/spacehank/games/battleship.js';
 
 const ORIGIN = 'https://hank.example';
 const PASSWORD = 'correct horse battery staple';
@@ -168,5 +169,41 @@ describe('realtime server', () => {
 
     expect(await open({ Origin: 'https://evil.example', Cookie: sessionCookie })).toMatchObject({ ok: false, status: 403 });
     expect(await open({ Origin: ORIGIN })).toMatchObject({ ok: false, status: 401 });
+  });
+
+  it('opens the online sea battle to anyone from the allowed origin, with no session, and lets two players meet', async () => {
+    const url = `ws://127.0.0.1:${port}/battle`;
+    const open = (headers) =>
+      new Promise((resolve) => {
+        const socket = new WebSocket(url, { headers });
+        const messages = [];
+        socket.on('message', (data) => messages.push(JSON.parse(data)));
+        socket.on('open', () => resolve({ ok: true, socket, messages }));
+        socket.on('unexpected-response', (_req, res) => resolve({ ok: false, status: res.statusCode }));
+        socket.on('error', () => {});
+      });
+    const until = async (check) => {
+      for (let i = 0; i < 100 && !check(); i += 1) await new Promise((resolve) => setTimeout(resolve, 20));
+      return check();
+    };
+
+    expect(await open({ Origin: 'https://evil.example' })).toMatchObject({ ok: false, status: 403 });
+    expect(await open({})).toMatchObject({ ok: false, status: 403 });
+
+    const a = await open({ Origin: ORIGIN });
+    const b = await open({ Origin: ORIGIN });
+    expect(a.ok && b.ok).toBe(true);
+    a.socket.send(JSON.stringify({ type: 'create', name: 'An' }));
+    expect(await until(() => a.messages.some((m) => m.type === 'joined'))).toBe(true);
+    const { code } = a.messages.find((m) => m.type === 'joined');
+    b.socket.send(JSON.stringify({ type: 'join', code, name: 'Binh' }));
+    expect(await until(() => a.messages.some((m) => m.type === 'room' && m.phase === 'place'))).toBe(true);
+    for (const player of [a, b]) player.socket.send(JSON.stringify({ type: 'ready', fleet: randomFleet().map((s) => ({ cells: s.cells })) }));
+    expect(await until(() => b.messages.some((m) => m.type === 'room' && m.phase === 'play'))).toBe(true);
+
+    // too big a message is refused outright
+    a.socket.send('x'.repeat(5000));
+    expect(await until(() => a.socket.readyState === 3)).toBe(true);
+    b.socket.close();
   });
 });

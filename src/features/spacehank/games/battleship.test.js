@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FLEET, SIZE, afloat, aiPick, around, blankShots, randomFleet, shoot } from './battleship';
+import { FLEET, SIZE, afloat, aiPick, around, blankShots, randomFleet, shoot, validateFleet } from './battleship';
 
 const seeded = (seed = 11) => () => {
   seed = (seed * 16807) % 2147483647;
@@ -83,5 +83,50 @@ describe('aiPick', () => {
       total += count;
     }
     expect(total / 20).toBeLessThan(75);
+  });
+});
+
+describe('validateFleet', () => {
+  const send = (fleet) => fleet.map((ship) => ({ cells: ship.cells }));
+
+  it('accepts a real fleet, in any order, and gives it back in the game shape', () => {
+    for (let seed = 1; seed <= 20; seed += 1) {
+      const fleet = randomFleet(seeded(seed));
+      const ok = validateFleet(send(fleet).reverse());
+      expect(ok).toHaveLength(FLEET.length);
+      expect(ok.map((s) => s.size)).toEqual(FLEET);
+      expect(ok.map((s) => s.id)).toEqual(FLEET.map((_, i) => i));
+      expect(ok.flatMap((s) => s.cells).sort((a, b) => a - b)).toEqual(fleet.flatMap((s) => s.cells).sort((a, b) => a - b));
+      // and the game can be played on what comes back
+      expect(shoot(ok, blankShots(), ok[0].cells[0]).outcome).toBe('hit');
+    }
+  });
+
+  it('refuses what is not a fleet', () => {
+    const fleet = send(randomFleet(seeded(3)));
+    expect(validateFleet(null)).toBeNull();
+    expect(validateFleet('fleet')).toBeNull();
+    expect(validateFleet(fleet.slice(1))).toBeNull();
+    expect(validateFleet([...fleet, { cells: [99] }])).toBeNull();
+    expect(validateFleet(fleet.map((s) => ({ cells: s.cells.map(String) })))).toBeNull();
+    expect(validateFleet(fleet.map((s) => ({ cells: [...s.cells, 0] })))).toBeNull();
+  });
+
+  it('refuses boats off the board, bent boats and boats that touch', () => {
+    const fleet = send(randomFleet(seeded(5)));
+    expect(validateFleet(fleet.map((s, i) => (i === 0 ? { cells: s.cells.map((c) => c + 100) } : s)))).toBeNull();
+    expect(validateFleet(fleet.map((s, i) => (i === 0 ? { cells: [9, 10, 11, 12] } : s)))).toBeNull(); // wraps a row
+    expect(validateFleet(fleet.map((s, i) => (i === 0 ? { cells: [0, 1, 11, 12] } : s)))).toBeNull(); // bent
+    // two one-square boats side by side, even diagonally, are not allowed
+    const touching = fleet.map((s) => ({ cells: [...s.cells] }));
+    const singles = touching.filter((s) => s.cells.length === 1);
+    singles[1].cells = [singles[0].cells[0] + (singles[0].cells[0] % SIZE < SIZE - 1 ? SIZE + 1 : SIZE - 1)];
+    expect(validateFleet(touching)).toBeNull();
+  });
+
+  it('refuses a fleet with the wrong boats', () => {
+    // ten one-square boats, far apart
+    const singles = Array.from({ length: 10 }, (_, i) => ({ cells: [i * 22 > 99 ? i * 11 : i * 22] }));
+    expect(validateFleet(singles)).toBeNull();
   });
 });

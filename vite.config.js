@@ -58,6 +58,14 @@ export default defineConfig({
           { name: 'Wallet', short_name: 'Wallet', url: '/spacehank?tab=wallet' },
           { name: 'Hank Music', short_name: 'Music', url: '/spacehank?tab=music' },
         ],
+        // "Share" in another app lists Hank62: what is shared is caught by the service worker (public/sw-focus.js) and offered
+        // to Second Brain or Image Studio (src/features/spacehank/share)
+        share_target: {
+          action: '/spacehank/share',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: { title: 'title', text: 'text', url: 'url', files: [{ name: 'media', accept: ['image/*'] }] },
+        },
         background_color: '#0b0c0e',
         theme_color: '#0b0c0e',
         icons: [

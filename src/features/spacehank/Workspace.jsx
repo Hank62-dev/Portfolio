@@ -1,6 +1,7 @@
-import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Copy, Download, Pause, Play, Plus, SkipBack, SkipForward, Users } from 'lucide-react';
-import { SoftContext, Spinner, TooltipProvider } from '../../design-system';
+import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useInstall, useOnline } from './hooks/useInstall';
 import { clsx } from '../../lib/format';
@@ -22,6 +23,7 @@ import { library, loadLibrary } from './music/library';
 import { syncBundledMusic } from './music/bundled';
 import Fab from './components/Fab';
 import FocusWidget from './components/FocusWidget';
+import ShareSheet from './components/ShareSheet';
 import NowPlayingBar from './music/NowPlayingBar';
 import { openPlayer } from './music/ui';
 import { next, player, previous, setSleepTimer, togglePlay } from './music/player';
@@ -48,9 +50,15 @@ const MemosView = lazy(() => import('./views/MemosView'));
 const GamesView = lazy(() => import('./views/GamesView'));
 
 const PageLoading = () => (
-  <div className="flex items-center gap-3 py-10 font-mono text-fine text-bone-dim">
-    <Spinner label="Loading" /> Loading…
-  </div>
+  <Loading label="Loading" className="flex flex-col gap-4 py-4">
+    <Skeleton className="h-8 w-48" />
+    <Skeleton className="h-4 w-72 max-w-full" />
+    <div className="grid gap-3 md:grid-cols-3">
+      <Skeleton className="h-40 rounded-3xl" />
+      <Skeleton className="h-40 rounded-3xl" />
+      <Skeleton className="h-40 rounded-3xl" />
+    </div>
+  </Loading>
 );
 
 export default function Workspace({
@@ -83,6 +91,23 @@ export default function Workspace({
   const music = true;
   const app = useInstall();
   const online = useOnline();
+
+  // another app shared something to Hank62: the address says so (?share=1) and the sheet asks where it goes
+  const [params, setParams] = useSearchParams();
+  const sharing = params.has('share');
+  const doneSharing = useCallback(
+    (nextTab) =>
+      setParams(
+        (previous) => {
+          const next = new URLSearchParams(previous);
+          next.delete('share');
+          if (nextTab) next.set('tab', nextTab);
+          return next;
+        },
+        { replace: !nextTab }
+      ),
+    [setParams]
+  );
 
   useEffect(() => {
     if (music) void loadLibrary().then(syncBundledMusic);
@@ -271,6 +296,7 @@ export default function Workspace({
               <span>{activeAgent ? `Focused: ${activeAgent.name}` : 'All systems nominal'}</span>
             </footer>
           </div>
+          {sharing && <ShareSheet onDone={doneSharing} onNotify={onNotify} />}
           {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}

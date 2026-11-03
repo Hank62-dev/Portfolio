@@ -1,6 +1,7 @@
 import alarmUrl from '../../../assets/sounds/focus-alarm.mp3';
 import { player, bindSystemKeys } from '../music/player';
 import { clock } from '../study/model';
+import { recordSession } from './log';
 import { createStore } from '../store';
 
 // The Focus timer, kept outside any screen so it keeps going wherever you are in the app. While it runs it shows itself
@@ -177,9 +178,12 @@ const setTitle = (text) => {
 const finish = () => {
   window.clearInterval(loop);
   loop = 0;
-  const { mode, sessions } = focus.get();
+  const { mode, sessions, total } = focus.get();
   const next = mode === 'focus' ? sessions + 1 : sessions;
-  if (mode === 'focus') saveSessions(next);
+  if (mode === 'focus') {
+    saveSessions(next);
+    recordSession(total / 60); // only a session that ran to the end goes in the history
+  }
   focus.set({ status: 'done', left: 0, sessions: next });
   setTitle('');
   ring();

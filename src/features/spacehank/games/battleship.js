@@ -1,7 +1,7 @@
 // Bắn tàu: the notebook-paper naval game. Ten by ten squares, a fleet of ten boats (one of four squares, two of three,
 // three of two, four of one), and the boats may not touch, even at a corner. Pure rules and a computer opponent.
 
-import { shuffle } from './logic';
+import { shuffle } from './logic.js';
 
 export const SIZE = 10;
 export const FLEET = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
@@ -47,6 +47,33 @@ export const randomFleet = (random = Math.random) => {
     if (ok) return ships;
   }
   throw new Error('Could not place the fleet');
+};
+
+/**
+ * Checks a fleet sent by a player: ten boats with the right sizes, each a straight line of squares on the board, none
+ * touching another, even at a corner. Returns the fleet in the game's own shape ([{ id, size, cells, vertical }]), or null.
+ */
+export const validateFleet = (fleet) => {
+  if (!Array.isArray(fleet) || fleet.length !== FLEET.length) return null;
+  const ships = [];
+  const taken = new Set();
+  for (const raw of fleet) {
+    const cells = raw?.cells;
+    if (!Array.isArray(cells) || cells.length < 1 || cells.length > 4 || !cells.every((c) => Number.isInteger(c) && c >= 0 && c < SIZE * SIZE)) return null;
+    const sorted = [...cells].sort((a, b) => a - b);
+    const horizontal = sorted.every((c, k) => Math.floor(c / SIZE) === Math.floor(sorted[0] / SIZE) && c === sorted[0] + k);
+    const vertical = sorted.every((c, k) => c === sorted[0] + k * SIZE);
+    if (!horizontal && !(vertical && sorted.length > 1)) return null;
+    if (sorted.some((c) => taken.has(c) || around(c).some((n) => taken.has(n)))) return null;
+    sorted.forEach((c) => taken.add(c));
+    ships.push({ size: sorted.length, cells: sorted, vertical: !horizontal });
+  }
+  // the sizes must be exactly the fleet's, whatever order they arrive in
+  const wanted = [...FLEET].sort((a, b) => b - a);
+  const got = ships.map((ship) => ship.size).sort((a, b) => b - a);
+  if (!wanted.every((size, k) => size === got[k])) return null;
+  const pool = [...ships].sort((a, b) => b.size - a.size);
+  return FLEET.map((size, id) => ({ id, ...pool.splice(pool.findIndex((ship) => ship.size === size), 1)[0] }));
 };
 
 /** What the shooter knows about a board: 0 unknown, 1 miss, 2 hit, 3 part of a sunk boat. */

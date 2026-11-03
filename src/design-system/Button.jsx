@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { clsx } from '../lib/format';
 import { useMagnetic } from '../hooks/useMotion';
-import { Spinner } from './Feedback';
 import { useSoft } from './soft';
 
 const BASE =
@@ -30,20 +29,18 @@ const SIZES = {
  *   variant  primary | secondary | ghost | danger | link
  *   size     md | sm | icon (icon-only buttons need an aria-label)
  *   icon     trailing arrow-style icon that nudges on hover
- *   loading  shows a spinner and disables the button
+ *   loading  hides the label behind a pulsing bar and disables the button
  */
 const Button = ({ variant = 'primary', size = 'md', to, href, children, className, icon, loading = false, ...rest }) => {
   const soft = useSoft();
   const look = soft ? VARIANTS[variant].replace('rounded-sm', 'rounded-full') : VARIANTS[variant];
-  const cls = clsx(BASE, look, variant !== 'link' && SIZES[size], className);
+  const cls = clsx(BASE, look, variant !== 'link' && SIZES[size], loading && 'relative', className);
   // The pointer-follow effect belongs to full-size calls to action only.
   const magnet = useMagnetic(variant !== 'link' && size === 'md');
   const content = (
     <>
-      <span className="inline-flex items-center gap-2">
-        {loading && <Spinner size={14} />}
-        {children}
-      </span>
+      <span className={clsx('inline-flex items-center gap-2', loading && 'invisible')}>{children}</span>
+      {loading && <i aria-hidden="true" className="absolute inset-x-4 top-1/2 h-2 -translate-y-1/2 animate-pulse rounded-full bg-current opacity-25" />}
       {icon && (
         <span
           className="inline-block transition-transform duration-500 ease-out-expo group-hover:translate-x-1"

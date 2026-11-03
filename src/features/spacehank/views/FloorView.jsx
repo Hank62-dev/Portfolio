@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrainCircuit, MessageCircle, Network, Users } from 'lucide-react';
-import { Badge, Button, Card, Eyebrow, PageHeader, Spinner, Stat } from '../../../design-system';
+import { Badge, Button, Card, Eyebrow, Loading, PageHeader, Skeleton, Stat } from '../../../design-system';
 import { isWorking } from '../model/agents';
 import { ROOMS } from '../scene/layout';
 
@@ -41,11 +41,11 @@ export default function FloorView({ agents, events, selected, onSelect, paused, 
         <div className="relative h-[clamp(380px,62vh,640px)] bg-ink-0">
           <Suspense
             fallback={
-              <div className="absolute inset-0 grid place-items-center">
-                <span className="flex items-center gap-3 font-mono text-fine text-bone-dim">
-                  <Spinner label="Loading 3D floor" /> Loading 3D floor…
-                </span>
-              </div>
+              <Loading label="Loading the 3D floor" className="absolute inset-0 grid grid-cols-4 grid-rows-3 gap-3 p-4">
+                {Array.from({ length: 12 }, (_, i) => (
+                  <Skeleton key={i} className="rounded-2xl opacity-60" />
+                ))}
+              </Loading>
             }
           >
             <World agents={agents} selected={selected} onSelect={onSelect} paused={paused} />

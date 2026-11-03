@@ -1,19 +1,25 @@
 import { AlertTriangle } from 'lucide-react';
 import { clsx } from '../lib/format';
 
-/** Indeterminate loading indicator. The accessible name comes from `label`. */
-export const Spinner = ({ size = 18, label }) => (
-  <span role={label ? 'status' : undefined} aria-label={label} aria-hidden={label ? undefined : true} className="inline-flex">
-    <span
-      className="animate-spin rounded-full border-2 border-line-strong border-t-signal"
-      style={{ width: size, height: size }}
-    />
-  </span>
+/** Placeholder block shown while content of a known shape loads. Pass a `rounded-*` class to change the corners. */
+export const Skeleton = ({ className }) => (
+  <div aria-hidden="true" className={clsx('animate-pulse bg-ink-3', !/(^|\s)rounded/.test(className ?? '') && 'rounded-sm', className)} />
 );
 
-/** Placeholder block shown while content of a known shape loads. */
-export const Skeleton = ({ className }) => (
-  <div aria-hidden="true" className={clsx('animate-pulse rounded-sm bg-ink-3', className)} />
+/** Placeholder for a few lines of text; the last one is shorter, like the end of a paragraph. */
+export const SkeletonLines = ({ lines = 3, className }) => (
+  <div aria-hidden="true" className={clsx('flex flex-col gap-2', className)}>
+    {Array.from({ length: lines }, (_, i) => (
+      <Skeleton key={i} className={clsx('h-3.5', i === lines - 1 && lines > 1 ? 'w-3/5' : 'w-full')} />
+    ))}
+  </div>
+);
+
+/** Names a region that is loading for screen readers; put the skeleton inside it. Nothing is announced out loud. */
+export const Loading = ({ label = 'Loading', className, children }) => (
+  <div role="status" aria-busy="true" aria-label={label} className={className}>
+    {children}
+  </div>
 );
 
 /** A small coloured dot for live/offline state. Pair it with a text label. */

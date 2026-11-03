@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   CalendarDays,
   CalendarPlus,
@@ -10,20 +10,25 @@ import {
   CloudSnow,
   CloudSun,
   Droplets,
+  Flame,
   MapPin,
   Sparkles,
   Sun,
   Thermometer,
+  Timer,
   Wind,
 } from 'lucide-react';
 import { Badge, Button, Card, Eyebrow, Skeleton } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { aiNote } from '../api/owner';
 import { spacehankConfig } from '../config';
+import { focusLog } from '../focus/log';
+import { hoursMinutes, summarize as summarizeFocus } from '../focus/stats';
 import { useBriefing } from '../hooks/useBriefing';
 import { demoSchedule } from '../model/demo';
 import { isWorking } from '../model/agents';
 import { CONDITION_TEXT, summarize } from '../model/weather';
+import { useStore } from '../store';
 
 const ICONS = { clear: Sun, partly: CloudSun, cloudy: Cloud, fog: CloudFog, drizzle: CloudDrizzle, rain: CloudRain, snow: CloudSnow, storm: CloudLightning };
 
@@ -166,6 +171,8 @@ function EmptyDay({ connected, onPreview }) {
 /** The morning briefing, as three compact tiles: weather, today's calendar and, on request, a note from Hank. */
 export default function BriefingCard({ owner, agents, connected }) {
   const briefing = useBriefing({ owner });
+  const { log: focusSessions } = useStore(focusLog);
+  const focusToday = useMemo(() => summarizeFocus(focusSessions), [focusSessions]);
   const { weather, calendarConfigured, problem } = briefing;
   // With no calendar connected, "Preview" shows a made-up day so the timeline can be seen.
   const [preview, setPreview] = useState(false);
@@ -257,6 +264,16 @@ export default function BriefingCard({ owner, agents, connected }) {
             {working ? `${working} agent${working > 1 ? 's are' : ' is'} at work. ` : 'The floor is quiet. '}
             {next ? `Next up: ${next.title} at ${clock(next.start)}.` : 'Ask for a short note on the day.'}
           </p>
+        )}
+        {(focusToday.today.minutes > 0 || focusToday.streak > 0) && (
+          <div className="flex flex-wrap gap-1.5" data-focus-line>
+            <Chip icon={Timer}>Focus {hoursMinutes(focusToday.today.minutes)}</Chip>
+            {focusToday.streak > 0 && (
+              <Chip icon={Flame} tone="signal">
+                {focusToday.streak}-day streak
+              </Chip>
+            )}
+          </div>
         )}
         {error && (
           <p className="rounded-sm border border-danger/40 bg-danger/10 px-2.5 py-1.5 font-mono text-[0.72rem] text-danger" role="alert">

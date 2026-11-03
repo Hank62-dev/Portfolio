@@ -1,5 +1,6 @@
 import { addSamples, loadLibrary } from '../music/library';
 import { habits, sampleHabits } from '../habits/store';
+import { seedDemoLog } from '../focus/log';
 import { memos } from '../memos/store';
 import { sampleCards, missions } from '../missions/store';
 import { createNote } from '../notes/library';
@@ -12,7 +13,7 @@ import { entries, sampleEntries } from '../wallet/store';
 // The first time someone opens the demo, every tab is filled with made-up data so there is something to use.
 // A marker in localStorage says it was done; "Reset demo" clears the demo database and the marker.
 const MARK = 'hank62.demo.seeded.v1';
-const EXTRA_KEYS = ['hank62.demo.docs', 'hank62.demo.ai', 'spacehank.constellation'];
+const EXTRA_KEYS = ['hank62.demo.docs', 'hank62.demo.ai', 'spacehank.constellation', 'hank62.demo.focus.log'];
 
 const seeded = () => {
   try {
@@ -72,6 +73,7 @@ const setUp = async () => {
   await flashcards.putMany(study.cards);
   await habits.putMany(sampleHabits());
   await memos.putMany(sampleMemos());
+  seedDemoLog();
   try {
     const { drawSamplePictures } = await import('../studio/sample');
     for (const { prompt, blob } of await drawSamplePictures()) await saveImage({ prompt, blob, sample: true });

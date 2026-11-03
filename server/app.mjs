@@ -3,6 +3,7 @@ import { WebSocketServer } from 'ws';
 import { configuredWorkers, createAgents } from './agents.mjs';
 import { createAi } from './ai.mjs';
 import { createAuth } from './auth.mjs';
+import { createBattle } from './battle.mjs';
 import { createCalendar } from './calendar.mjs';
 import { HttpError, createResponder, readJson } from './http.mjs';
 import { createHub } from './hub.mjs';
@@ -19,6 +20,7 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
   const auth = createAuth(config);
   const tasks = createTaskService({ agents, hub, config });
   const ai = createAi({ ai: config.ai, fetchImpl });
+  const battle = createBattle();
   const calendar = createCalendar({ url: config.calendarIcsUrl, fetchImpl });
   const { json, preflight } = createResponder(config.origin);
 
@@ -129,17 +131,49 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
     }
   });
 
-  const wss = new WebSocketServer({
-    server,
-    maxPayload: config.maxBodyBytes,
-    verifyClient: ({ origin, req }, done) => {
-      if (origin !== config.origin) return done(false, 403, 'Origin not allowed');
-      if (!auth.isAuthorized(req)) return done(false, 401, 'Authentication required');
-      return done(true);
-    },
+  // Two sockets share the one server. The owner's realtime link needs the session; the online sea battle at /battle is open to
+  // anyone with a room code, so it gets no session but the same origin check, and its messages are kept small.
+  const wss = new WebSocketServer({ noServer: true, maxPayload: config.maxBodyBytes });
+  const battleWss = new WebSocketServer({ noServer: true, maxPayload: 4 * 1024 });
+
+  const refuse = (socket, status, text) => {
+    socket.write(`HTTP/1.1 ${status} ${text}\r\nConnection: close\r\nContent-Length: 0\r\n\r\n`);
+    socket.destroy();
+  };
+
+  server.on('upgrade', (req, socket, head) => {
+    const { pathname } = new URL(req.url, 'http://localhost');
+    if (req.headers.origin !== config.origin) return refuse(socket, 403, 'Forbidden');
+    if (pathname === '/battle') {
+      return battleWss.handleUpgrade(req, socket, head, (client) => {
+        client.isAlive = true;
+        // an oversized or malformed frame makes the socket emit 'error'; without a listener that would stop the whole server
+        client.on('error', () => client.terminate());
+        client.on('pong', () => {
+          client.isAlive = true;
+        });
+        battle.attach(client);
+      });
+    }
+    if (!auth.isAuthorized(req)) return refuse(socket, 401, 'Unauthorized');
+    return wss.handleUpgrade(req, socket, head, (client) => wss.emit('connection', client, req));
   });
 
+  // A phone that lost its signal never says goodbye. Ping the battle sockets, drop the silent ones, and tidy empty rooms.
+  const heartbeat = setInterval(() => {
+    for (const client of battleWss.clients) {
+      if (!client.isAlive) client.terminate();
+      else {
+        client.isAlive = false;
+        client.ping();
+      }
+    }
+    battle.sweep();
+  }, 25000);
+  heartbeat.unref();
+
   wss.on('connection', (socket) => {
+    socket.on('error', () => socket.terminate());
     hub.clients.add(socket);
     socket.send(JSON.stringify({ type: 'state', ...hub.snapshot() }));
     socket.on('close', () => hub.clients.delete(socket));
@@ -163,8 +197,9 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
     listen: (port = config.port) => new Promise((resolve) => server.listen(port, () => resolve(server.address().port))),
     close: () =>
       new Promise((resolve) => {
-        for (const client of wss.clients) client.terminate();
-        wss.close(() => server.close(() => resolve()));
+        clearInterval(heartbeat);
+        for (const client of [...wss.clients, ...battleWss.clients]) client.terminate();
+        wss.close(() => battleWss.close(() => server.close(() => resolve())));
       }),
   };
 };

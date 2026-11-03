@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Download, Flame, LayoutGrid, List as ListIcon, Pin, Plus, Search, Sparkles, Upload } from 'lucide-react';
-import { Badge, Button, Menu, Spinner } from '../../../design-system';
+import { Badge, Button, Loading, Menu, Skeleton, SkeletonLines } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { askNotes } from '../api/owner';
 import { MOODS, excerpt, hueOf, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
@@ -214,9 +214,10 @@ export default function NotesView() {
     return (
       <Suspense
         fallback={
-          <div className="grid min-h-[50vh] place-items-center">
-            <Spinner label="Opening the editor" />
-          </div>
+          <Loading label="Opening the note" className="flex min-h-[50vh] flex-col gap-4 py-6">
+            <Skeleton className="h-9 w-2/3" />
+            <SkeletonLines lines={6} />
+          </Loading>
         }
       >
         <NoteEditor key={current.id} note={current} related={related} onOpen={setSelected} onBack={() => setSelected(null)} onDelete={remove} />
@@ -282,7 +283,13 @@ export default function NotesView() {
           )}
           {answer && (
             <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur" data-answer>
-              <Suspense fallback={<Spinner label="Loading" />}>
+              <Suspense
+                fallback={
+                  <Loading label="Loading the answer">
+                    <SkeletonLines lines={3} />
+                  </Loading>
+                }
+              >
                 <Markdown>{answer.text}</Markdown>
               </Suspense>
               {answer.sources.length > 0 && (

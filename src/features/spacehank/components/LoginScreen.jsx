@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { Button, Card, ErrorState, Eyebrow, Field, Input, Spinner } from '../../../design-system';
+import { Button, Card, ErrorState, Eyebrow, Field, Input, Loading, Skeleton } from '../../../design-system';
 
 const messageFor = (error) =>
   error.message === 'Failed to fetch' ? 'Realtime server is unreachable. Check that it is running.' : error.message;
 
 export function AuthLoading({ label = 'Securing workspace' }) {
   return (
-    <div className="grid min-h-screen place-items-center bg-ink-0 text-bone-dim">
-      <div className="flex items-center gap-3 font-mono text-fine">
-        <Spinner label={label} /> {label}…
-      </div>
+    <div className="grid min-h-screen place-items-center bg-ink-0 px-gutter">
+      <Loading label={label} className="flex w-[min(22rem,100%)] flex-col gap-4 rounded-card border border-line bg-ink-1 p-6">
+        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-11 w-full" />
+        <Skeleton className="h-11 w-full rounded-full" />
+      </Loading>
     </div>
   );
 }

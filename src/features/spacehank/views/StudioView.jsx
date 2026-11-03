@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookmarkPlus, Download, Heart, ImagePlus, LockKeyhole, Palette, RotateCcw, Shapes, Sparkles, Trash2, Wand2 } from 'lucide-react';
-import { Badge, Button, Spinner } from '../../../design-system';
+import { Badge, Button, Loading, Skeleton } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { aiUsage, base64ToBlob, generateImage } from '../api/owner';
 import { intents } from '../notes/library';
@@ -133,14 +133,10 @@ function Stage({ record, busy, shape, onFavorite, onReuse, onRemove }) {
             </div>
           </>
         ) : busy ? (
-          <div className={clsx('relative w-[min(420px,86%)] overflow-hidden rounded-xl bg-ink-2', FRAME[shape])} role="status" aria-label="Generating a picture">
+          <Loading label={`Painting the picture, ${seconds} seconds so far`} className={clsx('relative w-[min(420px,86%)] overflow-hidden rounded-xl bg-ink-2', FRAME[shape])}>
+            <Skeleton className="absolute inset-0 rounded-xl opacity-70" />
             <i className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            <div className="absolute inset-0 grid place-items-center">
-              <span className="flex flex-col items-center gap-2 font-mono text-fine text-bone-dim">
-                <Spinner label="Painting" /> Painting… {seconds}s
-              </span>
-            </div>
-          </div>
+          </Loading>
         ) : (
           <div className="flex max-w-xs flex-col items-center gap-3 p-8 text-center">
             <span className="grid size-16 place-items-center rounded-full bg-signal-soft text-signal">
@@ -338,8 +334,8 @@ function Create({ locked }) {
               disabled={locked || busy || !text.trim()}
               className="relative flex h-12 flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-signal to-[#ff8a5c] font-mono text-fine font-semibold text-ink-0 shadow-[0_8px_30px_-8px_rgb(255_91_46/0.7)] transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none"
             >
-              {busy ? <Spinner size={16} label="Generating" /> : <Sparkles size={16} aria-hidden="true" />}
-              {busy ? 'Generating…' : 'Generate'}
+              {busy ? <Skeleton className="h-3 w-24 rounded-full bg-ink-0/30" /> : <Sparkles size={16} aria-hidden="true" />}
+              {busy ? <span className="sr-only">Generating</span> : 'Generate'}
             </button>
             <Button type="button" variant="ghost" aria-label="Save this prompt" className="h-12 w-12" disabled={locked || !text.trim()} onClick={keepPrompt}>
               <BookmarkPlus size={17} aria-hidden="true" />
@@ -471,7 +467,14 @@ export default function StudioView({ locked = false }) {
       {tab === 'images' ? (
         <Create locked={locked} />
       ) : (
-        <Suspense fallback={<Spinner label="Loading brand kit" />}>
+        <Suspense
+          fallback={
+            <Loading label="Loading the brand kit" className="grid gap-3 sm:grid-cols-2">
+              <Skeleton className="h-40 rounded-3xl" />
+              <Skeleton className="h-40 rounded-3xl" />
+            </Loading>
+          }
+        >
           <BrandKit />
         </Suspense>
       )}

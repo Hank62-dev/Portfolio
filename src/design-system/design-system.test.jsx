@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
-import { Badge, Button, EmptyState, ErrorState, Field, Input, Select, Spinner } from './index';
+import { Badge, Button, EmptyState, ErrorState, Field, Input, Loading, Select, Skeleton, SkeletonLines } from './index';
 
 const html = (node) => renderToStaticMarkup(<MemoryRouter>{node}</MemoryRouter>);
 
@@ -59,10 +59,28 @@ describe('Field', () => {
 });
 
 describe('feedback states', () => {
-  it('announces errors as alerts and spinners as status only when labelled', () => {
+  it('announces errors as alerts and a loading region as a labelled, busy status', () => {
     expect(html(<ErrorState message="Boom" />)).toContain('role="alert"');
-    expect(html(<Spinner label="Loading" />)).toContain('role="status"');
-    expect(html(<Spinner />)).toContain('aria-hidden="true"');
+    const loading = html(<Loading label="Loading notes"><Skeleton /></Loading>);
+    expect(loading).toContain('role="status"');
+    expect(loading).toContain('aria-busy="true"');
+    expect(loading).toContain('aria-label="Loading notes"');
+  });
+
+  it('draws skeletons that screen readers skip, with square corners unless told otherwise', () => {
+    expect(html(<Skeleton />)).toContain('aria-hidden="true"');
+    expect(html(<Skeleton />)).toContain('rounded-sm');
+    expect(html(<Skeleton className="rounded-3xl h-4" />)).not.toContain('rounded-sm');
+    expect((html(<SkeletonLines lines={3} />).match(/animate-pulse/g) ?? []).length).toBe(3);
+  });
+
+  it('shows a busy button as a pulsing bar over its hidden label', () => {
+    const markup = html(<Button loading>Save</Button>);
+    expect(markup).toContain('aria-busy="true"');
+    expect(markup).toContain('disabled');
+    expect(markup).toContain('invisible');
+    expect(markup).toContain('animate-pulse');
+    expect(html(<Button>Save</Button>)).not.toContain('animate-pulse');
   });
 
   it('shows the empty-state copy and action', () => {

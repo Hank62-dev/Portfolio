@@ -1,14 +1,16 @@
-import { RefreshCw, X } from 'lucide-react';
-import { applyUpdate, later, useUpdate } from '../../lib/appUpdate';
+import { useState } from 'react';
+import { Bell, RefreshCw, X } from 'lucide-react';
+import { applyUpdate, enableNotices, later, noticePermission, useUpdate } from '../../lib/appUpdate';
 
 const copy = (vi) =>
   vi
-    ? { text: 'Có bản cập nhật mới', update: 'Cập nhật', later: 'Để sau' }
-    : { text: 'A new version is ready', update: 'Update', later: 'Later' };
+    ? { text: 'Có bản cập nhật mới', update: 'Cập nhật', later: 'Để sau', notify: 'Báo cho tôi trên màn hình điện thoại khi có bản mới' }
+    : { text: 'A new version is ready', update: 'Update', later: 'Later', notify: 'Notify me on my phone when there is a new version' };
 
 /** A small pill at the top of the screen that appears when a newer version of the site has been downloaded. */
 export default function UpdateToast() {
   const { ready, dismissed } = useUpdate();
+  const [permission, setPermission] = useState(noticePermission);
   if (!ready || dismissed) return null;
   const words = copy(typeof navigator !== 'undefined' && /^vi/i.test(navigator.language ?? ''));
   return (
@@ -19,6 +21,11 @@ export default function UpdateToast() {
           <i className="size-2 rounded-full bg-signal" />
         </span>
         <span className="min-w-0 flex-1 truncate font-mono text-fine text-bone">{words.text}</span>
+        {permission === 'default' && (
+          <button type="button" onClick={() => enableNotices().then(setPermission)} aria-label={words.notify} title={words.notify} className="grid size-9 shrink-0 place-items-center rounded-full text-bone-dim hover:text-bone active:scale-90" data-enable-notices>
+            <Bell size={15} aria-hidden="true" />
+          </button>
+        )}
         <button type="button" onClick={applyUpdate} className="inline-flex h-9 items-center gap-1.5 rounded-full bg-bone px-3.5 font-mono text-[0.78rem] font-medium text-ink-0 transition-transform active:scale-95">
           <RefreshCw size={13} aria-hidden="true" /> {words.update}
         </button>

@@ -21,6 +21,15 @@ const GAMES = [
   { id: 'rps', name: 'Kéo búa bao', hint: 'The oldest duel of all.', icon: () => <Hand size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Rps },
 ];
 
+/** The page of a game while its code arrives: a few lines in pale ink, where the game will be drawn. */
+const GameLoading = () => (
+  <div role="status" aria-busy="true" aria-label="Opening the game" className="flex flex-col gap-3">
+    <i className="block h-5 w-2/3 animate-pulse rounded-full" style={{ background: `${INK}26` }} />
+    <i className="block h-40 animate-pulse rounded-md" style={{ background: `${INK}14` }} />
+    <i className="block h-12 animate-pulse rounded-md" style={{ background: `${INK}1f` }} />
+  </div>
+);
+
 /** "Ra chơi": small games for a break, all drawn in blue pen on a squared page. */
 export default function GamesView() {
   const [params, setParams] = useSearchParams();
@@ -49,7 +58,7 @@ export default function GamesView() {
             </InkButton>
             <Title hint={current.hint}>{current.name}</Title>
           </div>
-          <Suspense fallback={<p className="font-pen text-[1.5rem]" style={{ color: INK }}>Đang lấy bút…</p>}>
+          <Suspense fallback={<GameLoading />}>
             <Play />
           </Suspense>
         </div>

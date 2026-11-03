@@ -4,6 +4,7 @@ import { Badge, Button, DatePicker, Input, Select, Textarea } from '../../../des
 import { clsx } from '../../../lib/format';
 import { generateCards } from '../api/owner';
 import { MODES, dismiss, focus, pause, reset, setMode, start } from '../focus/store';
+import FocusStats from '../components/FocusStats';
 import { Figure, PageHead, Segmented, Tile } from '../components/Page';
 import { loadNotes, notesStore } from '../notes/library';
 import { titleOf } from '../notes/notes';
@@ -378,6 +379,7 @@ function Focus({ onFocusMusic }) {
       </section>
       <div className="flex flex-col gap-3">
         <Figure value={sessions} label="Focus sessions today" tone="text-signal" />
+        <FocusStats />
         <Tile title="How it works">
           <ol className="flex list-decimal flex-col gap-1.5 pl-5 text-fine text-bone-dim">
             <li>Focus for 25 minutes on one thing.</li>
