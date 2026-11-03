@@ -14,6 +14,22 @@ npm run preview   # serve the build locally
 
 Deploys as a static site (Vercel). `vercel.json` rewrites unknown paths to `index.html`, so deep links such as `/projects/smart-center` work.
 
+## SpaceHank (private workspace, `/spacehank`)
+
+An installable PWA with notes, a diary, focus timer, games (including online sea battle), music, a studio and an AI assistant.
+`/spacehank?demo` opens it with made-up data and no server.
+
+| Need | Read |
+| ---- | ---- |
+| Deploy (Vercel + Render), checklist, what is free | [`DEPLOYMENT.md`](DEPLOYMENT.md) |
+| Step by step setup with every environment variable | [`SPACEHANK_SETUP.md`](SPACEHANK_SETUP.md) |
+| Try the web on an Android phone over a cable | [`PHONE_TESTING.md`](PHONE_TESTING.md) |
+
+```bash
+npm run spacehank:server   # realtime server on :8787 (needs SPACEHANK_PASSWORD and SPACEHANK_ORIGIN in .env)
+npm run lint && npm test   # before every deploy
+```
+
 ## Editing content
 
 All content is data; no component needs touching for routine updates.

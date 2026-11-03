@@ -31,4 +31,9 @@ export default [
     files: ['server/**/*.mjs', 'eslint.config.js', 'vite.config.js'],
     languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: globals.node },
   },
+  {
+    // the service worker file is plain script served as it is (it is pulled into the generated worker with importScripts)
+    files: ['public/sw-focus.js'],
+    languageOptions: { ecmaVersion: 'latest', sourceType: 'script', globals: globals.serviceworker },
+  },
 ];

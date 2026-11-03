@@ -12,7 +12,7 @@ Tài liệu này đi theo thứ tự: chuẩn bị tài khoản → lấy từng
 
 Chỉ cần trang portfolio: làm mục 6 (Vercel) và bỏ trống 3 biến `VITE_*`. Trang SpaceHank sẽ báo offline.
 
-Không có chế độ demo giả. Realtime server chưa chạy thì UI chỉ báo offline. Agent chưa có worker command thì task bị từ chối.
+Realtime server chưa chạy thì phần đăng nhập chỉ báo offline, và agent chưa có worker command thì task bị từ chối. Ngoại lệ là `/spacehank?demo`: chế độ demo công khai với dữ liệu giả, không gửi gì lên server và tách riêng khỏi workspace thật (Hải chiến online trong demo vẫn cần realtime server, vì hai người chơi nối với nhau qua đó).
 
 ## 2. Chỉ dùng gói miễn phí: giới hạn cần biết
 
@@ -30,7 +30,7 @@ Toàn bộ cấu hình dùng gói free, không cần thẻ trả phí. Đổi l�
 Hệ quả thực tế:
 
 - **Trang có thể chậm lần đầu.** Sau 15 phút rảnh, realtime server và RAG ngủ. Lần truy cập kế tiếp phải chờ đánh thức, RAG lâu hơn vì phải nạp thư viện.
-- **Đăng nhập SpaceHank mất khi realtime server ngủ hoặc restart,** vì phiên lưu trong bộ nhớ. Bạn phải đăng nhập lại.
+- **Đăng nhập SpaceHank mất khi realtime server ngủ hoặc restart,** vì phiên lưu trong bộ nhớ. Bạn phải đăng nhập lại. Các ván Hải chiến online đang chơi cũng mất vì phòng chỉ nằm trong bộ nhớ (ứng dụng tự nối lại trong 20 phút nếu server còn giữ phòng).
 - **Kho tri thức LightRAG không bền.** Không có ổ đĩa bền vững nên dữ liệu đồ thị LightRAG mất mỗi lần RAG ngủ hoặc restart, trong khi vector trong Qdrant vẫn còn nên RAG không nạp lại. Kết quả: câu hỏi dựa trên kho tri thức có thể trả về trống sau mỗi lần restart. Chat với tài liệu bạn tải lên (lưu trong Qdrant) và hỏi đáp trên dữ liệu kho (Postgres) không bị ảnh hưởng.
 - **Hết hạn mức Gemini thì chat dừng đến khi hạn mức được đặt lại.** Hạn mức theo ngày thường đặt lại vào nửa đêm giờ Thái Bình Dương.
 - **Nếu Render kill RAG vì hết bộ nhớ (OOM),** gói free không đủ. Tôi đo thử RAG chạy rảnh, chưa kết nối Qdrant/Postgres/Redis, đã dùng khoảng 300MB. Khi kết nối đủ và xử lý chat, mức dùng có thể gần 512MB. Nếu xảy ra, cách duy nhất để ổn định là nâng gói `standard` (trả phí) hoặc chạy RAG ở nơi khác.
@@ -161,6 +161,7 @@ Sau khi cập nhật code, redeploy service `hank62-rag` để thay đổi này 
 1. Vào Render → service `hank62-realtime` → **Environment** → sửa `SPACEHANK_ORIGIN` thành đúng URL Vercel (không có `/` ở cuối) → Save. Service tự redeploy.
 2. Mở `https://<vercel>/spacehank` → đăng nhập bằng `SPACEHANK_PASSWORD`.
 3. Nhãn realtime phải hiện online. Chat gửi tới RAG phải có phản hồi.
+4. Thử Hải chiến online: mở `https://<vercel>/spacehank?demo`, vào Trò chơi → Hải chiến → Chơi online → tạo phòng. Nếu báo không nối được máy chủ, `SPACEHANK_ORIGIN` chưa khớp đúng origin của trang. Lần nối đầu sau khi server ngủ có thể mất khoảng 1 phút.
 
 Làm tương tự cho RAG: vào Render → service `hank62-rag` → **Environment** → sửa `CORS_ORIGINS` thành URL Vercel → Save. Nếu quên bước này, chat sẽ lỗi CORS trong trình duyệt. URL xem trước (preview) của Vercel có địa chỉ khác URL chính, nên chúng bị chặn trừ khi bạn thêm vào `CORS_ORIGINS`.
 
@@ -235,6 +236,7 @@ Task và event lưu trong bộ nhớ. Restart server là mất lịch sử và p
 |---|---|---|
 | Realtime service trên Render không lên, log báo `SPACEHANK_ORIGIN is required` hoặc `SPACEHANK_PASSWORD is required` | Thiếu biến | Điền biến trong Render → Environment |
 | Đăng nhập báo thành công nhưng tải lại lại bị đăng xuất | `SPACEHANK_ORIGIN` không khớp URL Vercel, hoặc dùng `http://` | Đặt đúng origin `https://...`, không có `/` ở cuối |
+| Hải chiến online báo không nối được máy chủ, trong khi các tab khác vẫn chạy | `SPACEHANK_ORIGIN` khác origin của trang đang mở (ví dụ đang mở URL xem trước của Vercel), hoặc `VITE_SPACEHANK_WS_URL` sai | Mở bằng đúng domain chính, kiểm tra hai biến, rồi Redeploy |
 | Trang `/spacehank` báo SERVER OFFLINE | Biến `VITE_*` sai hoặc chưa redeploy | Sửa biến trên Vercel rồi Redeploy |
 | Trình duyệt báo lỗi CORS khi gọi realtime | `SPACEHANK_ORIGIN` sai | Sửa như trên |
 | Trình duyệt báo lỗi CORS khi chat hoặc upload (gọi RAG) | `CORS_ORIGINS` của RAG thiếu hoặc không khớp URL Vercel | Đặt đúng origin, `https://`, không có `/` ở cuối, rồi chờ service redeploy |
@@ -253,7 +255,8 @@ Task và event lưu trong bộ nhớ. Restart server là mất lịch sử và p
 
 - Không commit `.env`, API key hay mật khẩu. File `.env` đã nằm trong `.gitignore`.
 - Chỉ dùng HTTPS/WSS ở production.
-- Đặt `SPACEHANK_ORIGIN` đúng một origin, không dùng `*`.
+- Đặt `SPACEHANK_ORIGIN` đúng một origin, không dùng `*`. Hải chiến online không cần đăng nhập (bạn bè vào bằng mã phòng), nên origin này cùng giới hạn tin nhắn 4 KB, giới hạn tốc độ và trần 300 phòng là thứ bảo vệ nó.
+- Khoá vân tay của nhật ký chỉ che nhật ký trên màn hình, không mã hoá dữ liệu lưu trên máy. Ghi chú, nhật ký, ảnh và Mơ nằm trong trình duyệt của từng thiết bị, xoá dữ liệu trang hoặc gỡ app là mất, và chưa có sao lưu.
 - Đổi `SPACEHANK_PASSWORD` ngay nếu nghi ngờ bị lộ.
 - Giới hạn quyền của worker và `SPACEHANK_WORKDIR`.
 - RAG chỉ cho trình duyệt từ các origin trong `CORS_ORIGINS` gọi API. CORS chỉ chặn trình duyệt, không chặn `curl` hay script, và RAG chưa có đăng nhập. Ai biết URL RAG vẫn gọi được ngoài trình duyệt và tiêu tốn quota Gemini của bạn. Nếu cần chặn hẳn, thêm xác thực (ví dụ API key hoặc đi qua proxy có đăng nhập) trước khi công khai rộng rãi.
