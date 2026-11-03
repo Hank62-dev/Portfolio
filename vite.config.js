@@ -32,6 +32,9 @@ const bundledMusic = () => ({
 })
 
 export default defineConfig({
+  // Listen on IPv4. Vite's default ("localhost") can mean IPv6 only on Windows, and then a phone plugged in with
+  // `adb reverse tcp:5173 tcp:5173` (which reaches 127.0.0.1) gets an empty response.
+  server: { host: '127.0.0.1' },
   plugins: [
     react(),
     bundledMusic(),
