@@ -35,6 +35,7 @@
     "lucide-react": "^1.61.0",
     "music-metadata": "^12.3.3",
     "node-ical": "^0.27.3",
+    "pg": "^8.23.1",
     "postprocessing": "^6.39.5",
     "pullcord": "^0.1.0",
     "react": "^18.2.0",
@@ -48,12 +49,14 @@
     "ws": "^8.22.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15",
     "@eslint/js": "^9.39.5",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^4.2.1",
     "eslint": "^9.39.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "fake-indexeddb": "^6.2.7",
     "globals": "^17.13.0",
     "iwer": "^2.7.0",
     "tailwindcss": "^4.3.3",

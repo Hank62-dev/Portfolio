@@ -1,3 +1,4 @@
+import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Download, LockKeyhole, LogOut, PanelLeftClose, PanelLeftOpen, RotateCcw, Sparkles } from 'lucide-react';
 import { Avatar, Badge, Tooltip } from '../../../design-system';
@@ -109,6 +110,7 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
             onClick={() => (app.canInstall ? app.install() : onNotify?.('On iPhone: tap Share, then Add to Home Screen'))}
           />
         )}
+        {!guest && !rail && <SyncStatus />}
         {guest && <NavButton rail={rail} label="Reset demo data" icon={RotateCcw} onClick={onResetDemo} />}
         <NavButton rail={rail} label={guest ? 'Exit demo' : 'Lock workspace'} icon={guest ? LogOut : LockKeyhole} onClick={onLogout} />
         {canCollapse && (

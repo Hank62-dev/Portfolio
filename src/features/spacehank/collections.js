@@ -1,5 +1,6 @@
 import { createStore } from './store';
 import { storage } from './storage';
+import { onSynced } from './sync/events';
 
 /**
  * A small collection of records kept on this device (one IndexedDB store), with a reactive in-memory copy. Each
@@ -45,6 +46,15 @@ export const createCollection = (name, { order = (a, b) => b.updatedAt - a.updat
     for (const item of items) await table.put(item);
     store.set((s) => ({ items: [...s.items.filter((x) => !items.some((n) => n.id === x.id)), ...items].sort(order) }));
   };
+
+  // another device changed this store: read it again
+  onSynced((stores) => {
+    if (!stores.includes(name) || !store.get().loaded) return;
+    table
+      .all()
+      .then((items) => store.set({ items: items.sort(order) }))
+      .catch(() => {});
+  });
 
   return { store, load, create, update, remove, put, putMany };
 };

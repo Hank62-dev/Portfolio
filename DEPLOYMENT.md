@@ -64,7 +64,7 @@ The RAG service must have persistent external services. Do not use local Docker 
 
 - Login and the private workspace (password, session cookie).
 - The online sea battle, `wss://<realtime>/battle`. It needs no login (a friend joins with a room code), but it checks the browser origin, caps messages at 4 KB, rate limits, and holds at most 300 rooms. Rooms live in memory: a restart or a sleep ends the games in progress.
-- Optional owner helpers (Hank DJ, morning note, Image Studio, calendar) that switch on when their variable is set.
+- Optional owner helpers (Hank DJ, morning note, Image Studio, calendar, the Creator Lab's AI content engine and Discord posting) that switch on when their variable is set. `DISCORD_WEBHOOK_URL` is a webhook address from your own Discord server; it stays on the server. See CREATOR_STRATEGY.md.
 
 The battle and the login use the same `SPACEHANK_ORIGIN`, so one value covers both.
 
@@ -72,7 +72,9 @@ The battle and the login use the same `SPACEHANK_ORIGIN`, so one value covers bo
 
 - It installs from the production URL over HTTPS. Share-into-app is Android Chrome only; the fingerprint lock for the diary needs HTTPS (or localhost) and a phone with a screen lock.
 - A new deploy shows an "Update" notice inside the app. On Chrome Android it can also arrive as a phone notification once the visitor has allowed notifications; that is not guaranteed when the app is fully closed.
-- Notes, diary pages, photos, drafts and Mơ live only in the browser of each device (IndexedDB and localStorage). Clearing site data or uninstalling the app erases them, and nothing is backed up.
+- Sync: with `DATABASE_URL` set on the realtime service (a Postgres address; Neon's free tier works) the owner's notes, diary pages and their photos, habits, tasks, money, courses and flashcards, Creator Lab data and AI pictures are kept in that database and appear on every device you sign in on. Each device still works offline and sends its changes when it can; if two devices change the same record the later edit wins. The tables are created by the server on start. The music library is not synced (the files are too big), nor are voice memos or pictures over 4 MB (`SYNC_MAX_BLOB_MB`), and the storage is capped at 300 MB (`SYNC_QUOTA_MB`) so it never fills a free database. Without `DATABASE_URL` the status line says "Sync is off" and each device keeps its own copy, which clearing site data or uninstalling the app erases.
+- Focus and flashcard statistics, the diary fingerprint lock and a few per-device settings stay on the device.
+- Data in the database is not end-to-end encrypted: the database owner (you) and Neon can read it. The diary fingerprint lock hides the diary on screen only.
 - `/spacehank?demo` is the guest mode: the home screen, Habit Garden (two plants), Study Hub (one course, three cards, focus timer) and Games. Every other tab shows a one-line introduction and asks for the password, so a visitor does not see what the workspace holds. It sends nothing to a server and is separate from the real workspace. A signed-in owner never sees sample data.
 - Sign-in lasts: a short access token (30 minutes) renewed from a refresh token (30 days, sliding), both signed, so they survive the free Render service sleeping or restarting. If the realtime link drops (phone locked, server asleep) the app reconnects by itself and the status dot turns amber, then green.
 

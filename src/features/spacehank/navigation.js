@@ -1,4 +1,4 @@
-import { Activity, BookHeart, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet } from 'lucide-react';
+import { Activity, BookHeart, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet, Rocket } from 'lucide-react';
 
 export const NAV_SECTIONS = ['WORKSPACE', 'KNOWLEDGE', 'CREATE', 'LIFE'];
 
@@ -14,6 +14,7 @@ export const NAVIGATION = [
   { id: 'memos', label: 'Voice Memos', icon: Mic, section: 'KNOWLEDGE', keywords: 'record audio voice speech transcript dictate' },
   { id: 'memory', label: 'Memory Stream', icon: Activity, section: 'KNOWLEDGE', keywords: 'timeline events log history' },
   { id: 'studio', label: 'Image Studio', icon: Palette, section: 'CREATE', keywords: 'image picture generate brand colours palette tokens design' },
+  { id: 'creator', label: 'Creator Lab', icon: Rocket, section: 'CREATE', badge: 'NEW', keywords: 'creator content tiktok discord money income sponsor clients freelance hooks script teleprompter deals quote pricing' },
   { id: 'music', label: 'Hank Music', icon: Music2, section: 'CREATE', keywords: 'songs player library playlist audio listen' },
   { id: 'missions', label: 'Mission Board', icon: Kanban, section: 'LIFE', keywords: 'kanban tasks cards todo board plan agents' },
   { id: 'study', label: 'Study Hub', icon: GraduationCap, section: 'LIFE', keywords: 'courses exams deadlines flashcards pomodoro focus learn school' },

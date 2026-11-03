@@ -36,13 +36,32 @@ export const readJson = (req, limit) =>
     });
   });
 
+/** Reads a raw body (a picture or a recording), refusing anything larger than `limit` bytes. */
+export const readBytes = (req, limit) =>
+  new Promise((resolve, reject) => {
+    let size = 0;
+    let chunks = [];
+    let tooLarge = false;
+    req.on('data', (chunk) => {
+      size += chunk.length;
+      if (size > limit) {
+        tooLarge = true;
+        chunks = [];
+      } else if (!tooLarge) {
+        chunks.push(chunk);
+      }
+    });
+    req.on('error', reject);
+    req.on('end', () => (tooLarge ? reject(new HttpError(413, 'That file is too large to sync.')) : resolve(Buffer.concat(chunks))));
+  });
+
 /** JSON responder that always carries the CORS headers for the one allowed origin. */
 export const createResponder = (origin) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': origin,
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
     Vary: 'Origin',
   };
 
@@ -51,10 +70,16 @@ export const createResponder = (origin) => {
     res.end(JSON.stringify(data));
   };
 
+  /** A binary answer (a stored picture or recording). */
+  const bytes = (res, status, data, mime) => {
+    res.writeHead(status, { 'Content-Type': mime, 'Content-Length': data.length, 'Cache-Control': 'private, max-age=31536000, immutable', ...corsHeaders });
+    res.end(data);
+  };
+
   const preflight = (res) => {
     res.writeHead(204, corsHeaders);
     res.end();
   };
 
-  return { json, preflight };
+  return { json, bytes, preflight };
 };

@@ -5,8 +5,10 @@ import { createAi } from './ai.mjs';
 import { createAuth } from './auth.mjs';
 import { createBattle } from './battle.mjs';
 import { createCalendar } from './calendar.mjs';
-import { HttpError, createResponder, readJson } from './http.mjs';
+import { createDiscord } from './discord.mjs';
+import { HttpError, createResponder, readBytes, readJson } from './http.mjs';
 import { createHub } from './hub.mjs';
+import { createSync } from './sync.mjs';
 import { createTaskService } from './tasks.mjs';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -14,7 +16,7 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 // Behind Render's proxy the socket address is the proxy, so prefer the forwarded client address.
 const clientKey = (req) => req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
 
-export const createApp = (config, { fetchImpl = fetch } = {}) => {
+export const createApp = (config, { fetchImpl = fetch, db = null } = {}) => {
   const agents = createAgents();
   const hub = createHub({ agents, maxEvents: config.maxEvents, maxTasks: config.maxTasks });
   const auth = createAuth(config);
@@ -22,7 +24,15 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
   const ai = createAi({ ai: config.ai, fetchImpl });
   const battle = createBattle();
   const calendar = createCalendar({ url: config.calendarIcsUrl, fetchImpl });
-  const { json, preflight } = createResponder(config.origin);
+  const discord = createDiscord({ webhooks: config.discordWebhooks, fetchImpl });
+  const { json, bytes, preflight } = createResponder(config.origin);
+  // personal data kept in a real database so every device sees the same thing; off when there is no database
+  const sync = db ? createSync({ db, ...config.sync }) : null;
+  const needSync = () => {
+    if (!sync) throw new HttpError(503, 'Sync is not set up: add DATABASE_URL (a Postgres address) to the realtime service.');
+    return sync;
+  };
+  const query = (req) => new URL(req.url, 'http://localhost').searchParams;
 
   const requireAuth = (req) => {
     if (!auth.isAuthorized(req)) throw new HttpError(401, 'Authentication required');
@@ -114,6 +124,62 @@ export const createApp = (config, { fetchImpl = fetch } = {}) => {
     'POST /api/ai/command': async (req, res) => {
       requireAuth(req);
       json(res, 200, await ai.command(await readJson(req, config.maxBodyBytes)));
+    },
+
+    // ---- sync of the owner's personal data (see sync.mjs)
+    'GET /api/sync/status': async (req, res) => {
+      requireAuth(req);
+      if (!sync) return json(res, 200, { enabled: false });
+      return json(res, 200, { enabled: true, ...(await sync.usage()), maxBlobBytes: config.sync.maxBlobBytes });
+    },
+
+    'GET /api/sync/pull': async (req, res) => {
+      requireAuth(req);
+      const params = query(req);
+      json(res, 200, await needSync().pull(params.get('since'), params.get('limit')));
+    },
+
+    'POST /api/sync/push': async (req, res) => {
+      requireAuth(req);
+      const body = await readJson(req, 2 * 1024 * 1024);
+      const result = await needSync().push(body.changes);
+      if (result.applied) hub.broadcast({ type: 'sync' }); // the other devices pull at once
+      json(res, 200, result);
+    },
+
+    'PUT /api/sync/blob': async (req, res) => {
+      requireAuth(req);
+      const params = query(req);
+      const data = await readBytes(req, config.sync.maxBlobBytes);
+      json(res, 200, await needSync().putBlob({ store: params.get('store'), id: params.get('id'), mime: req.headers['content-type'], data, updatedAt: params.get('at') }));
+    },
+
+    'GET /api/sync/blob': async (req, res) => {
+      requireAuth(req);
+      const params = query(req);
+      const file = await needSync().getBlob({ store: params.get('store'), id: params.get('id') });
+      bytes(res, 200, file.data, file.mime);
+    },
+
+    'POST /api/ai/content': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.content(await readJson(req, config.maxBodyBytes)));
+    },
+
+    'POST /api/ai/pitch': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.pitch(await readJson(req, config.maxBodyBytes)));
+    },
+
+    // Posting to the owner's own Discord server through a webhook kept on the server (see discord.mjs).
+    'GET /api/discord/channels': (req, res) => {
+      requireAuth(req);
+      json(res, 200, discord.channels());
+    },
+
+    'POST /api/discord/post': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await discord.post(await readJson(req, config.maxBodyBytes)));
     },
 
     'POST /api/ai/image': async (req, res) => {

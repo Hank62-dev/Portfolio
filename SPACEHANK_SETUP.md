@@ -107,6 +107,17 @@ Nếu bỏ qua Postgres, RAG vẫn chạy nhưng không đọc được lịch s
 
 File kho vận cũ (giao hàng, chuyến bay, hải quan) được giữ ở `scripts/sql/logistics_demo_schema.sql`, chỉ dùng nếu bạn muốn chạy lại bản demo kho vận với `scripts/import_warehouse_to_postgres.py`. Hank chung chung không cần nó.
 
+### 4.2b. Đồng bộ dữ liệu cá nhân giữa các thiết bị (dùng chung database Neon)
+
+Ghi chú, nhật ký, ảnh, thói quen, thu chi, thẻ ôn, Creator Lab… được lưu vào Postgres để máy nào đăng nhập cũng thấy. **Service `hank62-realtime` cần `DATABASE_URL`** (không phải chỉ RAG).
+
+1. Dùng lại project Neon ở mục 4.2 (cùng connection string cũng được, bảng của đồng bộ có tiền tố `sync_` nên không đụng bảng RAG), hoặc tạo database riêng.
+2. Render → service `hank62-realtime` → **Environment** → thêm `DATABASE_URL` = connection string (giữ `?sslmode=require`) → **Save, rebuild, and deploy**. Server tự tạo bảng khi khởi động, bạn không phải chạy SQL.
+3. Mở app đã đăng nhập: ở thanh bên (hoặc menu "More" trên điện thoại) có dòng trạng thái: "Synced vừa xong". Chưa có `DATABASE_URL` thì dòng đó ghi "Sync is off".
+4. Dữ liệu đã có sẵn trên từng máy sẽ được tải lên một lần ở lần đồng bộ đầu tiên; máy mới chỉ cần đăng nhập để kéo về.
+
+Giới hạn: nhạc (file quá lớn), file ghi âm và ảnh trên 4 MB (`SYNC_MAX_BLOB_MB`) chỉ ở lại trên máy; dung lượng đồng bộ tối đa 300 MB (`SYNC_QUOTA_MB`) để không làm đầy database miễn phí (Neon free 0,5 GB, dùng chung với RAG). Hai máy sửa cùng một bản ghi cùng lúc thì lần sửa sau thắng. Dữ liệu trong database không được mã hoá đầu cuối: chủ database và Neon đọc được.
+
 ### 4.3. Redis (cache và bộ nhớ hội thoại)
 
 Ví dụ dùng Upstash. Bạn cũng có thể dùng Render Key Value.

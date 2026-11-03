@@ -18,6 +18,7 @@ const BLURB = {
   missions: 'A board for plans and tasks.',
   wallet: 'Spending and budgets.',
   diary: 'A private diary.',
+  creator: 'A cockpit for content, deals and income.',
 };
 
 /** What a guest sees on a tab that belongs to the owner. */

@@ -5,9 +5,19 @@ import { isDemo } from './demo/mode';
 
 // the demo keeps its made-up data in a database of its own, so it can never touch the owner's real one
 const name = () => (isDemo() ? 'hank62-demo' : 'hank62-workspace');
-const VERSION = 4;
+const VERSION = 6;
 // tracks / playlists / images / prompts / notes / photos (a diary's pictures) hold records; blobs / covers hold the raw files, keyed by the owner id.
-const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos', 'photos'];
+const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos', 'photos', 'content', 'income', 'deals', 'settings', 'outbox'];
+
+// The stores that are kept in step across devices (see ./sync). The music library is not: its files are too big. `outbox` is the
+// list of changes this device has not sent yet.
+export const SYNCED_STORES = ['notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'content', 'income', 'deals', 'prompts', 'settings', 'memos', 'images', 'photos'];
+const SYNCED = new Set(SYNCED_STORES);
+let writeHook = null;
+/** The sync engine registers here to hear about every change made to a synced store. */
+export const setWriteHook = (hook) => {
+  writeHook = hook;
+};
 
 let opening = null;
 
@@ -60,7 +70,7 @@ const run = async (name, mode, work) => {
   });
 };
 
-/** A handle on one store: all / get / put / remove / clear. */
+/** A handle on one store: all / get / put / remove / clear. This one does not tell the sync engine (the engine itself uses it). */
 export const table = (name) => ({
   all: () => run(name, 'readonly', (store) => wrap(store.getAll())),
   get: (id) => run(name, 'readonly', (store) => wrap(store.get(id))),
@@ -69,7 +79,29 @@ export const table = (name) => ({
   clear: () => run(name, 'readwrite', (store) => wrap(store.clear())),
 });
 
-export const storage = Object.fromEntries(STORES.map((name) => [name, table(name)]));
+/** Every store without the sync hook: for the sync engine, which must not queue its own writes. */
+export const rawStorage = Object.fromEntries(STORES.map((name) => [name, table(name)]));
+
+/** The same handle, but a write to a synced store is reported, so it can be sent to the other devices. */
+const watched = (name) => {
+  const t = table(name);
+  if (!SYNCED.has(name)) return t;
+  return {
+    ...t,
+    put: async (record) => {
+      const result = await t.put(record);
+      writeHook?.(name, record.id, false);
+      return result;
+    },
+    remove: async (id) => {
+      const result = await t.remove(id);
+      writeHook?.(name, id, true);
+      return result;
+    },
+  };
+};
+
+export const storage = Object.fromEntries(STORES.map((name) => [name, watched(name)]));
 
 /** Asks the browser not to evict this data under storage pressure. Safe to call repeatedly; failure is fine. */
 export const requestPersistence = async () => {

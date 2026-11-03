@@ -6,6 +6,7 @@ import { aiUsage, base64ToBlob, generateImage } from '../api/owner';
 import { intents } from '../notes/library';
 import { useStore } from '../store';
 import { COLORS, brandPrompt } from '../studio/brand';
+import { useSynced } from '../sync/useSync';
 import { SHAPES, STYLES, composePrompt, listImages, listPrompts, removeImage, removePrompt, saveImage, savePrompt, setImageFavorite } from '../studio/gallery';
 
 const BrandKit = lazy(() => import('../studio/BrandKit'));
@@ -179,7 +180,7 @@ function Create({ locked }) {
     if (!locked) aiUsage().then(setUsage).catch(() => setUsage(null));
   }, [locked]);
 
-  useEffect(() => {
+  const readAll = useCallback(() => {
     listImages()
       .then((list) => {
         setImages(list);
@@ -187,8 +188,15 @@ function Create({ locked }) {
       })
       .catch(() => {});
     listPrompts().then(setPrompts).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    readAll();
     refreshUsage();
-  }, [refreshUsage]);
+  }, [readAll, refreshUsage]);
+
+  // another device added or removed pictures
+  useSynced(['images', 'prompts'], readAll);
 
   const selected = images.find((r) => r.id === selectedId) ?? images[0] ?? null;
   const shown = useMemo(() => (only === 'favorites' ? images.filter((r) => r.favorite) : images), [images, only]);

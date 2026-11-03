@@ -22,7 +22,7 @@ const textOf = (data) =>
  * spend from one daily budget (so a free quota is never burned by accident) and none of them ever returns a
  * key or an upstream error body to the browser.
  */
-export const createAi = ({ ai, fetchImpl = fetch, now = Date.now }) => {
+export const createAi = ({ ai, fetchImpl = fetch, now = Date.now, sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms)) }) => {
   let day = today(now);
   let used = 0;
 
@@ -55,19 +55,26 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now }) => {
   const gemini = async (model, body) => {
     if (!ai.geminiKey) throw new HttpError(503, 'AI is not configured: set GEMINI_API_KEY on the server.');
     spend();
-    let response;
-    try {
-      response = await fetchImpl(`${ai.geminiBase}/models/${model}:generateContent`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': ai.geminiKey },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(60000),
-      });
-    } catch {
-      throw new HttpError(502, 'Gemini is unreachable right now.');
+    // an overloaded model (503) is usually over in seconds: ask again twice, with a pause, before giving up (one call costs one unit of the budget)
+    for (let attempt = 0; ; attempt += 1) {
+      let response;
+      try {
+        response = await fetchImpl(`${ai.geminiBase}/models/${model}:generateContent`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': ai.geminiKey },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(60000),
+        });
+      } catch {
+        throw new HttpError(502, 'Gemini is unreachable right now.');
+      }
+      if (response.ok) return response.json();
+      if ([500, 503, 504].includes(response.status) && attempt < 2) {
+        await sleep(1200 * 2 ** attempt);
+        continue;
+      }
+      fail(response, 'Gemini');
     }
-    if (!response.ok) fail(response, 'Gemini');
-    return response.json();
   };
 
   /** Chooses up to `limit` tracks from the owner's own library that fit a mood. Only titles go to the model. */
@@ -209,6 +216,84 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now }) => {
     return { cards: list };
   };
 
+  const jsonOf = (data, failure) => {
+    try {
+      const parsed = JSON.parse(textOf(data));
+      if (parsed && typeof parsed === 'object') return parsed;
+    } catch {
+      /* falls through */
+    }
+    throw new HttpError(502, failure);
+  };
+
+  /**
+   * A content pack from one idea: hooks to choose from, a short spoken script in beats, a caption with hashtags, a Discord
+   * announcement and a thread. The model is told to leave [brackets] where only the creator knows the fact, and never to make
+   * income promises, so the person fills in what is true before posting.
+   */
+  const content = async ({ topic, niche, audience, language, tone, seconds }) => {
+    const idea = clip(topic, 400);
+    if (idea.length < 3) throw new HttpError(400, 'Say what the video or post is about.');
+    const tongue = language === 'en' ? 'English' : 'Vietnamese';
+    const length = [15, 30, 45, 60, 90].includes(Number(seconds)) ? Number(seconds) : 30;
+    const prompt = [
+      `You write short-form video scripts for a solo creator. Write in natural, spoken ${tongue} (not translated), the way a real person talks to a friend.`,
+      `Idea: ${JSON.stringify(idea)}`,
+      `Niche: ${JSON.stringify(clip(niche, 80) || 'general')}. Audience: ${JSON.stringify(clip(audience, 120) || 'general')}. Tone: ${JSON.stringify(clip(tone, 40) || 'friendly, direct')}.`,
+      `The video is about ${length} seconds. Put the hook in the first 3 seconds; one idea per beat; end with ONE clear call to action.`,
+      'Rules: never promise income or results, never invent statistics, testimonials or personal stories. Where a fact or number only the creator knows is needed, write it as [like this]. No medical, legal or financial advice claims.',
+      'Reply as JSON: {"hooks":[{"text":"...","formula":"curiosity|contrarian|number|story|pain|result"}] (exactly 6, each under 18 words, all different in approach),',
+      '"script":{"title":"...","beats":[{"at":"0-3s","say":"what is said","show":"what is on screen"}] (5 to 8 beats covering the whole video),"cta":"..."},',
+      '"caption":"under 200 characters","hashtags":["no # sign, 5 to 8, mix broad and niche"],',
+      '"discord":"a friendly announcement for a Discord server, under 700 characters, with line breaks","thread":["3 to 5 short posts for a text thread, each under 270 characters"]}',
+    ].join('\n');
+    const data = await gemini(ai.textModel, { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.9 } });
+    const parsed = jsonOf(data, 'No ideas came back. Try again.');
+    const hooks = (Array.isArray(parsed.hooks) ? parsed.hooks : [])
+      .map((h) => ({ text: clip(h?.text ?? h, 160), formula: clip(h?.formula, 20) }))
+      .filter((h) => h.text)
+      .slice(0, 6);
+    const beats = (Array.isArray(parsed.script?.beats) ? parsed.script.beats : [])
+      .map((b) => ({ at: clip(b?.at, 12), say: clip(b?.say, 400), show: clip(b?.show, 200) }))
+      .filter((b) => b.say)
+      .slice(0, 10);
+    if (!hooks.length || !beats.length) throw new HttpError(502, 'The pack came back incomplete. Try again.');
+    return {
+      hooks,
+      script: { title: clip(parsed.script?.title, 120), beats, cta: clip(parsed.script?.cta, 200) },
+      caption: clip(parsed.caption, 300),
+      hashtags: [...new Set((Array.isArray(parsed.hashtags) ? parsed.hashtags : []).map((h) => clip(h, 40).replace(/^#+/, '').replace(/\s+/g, '')).filter(Boolean))].slice(0, 12),
+      discord: clip2(parsed.discord, 1500),
+      thread: (Array.isArray(parsed.thread) ? parsed.thread : []).map((t) => clip(t, 280)).filter(Boolean).slice(0, 6),
+    };
+  };
+
+  /** A short message to a sponsor or client: a first pitch, a follow-up, or a proposal outline. Honest, no pressure, [brackets] for numbers it was not given. */
+  const pitch = async ({ kind, who, offer, about, channel, language, tone }) => {
+    const target = clip(who, 80);
+    const what = clip(offer, 400);
+    if (!target || !what) throw new HttpError(400, 'Say who it is for and what you are offering.');
+    const type =
+      {
+        sponsor: 'a first message to a brand about a sponsored video',
+        client: 'a first message to a potential client offering a development service',
+        followup: 'a polite follow-up to a message that has had no reply',
+        proposal: 'a one-page proposal outline (scope, deliverables, timeline, price placeholders)',
+      }[kind] ?? 'a first message';
+    const tongue = language === 'en' ? 'English' : 'Vietnamese';
+    const prompt = [
+      `Write ${type}, in ${tongue}, for the channel: ${clip(channel, 30) || 'email'}.`,
+      `To: ${JSON.stringify(target)}. What I offer: ${JSON.stringify(what)}. About me: ${JSON.stringify(clip(about, 400) || 'a full-stack developer and creator')}. Tone: ${JSON.stringify(clip(tone, 40) || 'warm, professional, short')}.`,
+      'Rules: honest and concrete, no pressure tactics, no invented numbers, clients or results; use [brackets] for anything only I can fill in. Under 170 words (a proposal may be longer, under 300).',
+      'Reply as JSON: {"subject":"a subject line, or empty for a chat message","message":"the message with line breaks"}',
+    ].join('\n');
+    const data = await gemini(ai.textModel, { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.7 } });
+    const parsed = jsonOf(data, 'No draft came back. Try again.');
+    const message = clip2(parsed.message, 2000);
+    if (!message) throw new HttpError(502, 'No draft came back. Try again.');
+    return { subject: clip(parsed.subject, 140), message };
+  };
+
   /** One picture. Returns { mime, data (base64) }. */
   const image = async ({ prompt }) => {
     const wish = clip(prompt, 900);
@@ -245,5 +330,5 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now }) => {
     return { mime: part.inlineData.mimeType || 'image/png', data: part.inlineData.data };
   };
 
-  return { usage, dj, note, image, ask, command, cards };
+  return { usage, dj, note, image, ask, command, cards, content, pitch };
 };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { storage } from '../storage';
+import { onSynced } from '../sync/events';
 
 // The pictures that go with a diary page. They are made smaller on the way in (a phone photo is several megabytes; the
 // page only ever shows it a few hundred pixels wide) and kept on this device with the rest of the diary.
@@ -27,7 +28,8 @@ export const shrink = async (file, side = MAX_SIDE) => {
 /** Stores a picture (already a blob) and returns its id. */
 export const addPhotoBlob = async (blob) => {
   const id = crypto.randomUUID();
-  await storage.photos.put({ id, blob, mime: blob.type || 'image/jpeg', at: Date.now() });
+  const now = Date.now();
+  await storage.photos.put({ id, blob, mime: blob.type || 'image/jpeg', at: now, updatedAt: now });
   return id;
 };
 
@@ -44,6 +46,7 @@ export const removePhoto = async (id) => {
 /** The address to show a stored picture at, or '' until it has been read. */
 export function usePhoto(id) {
   const [url, setUrl] = useState(() => urls.get(id) ?? '');
+  const [again, setAgain] = useState(0); // a picture that came from another device after this page was drawn
   useEffect(() => {
     if (!id) return undefined;
     if (urls.has(id)) {
@@ -63,6 +66,8 @@ export function usePhoto(id) {
     return () => {
       live = false;
     };
-  }, [id]);
+  }, [id, again]);
+
+  useEffect(() => (id && !url ? onSynced((stores) => stores.includes('photos') && setAgain((n) => n + 1)) : undefined), [id, url]);
   return url;
 }

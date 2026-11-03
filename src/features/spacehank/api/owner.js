@@ -46,3 +46,12 @@ export const base64ToBlob = (data, mime) => {
   const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
   return new Blob([bytes], { type: mime });
 };
+
+// ---- Creator Lab: the AI content engine, pitches, and posting to the owner's own Discord server (the webhook stays on the server)
+const owner = () => {
+  if (isDemo()) throw new Error('The Creator Lab is private. Sign in to use it.');
+};
+export const generateContent = (input) => (owner(), call('/api/ai/content', { method: 'POST', body: input }));
+export const generatePitch = (input) => (owner(), call('/api/ai/pitch', { method: 'POST', body: input }));
+export const discordChannels = () => (owner(), call('/api/discord/channels'));
+export const postToDiscord = ({ channel, content }) => (owner(), call('/api/discord/post', { method: 'POST', body: { channel, content } }));

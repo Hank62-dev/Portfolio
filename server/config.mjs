@@ -1,3 +1,4 @@
+import { parseWebhooks } from './discord.mjs';
 // Reads and validates the environment once, so the rest of the server never touches process.env.
 
 const MINUTE = 60 * 1000;
@@ -35,6 +36,13 @@ export const loadConfig = (env = process.env) => {
       dailyLimit: Number(env.AI_DAILY_LIMIT || 60),
     },
     calendarIcsUrl: env.CALENDAR_ICS_URL || '',
+    discordWebhooks: parseWebhooks(env), // { channelName: webhook url }, kept on the server
+    // the database that keeps the owner's data in step across devices; without it the workspace stays on each device
+    databaseUrl: env.DATABASE_URL || '',
+    sync: {
+      maxBlobBytes: Math.max(100 * 1024, Number(env.SYNC_MAX_BLOB_MB || 4) * 1024 * 1024),
+      quotaBytes: Math.max(10 * 1024 * 1024, Number(env.SYNC_QUOTA_MB || 300) * 1024 * 1024),
+    },
     maxTaskChars: 20000,
     maxTasks: 200,
     maxEvents: 40,

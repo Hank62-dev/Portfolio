@@ -1,5 +1,6 @@
 import { createStore } from '../store';
 import { storage } from '../storage';
+import { onSynced } from '../sync/events';
 import { dayKey, journalTemplate, textToHtml } from './notes';
 
 // Notes live in this browser's IndexedDB, like the music. A note is { id, text, createdAt, updatedAt, pinned,
@@ -17,6 +18,15 @@ export const loadNotes = async () => {
     notesStore.set({ loaded: true, error: 'This browser would not open its private storage, so notes cannot be kept.' });
   }
 };
+
+// another device changed the notes: read them again
+onSynced((stores) => {
+  if (!stores.includes('notes') || !notesStore.get().loaded) return;
+  storage.notes
+    .all()
+    .then((notes) => notesStore.set({ notes: notes.sort(order) }))
+    .catch(() => {});
+});
 
 const put = async (note) => {
   await storage.notes.put(note);

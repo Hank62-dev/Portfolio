@@ -6,6 +6,7 @@ import { DEMO_URL, WORKSPACE_URL, isDemo } from './demo/mode';
 import { resetDemo, seedDemo } from './demo/seed';
 import { useDemo } from './hooks/useDemo';
 import { useRealtime } from './hooks/useRealtime';
+import { startSync } from './sync';
 import { DEFAULT_AGENT_ID } from './model/agents';
 import { DEFAULT_TAB, NAVIGATION } from './navigation';
 
@@ -41,6 +42,10 @@ export default function SpaceHank() {
   }, [guest]);
 
   const { authenticated } = live;
+
+  // the owner's data is kept in step with the database while signed in (a guest has nothing to sync)
+  useEffect(() => (!guest && authenticated ? startSync() : undefined), [guest, authenticated]);
+
   if (guest && !ready) return <AuthLoading label="Setting up the demo" />;
   if (!guest && authenticated === null) return <AuthLoading label={live.waking ? 'Waking the server (a free server can take up to a minute)' : undefined} />;
   // a full page load, so the demo's storage and the real one are never open at the same time

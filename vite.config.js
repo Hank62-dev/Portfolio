@@ -102,5 +102,8 @@ export default defineConfig({
   },
   test: {
     include: ['src/**/*.test.{js,jsx}', 'server/**/*.test.mjs'],
+    // the sync tests start an in-process Postgres, which is slow when the whole suite runs at once
+    testTimeout: 30000,
+    hookTimeout: 30000,
   },
 })

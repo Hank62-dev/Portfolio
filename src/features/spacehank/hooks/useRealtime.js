@@ -4,6 +4,7 @@ import { fetchSession, login as apiLogin, logout as apiLogout, openSocket, sendT
 import { spacehankConfig } from '../config';
 import { DEFAULT_AGENT_ID, createInitialAgents } from '../model/agents';
 import { applyRealtimeMessage } from '../model/realtime';
+import { requestSync } from '../sync';
 
 const { maxEvents } = spacehankConfig;
 
@@ -136,6 +137,7 @@ export function useRealtime() {
           onMessage: (message) => {
             if (mine !== generation) return;
             if (message.type === 'task_error') notify(message.error, { tone: 'error' });
+            if (message.type === 'sync') requestSync(); // another device changed the owner's data
             dispatchMessage(message);
           },
         });

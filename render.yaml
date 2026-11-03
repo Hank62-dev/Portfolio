@@ -24,6 +24,13 @@ services:
         sync: false
       - key: CALENDAR_ICS_URL
         sync: false
+      # Keeps notes, diary, photos, habits, money and the Creator Lab in step across devices. A Postgres address (Neon's free tier works).
+      # Leave blank and each device keeps its own copy.
+      - key: DATABASE_URL
+        sync: false
+      # Creator Lab: post announcements to your own Discord server. A webhook address (Server Settings, Integrations, Webhooks). Leave blank to switch it off.
+      - key: DISCORD_WEBHOOK_URL
+        sync: false
       - key: AI_DAILY_LIMIT
         value: 60
 

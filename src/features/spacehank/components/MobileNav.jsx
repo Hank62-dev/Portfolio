@@ -1,3 +1,4 @@
+import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, X } from 'lucide-react';
@@ -158,6 +159,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
               </section>
             ))}
 
+            {!guest && <SyncStatus className="border-t border-line pt-3" />}
             <div className="flex flex-wrap gap-2 border-t border-line pt-4">
               {(app?.canInstall || app?.ios) && (
                 <button
