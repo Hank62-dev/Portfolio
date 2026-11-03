@@ -5,6 +5,7 @@ export { default as Badge } from './Badge';
 export { default as Button } from './Button';
 export { Card, CardHeader, Eyebrow, PageHeader, Stat } from './Card';
 export { Dialog, DialogClose } from './Dialog';
+export { useSheetDrag } from './useSheetDrag';
 export { EmptyState, ErrorState, Loading, Skeleton, SkeletonLines, StatusDot, Toast } from './Feedback';
 export { DatePicker, Calendar } from './DatePicker';
 export { Field, Input, Select, Textarea } from './Field';

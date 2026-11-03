@@ -55,9 +55,10 @@ export function Tile({ title, aside, className, children, ...rest }) {
 /** A big number with a label under it. */
 export function Figure({ value, label, tone }) {
   return (
-    <div className="rounded-3xl border border-line bg-gradient-to-b from-white/[0.04] to-transparent bg-ink-1 p-4">
+    <div className="min-w-0 rounded-3xl border border-line bg-gradient-to-b from-white/[0.04] to-transparent bg-ink-1 p-3.5 md:p-4">
       <b className={clsx('block font-display text-h3 leading-none tabular-nums', tone ?? 'text-bone')}>{value}</b>
-      <small className="mt-1.5 block font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{label}</small>
+      {/* short labels, and on a phone plain sentence case: three columns are narrow, and a spaced-out capital label wraps */}
+      <small className="mt-2 block text-[0.74rem] leading-tight text-balance text-bone-faint md:mt-1.5 md:font-mono md:text-[0.68rem] md:tracking-[0.12em] md:uppercase">{label}</small>
     </div>
   );
 }

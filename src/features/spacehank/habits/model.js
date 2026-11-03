@@ -96,3 +96,55 @@ export const moodLift = (days, moodByDay) => {
   const mean = (a) => a.reduce((n, x) => n + x, 0) / a.length;
   return +(mean(withHabit) - mean(without)).toFixed(1);
 };
+
+const WEEKDAY = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+/** The last `length` days up to today, oldest first: [{ day, done, isToday, label }]. `label` is the weekday's first letter. */
+export const weekStrip = (days, length = 7, today = new Date()) => {
+  const done = new Set(days);
+  return Array.from({ length }, (_, i) => {
+    const date = addDays(today, i - (length - 1));
+    const key = dayKey(date);
+    return { day: key, done: done.has(key), isToday: i === length - 1, label: WEEKDAY[date.getDay()] };
+  });
+};
+
+/** The whole garden over the last `length` days: how many habits were done each day, out of how many. */
+export const gardenWeek = (habits, length = 7, today = new Date()) =>
+  Array.from({ length }, (_, i) => {
+    const date = addDays(today, i - (length - 1));
+    const key = dayKey(date);
+    return { day: key, isToday: i === length - 1, label: WEEKDAY[date.getDay()], done: habits.filter((h) => h.days.includes(key)).length, total: habits.length };
+  });
+
+const STAGE_AT = [0, 1, 3, 7, 14, 30];
+
+/** The next thing the plant grows into, and how many more days in a row it takes; null for a full-grown tree. */
+export const nextStage = (run) => {
+  const index = STAGE_AT.findIndex((at) => run < at);
+  return index === -1 ? null : { name: STAGES[index], left: STAGE_AT[index] - run, at: STAGE_AT[index] };
+};
+
+/** How far along the way to the next stage (0 to 1), for a progress bar. A full-grown tree is 1. */
+export const stageProgress = (run) => {
+  const index = STAGE_AT.findIndex((at) => run < at);
+  if (index === -1) return 1;
+  const from = STAGE_AT[index - 1] ?? 0;
+  return (run - from) / (STAGE_AT[index] - from);
+};
+
+/** One line about how the garden is doing today. */
+export const gardenLine = (done, total) => {
+  if (total === 0) return 'Plant your first habit to start the garden.';
+  if (done === total) return 'Every plant is watered. The garden is happy.';
+  if (done === 0) return total === 1 ? 'One plant is waiting for water.' : 'Your plants are waiting for water.';
+  const left = total - done;
+  return `${left} more ${left === 1 ? 'plant needs' : 'plants need'} water today.`;
+};
+
+/** Habits in the order the list shows them: the ones still to do today first, then the done ones; each group keeps its own order. */
+export const todoFirst = (habits, today = new Date()) => {
+  const key = dayKey(today);
+  const pending = habits.filter((h) => !h.days.includes(key));
+  return [...pending, ...habits.filter((h) => h.days.includes(key))];
+};

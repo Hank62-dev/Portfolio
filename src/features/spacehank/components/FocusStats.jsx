@@ -27,9 +27,9 @@ export default function FocusStats() {
               {stats.streak}
             </span>
           }
-          label={stats.streak === 1 ? 'Day in a row' : 'Days in a row'}
+          label="Streak"
         />
-        <Figure value={stats.best} label="Best streak" />
+        <Figure value={stats.best} label="Best" />
       </div>
       <figure className="mt-4" aria-label={summary}>
         <ol className="flex h-[7.5rem] items-end justify-between gap-2" aria-hidden="true">

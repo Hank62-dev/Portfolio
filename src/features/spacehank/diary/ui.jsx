@@ -1,6 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { clsx } from '../../../lib/format';
+import { useSheetDrag } from '../../../design-system/useSheetDrag';
 import { usePhoto } from './photos';
 
 // The pieces the diary is made of: a dark sheet that rises from the bottom, round buttons, a photo thumbnail.
@@ -23,11 +24,13 @@ export function SoftButton({ tone = 'fill', className, children, ...rest }) {
 
 /** A dark sheet over the sky. The title and description are for screen readers; the content draws its own heading. */
 export function PaperSheet({ open, onClose, title, description, children }) {
+  // a finger can pull the sheet down to put it away, as with any sheet on the phone
+  const drag = useSheetDrag(onClose, { minWidth: 768 });
   return (
     <Dialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-[85] animate-fade-in bg-[#08183a]/60 backdrop-blur-sm" />
-        <Dialog.Content className="paper fixed inset-x-0 bottom-0 z-[86] mx-auto flex max-h-[94dvh] w-full max-w-[34rem] animate-sheet-up flex-col overflow-y-auto rounded-t-[2rem] pb-[env(safe-area-inset-bottom)] outline-none md:top-1/2 md:bottom-auto md:max-h-[90dvh] md:-translate-y-1/2 md:rounded-[2rem]">
+        <Dialog.Content className="paper fixed inset-x-0 bottom-0 z-[86] mx-auto flex max-h-[94dvh] w-full max-w-[34rem] animate-sheet-up flex-col overflow-y-auto overscroll-contain rounded-t-[2rem] pb-[env(safe-area-inset-bottom)] outline-none md:top-1/2 md:bottom-auto md:max-h-[90dvh] md:-translate-y-1/2 md:rounded-[2rem]" {...drag.bind} style={drag.style}>
           <Dialog.Title className="sr-only">{title}</Dialog.Title>
           <Dialog.Description className="sr-only">{description}</Dialog.Description>
           <span className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-[#456fa8] md:hidden" aria-hidden="true" />

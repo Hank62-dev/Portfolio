@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useSheetDrag } from '../../../design-system/useSheetDrag';
+import { useHistoryLayer } from '../hooks/useHistoryLayer';
 import {
   ChevronDown,
   ChevronLeft,
@@ -77,37 +78,6 @@ const auroraOf = (text) => {
   const hue = hashHue(text);
   return `radial-gradient(120% 90% at 0% 0%, hsl(${hue} 75% 52% / 0.85), transparent 60%), radial-gradient(100% 100% at 100% 100%, hsl(${(hue + 70) % 360} 70% 45% / 0.8), transparent 62%), hsl(${hue} 40% 12%)`;
 };
-
-/**
- * A layer above the screen that takes a history entry of its own: the phone's Back button closes the layer and leaves
- * the screen underneath as it was. Layers can stack (a page, then the player over it).
- */
-function useHistoryLayer(open, close) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const key = useRef(`layer-${Math.random().toString(36).slice(2)}`);
-  const pushed = useRef(false);
-  const armed = useRef(false);
-
-  useEffect(() => {
-    if (open && !pushed.current) {
-      pushed.current = true;
-      navigate(`${location.pathname}${location.search}`, { state: { layers: [...(location.state?.layers ?? []), key.current] } });
-    }
-    if (!open) pushed.current = false;
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only when the layer opens or closes
-  }, [open]);
-
-  useEffect(() => {
-    if (location.state?.layers?.includes(key.current)) armed.current = true;
-    else if (armed.current && open) {
-      armed.current = false;
-      close();
-    }
-  }, [open, location]); // eslint-disable-line react-hooks/exhaustive-deps -- `close` is only a setter
-
-  return () => (armed.current ? navigate(-1) : close());
-}
 
 const Layer = ({ children }) => createPortal(children, document.querySelector('.app-shell') ?? document.body);
 
@@ -202,6 +172,7 @@ function CollectionRow({ item, onOpen }) {
 /** The page of an album, artist or playlist: the sleeve with its record sliding out, play and shuffle, then the songs. */
 function CollectionPage({ data, playlists, onClose, onDeleted }) {
   const leave = useHistoryLayer(true, onClose);
+  const drag = useSheetDrag(leave); // pull the page down to put it away
   const tint = useCoverTint(data.tracks[0]);
   const accent = data.tracks[0]?.hasCover ? tint : GOLD;
   const ids = data.tracks.map((t) => t.id);
@@ -210,7 +181,7 @@ function CollectionPage({ data, playlists, onClose, onDeleted }) {
   const spinning = playing && ids.includes(nowId);
   return (
     <Layer>
-      <div className="fixed inset-0 z-[25] animate-sheet-up overflow-y-auto overscroll-contain bg-ink-0 pb-48" style={{ backgroundImage: `radial-gradient(90% 40% at 50% 0%, rgb(${accent} / 0.5), transparent 75%)` }} data-collection-page>
+      <div className="fixed inset-0 z-[25] animate-sheet-up overflow-y-auto overscroll-contain bg-ink-0 pb-48" style={{ ...drag.style, backgroundImage: `radial-gradient(90% 40% at 50% 0%, rgb(${accent} / 0.5), transparent 75%)` }} {...drag.bind} data-collection-page>
         <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2">
           <button type="button" aria-label="Back" onClick={leave} className="grid size-10 place-items-center rounded-full border border-white/12 bg-black/35 text-bone backdrop-blur active:scale-90">
             <ChevronLeft size={22} aria-hidden="true" />
@@ -270,13 +241,14 @@ function NowPlaying({ tracks, byId }) {
   const accent = current?.hasCover ? tint : GOLD;
   const lyricsInput = useRef(null);
   const leave = useHistoryLayer(true, closePlayer);
+  const drag = useSheetDrag(leave); // pull the player down to put it away
   const lines = useMemo(() => parseLrc(current?.lyrics), [current?.lyrics]);
   const active = activeLine(lines, time);
   const upNext = queue.order.slice(queue.index + 1, queue.index + 6).map((id) => byId.get(id)).filter(Boolean);
   const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
   return (
     <Layer>
-      <div className="fixed inset-0 z-[60] animate-sheet-up overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-10" style={{ background: `radial-gradient(120% 55% at 50% 0%, rgb(${accent} / 0.55), transparent 75%), var(--color-ink-0)` }} data-now-playing-page>
+      <div className="fixed inset-0 z-[60] animate-sheet-up overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-10" style={{ ...drag.style, background: `radial-gradient(120% 55% at 50% 0%, rgb(${accent} / 0.55), transparent 75%), var(--color-ink-0)` }} {...drag.bind} data-now-playing-page>
         <div className="flex items-center justify-between">
           <button type="button" aria-label="Close the player" onClick={leave} className="grid size-10 place-items-center rounded-full border border-white/12 bg-white/8 text-bone active:scale-90">
             <ChevronDown size={22} aria-hidden="true" />
