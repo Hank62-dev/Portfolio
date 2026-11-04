@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { Copy, Download, Pause, Play, Plus, SkipBack, SkipForward, Users } from 'lucide-react';
 import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
-import { useInstall, useOnline } from './hooks/useInstall';
+import { useInstall } from './hooks/useInstall';
 import { clsx } from '../../lib/format';
 import { useTheme } from '../../lib/theme';
 import CommandPalette from './components/CommandPalette';
@@ -98,7 +98,6 @@ export default function Workspace({
   const music = true;
   const app = useInstall();
   const { mode, setMode } = useTheme();
-  const online = useOnline();
 
   // another app shared something to Hank62: the address says so (?share=1) and the sheet asks where it goes
   const [params, setParams] = useSearchParams();
@@ -293,11 +292,6 @@ export default function Workspace({
           )}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <Topbar tab={tab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
-            {!online && (
-              <div className="border-b border-line bg-ink-2 px-gutter py-2 font-mono text-fine text-bone-dim" role="status" data-offline>
-                You are offline. Music, notes and pictures still work; AI, the calendar and the realtime link wait for the connection.
-              </div>
-            )}
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
               <div key={tab} className={clsx('animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>

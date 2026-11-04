@@ -41,19 +41,3 @@ export function useInstall() {
 
   return { canInstall: Boolean(prompt) && !installed, ios: isIos() && !installed, installed, install };
 }
-
-/** Whether the browser thinks it has a connection (it can say "no" reliably, but "yes" only loosely). */
-export function useOnline() {
-  const [online, setOnline] = useState(() => (typeof navigator === 'undefined' ? true : navigator.onLine));
-  useEffect(() => {
-    const up = () => setOnline(true);
-    const down = () => setOnline(false);
-    window.addEventListener('online', up);
-    window.addEventListener('offline', down);
-    return () => {
-      window.removeEventListener('online', up);
-      window.removeEventListener('offline', down);
-    };
-  }, []);
-  return online;
-}

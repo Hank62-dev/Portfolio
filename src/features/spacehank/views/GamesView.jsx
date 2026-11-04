@@ -1,6 +1,6 @@
 import { lazy, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Brain, Grid3x3, Hand, Hash, Worm } from 'lucide-react';
+import { ArrowLeft, Blocks, Bomb, Brain, CircleDot, Disc, Grid3x3, Hammer, Hand, Hash, LayoutGrid, Lightbulb, Worm } from 'lucide-react';
 import { Desk, Doodle, INK, InkBox, InkButton, RED, Title } from '../games/ink';
 import { BauCua, FindNumbers, Memory, Rps } from '../games/small';
 
@@ -8,6 +8,14 @@ const Sudoku = lazy(() => import('../games/Sudoku'));
 const Caro = lazy(() => import('../games/Caro'));
 const Snake = lazy(() => import('../games/Snake'));
 const Battleship = lazy(() => import('../games/SeaBattle'));
+const Game2048 = lazy(() => import('../games/Game2048'));
+const Minesweeper = lazy(() => import('../games/Minesweeper'));
+const ConnectFour = lazy(() => import('../games/ConnectFour'));
+const Reversi = lazy(() => import('../games/Reversi'));
+const SlidePuzzle = lazy(() => import('../games/SlidePuzzle'));
+const LightsOut = lazy(() => import('../games/LightsOut'));
+const WhackMole = lazy(() => import('../games/WhackMole'));
+const Tetris = lazy(() => import('../games/FallingBlocks'));
 
 const PEN = { filter: 'url(#pen)' };
 const GAMES = [
@@ -19,6 +27,14 @@ const GAMES = [
   { id: 'memory', name: 'Lật hình', hint: 'Find all the pairs.', icon: () => <Brain size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Memory },
   { id: 'snake', name: 'Rắn săn mồi', hint: 'Eat, grow, do not crash.', icon: () => <Worm size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Snake },
   { id: 'rps', name: 'Kéo búa bao', hint: 'The oldest duel of all.', icon: () => <Hand size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Rps },
+  { id: '2048', name: 'Gộp số', hint: 'Slide, join equal numbers, reach 2048.', icon: () => <b className="font-pen text-[2.1rem] leading-none" style={{ color: INK, ...PEN }}>2048</b>, tone: INK, play: Game2048 },
+  { id: 'tetris', name: 'Xếp hình', hint: 'Falling blocks. Fill a line, it vanishes.', icon: () => <Blocks size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Tetris },
+  { id: 'mines', name: 'Dò mìn', hint: 'Open the squares, avoid the mines.', icon: () => <Bomb size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Minesweeper },
+  { id: 'connect4', name: 'Bốn quân', hint: 'Drop discs, get four in a row.', icon: () => <CircleDot size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: ConnectFour },
+  { id: 'reversi', name: 'Cờ lật', hint: 'Trap discs between yours and flip them.', icon: () => <Disc size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Reversi },
+  { id: 'slide', name: 'Ghép số', hint: 'Slide the tiles until 1 to 15 are in order.', icon: () => <LayoutGrid size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: SlidePuzzle },
+  { id: 'lights', name: 'Tắt đèn', hint: 'Press a lamp, its neighbours flip too.', icon: () => <Lightbulb size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: LightsOut },
+  { id: 'whack', name: 'Đập chuột', hint: 'Tap the moles before they duck. 30 seconds.', icon: () => <Hammer size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: WhackMole },
 ];
 
 /** The page of a game while its code arrives: a few lines in pale ink, where the game will be drawn. */
