@@ -18,6 +18,15 @@ const bundledMusic = () => ({
   resolveId: (id) => (id === 'virtual:bundled-music' ? '\0virtual:bundled-music' : undefined),
   load: (id) => (id === '\0virtual:bundled-music' ? `export default ${JSON.stringify(musicFiles())}` : undefined),
   configureServer(server) {
+    // a song added to (or removed from) the folder while `npm run dev` runs: refresh the list and reload the page
+    server.watcher.add(MUSIC_DIR)
+    const relist = (file) => {
+      if (!file.startsWith(MUSIC_DIR) || !MUSIC_FILE.test(file)) return
+      const mod = server.moduleGraph.getModuleById('\0virtual:bundled-music')
+      if (mod) server.moduleGraph.invalidateModule(mod)
+      server.ws.send({ type: 'full-reload' })
+    }
+    server.watcher.on('add', relist).on('unlink', relist)
     server.middlewares.use('/music', (req, res, next) => {
       const name = decodeURIComponent((req.url ?? '').split('?')[0].replace(/^\//, ''))
       const file = resolve(MUSIC_DIR, name)
