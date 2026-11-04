@@ -76,7 +76,7 @@ const askToNotify = () => {
 };
 const notify = async (title, body, ringing = false) => {
   if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-  const options = { body, tag: 'hank62-focus', icon: '/icons/icon-192.png', badge: '/icons/icon-192.png', silent: !ringing, requireInteraction: ringing, renotify: ringing, vibrate: ringing ? [300, 150, 300, 150, 600] : undefined };
+  const options = { body, tag: 'hank62-focus', icon: '/icons/logo-192.png', badge: '/icons/logo-192.png', silent: !ringing, requireInteraction: ringing, renotify: ringing, vibrate: ringing ? [300, 150, 300, 150, 600] : undefined };
   try {
     const registration = await navigator.serviceWorker?.ready;
     if (registration?.showNotification) await registration.showNotification(title, options);
@@ -99,7 +99,7 @@ const clearNotification = async () => {
 const publishCard = () => {
   if (!hasSession() || musicIsPlaying()) return; // while a song plays, the card belongs to the song
   const { mode, left, total, status } = focus.get();
-  navigator.mediaSession.metadata = new MediaMetadata({ title: `${label(mode)} · ${clock(left)}`, artist: status === 'running' ? 'Hank62 · keep going' : 'Hank62 · paused', album: 'Focus timer', artwork: [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }] });
+  navigator.mediaSession.metadata = new MediaMetadata({ title: `${label(mode)} · ${clock(left)}`, artist: status === 'running' ? 'Hank62 · keep going' : 'Hank62 · paused', album: 'Focus timer', artwork: [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }] });
   navigator.mediaSession.playbackState = status === 'running' ? 'playing' : 'paused';
   try {
     navigator.mediaSession.setPositionState?.({ duration: total, position: Math.max(0, Math.min(total, total - left)), playbackRate: 1 });
@@ -189,7 +189,7 @@ const finish = () => {
   ring();
   void notify(mode === 'focus' ? 'Focus session done' : 'Break over', mode === 'focus' ? 'Time for a short break.' : 'Ready for the next round?', true);
   if (hasSession() && !musicIsPlaying()) {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: mode === 'focus' ? 'Focus done' : 'Break over', artist: 'Hank62', album: 'Focus timer', artwork: [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }] });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: mode === 'focus' ? 'Focus done' : 'Break over', artist: 'Hank62', album: 'Focus timer', artwork: [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }] });
     navigator.mediaSession.playbackState = 'playing';
   }
 };

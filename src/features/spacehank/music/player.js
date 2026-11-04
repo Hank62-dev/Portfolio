@@ -102,7 +102,7 @@ const publishToSystem = async (track) => {
     title: track.title,
     artist: track.artist || 'Hank Music',
     album: track.album || 'Hank62',
-    artwork: art ? sizes.map((size) => ({ src: art, sizes: size })) : [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }],
+    artwork: art ? sizes.map((size) => ({ src: art, sizes: size })) : [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }],
   });
 };
 

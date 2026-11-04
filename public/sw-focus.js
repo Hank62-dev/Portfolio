@@ -16,8 +16,8 @@ const announceUpdate = async () => {
   await self.registration.showNotification(vi ? 'Hank62 có bản cập nhật mới' : 'Hank62 has an update', {
     body: vi ? 'Chạm để mở app và cập nhật.' : 'Tap to open the app and update.',
     tag: UPDATE_TAG,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon: '/icons/logo-192.png',
+    badge: '/icons/logo-192.png',
     data: { kind: 'update' },
   });
 };
