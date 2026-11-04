@@ -22,6 +22,8 @@ export const SYNC_STORES = {
   deals: {},
   prompts: {},
   settings: {},
+  chats: {}, // Hank RAG conversations: one record each (title, session) …
+  chatMsgs: {}, // … and one small record per message, so a long chat never outgrows the size limit of a record
   memos: { blob: true },
   images: { blob: true },
   photos: { blob: true },
