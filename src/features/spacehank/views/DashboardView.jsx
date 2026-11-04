@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Activity, ArrowUpRight, BrainCircuit, Boxes, ChevronDown, Database, Gauge, MessageCircle, Network, Users, Wifi } from 'lucide-react';
 import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, PageHeader, Stat } from '../../../design-system';
 import BriefingCard from '../components/BriefingCard';
+import AppIcon from '../components/AppIcon';
 import PetCard from '../components/PetCard';
 import { greetingFor, owner } from '../config';
 import { isWorking } from '../model/agents';
-import { NAVIGATION, tabHue } from '../navigation';
+import { NAVIGATION } from '../navigation';
 
 function LayerRow({ icon: Icon, label, value }) {
   return (
@@ -20,21 +21,6 @@ function LayerRow({ icon: Icon, label, value }) {
 /** A phone's home screen: every part of the workspace as an app icon, like a launcher. Two rows show; the rest open on request. */
 const FIRST_ROWS = 8;
 
-function AppIcon({ item, onTab }) {
-  const { id, label, icon: Icon } = item;
-  const hue = tabHue(id);
-  return (
-    <li>
-      <button type="button" onClick={() => onTab(id)} className="group flex w-full flex-col items-center gap-1.5 active:scale-95">
-        <span className="grid size-[3.6rem] place-items-center rounded-[1.25rem] shadow-[inset_0_1px_0_rgb(255_255_255/0.12)] transition-transform" style={{ background: `linear-gradient(150deg, hsl(${hue} 70% 46% / 0.9), hsl(${(hue + 40) % 360} 65% 30% / 0.95))`, color: `hsl(${hue} 100% 92%)` }}>
-          <Icon size={25} strokeWidth={1.7} aria-hidden="true" />
-        </span>
-        <span className="line-clamp-2 w-full text-center font-mono text-[0.6rem] leading-tight tracking-tight [overflow-wrap:anywhere] text-bone-dim">{label}</span>
-      </button>
-    </li>
-  );
-}
-
 function Launcher({ onTab }) {
   const [more, setMore] = useState(false);
   const items = NAVIGATION.filter((item) => item.id !== 'hank');
@@ -42,13 +28,13 @@ function Launcher({ onTab }) {
     <nav aria-label="All apps" className="md:hidden" data-launcher>
       <ul className="grid grid-cols-4 gap-x-2 gap-y-4">
         {items.slice(0, FIRST_ROWS).map((item) => (
-          <AppIcon key={item.id} item={item} onTab={onTab} />
+          <AppIcon key={item.id} item={item} onPick={onTab} />
         ))}
       </ul>
       <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out-expo ${more ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`} aria-hidden={!more}>
         <ul className="grid min-h-0 grid-cols-4 gap-x-2 gap-y-4 overflow-hidden pt-4">
           {items.slice(FIRST_ROWS).map((item) => (
-            <AppIcon key={item.id} item={item} onTab={onTab} />
+            <AppIcon key={item.id} item={item} onPick={onTab} />
           ))}
         </ul>
       </div>

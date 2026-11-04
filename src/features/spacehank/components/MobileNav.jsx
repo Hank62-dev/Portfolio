@@ -1,10 +1,13 @@
 import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, X } from 'lucide-react';
+import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, Search, X } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { ThemePills } from './ThemeMenu';
-import { NAVIGATION, NAV_SECTIONS } from '../navigation';
+import AppIcon from './AppIcon';
+import { NAVIGATION } from '../navigation';
+
+const matches = (item, q) => !q || `${item.label} ${item.section} ${item.keywords ?? ''}`.toLowerCase().includes(q);
 
 // The four places a phone reaches most often; everything else lives under "More".
 const PINNED = ['hank', 'rag', 'notes', 'music'];
@@ -21,10 +24,14 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
   const start = useRef(null);
   const scroller = useRef(null);
   const [more, setMore] = useState(false); // there is more of the list below
+  const [query, setQuery] = useState('');
+  const q = query.trim().toLowerCase();
+  const found = NAVIGATION.filter((item) => matches(item, q));
   const pinned = PINNED.map((id) => NAVIGATION.find((item) => item.id === id));
 
   const go = (id) => {
     setOpen(false);
+    setQuery('');
     navigator.vibrate?.(6);
     // tapping the tab you are on scrolls it back to the top, as in a native app
     if (id === tab) window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -62,7 +69,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
       cancelAnimationFrame(frame);
       if (el && on) el.removeEventListener('scroll', on);
     };
-  }, [open]);
+  }, [open, q]);
 
   // the bubble and the notch in the bar follow the active slot (0..4); --notch is animated, see @property in index.css
   const slot = pinned.findIndex((item) => item.id === tab);
@@ -70,7 +77,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
   const ActiveIcon = slot === -1 ? MoreHorizontal : pinned[slot].icon;
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root open={open} onOpenChange={(next) => { setOpen(next); if (!next) setQuery(''); }}>
       <nav
         aria-label="Workspace"
         className="fixed inset-x-3 bottom-[calc(0.6rem+env(safe-area-inset-bottom))] z-30 h-[4.1rem] [transition:--notch_0.55s_cubic-bezier(0.16,1,0.3,1)]"
@@ -107,7 +114,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
         <Dialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/65 backdrop-blur-sm" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-x-0 bottom-0 z-50 flex max-h-[86dvh] flex-col rounded-t-[2rem] border border-b-0 border-line bg-ink-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-30px_80px_-30px_rgb(var(--shadow-rgb)/0.9)] [animation:sheet-up_0.38s_cubic-bezier(0.16,1,0.3,1)_backwards]"
+          className="fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col overflow-hidden rounded-t-[2rem] border border-b-0 border-line bg-ink-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-30px_80px_-30px_rgb(var(--shadow-rgb)/0.9)] [animation:sheet-up_0.38s_cubic-bezier(0.16,1,0.3,1)_backwards]"
           style={{ transform: drag.y ? `translateY(${drag.y}px)` : undefined, transition: drag.active ? 'none' : 'transform 0.28s cubic-bezier(0.16,1,0.3,1)' }}
         >
           {/* hold the handle or the title and pull down to put the sheet away */}
@@ -122,47 +129,65 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             onPointerCancel={release}
           >
             <span className="mx-auto mt-2.5 block h-1 w-10 rounded-full bg-line-strong" aria-hidden="true" />
-            <div className="flex items-center justify-between px-5 pt-3 pb-2">
-              <Dialog.Title className="font-display text-lead text-bone">Everything in Hank62</Dialog.Title>
-              <Dialog.Close aria-label="Close" className="grid size-9 place-items-center rounded-full text-bone-dim hover:bg-wash/5 hover:text-bone">
-                <X size={18} aria-hidden="true" />
+            <div className="relative flex items-end justify-between px-5 pt-3 pb-3">
+              <div className="min-w-0">
+                <p className="mb-1.5 font-mono text-[0.6rem] tracking-[0.22em] text-bone-faint">INDEX · {String(NAVIGATION.length).padStart(2, '0')} PLACES</p>
+                <Dialog.Title className="font-display text-[1.95rem] leading-none font-normal tracking-tight text-bone">
+                  Everything in <em className="text-signal">Hank62</em>
+                </Dialog.Title>
+              </div>
+              <Dialog.Close aria-label="Close" className="mb-0.5 grid size-9 shrink-0 place-items-center rounded-full border border-line text-bone-dim hover:text-bone active:scale-90">
+                <X size={16} aria-hidden="true" />
               </Dialog.Close>
             </div>
+          </div>
+
+          <div className="relative mx-5 mb-4">
+            <Search size={14} aria-hidden="true" className="pointer-events-none absolute top-1/2 left-0 -translate-y-1/2 text-bone-faint" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && found[0]) go(found[0].id);
+              }}
+              placeholder="Find a place: music, notes, money"
+              aria-label="Find a place"
+              enterKeyHint="go"
+              autoComplete="off"
+              className="h-10 w-full border-b border-line-strong bg-transparent pl-6 font-mono text-fine text-bone transition-colors placeholder:text-bone-faint focus:border-signal focus:outline-none"
+            />
           </div>
 
           <div className="relative flex min-h-0 flex-col">
           <div
             ref={scroller}
-            className="no-scrollbar flex flex-col gap-5 overflow-y-auto overscroll-contain px-5 pt-1 pb-5"
+            className="no-scrollbar flex flex-col gap-6 overflow-y-auto overscroll-contain px-5 pt-1 pb-5"
             onTouchStart={(e) => begin(e.touches[0].clientY)}
             onTouchMove={(e) => follow(e.touches[0].clientY, (scroller.current?.scrollTop ?? 0) <= 0)}
             onTouchEnd={release}
             onTouchCancel={release}
           >
-            {NAV_SECTIONS.map((section) => (
-              <section key={section} aria-label={section}>
-                <h2 className="mb-2 font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">{section}</h2>
-                <ul className="grid grid-cols-3 gap-2">
-                  {NAVIGATION.filter((item) => item.section === section).map(({ id, label, icon: Icon }) => (
-                    <li key={id}>
-                      <button
-                        type="button"
-                        onClick={() => go(id)}
-                        aria-current={tab === id ? 'page' : undefined}
-                        className={clsx('flex h-full w-full flex-col items-center gap-2 rounded-2xl border px-2 py-3.5 text-center font-mono text-[0.72rem] leading-tight transition-colors', tab === id ? 'border-signal/50 bg-signal-soft text-bone' : 'border-line bg-ink-2/60 text-bone-dim active:bg-ink-3')}
-                      >
-                        <Icon size={20} strokeWidth={1.7} aria-hidden="true" className={tab === id ? 'text-signal' : ''} />
-                        {label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
+            {found.length > 0 && (
+              <ul className="grid grid-cols-4 gap-x-2 gap-y-4 pt-1" key={q}>
+                {found.map((item, i) => (
+                  <AppIcon key={item.id} item={item} index={i} current={tab === item.id} onPick={go} className="sheet-tile" />
+                ))}
+              </ul>
+            )}
+            {!found.length && (
+              <p className="py-8 text-center font-mono text-fine text-bone-faint" role="status">
+                Nothing here called “{query.trim()}”. Try “notes”, “money” or “play”.
+              </p>
+            )}
 
-            <ThemePills className="border-t border-line pt-4" />
-            {!guest && <SyncStatus className="border-t border-line pt-3" />}
-            <div className="flex flex-wrap gap-2 border-t border-line pt-4">
+            {!q && (
+              <>
+                <ThemePills className="border-t border-line pt-4" />
+                {!guest && <SyncStatus className="border-t border-line pt-3" />}
+              </>
+            )}
+            <div className={clsx('flex flex-wrap gap-2 border-t border-line pt-4', q && 'hidden')}>
               {(app?.canInstall || app?.ios) && (
                 <button
                   type="button"

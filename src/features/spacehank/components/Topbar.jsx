@@ -4,7 +4,7 @@ import { Avatar, Badge, Button, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { ThemeMenu } from './ThemeMenu';
 import { owner } from '../config';
-import { NAVIGATION, tabHue } from '../navigation';
+import { NAVIGATION, tabAccent, tabHue } from '../navigation';
 
 // the realtime link: green when open, amber while it is being (re)opened, red when it is not coming back
 const LINK = {
@@ -44,14 +44,14 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
       className={clsx('sticky top-[-1.1rem] z-20 flex h-[calc(4.4rem+env(safe-area-inset-top))] items-end px-gutter pb-2.5 transition-[background-color,box-shadow,backdrop-filter] duration-300 md:hidden', scrolled ? 'bg-ink-0/80 shadow-[0_1px_0_var(--color-line)] backdrop-blur-xl' : 'bg-transparent')}
       data-phone-bar
     >
-      <span aria-hidden="true" className={clsx('pointer-events-none absolute inset-0 transition-opacity duration-500', scrolled ? 'opacity-40' : 'opacity-100')} style={{ background: `radial-gradient(80% 140% at 0% 0%, hsl(${hue} 80% 55% / 0.24), transparent 70%)` }} />
+      <span aria-hidden="true" className={clsx('pointer-events-none absolute inset-0 transition-opacity duration-500', scrolled ? 'opacity-40' : 'opacity-100')} style={{ background: `radial-gradient(80% 140% at 0% 0%, hsl(${hue} 55% 50% / 0.13), transparent 70%)` }} />
       <div className="relative flex w-full items-center gap-3">
         <span
-          className={clsx('grid shrink-0 place-items-center text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.2),0_8px_18px_-8px_var(--color-signal)] transition-all duration-300', scrolled ? 'size-8 rounded-[0.7rem]' : 'size-11 rounded-[1rem]')}
-          style={{ background: `linear-gradient(150deg, hsl(${hue} 72% 48%), hsl(${(hue + 40) % 360} 66% 32%))` }}
+          className={clsx('grid shrink-0 place-items-center border border-line-strong bg-ink-2/80 transition-all duration-300', scrolled ? 'size-8 rounded-[0.7rem]' : 'size-11 rounded-[1rem]')}
+          style={{ color: tabAccent(tab) }}
           aria-hidden="true"
         >
-          <Icon size={scrolled ? 16 : 22} strokeWidth={1.8} />
+          <Icon size={scrolled ? 16 : 22} strokeWidth={1.5} />
         </span>
         <h1 className="min-w-0 flex-1 leading-none">
           <small className={clsx('block overflow-hidden font-mono text-[0.58rem] tracking-[0.18em] text-signal uppercase transition-all duration-300', scrolled ? 'mb-0 max-h-0 opacity-0' : 'mb-1.5 max-h-4 opacity-100')}>{current.section}</small>

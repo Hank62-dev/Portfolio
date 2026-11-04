@@ -516,6 +516,23 @@
   }
 }
 
+/* The entries of the "everything" sheet appear one after another (--i is each tile's place in the list). */
+.sheet-tile {
+  animation: sheet-tile-in 0.55s var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--i, 0) * 22ms + 140ms);
+}
+@keyframes sheet-tile-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet-tile {
+    animation: none;
+  }
+}
+
 /* Three bars that move while a song plays. */
 .eq {
   display: inline-flex;
@@ -811,22 +828,22 @@ input[data-own-clear]::-webkit-search-decoration {
    airy by day, and a soft glow of the hue sits in the top corner. Text colours stay with the theme, so contrast is unchanged. */
 .app-shell {
   --tab: var(--app-hue, 18);
-  --color-signal: hsl(var(--tab) 88% 62%);
-  --color-signal-soft: hsl(var(--tab) 88% 62% / 0.15);
-  --color-ink-0: hsl(var(--tab) 22% 5.5%);
-  --color-ink-1: hsl(var(--tab) 18% 7.8%);
-  --color-ink-2: hsl(var(--tab) 15% 10.5%);
-  --color-ink-3: hsl(var(--tab) 13% 14%);
-  background-image: radial-gradient(75% 48% at 0% 0%, hsl(var(--tab) 85% 55% / 0.13), transparent 70%), radial-gradient(60% 40% at 100% 100%, hsl(calc(var(--tab) + 40) 80% 55% / 0.06), transparent 70%);
+  --color-signal: hsl(var(--tab) 74% 61%);
+  --color-signal-soft: hsl(var(--tab) 74% 61% / 0.14);
+  --color-ink-0: hsl(var(--tab) 10% 5.6%);
+  --color-ink-1: hsl(var(--tab) 8% 7.8%);
+  --color-ink-2: hsl(var(--tab) 7% 10.4%);
+  --color-ink-3: hsl(var(--tab) 6% 13.8%);
+  background-image: radial-gradient(75% 44% at 0% 0%, hsl(var(--tab) 55% 50% / 0.085), transparent 70%);
 }
 :root[data-theme='light'] .app-shell {
-  --color-signal: hsl(var(--tab) 78% 38%);
-  --color-signal-soft: hsl(var(--tab) 78% 38% / 0.12);
-  --color-ink-0: hsl(var(--tab) 42% 95.5%);
-  --color-ink-1: hsl(var(--tab) 36% 92.5%);
-  --color-ink-2: hsl(var(--tab) 31% 89%);
-  --color-ink-3: hsl(var(--tab) 27% 84%);
-  background-image: radial-gradient(75% 48% at 0% 0%, hsl(var(--tab) 90% 62% / 0.2), transparent 70%), radial-gradient(60% 40% at 100% 100%, hsl(calc(var(--tab) + 40) 85% 62% / 0.12), transparent 70%);
+  --color-signal: hsl(var(--tab) 68% 38%);
+  --color-signal-soft: hsl(var(--tab) 68% 38% / 0.11);
+  --color-ink-0: hsl(var(--tab) 24% 95.5%);
+  --color-ink-1: hsl(var(--tab) 20% 92.5%);
+  --color-ink-2: hsl(var(--tab) 17% 89%);
+  --color-ink-3: hsl(var(--tab) 15% 84.5%);
+  background-image: radial-gradient(75% 44% at 0% 0%, hsl(var(--tab) 60% 60% / 0.13), transparent 70%);
 }
 
 /* "Ra chơi": a wooden desk with a squared notebook on it, everything in blue ballpoint. */
