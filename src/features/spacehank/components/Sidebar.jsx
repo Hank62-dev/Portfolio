@@ -1,8 +1,9 @@
 import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Download, LockKeyhole, LogOut, PanelLeftClose, PanelLeftOpen, RotateCcw, Sparkles } from 'lucide-react';
+import { ChevronDown, Download, LockKeyhole, LogOut, PanelLeftClose, PanelLeftOpen, RotateCcw } from 'lucide-react';
 import { Avatar, Badge, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
+import Logo from '../../../components/ui/Logo';
 import { owner } from '../config';
 import { NAVIGATION, NAV_SECTIONS } from '../navigation';
 
@@ -58,9 +59,7 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
       )}
     >
       <div className={clsx('flex items-center gap-2.5 px-2', rail && 'justify-center px-0')}>
-        <span className="grid size-8 shrink-0 place-items-center rounded-sm bg-signal text-ink-0">
-          <Sparkles size={16} aria-hidden="true" />
-        </span>
+        <Logo className="size-9 rounded-lg" />
         {!rail && (
           <span className="leading-tight">
             <b className="font-display text-lead font-normal">

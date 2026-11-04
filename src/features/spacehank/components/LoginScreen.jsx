@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import Logo from '../../../components/ui/Logo';
 import { Button, Card, ErrorState, Eyebrow, Field, Input, Loading, Skeleton } from '../../../design-system';
 
 const messageFor = (error) =>
@@ -59,9 +59,7 @@ export default function LoginScreen({ onLogin, onGuest }) {
   return (
     <div className="grid min-h-screen place-items-center bg-ink-0 px-gutter py-10">
       <Card as="form" onSubmit={submit} className="flex w-full max-w-[420px] flex-col gap-5 p-7 shadow-pop">
-        <span className="grid size-10 place-items-center rounded-sm bg-signal text-ink-0">
-          <Sparkles size={18} aria-hidden="true" />
-        </span>
+        <Logo className="size-12 rounded-lg" />
         <div>
           <Eyebrow>PRIVATE WORKSPACE / 01</Eyebrow>
           <h1 className="mt-2 font-display text-h2 leading-none">Welcome back.</h1>

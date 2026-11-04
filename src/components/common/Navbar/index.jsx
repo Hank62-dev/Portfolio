@@ -7,6 +7,7 @@ import { clsx } from '../../../lib/format';
 import { jumpTo } from '../../../lib/scroll';
 import { lenisRef } from '../../../motion/SmoothScroll';
 import LangToggle from '../LangToggle';
+import Logo from '../../ui/Logo';
 
 // Below the `nav` breakpoint the links become a full-screen panel that fades and slides in.
 // `visibility` flips last when closing so the panel stays clickable-proof while it fades out.
@@ -80,9 +81,7 @@ const Navbar = () => {
     >
       <div className="wrap flex h-full items-center justify-between gap-6">
         <Link to="/" className="inline-flex items-center gap-3" aria-label={c.nav.home}>
-          <span className="grid h-[30px] place-items-center rounded-sm border border-line-strong px-2 font-mono text-[0.72rem] font-semibold tracking-[0.06em]">
-            HGH
-          </span>
+          <Logo className="size-9 rounded-md" />
           <span className="font-display text-[1.25rem] max-[1020px]:hidden">Võ Gia Huy</span>
         </Link>
 
