@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import LoginScreen, { AuthLoading } from './components/LoginScreen';
+import LoginScreen, { AuthLoading, ServerUnreachable } from './components/LoginScreen';
 import { Toast } from '../../design-system';
 import { DEMO_URL, WORKSPACE_URL, isDemo } from './demo/mode';
 import { resetDemo, seedDemo } from './demo/seed';
@@ -9,6 +9,7 @@ import { useRealtime } from './hooks/useRealtime';
 import { startSync } from './sync';
 import { useAppViewport } from './hooks/useAppViewport';
 import { DEFAULT_AGENT_ID } from './model/agents';
+import { spacehankConfig } from './config';
 import { DEFAULT_TAB, NAVIGATION } from './navigation';
 
 // the open tab lives in the address (/spacehank?tab=notes), which is also what an installed app's shortcuts use
@@ -49,6 +50,7 @@ export default function SpaceHank() {
   useEffect(() => (!guest && authenticated ? startSync() : undefined), [guest, authenticated]);
 
   if (guest && !ready) return <AuthLoading label="Setting up the demo" />;
+  if (!guest && authenticated === null && live.unreachable) return <ServerUnreachable apiUrl={spacehankConfig.realtimeApiUrl} />;
   if (!guest && authenticated === null) return <AuthLoading label={live.waking ? 'Waking the server (a free server can take up to a minute)' : undefined} />;
   // a full page load, so the demo's storage and the real one are never open at the same time
   if (!guest && !authenticated) return <LoginScreen onLogin={live.login} onGuest={() => window.location.assign(DEMO_URL)} />;

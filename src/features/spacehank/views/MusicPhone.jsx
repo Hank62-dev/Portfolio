@@ -32,7 +32,6 @@ import { clsx } from '../../../lib/format';
 import { djPick } from '../api/owner';
 import { greetingFor, owner } from '../config';
 import Cover, { useCoverTint } from '../music/Cover';
-import { activeLine, parseLrc } from '../music/lrc';
 import {
   createPlaylist,
   deletePlaylist,
@@ -42,10 +41,10 @@ import {
   library,
   loadLibrary,
   removeSamples,
-  setLyrics,
   toggleFavorite,
 } from '../music/library';
-import { MOODS, Orbit, Ribbon, SheetRow, Slider, matches } from '../music/parts';
+import Lyrics from '../music/Lyrics';
+import { MOODS, Orbit, SheetRow, Slider, matches } from '../music/parts';
 import { cycleRepeat, next, playList, player, playTrack, previous, seek, setSleepTimer, toggleShuffle, togglePlay } from '../music/player';
 import { closePlayer, musicUi } from '../music/ui';
 import { useStore } from '../store';
@@ -177,7 +176,9 @@ function CollectionPage({ data, playlists, onClose, onDeleted }) {
   const ids = data.tracks.map((t) => t.id);
   const nowId = useStore(player, (s) => s.trackId);
   const playing = useStore(player, (s) => s.playing);
+  const repeat = useStore(player, (s) => s.repeat);
   const spinning = playing && ids.includes(nowId);
+  const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
   return (
     <Layer>
       <div className="fixed inset-0 z-[25] animate-sheet-up overflow-y-auto overscroll-contain bg-ink-0 pb-48" style={{ ...drag.style, backgroundImage: `radial-gradient(90% 40% at 50% 0%, rgb(${accent} / 0.5), transparent 75%)` }} {...drag.bind} data-collection-page>
@@ -215,6 +216,10 @@ function CollectionPage({ data, playlists, onClose, onDeleted }) {
             <button type="button" aria-label="Shuffle play" disabled={!ids.length} onClick={() => void playList(ids, { shuffle: true })} className="grid size-12 place-items-center rounded-full border border-wash/15 text-bone-dim active:scale-90 disabled:opacity-40">
               <Shuffle size={18} aria-hidden="true" />
             </button>
+            {/* off, then the whole list again and again, then one song again and again */}
+            <button type="button" aria-label={`Repeat: ${repeat}`} aria-pressed={repeat !== 'off'} onClick={cycleRepeat} className={clsx('grid size-12 place-items-center rounded-full border active:scale-90', repeat === 'off' ? 'border-wash/15 text-bone-dim' : 'border-signal/50 bg-signal-soft text-signal')} data-repeat-list>
+              <RepeatIcon size={18} aria-hidden="true" />
+            </button>
             <button type="button" aria-label="Play all" disabled={!ids.length} onClick={() => void playList(ids)} className="ml-auto grid size-[3.7rem] place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_14px_30px_-10px_var(--color-signal)] ring-4 ring-signal/20 active:scale-95 disabled:opacity-40">
               <Play size={25} fill="currentColor" className="translate-x-px" aria-hidden="true" />
             </button>
@@ -238,11 +243,8 @@ function NowPlaying({ tracks, byId }) {
   const current = tracks.find((t) => t.id === trackId) ?? null;
   const tint = useCoverTint(current);
   const accent = current?.hasCover ? tint : GOLD;
-  const lyricsInput = useRef(null);
   const leave = useHistoryLayer(true, closePlayer);
   const drag = useSheetDrag(leave); // pull the player down to put it away
-  const lines = useMemo(() => parseLrc(current?.lyrics), [current?.lyrics]);
-  const active = activeLine(lines, time);
   const upNext = queue.order.slice(queue.index + 1, queue.index + 6).map((id) => byId.get(id)).filter(Boolean);
   const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
   return (
@@ -310,17 +312,9 @@ function NowPlaying({ tracks, byId }) {
         {current && (
           <section className="mx-auto mt-8 w-full max-w-[22rem] rounded-[1.75rem] border border-wash/10 bg-shade/25 p-5 backdrop-blur" aria-label="Lyrics">
             <h3 className="font-mono text-[0.62rem] tracking-[0.24em] text-signal uppercase">Lyrics</h3>
-            {lines.length ? (
-              <Ribbon lines={lines} active={active} />
-            ) : (
-              <div className="mt-3 flex items-center justify-between gap-3">
-                <p className="text-fine text-bone-dim">No lyrics for this one.</p>
-                <Button variant="ghost" size="sm" onClick={() => lyricsInput.current?.click()}>
-                  Add .lrc
-                </Button>
-              </div>
-            )}
-            <input ref={lyricsInput} type="file" accept=".lrc,text/plain" hidden onChange={async (e) => { const file = e.target.files?.[0]; if (file && current) await setLyrics(current.id, await file.text()); e.target.value = ''; }} />
+            <div className="mt-3">
+              <Lyrics track={current} time={time} compact />
+            </div>
           </section>
         )}
 

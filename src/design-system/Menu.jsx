@@ -14,7 +14,7 @@ export const Menu = ({ trigger, items, align = 'start' }) => (
       <DropdownMenu.Content
         align={align}
         sideOffset={6}
-        className="z-50 min-w-44 animate-fade-in rounded-card border border-line-strong bg-ink-1 p-1 shadow-pop"
+        className="z-[95] min-w-44 animate-fade-in rounded-card border border-line-strong bg-ink-1 p-1 shadow-pop"
       >
         {items.map(({ id, label, icon: Icon, onSelect, selected }) => (
           <DropdownMenu.Item

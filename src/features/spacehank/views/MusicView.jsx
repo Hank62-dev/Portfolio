@@ -31,7 +31,6 @@ import { Button, Menu } from '../../../design-system';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { clsx } from '../../../lib/format';
 import { djPick } from '../api/owner';
-import { activeLine, parseLrc } from '../music/lrc';
 import Cover, { useCoverTint } from '../music/Cover';
 import {
   createPlaylist,
@@ -43,11 +42,11 @@ import {
   loadLibrary,
   removeFromPlaylist,
   removeSamples,
-  setLyrics,
   toggleFavorite,
 } from '../music/library';
 import { cycleRepeat, next, playList, player, playTrack, previous, seek, setSleepTimer, setVolume, toggleShuffle, togglePlay } from '../music/player';
-import { MOODS, Orbit, Ribbon, SheetRow, Slider, matches } from '../music/parts';
+import Lyrics from '../music/Lyrics';
+import { MOODS, Orbit, SheetRow, Slider, matches } from '../music/parts';
 import RadialVisualizer from '../music/RadialVisualizer';
 import { closePlayer, musicUi } from '../music/ui';
 import MusicPhone from './MusicPhone';
@@ -137,7 +136,6 @@ function MusicDesktop() {
   const leavePlayer = () => (armed.current ? navigate(-1) : closePlayer());
   const filePicker = useRef(null);
   const folderPicker = useRef(null);
-  const lyricsInput = useRef(null);
 
   useEffect(() => {
     void loadLibrary();
@@ -179,8 +177,6 @@ function MusicDesktop() {
   const liked = useMemo(() => tracks.filter((t) => t.favorite), [tracks]);
   const of = (g) => g.trackIds.map((id) => byId.get(id)).filter(Boolean);
   const hasSamples = tracks.some((t) => t.sample);
-  const lines = useMemo(() => parseLrc(current?.lyrics), [current?.lyrics]);
-  const active = activeLine(lines, time);
   const upNext = queue.order
     .slice(queue.index + 1, queue.index + 5)
     .map((id) => byId.get(id))
@@ -405,22 +401,7 @@ function MusicDesktop() {
 
         {/* right: lyrics ribbon, or Hank DJ and what is next */}
         <div className="flex min-w-0 flex-col gap-6">
-          {lines.length > 0 ? (
-            <Ribbon lines={lines} active={active} />
-          ) : current ? (
-            <div className="flex flex-col items-start gap-2">
-              <p className="font-display text-h3 leading-tight text-bone-dim">No lyrics for this one.</p>
-              <Button variant="ghost" size="sm" onClick={() => lyricsInput.current?.click()}>
-                Add lyrics (.lrc)
-              </Button>
-            </div>
-          ) : null}
-          <input ref={lyricsInput} type="file" accept=".lrc,text/plain" hidden onChange={async (e) => { const file = e.target.files?.[0]; if (file && current) await setLyrics(current.id, await file.text()); e.target.value = ''; }} />
-          {lines.length > 0 && current && (
-            <button type="button" onClick={() => lyricsInput.current?.click()} className="-mt-3 self-start font-mono text-[0.72rem] text-bone-faint underline hover:text-bone">
-              Replace lyrics
-            </button>
-          )}
+          {current && <Lyrics track={current} time={time} />}
 
           {!empty && (
             <form
@@ -649,6 +630,9 @@ function MusicDesktop() {
             </button>
             <button type="button" aria-label="Shuffle play" disabled={!drawer.tracks.length} onClick={() => playList(drawer.tracks.map((t) => t.id), { shuffle: true })} className="grid size-10 place-items-center rounded-full text-bone-dim hover:text-bone disabled:opacity-40">
               <Shuffle size={17} aria-hidden="true" />
+            </button>
+            <button type="button" aria-label={`Repeat: ${repeat}`} aria-pressed={repeat !== 'off'} onClick={cycleRepeat} className={clsx('grid size-10 place-items-center rounded-full transition-colors', repeat === 'off' ? 'text-bone-dim hover:text-bone' : 'bg-signal-soft text-signal')} data-repeat-list>
+              <RepeatIcon size={17} aria-hidden="true" />
             </button>
             {drawer.playlist && (
               <Button variant="danger" size="sm" onClick={() => { void deletePlaylist(drawer.playlist.id); setSheet(null); }}>

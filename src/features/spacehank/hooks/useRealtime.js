@@ -2,6 +2,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { pushToast } from '../../../design-system';
 import { fetchSession, login as apiLogin, logout as apiLogout, openSocket, sendTask } from '../api/realtime';
 import { spacehankConfig } from '../config';
+import { isLocalServer } from '../model/realtime';
 import { DEFAULT_AGENT_ID, createInitialAgents } from '../model/agents';
 import { applyRealtimeMessage } from '../model/realtime';
 import { requestSync } from '../sync';
@@ -28,6 +29,7 @@ export function useRealtime() {
   const [authenticated, setAuthenticated] = useState(null);
   const [link, setLink] = useState('connecting');
   const [waking, setWaking] = useState(false);
+  const [unreachable, setUnreachable] = useState(false); // a server on this very computer that does not answer: not asleep, wrong
   const [{ agents, events }, dispatchMessage] = useReducer(reducer, undefined, () => ({
     agents: createInitialAgents(),
     events: [],
@@ -50,6 +52,7 @@ export function useRealtime() {
         const value = await fetchSession();
         if (!stopped) {
           setWaking(false);
+          setUnreachable(false);
           setAuthenticated(value);
         }
       } catch {
@@ -61,6 +64,8 @@ export function useRealtime() {
           return;
         }
         if (Date.now() - startedAt > 3000) setWaking(true);
+        // a free server on the internet can be asleep for a minute, but one on localhost is not: say what to check
+        if (Date.now() - startedAt > 6000 && isLocalServer(spacehankConfig.realtimeApiUrl)) setUnreachable(true);
         timer = window.setTimeout(ask, backoffMs(attempt++));
       }
     };
@@ -204,5 +209,5 @@ export function useRealtime() {
     [notify]
   );
 
-  return { authenticated, connected, link, waking, agents, events, notify, login, logout, dispatchTask };
+  return { authenticated, connected, link, waking, unreachable, agents, events, notify, login, logout, dispatchTask };
 }

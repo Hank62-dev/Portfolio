@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createInitialAgents, isWorking } from './agents';
-import { applyRealtimeMessage, toUiEvent } from './realtime';
+import { applyRealtimeMessage, isLocalServer, toUiEvent } from './realtime';
 
 const fresh = () => ({ agents: createInitialAgents(), events: [] });
 
@@ -40,5 +40,15 @@ describe('applyRealtimeMessage', () => {
 
   it('falls back to the first agent for an unknown id', () => {
     expect(toUiEvent({ agent: 'ghost', action: 'x', text: 'y' }).name).toBe('Minh Codex');
+  });
+});
+
+describe('isLocalServer', () => {
+  it('knows an address on this computer from one on the internet', () => {
+    expect(isLocalServer('http://localhost:8787')).toBe(true);
+    expect(isLocalServer('http://127.0.0.1:8787/')).toBe(true);
+    expect(isLocalServer('https://hank62-realtime.onrender.com')).toBe(false);
+    expect(isLocalServer('not a url')).toBe(false);
+    expect(isLocalServer('')).toBe(false);
   });
 });

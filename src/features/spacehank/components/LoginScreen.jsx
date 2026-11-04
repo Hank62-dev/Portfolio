@@ -18,6 +18,27 @@ export function AuthLoading({ label = 'Securing workspace' }) {
   );
 }
 
+/** The realtime server is on this computer but does not answer the page: say what to check, instead of a skeleton for ever. */
+export function ServerUnreachable({ apiUrl }) {
+  return (
+    <div className="grid min-h-screen place-items-center bg-ink-0 px-gutter">
+      <div role="alert" className="flex w-[min(30rem,100%)] flex-col gap-3 rounded-card border border-line bg-ink-1 p-6" data-server-unreachable>
+        <span className="font-mono text-[0.68rem] tracking-[0.12em] text-warn uppercase">Cannot reach the local server</span>
+        <h1 className="font-display text-h3 leading-tight text-bone">This page cannot talk to {apiUrl}</h1>
+        <ul className="list-disc space-y-1.5 pl-5 text-fine text-bone-dim">
+          <li>
+            Is it running? Start it from a terminal with <code className="font-mono text-bone">npm run spacehank:server</code>.
+          </li>
+          <li>
+            Is its origin this page's? It must be exactly <code className="font-mono text-bone">{window.location.origin}</code> in <code className="font-mono text-bone">SPACEHANK_ORIGIN</code> (in <code className="font-mono text-bone">.env</code>). A value already set in that terminal, such as the Vercel address, wins over <code className="font-mono text-bone">.env</code>: close the terminal, or clear it with <code className="font-mono text-bone">Remove-Item Env:SPACEHANK_ORIGIN</code>, then start the server again.
+          </li>
+        </ul>
+        <p className="font-mono text-[0.72rem] text-bone-faint">This page keeps trying by itself and will carry on as soon as the server answers.</p>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginScreen({ onLogin, onGuest }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

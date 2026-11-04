@@ -21,8 +21,11 @@ export default function Cover({ track, className, rounded = 'rounded-sm' }) {
     };
   }, [id, has]);
 
+  // the frame is positioned (the picture sits inside it), unless the caller places it itself, e.g. `absolute inset-[9%]`:
+  // two position classes on one element fight, and whichever the stylesheet lists last wins, so only one is ever given
+  const placed = /(^|\s)(absolute|fixed|sticky|relative)(\s|$)/.test(className ?? '');
   return (
-    <span className={clsx('relative grid shrink-0 place-items-center overflow-hidden bg-ink-3 text-bone-faint', rounded, className)}>
+    <span className={clsx('grid shrink-0 place-items-center overflow-hidden bg-ink-3 text-bone-faint', !placed && 'relative', rounded, className)}>
       {src ? <img src={src} alt="" draggable={false} className="absolute inset-0 size-full object-cover" /> : <Music2 size={18} aria-hidden="true" />}
     </span>
   );

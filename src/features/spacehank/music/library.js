@@ -160,7 +160,11 @@ const update = async (id, patch) => {
 };
 
 export const toggleFavorite = (id) => update(id, { favorite: !library.get().tracks.find((t) => t.id === id)?.favorite });
-export const setLyrics = (id, lyrics) => update(id, { lyrics: String(lyrics ?? '') });
+export const setLyrics = (id, lyrics) => update(id, { lyrics: String(lyrics ?? ''), instrumental: false, lyricsSource: 'file' });
+/** Lyrics found online (see lyricsFinder.js): LRC text when timed, plain text otherwise, '' for an instrumental. */
+export const attachOnlineLyrics = (id, found) => update(id, { lyrics: found.lyrics, instrumental: Boolean(found.instrumental), lyricsSource: 'lrclib', lyricsCheckedAt: Date.now() });
+/** A search that found nothing is remembered, so the same song is not asked about again and again. */
+export const markLyricsChecked = (id) => update(id, { lyricsCheckedAt: Date.now() });
 export const countPlay = (id) => update(id, { plays: (library.get().tracks.find((t) => t.id === id)?.plays ?? 0) + 1, playedAt: Date.now() });
 
 export const removeTracks = async (ids) => {

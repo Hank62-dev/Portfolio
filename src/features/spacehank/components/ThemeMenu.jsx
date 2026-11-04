@@ -31,24 +31,21 @@ export function ThemeMenu() {
 
 /** The same three choices as a row of pills, for the phone's "More" sheet. */
 export function ThemePills({ className }) {
-  const { mode, setMode, theme } = useTheme();
+  const { mode, setMode } = useTheme();
   return (
-    <div className={clsx('flex flex-col gap-2', className)} role="radiogroup" aria-label="Theme" data-theme-pills>
-      <div className="flex flex-wrap gap-2">
-        {THEME_CHOICES.map(({ id, label, short, icon: Icon }) => (
-          <button
-            key={id}
-            type="button"
-            role="radio"
-            aria-checked={mode === id}
-            onClick={() => setMode(id)}
-            className={clsx('inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-fine transition-colors', mode === id ? 'border-signal/60 bg-signal-soft text-bone' : 'border-line text-bone-dim')}
-          >
-            <Icon size={15} aria-hidden="true" /> {short ?? label}
-          </button>
-        ))}
-      </div>
-      {mode === 'auto' && <p className="px-1 font-mono text-[0.7rem] text-bone-faint">Light from 06:00 to 18:00, dark otherwise. It is {theme} now.</p>}
+    <div className={clsx('flex flex-wrap gap-2', className)} role="radiogroup" aria-label="Theme" data-theme-pills>
+      {THEME_CHOICES.map(({ id, label, short, icon: Icon }) => (
+        <button
+          key={id}
+          type="button"
+          role="radio"
+          aria-checked={mode === id}
+          onClick={() => setMode(id)}
+          className={clsx('inline-flex items-center gap-2 rounded-full border px-4 py-2 font-mono text-fine transition-colors', mode === id ? 'border-signal/60 bg-signal-soft text-bone' : 'border-line text-bone-dim')}
+        >
+          <Icon size={15} aria-hidden="true" /> {short ?? label}
+        </button>
+      ))}
     </div>
   );
 }

@@ -31,3 +31,12 @@ export const applyRealtimeMessage = (state, message, maxEvents) => {
 
   return { agents, events, error: message.type === 'task_error' ? message.error : null };
 };
+
+/** Whether the realtime server's address is on this very computer (so it is never "asleep"): localhost, 127.0.0.1 or ::1. */
+export const isLocalServer = (url) => {
+  try {
+    return ['localhost', '127.0.0.1', '[::1]'].includes(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+};
