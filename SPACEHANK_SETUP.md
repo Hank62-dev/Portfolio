@@ -263,7 +263,7 @@ Task và event lưu trong bộ nhớ. Restart server là mất lịch sử và p
 - Không commit `.env`, API key hay mật khẩu. File `.env` đã nằm trong `.gitignore`.
 - Chỉ dùng HTTPS/WSS ở production.
 - Đặt `SPACEHANK_ORIGIN` đúng một origin, không dùng `*`. Hải chiến online không cần đăng nhập (bạn bè vào bằng mã phòng), nên origin này cùng giới hạn tin nhắn 4 KB, giới hạn tốc độ và trần 300 phòng là thứ bảo vệ nó.
-- Khoá vân tay của nhật ký chỉ che nhật ký trên màn hình, không mã hoá dữ liệu lưu trên máy. Ghi chú, nhật ký, ảnh và Mơ nằm trong trình duyệt của từng thiết bị, xoá dữ liệu trang hoặc gỡ app là mất, và chưa có sao lưu.
+- Khoá vân tay của nhật ký chỉ che nhật ký trên màn hình, không mã hoá dữ liệu lưu trên máy. Ghi chú, nhật ký, ảnh và Niú nằm trong trình duyệt của từng thiết bị, xoá dữ liệu trang hoặc gỡ app là mất, và chưa có sao lưu.
 - Đổi `SPACEHANK_PASSWORD` ngay nếu nghi ngờ bị lộ.
 - Giới hạn quyền của worker và `SPACEHANK_WORKDIR`.
 - RAG chỉ cho trình duyệt từ các origin trong `CORS_ORIGINS` gọi API. CORS chỉ chặn trình duyệt, không chặn `curl` hay script, và RAG chưa có đăng nhập. Ai biết URL RAG vẫn gọi được ngoài trình duyệt và tiêu tốn quota Gemini của bạn. Nếu cần chặn hẳn, thêm xác thực (ví dụ API key hoặc đi qua proxy có đăng nhập) trước khi công khai rộng rãi.

@@ -66,7 +66,7 @@ describe('what she says', () => {
 describe('derivePet', () => {
   it('starts as a calm little sprout', () => {
     const pet = derivePet({ notes: [], log: [], now: NOW });
-    expect(pet).toMatchObject({ name: 'Mơ', mood: 'calm', points: 0, stage: { id: 'baby' } });
+    expect(pet).toMatchObject({ name: 'Niú', mood: 'calm', points: 0, stage: { id: 'baby' } });
     expect(pet.outfit.scarf).toBe(false);
   });
 

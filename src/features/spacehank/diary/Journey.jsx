@@ -7,7 +7,7 @@ import { Thumb } from './ui';
 
 // The journey: one stepping stone for every day, on a path that winds down the page, today at the top and the first page at
 // the bottom. A written day is a round face in the colour of its mood with a card beside it; a day left blank is an empty
-// stone you can still step on. Landmarks (the first page, a week, a month…) stand beside the path, and Mơ waits at today.
+// stone you can still step on. Landmarks (the first page, a week, a month…) stand beside the path, and Niú waits at today.
 
 const W = 360; // the drawing is 360 wide; everything is placed in these units and shown as a percentage
 const DAY_H = 126;
@@ -162,7 +162,7 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
 
             {d.isToday && (
               <div className="absolute" style={{ left: pc(free.l - 2, W), top: pc(row.cy - 28, height), width: pc(52, W) }} data-pet-here>
-                <Pet mood={pet.mood} outfit={pet.outfit} size="100%" waving />
+                <Pet mood={pet.mood} outfit={pet.outfit} size="100%" />
               </div>
             )}
             {!d.isToday && mark && (

@@ -7,7 +7,7 @@ import { useStore } from '../store';
 import { describeLockError, diaryLock, resetLock, unlockDiary } from './lock';
 import { SoftButton } from './ui';
 
-/** The screen over a locked diary: Mơ keeps the book shut until the phone says it is you. Asks once as it opens. */
+/** The screen over a locked diary: Niú keeps the book shut until the phone says it is you. Asks once as it opens. */
 export default function DiaryLock() {
   const { busy } = useStore(diaryLock);
   const [error, setError] = useState('');
@@ -53,7 +53,7 @@ export default function DiaryLock() {
       </div>
       <div>
         <h1 className="font-display text-[2.2rem] leading-none text-[color:var(--dz-text)]">Nhật ký đang khoá</h1>
-        <p className="mx-auto mt-2 max-w-[18rem] font-body text-[0.9rem] leading-relaxed text-[color:var(--dz-text-2)]">Chạm vân tay để mở. Mơ đang giữ sổ cho bạn.</p>
+        <p className="mx-auto mt-2 max-w-[18rem] font-body text-[0.9rem] leading-relaxed text-[color:var(--dz-text-2)]">Chạm vân tay để mở. Niú đang giữ sổ cho bạn.</p>
       </div>
       <SoftButton onClick={unlock} disabled={busy} className="min-h-12 px-7" data-unlock>
         <Fingerprint size={20} aria-hidden="true" /> Mở bằng vân tay

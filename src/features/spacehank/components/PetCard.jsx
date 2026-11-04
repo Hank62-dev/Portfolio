@@ -14,7 +14,7 @@ const Heart = ({ x, delay }) => (
   </svg>
 );
 
-/** Mơ on the home screen: how she is, what she says, how far she has grown, and a way into the diary. Tap her. */
+/** Niú on the home screen: how it is, what it says, how far it has grown, and a way into the diary. Tap her. */
 export default function PetCard({ onTab }) {
   const pet = usePet();
   const [poke, setPoke] = useState({ at: 0, line: '' });
@@ -34,11 +34,11 @@ export default function PetCard({ onTab }) {
   const progress = Math.round(pet.progress * 100);
 
   return (
-    <section aria-label={`${pet.name}, thú cưng của bạn`} className="relative overflow-hidden rounded-[1.75rem] border border-line bg-[radial-gradient(90%_130%_at_0%_0%,rgb(255_160_120/0.18),transparent_62%),var(--color-ink-1)] p-4" data-pet data-pet-mood={pet.mood}>
+    <section aria-label={`${pet.name}, thú cưng của bạn`} className="relative overflow-hidden rounded-[1.75rem] border border-line bg-[radial-gradient(90%_130%_at_0%_0%,rgb(150_205_170/0.16),transparent_62%),var(--color-ink-1)] p-4" data-pet data-pet-mood={pet.mood}>
       <div className="flex items-center gap-3">
         <button type="button" onClick={touch} aria-label={`Chạm vào ${pet.name}`} className="relative shrink-0 rounded-full active:scale-95">
           <span className={clsx('block', hopping && 'pet-hop')} key={poke.at}>
-            <Pet mood={pet.mood} outfit={pet.outfit} size={96} waving={pet.mood === 'happy' || pet.mood === 'excited'} label={`${pet.name} ${MOOD_WORDS[pet.mood]}`} />
+            <Pet mood={pet.mood} outfit={pet.outfit} size={96} label={`${pet.name} ${MOOD_WORDS[pet.mood]}`} />
           </span>
           {hopping && (
             <>
@@ -56,11 +56,11 @@ export default function PetCard({ onTab }) {
           <p className="mt-1.5 rounded-2xl rounded-tl-md bg-wash/[0.07] px-3 py-2 text-fine leading-snug text-bone" role="status" data-pet-line>
             {line}
           </p>
-          <div className="mt-2" aria-label={pet.next ? `Còn ${pet.left} điểm nữa để lên ${pet.next.name}` : 'Mơ đã lớn hết cỡ'}>
+          <div className="mt-2" aria-label={pet.next ? `Còn ${pet.left} điểm nữa để lên ${pet.next.name}` : `${pet.name} đã lớn hết cỡ`}>
             <div className="h-1.5 overflow-hidden rounded-full bg-wash/10" aria-hidden="true">
-              <i className="block h-full rounded-full bg-gradient-to-r from-[#ffb08a] to-[#ffd35e] transition-[width] duration-700" style={{ width: `${progress}%` }} />
+              <i className="block h-full rounded-full bg-gradient-to-r from-[#9ad9b0] to-[#e9e2a0] transition-[width] duration-700" style={{ width: `${progress}%` }} />
             </div>
-            <small className="mt-1 block font-mono text-[0.64rem] text-bone-faint">{pet.next ? `Còn ${pet.left} điểm nữa để thành ${pet.next.name}` : 'Mơ đã lớn hết cỡ rồi'}</small>
+            <small className="mt-1 block font-mono text-[0.64rem] text-bone-faint">{pet.next ? `Còn ${pet.left} điểm nữa để thành ${pet.next.name}` : `${pet.name} đã lớn hết cỡ rồi`}</small>
           </div>
         </div>
       </div>

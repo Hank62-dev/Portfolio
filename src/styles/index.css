@@ -895,7 +895,7 @@ input[data-own-clear]::-webkit-search-decoration {
   display: none;
 }
 
-/* Mơ, the apricot pet: a slow bob, a blink now and then, a wave, a hop when she is tapped. */
+/* Niú, the panda pet: a slow bob, a blink now and then, a hop when it is tapped. */
 .pet-bob {
   animation: pet-bob 3.4s ease-in-out infinite;
   transform-box: fill-box;
@@ -905,11 +905,6 @@ input[data-own-clear]::-webkit-search-decoration {
   animation: pet-blink 4.6s infinite;
   transform-box: fill-box;
   transform-origin: 50% 50%;
-}
-.pet-wave {
-  animation: pet-wave 1.2s ease-in-out infinite;
-  transform-box: fill-box;
-  transform-origin: 0% 100%;
 }
 .pet-z {
   animation: pet-z 2.8s ease-in-out infinite;
@@ -933,11 +928,6 @@ input[data-own-clear]::-webkit-search-decoration {
   }
   96% {
     transform: scaleY(0.1);
-  }
-}
-@keyframes pet-wave {
-  50% {
-    transform: rotate(-24deg);
   }
 }
 @keyframes pet-z {
@@ -964,7 +954,6 @@ input[data-own-clear]::-webkit-search-decoration {
 @media (prefers-reduced-motion: reduce) {
   .pet-bob,
   .pet-blink,
-  .pet-wave,
   .pet-z,
   .pet-hop,
   .pet-heart {

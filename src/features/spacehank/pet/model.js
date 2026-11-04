@@ -2,14 +2,14 @@ import { dayKey } from '../notes/notes';
 import { daysBetween, diaryStreak, journeyStats, writtenDays } from '../diary/model';
 import { summarize } from '../focus/stats';
 
-// Mơ, the little apricot who walks the journey with you. How she feels and how far she has grown come from what you did:
+// Niú, the little panda who walks the journey with you. How it feels and how far it has grown come from what you did:
 // pages written in the diary and focus sessions finished. As plain functions, so all of it is tested.
 
-export const PET_NAME = 'Mơ';
+export const PET_NAME = 'Niú';
 
 export const STAGES = [
   { id: 'baby', name: 'Mầm non', min: 0 },
-  { id: 'kid', name: 'Nhóc con', min: 6 },
+  { id: 'kid', name: 'Anh chàng học IT', min: 6 },
   { id: 'traveler', name: 'Lữ khách', min: 24 },
   { id: 'explorer', name: 'Nhà thám hiểm', min: 75 },
   { id: 'legend', name: 'Huyền thoại', min: 200 },

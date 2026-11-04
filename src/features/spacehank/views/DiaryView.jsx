@@ -103,7 +103,7 @@ export default function DiaryView({ onNotify }) {
             {/* today */}
             <section className="paper flex items-center gap-3 rounded-[2rem] p-4" aria-label="Hôm nay" data-today>
               <div className="w-[5.5rem] shrink-0">
-                <Pet mood={pet.mood} outfit={pet.outfit} size="100%" waving={pet.mood === 'happy' || pet.mood === 'excited'} label={`${pet.name}, bạn đồng hành`} />
+                <Pet mood={pet.mood} outfit={pet.outfit} size="100%" label={`${pet.name}, bạn đồng hành`} />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="font-mono text-[0.66rem] tracking-[0.12em] text-[color:var(--dz-text-3)] uppercase">{dayLabel(today)}</p>

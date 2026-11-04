@@ -4,7 +4,7 @@ import { loadNotes, notesStore } from '../notes/library';
 import { useStore } from '../store';
 import { derivePet } from './model';
 
-/** Mơ as she is right now: re-worked when the diary or the focus log changes, and every few minutes as the day moves on. */
+/** Niú as it is right now: re-worked when the diary or the focus log changes, and every few minutes as the day moves on. */
 export function usePet() {
   const { notes } = useStore(notesStore);
   const { log } = useStore(focusLog);
