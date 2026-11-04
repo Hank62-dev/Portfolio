@@ -72,11 +72,11 @@ export default function ShellView({ ctx }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <section
-        className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(80%_60%_at_0%_0%,rgb(255_91_46/0.1),transparent_60%),radial-gradient(60%_60%_at_100%_100%,rgb(91_43_255/0.12),transparent_60%),#08080b] shadow-[0_30px_80px_-40px_rgb(0_0_0/0.9)]"
+        className="dark-island flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-wash/10 bg-[#08080b] bg-[radial-gradient(80%_60%_at_0%_0%,rgb(255_91_46/0.1),transparent_60%),radial-gradient(60%_60%_at_100%_100%,rgb(91_43_255/0.12),transparent_60%)] shadow-[0_30px_80px_-40px_rgb(var(--shadow-rgb)/0.9)]"
         onClick={() => window.getSelection()?.isCollapsed && field.current?.focus()}
         aria-label="Shell"
       >
-        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 border-b border-white/8 px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 border-b border-wash/8 px-4 py-2.5">
           <span className="flex items-center gap-1.5" aria-hidden="true">
             <i className="size-2.5 rounded-full bg-[#ff5f57]" />
             <i className="size-2.5 rounded-full bg-[#febc2e]" />
@@ -85,7 +85,7 @@ export default function ShellView({ ctx }) {
           </span>
           <div className="ml-auto flex flex-wrap gap-1.5" aria-label="Try one">
             {QUICK.map((q) => (
-              <button key={q} type="button" onClick={() => run(q)} className="rounded-full border border-white/10 px-2.5 py-0.5 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/60 hover:text-bone">
+              <button key={q} type="button" onClick={() => run(q)} className="rounded-full border border-wash/10 px-2.5 py-0.5 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/60 hover:text-bone">
                 {q}
               </button>
             ))}
@@ -114,7 +114,7 @@ export default function ShellView({ ctx }) {
         </div>
 
         <form
-          className="flex items-center gap-2 border-t border-white/8 px-4 py-2.5"
+          className="flex items-center gap-2 border-t border-wash/8 px-4 py-2.5"
           onSubmit={(e) => {
             e.preventDefault();
             void run(input);

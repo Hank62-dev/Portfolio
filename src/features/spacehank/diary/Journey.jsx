@@ -36,13 +36,13 @@ export const layout = (days) => {
 };
 
 const Landmark = ({ kind, className }) => {
-  const common = { fill: 'none', stroke: '#eef3f7', strokeWidth: 2.4, strokeLinecap: 'round', strokeLinejoin: 'round' };
+  const common = { fill: 'none', stroke: 'var(--dz-text)', strokeWidth: 2.4, strokeLinecap: 'round', strokeLinejoin: 'round' };
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
       {kind === 'flag' && (
         <g {...common}>
           <path d="M14 42 V8" />
-          <path d="M14 9 q9 -5 14 0 t12 0 v14 q-6 4 -12 0 t-14 0" fill="#e0a458" stroke="#eef3f7" />
+          <path d="M14 9 q9 -5 14 0 t12 0 v14 q-6 4 -12 0 t-14 0" fill="#e0a458" stroke="var(--dz-text)" />
         </g>
       )}
       {kind === 'tent' && (
@@ -114,7 +114,7 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
       <svg viewBox={`0 0 ${W} ${height}`} className="absolute inset-0 size-full" aria-hidden="true">
         {segments.map((s, i) => (
           <g key={i}>
-            <path d={s.d} fill="none" stroke="#bcd3ec" strokeOpacity="0.55" strokeWidth="4" strokeDasharray="1 11" strokeLinecap="round" />
+            <path d={s.d} fill="none" stroke="var(--dz-trail)" strokeOpacity="0.55" strokeWidth="4" strokeDasharray="1 11" strokeLinecap="round" />
             {s.solid && <path d={s.d} fill="none" stroke="#e0a458" strokeOpacity="0.95" strokeWidth="4.5" strokeLinecap="round" />}
           </g>
         ))}
@@ -123,7 +123,7 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
       {rows.map((row) => {
         if (row.type === 'month') {
           return (
-            <span key={`m-${row.day}`} className="absolute left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-black/25 px-3.5 py-1 font-body text-[0.78rem] leading-none font-medium tracking-[0.08em] whitespace-nowrap text-[#e0eaf5] uppercase backdrop-blur" style={{ top: pc(row.y + 10, height) }} data-month>
+            <span key={`m-${row.day}`} className="absolute left-1/2 -translate-x-1/2 rounded-full border border-[color:var(--dz-text)]/10 bg-[color:var(--dz-chip)] px-3.5 py-1 font-body text-[0.78rem] leading-none font-medium tracking-[0.08em] whitespace-nowrap text-[#e0eaf5] uppercase backdrop-blur" style={{ top: pc(row.y + 10, height) }} data-month>
               {monthLabel(row.day, todayKey)}
             </span>
           );
@@ -144,17 +144,17 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
               {d.written ? (
                 <button type="button" onClick={press} className="paper flex max-h-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl p-2.5 text-left transition-transform active:scale-[0.97]" data-card>
                   <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-center gap-x-1.5 font-mono text-[0.62rem] tracking-[0.06em] text-[#a3bcd9] uppercase">
+                    <span className="flex flex-wrap items-center gap-x-1.5 font-mono text-[0.62rem] tracking-[0.06em] text-[color:var(--dz-text-3)] uppercase">
                       {d.isToday ? 'Hôm nay' : shortLabel(d.day)}
-                      {d.mood && <b className="font-body text-[0.72rem] tracking-normal whitespace-nowrap text-[#e0a458] normal-case">{moodWord(d.mood)}</b>}
+                      {d.mood && <b className="font-body text-[0.72rem] tracking-normal whitespace-nowrap text-[color:var(--dz-amber)] normal-case">{moodWord(d.mood)}</b>}
                     </span>
-                    {mark && <span className="block font-display text-[0.98rem] leading-tight text-[#e0a458]">{mark.title}</span>}
-                    <span className="mt-0.5 line-clamp-2 font-body text-[0.82rem] leading-snug text-[#eef4fb]">{excerptOf(body, 80) || 'Một dấu chân không lời.'}</span>
+                    {mark && <span className="block font-display text-[0.98rem] leading-tight text-[color:var(--dz-amber)]">{mark.title}</span>}
+                    <span className="mt-0.5 line-clamp-2 font-body text-[0.82rem] leading-snug text-[color:var(--dz-text)]">{excerptOf(body, 80) || 'Một dấu chân không lời.'}</span>
                   </span>
                   {photo && <Thumb id={photo} size={38} className="!rounded-xl" />}
                 </button>
               ) : (
-                <button type="button" onClick={press} className={clsx('self-start rounded-full px-3 py-1.5 text-left font-body text-[0.85rem] leading-tight transition-transform active:scale-95', d.isToday ? 'bg-[#e0a458] font-semibold text-[#1b1407] shadow-lg' : 'bg-white/10 text-[#eef3f7]/80')}>
+                <button type="button" onClick={press} className={clsx('self-start rounded-full px-3 py-1.5 text-left font-body text-[0.85rem] leading-tight transition-transform active:scale-95', d.isToday ? 'bg-[#e0a458] font-semibold text-[#1b1407] shadow-lg' : 'bg-[color:var(--dz-text)]/10 text-[color:var(--dz-text)]/80')}>
                   {d.isToday ? 'Hôm nay · viết gì đó nhé' : `${shortLabel(d.day)} · chưa ghi`}
                 </button>
               )}

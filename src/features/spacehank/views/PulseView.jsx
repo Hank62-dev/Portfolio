@@ -99,7 +99,7 @@ export default function PulseView({ owner }) {
           return (
             <Tile key={s.id} data-service={s.id}>
               <div className="flex items-start gap-3">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/8 text-bone-dim">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-wash/8 text-bone-dim">
                   {(() => {
                     const Icon = SERVICE_ICON[s.id];
                     return <Icon size={16} aria-hidden="true" />;

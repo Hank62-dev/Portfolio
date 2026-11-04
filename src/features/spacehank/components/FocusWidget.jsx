@@ -21,7 +21,7 @@ export default function FocusWidget({ onOpen }) {
       className="fixed top-[calc(4.9rem+env(safe-area-inset-top))] left-1/2 z-30 w-[min(23rem,calc(100vw-1.5rem))] -translate-x-1/2 animate-fade-in md:top-20"
       data-focus-widget
     >
-      <div className={clsx('flex items-center gap-2.5 rounded-full border bg-ink-1/85 p-1.5 pr-2 shadow-[0_18px_40px_-14px_rgb(0_0_0/0.95)] backdrop-blur-2xl', ringing ? 'border-signal/70 shadow-[0_0_0_4px_var(--color-signal-soft)]' : 'border-white/12')}>
+      <div className={clsx('flex items-center gap-2.5 rounded-full border bg-ink-1/85 p-1.5 pr-2 shadow-[0_18px_40px_-14px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur-2xl', ringing ? 'border-signal/70 shadow-[0_0_0_4px_var(--color-signal-soft)]' : 'border-wash/12')}>
         <button type="button" onClick={onOpen} aria-label="Open the Focus timer" className="flex min-w-0 flex-1 items-center gap-3 text-left">
           <span className="relative size-11 shrink-0">
             <svg viewBox="0 0 100 100" className="absolute inset-0 size-full -rotate-90" aria-hidden="true">

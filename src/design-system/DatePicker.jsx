@@ -11,7 +11,7 @@ import { useSoft } from './soft';
 
 const CHEVRONS = { left: ChevronLeft, right: ChevronRight, up: ChevronUp, down: ChevronDown };
 
-const DAY = 'grid size-9 place-items-center rounded-full text-fine text-bone-dim transition-colors hover:bg-white/10 hover:text-bone focus-visible:ring-2 focus-visible:ring-signal/50 focus-visible:outline-none';
+const DAY = 'grid size-9 place-items-center rounded-full text-fine text-bone-dim transition-colors hover:bg-wash/10 hover:text-bone focus-visible:ring-2 focus-visible:ring-signal/50 focus-visible:outline-none';
 
 export function Calendar({ className, classNames, ...props }) {
   return (
@@ -25,8 +25,8 @@ export function Calendar({ className, classNames, ...props }) {
         month_caption: 'flex h-9 items-center justify-center px-10',
         caption_label: 'font-display text-lead text-bone',
         nav: 'absolute inset-x-0 top-0 z-10 flex h-9 items-center justify-between',
-        button_previous: 'grid size-9 place-items-center rounded-full text-bone-dim transition-colors hover:bg-white/10 hover:text-bone',
-        button_next: 'grid size-9 place-items-center rounded-full text-bone-dim transition-colors hover:bg-white/10 hover:text-bone',
+        button_previous: 'grid size-9 place-items-center rounded-full text-bone-dim transition-colors hover:bg-wash/10 hover:text-bone',
+        button_next: 'grid size-9 place-items-center rounded-full text-bone-dim transition-colors hover:bg-wash/10 hover:text-bone',
         month_grid: 'w-full border-collapse',
         weekdays: 'flex',
         weekday: 'size-9 text-center font-mono text-[0.66rem] font-normal tracking-wide text-bone-faint uppercase',
@@ -86,15 +86,15 @@ export const DatePicker = forwardRef(function DatePicker({ value, onChange, plac
           align="start"
           sideOffset={8}
           collisionPadding={12}
-          className="z-[70] animate-fade-in rounded-3xl border border-white/10 bg-ink-1/95 shadow-[0_28px_70px_-24px_rgb(0_0_0/0.95)] backdrop-blur-xl focus-visible:outline-none"
+          className="z-[70] animate-fade-in rounded-3xl border border-wash/10 bg-ink-1/95 shadow-[0_28px_70px_-24px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur-xl focus-visible:outline-none"
         >
           <Calendar mode="single" selected={selected} defaultMonth={selected} onSelect={(date) => date && choose(format(date))} autoFocus />
-          <div className="flex items-center justify-between border-t border-white/8 px-3 py-2 font-mono text-[0.78rem]">
-            <button type="button" onClick={() => choose(format(new Date()))} className="rounded-full px-3 py-1.5 text-bone-dim transition-colors hover:bg-white/8 hover:text-bone">
+          <div className="flex items-center justify-between border-t border-wash/8 px-3 py-2 font-mono text-[0.78rem]">
+            <button type="button" onClick={() => choose(format(new Date()))} className="rounded-full px-3 py-1.5 text-bone-dim transition-colors hover:bg-wash/8 hover:text-bone">
               Today
             </button>
             {clearable && (
-              <button type="button" disabled={!selected} onClick={() => choose('')} className="rounded-full px-3 py-1.5 text-bone-faint transition-colors hover:bg-white/8 hover:text-bone disabled:opacity-35 disabled:hover:bg-transparent">
+              <button type="button" disabled={!selected} onClick={() => choose('')} className="rounded-full px-3 py-1.5 text-bone-faint transition-colors hover:bg-wash/8 hover:text-bone disabled:opacity-35 disabled:hover:bg-transparent">
                 Clear
               </button>
             )}

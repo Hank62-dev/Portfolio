@@ -79,10 +79,10 @@ function Disc({ track, playing, tint, onEmpty }) {
           type="button"
           onClick={track ? undefined : onEmpty}
           aria-label={track ? undefined : 'Add songs'}
-          className="absolute top-1/2 left-1/2 grid aspect-square w-[62%] -translate-x-1/2 -translate-y-1/2 place-items-center overflow-hidden rounded-full bg-ink-3 text-bone-faint ring-4 ring-black/40"
+          className="absolute top-1/2 left-1/2 grid aspect-square w-[62%] -translate-x-1/2 -translate-y-1/2 place-items-center overflow-hidden rounded-full bg-ink-3 text-bone-faint ring-4 ring-shade/40"
         >
           {track ? <Cover track={track} className="size-full" rounded="rounded-none" /> : <Plus size={42} strokeWidth={1.4} aria-hidden="true" />}
-          <i className="absolute top-1/2 left-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-0 ring-2 ring-white/20" aria-hidden="true" />
+          <i className="absolute top-1/2 left-1/2 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-0 ring-2 ring-wash/20" aria-hidden="true" />
         </button>
       </div>
     </div>
@@ -273,14 +273,14 @@ function MusicDesktop() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onBlur={() => !query && setSearching(false)}
-                className="h-10 w-full rounded-full border border-white/10 bg-black/30 pr-9 pl-10 text-fine text-bone backdrop-blur placeholder:text-bone-dim focus-visible:border-signal focus-visible:outline-none"
+                className="h-10 w-full rounded-full border border-wash/10 bg-shade/30 pr-9 pl-10 text-fine text-bone backdrop-blur placeholder:text-bone-dim focus-visible:border-signal focus-visible:outline-none"
               />
               <button type="button" aria-label="Clear the search" onClick={() => { setQuery(''); setSearching(false); }} className="absolute top-1/2 right-3 -translate-y-1/2 text-bone-dim hover:text-bone">
                 <X size={14} aria-hidden="true" />
               </button>
             </>
           ) : (
-            <button type="button" aria-label="Search the library" onClick={() => setSearching(true)} className="grid size-10 place-items-center rounded-full border border-white/10 bg-black/25 text-bone-dim backdrop-blur transition-colors hover:text-bone">
+            <button type="button" aria-label="Search the library" onClick={() => setSearching(true)} className="grid size-10 place-items-center rounded-full border border-wash/10 bg-shade/25 text-bone-dim backdrop-blur transition-colors hover:text-bone">
               <Search size={16} aria-hidden="true" />
             </button>
           )}
@@ -316,7 +316,7 @@ function MusicDesktop() {
       >
         {full && (
           <div className="flex items-center justify-between md:hidden">
-            <button type="button" aria-label="Close the player" onClick={leavePlayer} className="grid size-10 place-items-center rounded-full bg-white/10 text-bone active:scale-95">
+            <button type="button" aria-label="Close the player" onClick={leavePlayer} className="grid size-10 place-items-center rounded-full bg-wash/10 text-bone active:scale-95">
               <ChevronDown size={22} aria-hidden="true" />
             </button>
             <span className="font-mono text-[0.68rem] tracking-[0.16em] text-bone-dim uppercase">Now playing</span>
@@ -351,11 +351,11 @@ function MusicDesktop() {
                 <span className="w-9 font-mono text-[0.72rem] text-bone-dim tabular-nums">{formatTime(duration)}</span>
               </div>
 
-              <div className="flex items-center gap-1 rounded-full border border-white/10 bg-black/25 p-1.5 shadow-[0_20px_50px_-20px_rgb(0_0_0/0.8)] backdrop-blur-xl">
+              <div className="flex items-center gap-1 rounded-full border border-wash/10 bg-shade/25 p-1.5 shadow-[0_20px_50px_-20px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur-xl">
                 <button type="button" aria-label="Shuffle" aria-pressed={shuffle} onClick={toggleShuffle} className={clsx('grid size-10 place-items-center rounded-full transition-colors hover:text-bone', shuffle ? 'text-signal' : 'text-bone-dim')}>
                   <Shuffle size={16} aria-hidden="true" />
                 </button>
-                <button type="button" aria-label="Previous track" onClick={previous} className="grid size-11 place-items-center rounded-full text-bone transition-colors hover:bg-white/10">
+                <button type="button" aria-label="Previous track" onClick={previous} className="grid size-11 place-items-center rounded-full text-bone transition-colors hover:bg-wash/10">
                   <SkipBack size={19} fill="currentColor" aria-hidden="true" />
                 </button>
                 <button
@@ -366,7 +366,7 @@ function MusicDesktop() {
                 >
                   {playing ? <Pause size={22} fill="currentColor" aria-hidden="true" /> : <Play size={22} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
                 </button>
-                <button type="button" aria-label="Next track" onClick={next} className="grid size-11 place-items-center rounded-full text-bone transition-colors hover:bg-white/10">
+                <button type="button" aria-label="Next track" onClick={next} className="grid size-11 place-items-center rounded-full text-bone transition-colors hover:bg-wash/10">
                   <SkipForward size={19} fill="currentColor" aria-hidden="true" />
                 </button>
                 <button type="button" aria-label={`Repeat: ${repeat}`} aria-pressed={repeat !== 'off'} onClick={cycleRepeat} className={clsx('grid size-10 place-items-center rounded-full transition-colors hover:text-bone', repeat !== 'off' ? 'text-signal' : 'text-bone-dim')}>
@@ -428,7 +428,7 @@ function MusicDesktop() {
                 e.preventDefault();
                 void askDj();
               }}
-              className="flex flex-col gap-3 rounded-[1.75rem] border border-white/10 bg-black/20 p-4 backdrop-blur-xl max-md:hidden"
+              className="flex flex-col gap-3 rounded-[1.75rem] border border-wash/10 bg-shade/20 p-4 backdrop-blur-xl max-md:hidden"
             >
               <div className="flex items-center gap-2.5">
                 <span className="grid size-8 place-items-center rounded-full bg-signal text-ink-0">
@@ -441,13 +441,13 @@ function MusicDesktop() {
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {MOODS.map((m) => (
-                  <button key={m} type="button" onClick={() => void askDj(m)} className="rounded-full border border-white/10 bg-white/6 px-3.5 py-1.5 font-mono text-[0.78rem] text-bone transition-all hover:-translate-y-0.5 hover:border-signal/60 hover:bg-signal/15">
+                  <button key={m} type="button" onClick={() => void askDj(m)} className="rounded-full border border-wash/10 bg-wash/6 px-3.5 py-1.5 font-mono text-[0.78rem] text-bone transition-all hover:-translate-y-0.5 hover:border-signal/60 hover:bg-signal/15">
                     {m}
                   </button>
                 ))}
               </div>
               <div className="flex gap-2">
-                <input aria-label="Tell Hank DJ what to play" placeholder="or say it in your own words…" value={mood} onChange={(e) => setMood(e.target.value)} className="h-10 min-w-0 flex-1 rounded-full border border-white/10 bg-black/25 px-4 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
+                <input aria-label="Tell Hank DJ what to play" placeholder="or say it in your own words…" value={mood} onChange={(e) => setMood(e.target.value)} className="h-10 min-w-0 flex-1 rounded-full border border-wash/10 bg-shade/25 px-4 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
                 <Button type="submit" size="sm" loading={dj.busy} disabled={!mood.trim()}>
                   Play a mix
                 </Button>
@@ -466,7 +466,7 @@ function MusicDesktop() {
               <ul className="flex flex-wrap gap-2">
                 {upNext.map((t) => (
                   <li key={t.id}>
-                    <button type="button" onClick={() => playTrack(t.id, queue.order)} className="flex items-center gap-2 rounded-full border border-white/10 bg-white/6 py-1 pr-3.5 pl-1 text-fine text-bone transition-colors hover:bg-white/12">
+                    <button type="button" onClick={() => playTrack(t.id, queue.order)} className="flex items-center gap-2 rounded-full border border-wash/10 bg-wash/6 py-1 pr-3.5 pl-1 text-fine text-bone transition-colors hover:bg-wash/12">
                       <Cover track={t} className="size-7" rounded="rounded-full" /> <span className="max-w-[9rem] truncate">{t.title}</span>
                     </button>
                   </li>
@@ -482,9 +482,9 @@ function MusicDesktop() {
       {!empty && (
         <section className="relative pb-6" aria-label="Library">
           <div className="flex flex-wrap items-center gap-2 px-5 pb-4 sm:px-7">
-            <div className="flex flex-wrap gap-1 rounded-[1.5rem] border border-white/10 bg-black/25 p-1 backdrop-blur max-md:border-0 max-md:bg-transparent max-md:p-0" role="tablist" aria-label="Library shelves">
+            <div className="flex flex-wrap gap-1 rounded-[1.5rem] border border-wash/10 bg-shade/25 p-1 backdrop-blur max-md:border-0 max-md:bg-transparent max-md:p-0" role="tablist" aria-label="Library shelves">
               {SHELVES.map(({ id, label }) => (
-                <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => { setShelf(id); setSheet(null); }} className={clsx('rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors max-md:py-1.5', shelf === id ? 'bg-bone text-ink-0 max-md:bg-signal' : 'text-bone-dim hover:text-bone max-md:bg-white/8')}>
+                <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => { setShelf(id); setSheet(null); }} className={clsx('rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors max-md:py-1.5', shelf === id ? 'bg-bone text-ink-0 max-md:bg-signal' : 'text-bone-dim hover:text-bone max-md:bg-wash/8')}>
                   {label}
                 </button>
               ))}
@@ -496,7 +496,7 @@ function MusicDesktop() {
 
           {shelf === 'playlists' && newPlaylist !== null && (
             <form onSubmit={createList} className="mx-5 mb-4 flex max-w-sm gap-2 sm:mx-7">
-              <input autoFocus aria-label="New playlist name" placeholder="Name the playlist" value={newPlaylist} onChange={(e) => setNewPlaylist(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setNewPlaylist(null)} className="h-10 min-w-0 flex-1 rounded-full border border-white/10 bg-black/25 px-4 text-fine text-bone focus-visible:border-signal focus-visible:outline-none" />
+              <input autoFocus aria-label="New playlist name" placeholder="Name the playlist" value={newPlaylist} onChange={(e) => setNewPlaylist(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setNewPlaylist(null)} className="h-10 min-w-0 flex-1 rounded-full border border-wash/10 bg-shade/25 px-4 text-fine text-bone focus-visible:border-signal focus-visible:outline-none" />
               <Button type="submit" size="sm" disabled={!newPlaylist.trim()}>
                 Create
               </Button>
@@ -512,7 +512,7 @@ function MusicDesktop() {
               <b className="block text-fine font-medium text-bone">Shuffle play</b>
               <small className="font-mono text-[0.7rem] text-bone-faint">{tracks.length} songs</small>
             </span>
-            <button type="button" aria-expanded={djOpen} onClick={() => setDjOpen((open) => !open)} className="inline-flex items-center gap-1.5 rounded-full border border-white/12 bg-white/6 px-3.5 py-2 font-mono text-[0.76rem] text-bone active:scale-95">
+            <button type="button" aria-expanded={djOpen} onClick={() => setDjOpen((open) => !open)} className="inline-flex items-center gap-1.5 rounded-full border border-wash/12 bg-wash/6 px-3.5 py-2 font-mono text-[0.76rem] text-bone active:scale-95">
               <Sparkles size={14} className="text-signal" aria-hidden="true" /> Hank DJ <ChevronDown size={13} className={clsx('transition-transform', djOpen && 'rotate-180')} aria-hidden="true" />
             </button>
           </div>
@@ -522,17 +522,17 @@ function MusicDesktop() {
                 e.preventDefault();
                 void askDj();
               }}
-              className="mx-5 mb-4 flex animate-fade-in flex-col gap-3 rounded-3xl border border-white/10 bg-white/6 p-4 md:hidden"
+              className="mx-5 mb-4 flex animate-fade-in flex-col gap-3 rounded-3xl border border-wash/10 bg-wash/6 p-4 md:hidden"
             >
               <div className="flex flex-wrap gap-1.5">
                 {MOODS.map((m) => (
-                  <button key={m} type="button" onClick={() => void askDj(m)} className="rounded-full border border-white/10 bg-white/6 px-3.5 py-1.5 font-mono text-[0.78rem] text-bone active:bg-signal/20">
+                  <button key={m} type="button" onClick={() => void askDj(m)} className="rounded-full border border-wash/10 bg-wash/6 px-3.5 py-1.5 font-mono text-[0.78rem] text-bone active:bg-signal/20">
                     {m}
                   </button>
                 ))}
               </div>
               <div className="flex gap-2">
-                <input aria-label="Tell Hank DJ what to play (phone)" placeholder="or say it in your own words…" value={mood} onChange={(e) => setMood(e.target.value)} className="h-10 min-w-0 flex-1 rounded-full border border-white/10 bg-black/25 px-4 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
+                <input aria-label="Tell Hank DJ what to play (phone)" placeholder="or say it in your own words…" value={mood} onChange={(e) => setMood(e.target.value)} className="h-10 min-w-0 flex-1 rounded-full border border-wash/10 bg-shade/25 px-4 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
                 <Button type="submit" size="sm" loading={dj.busy} disabled={!mood.trim()}>
                   Play
                 </Button>
@@ -544,8 +544,8 @@ function MusicDesktop() {
           <ul className="flex flex-col pb-2 md:hidden" aria-label={SHELVES.find((s) => s.id === shelf)?.label}>
             {shelf === 'playlists' && (
               <li className="px-3">
-                <button type="button" onClick={() => setNewPlaylist('')} className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-white/6">
-                  <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-white/8 text-bone-dim">
+                <button type="button" onClick={() => setNewPlaylist('')} className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-wash/6">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-wash/8 text-bone-dim">
                     <Plus size={22} aria-hidden="true" />
                   </span>
                   <b className="text-fine font-medium text-bone">New playlist</b>
@@ -555,7 +555,7 @@ function MusicDesktop() {
             {items.map((item) =>
               item.track ? (
                 <li key={item.key} className="flex items-center px-3" data-track={item.track.title}>
-                  <button type="button" onClick={() => (item.track.id === trackId ? togglePlay() : playTrack(item.track.id, tracks.map((t) => t.id)))} aria-label={`${item.track.id === trackId && playing ? 'Pause' : 'Play'} ${item.track.title}`} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-white/6">
+                  <button type="button" onClick={() => (item.track.id === trackId ? togglePlay() : playTrack(item.track.id, tracks.map((t) => t.id)))} aria-label={`${item.track.id === trackId && playing ? 'Pause' : 'Play'} ${item.track.title}`} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-wash/6">
                     <Cover track={item.track} className="size-12 shrink-0" rounded="rounded-lg" />
                     <span className="min-w-0 flex-1 leading-tight">
                       <b className={clsx('block truncate text-fine font-medium', item.track.id === trackId ? 'text-signal' : 'text-bone')}>{item.track.title}</b>
@@ -571,7 +571,7 @@ function MusicDesktop() {
                 </li>
               ) : (
                 <li key={item.key} className="px-3">
-                  <button type="button" onClick={() => setSheet(item.open)} aria-label={`Open ${item.title}`} className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-white/6">
+                  <button type="button" onClick={() => setSheet(item.open)} aria-label={`Open ${item.title}`} className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left active:bg-wash/6">
                     <Orbit tracks={item.tracks} liked={item.liked} className="size-12 shrink-0" />
                     <span className="min-w-0 flex-1 leading-tight">
                       <b className="block truncate text-fine font-medium text-bone">{item.title}</b>
@@ -588,7 +588,7 @@ function MusicDesktop() {
           <ul className="grid grid-cols-3 gap-x-4 gap-y-6 px-5 pb-3 max-md:hidden sm:flex sm:snap-x sm:gap-5 sm:overflow-x-auto sm:px-7" aria-label={SHELVES.find((s) => s.id === shelf)?.label}>
             {shelf === 'playlists' && (
               <li className="sm:w-28 sm:shrink-0 sm:snap-start">
-                <button type="button" onClick={() => setNewPlaylist('')} className="grid aspect-square w-full place-items-center rounded-full border-2 border-dashed border-white/20 text-bone-dim transition-colors hover:border-signal hover:text-signal" aria-label="New playlist">
+                <button type="button" onClick={() => setNewPlaylist('')} className="grid aspect-square w-full place-items-center rounded-full border-2 border-dashed border-wash/20 text-bone-dim transition-colors hover:border-signal hover:text-signal" aria-label="New playlist">
                   <Plus size={26} aria-hidden="true" />
                 </button>
                 <span className="mt-2 block text-center text-fine text-bone-dim">New</span>
@@ -607,7 +607,7 @@ function MusicDesktop() {
                     <b className={clsx('mt-2 block truncate text-fine font-medium', item.track.id === trackId ? 'text-signal' : 'text-bone')}>{item.track.title}</b>
                     <small className="block truncate font-mono text-[0.68rem] text-bone-faint">{item.track.artist || 'Unknown artist'}</small>
                   </button>
-                  <button type="button" aria-label={item.track.favorite ? `Remove ${item.track.title} from favorites` : `Add ${item.track.title} to favorites`} aria-pressed={item.track.favorite} onClick={() => toggleFavorite(item.track.id)} className={clsx('absolute top-0 right-0 grid size-7 place-items-center rounded-full bg-black/55 backdrop-blur transition-opacity hover:text-signal group-hover:opacity-100', item.track.favorite ? 'text-signal opacity-100' : 'text-bone opacity-0 focus-visible:opacity-100')}>
+                  <button type="button" aria-label={item.track.favorite ? `Remove ${item.track.title} from favorites` : `Add ${item.track.title} to favorites`} aria-pressed={item.track.favorite} onClick={() => toggleFavorite(item.track.id)} className={clsx('absolute top-0 right-0 grid size-7 place-items-center rounded-full bg-shade/55 backdrop-blur transition-opacity hover:text-signal group-hover:opacity-100', item.track.favorite ? 'text-signal opacity-100' : 'text-bone opacity-0 focus-visible:opacity-100')}>
                     <Heart size={13} fill={item.track.favorite ? 'currentColor' : 'none'} aria-hidden="true" />
                   </button>
                 </li>
@@ -637,8 +637,8 @@ function MusicDesktop() {
 
       {/* the drawer: a collection's songs, rising from the bottom */}
       {drawer && (
-        <div ref={drawerRef} className="mx-3 mb-3 flex max-h-[72vh] animate-[enter_0.5s_var(--ease-out-expo)_both] flex-col overflow-hidden rounded-[1.75rem] border border-white/12 bg-ink-0/85 shadow-[0_-30px_80px_-30px_rgb(0_0_0/0.9)] backdrop-blur-2xl" role="dialog" aria-label={drawer.title}>
-          <div className="flex items-center gap-3 border-b border-white/8 px-5 py-4">
+        <div ref={drawerRef} className="mx-3 mb-3 flex max-h-[72vh] animate-[enter_0.5s_var(--ease-out-expo)_both] flex-col overflow-hidden rounded-[1.75rem] border border-wash/12 bg-ink-0/85 shadow-[0_-30px_80px_-30px_rgb(var(--shadow-rgb)/0.9)] backdrop-blur-2xl" role="dialog" aria-label={drawer.title}>
+          <div className="flex items-center gap-3 border-b border-wash/8 px-5 py-4">
             <Orbit tracks={drawer.tracks} liked={drawer.liked} className="size-12" />
             <div className="min-w-0 flex-1 leading-tight">
               <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{drawer.sub ?? 'Library'}</span>
@@ -655,7 +655,7 @@ function MusicDesktop() {
                 Delete
               </Button>
             )}
-            <button type="button" aria-label="Close the list" onClick={() => { setSheet(null); setQuery(''); setSearching(false); }} className="grid size-10 place-items-center rounded-full text-bone-dim hover:bg-white/10 hover:text-bone">
+            <button type="button" aria-label="Close the list" onClick={() => { setSheet(null); setQuery(''); setSearching(false); }} className="grid size-10 place-items-center rounded-full text-bone-dim hover:bg-wash/10 hover:text-bone">
               <X size={18} aria-hidden="true" />
             </button>
           </div>

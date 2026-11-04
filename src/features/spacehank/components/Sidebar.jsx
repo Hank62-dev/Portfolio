@@ -92,7 +92,7 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
           aria-label="Scroll down for more"
           onClick={() => list.current?.scrollBy({ top: 200, behavior: 'smooth' })}
           className={clsx(
-            'absolute bottom-1 left-1/2 grid size-8 -translate-x-1/2 place-items-center rounded-full border border-line bg-ink-2/85 text-bone-dim shadow-[0_8px_20px_-8px_rgb(0_0_0/0.8)] backdrop-blur transition-all duration-300 hover:text-bone',
+            'absolute bottom-1 left-1/2 grid size-8 -translate-x-1/2 place-items-center rounded-full border border-line bg-ink-2/85 text-bone-dim shadow-[0_8px_20px_-8px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur transition-all duration-300 hover:text-bone',
             more ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0'
           )}
           data-scroll-hint

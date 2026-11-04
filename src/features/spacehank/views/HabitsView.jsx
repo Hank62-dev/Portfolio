@@ -118,7 +118,7 @@ function Today({ items }) {
             const share = d.total ? d.done / d.total : 0;
             return (
               <li key={d.day} className="flex flex-col items-center gap-1.5" title={`${d.day}: ${d.done} of ${d.total}`}>
-                <span className="relative h-10 w-full max-w-9 overflow-hidden rounded-xl bg-white/[0.06]">
+                <span className="relative h-10 w-full max-w-9 overflow-hidden rounded-xl bg-wash/[0.06]">
                   <i className={clsx('absolute inset-x-0 bottom-0 block transition-[height] duration-500', share === 1 ? 'bg-ok' : 'bg-signal/80')} style={{ height: `${Math.round(share * 100)}%` }} />
                 </span>
                 <span className={clsx('font-mono text-[0.66rem]', d.isToday ? 'text-signal' : 'text-bone-faint')}>{d.label}</span>
@@ -138,7 +138,7 @@ function Heat({ days, hue }) {
       {weeks.map((week, i) => (
         <div key={i} className={clsx('flex flex-col gap-[3px]', i < weeks.length - 13 && 'max-md:hidden')}>
           {week.map((cell) => (
-            <i key={cell.day} title={cell.day} className={clsx('block size-[10px] rounded-[3px]', cell.future ? 'opacity-0' : cell.done ? '' : 'bg-white/8')} style={cell.done ? { background: `hsl(${hue} 70% 58%)` } : undefined} />
+            <i key={cell.day} title={cell.day} className={clsx('block size-[10px] rounded-[3px]', cell.future ? 'opacity-0' : cell.done ? '' : 'bg-wash/8')} style={cell.done ? { background: `hsl(${hue} 70% 58%)` } : undefined} />
           ))}
         </div>
       ))}
@@ -213,7 +213,7 @@ function HabitRow({ habit, mood, onEdit }) {
       </div>
 
       {open && (
-        <div className="flex flex-col gap-4 border-t border-line bg-black/15 p-4 max-md:p-3.5" data-habit-details>
+        <div className="flex flex-col gap-4 border-t border-line bg-shade/15 p-4 max-md:p-3.5" data-habit-details>
           {next && (
             <div>
               <div className="mb-1.5 flex justify-between font-mono text-[0.68rem] text-bone-faint">
@@ -222,7 +222,7 @@ function HabitRow({ habit, mood, onEdit }) {
                   {next.left} more {next.left === 1 ? 'day' : 'days'} to {next.name}
                 </span>
               </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label="Growth to the next stage" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(stageProgress(run) * 100)}>
+              <div className="h-1.5 overflow-hidden rounded-full bg-wash/10" role="progressbar" aria-label="Growth to the next stage" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(stageProgress(run) * 100)}>
                 <i className="block h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.round(stageProgress(run) * 100)}%`, background: tint }} />
               </div>
             </div>
@@ -290,7 +290,7 @@ function HabitDialog({ habit, onClose, count }) {
           <legend className="mb-1 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Icon</legend>
           <div className="grid grid-cols-6 gap-1.5" role="radiogroup" aria-label="Icon">
             {HABIT_ICONS.map((id) => (
-              <button key={id} type="button" role="radio" aria-checked={icon === id} aria-label={`Icon: ${ICON_LABEL[id]}`} title={ICON_LABEL[id]} onClick={() => setIcon(id)} className={clsx('grid aspect-square place-items-center rounded-2xl transition-all active:scale-90', icon === id ? 'bg-signal text-ink-0' : 'bg-white/[0.05] text-bone-dim hover:bg-white/10 hover:text-bone')}>
+              <button key={id} type="button" role="radio" aria-checked={icon === id} aria-label={`Icon: ${ICON_LABEL[id]}`} title={ICON_LABEL[id]} onClick={() => setIcon(id)} className={clsx('grid aspect-square place-items-center rounded-2xl transition-all active:scale-90', icon === id ? 'bg-signal text-ink-0' : 'bg-wash/[0.05] text-bone-dim hover:bg-wash/10 hover:text-bone')}>
                 <HabitIcon id={id} size={18} />
               </button>
             ))}

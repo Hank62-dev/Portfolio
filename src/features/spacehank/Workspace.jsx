@@ -5,8 +5,10 @@ import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-sy
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useInstall, useOnline } from './hooks/useInstall';
 import { clsx } from '../../lib/format';
+import { useTheme } from '../../lib/theme';
 import CommandPalette from './components/CommandPalette';
 import MobileNav from './components/MobileNav';
+import { THEME_CHOICES } from './components/ThemeMenu';
 import Sidebar from './components/Sidebar';
 import TaskModal from './components/TaskModal';
 import Topbar from './components/Topbar';
@@ -95,6 +97,7 @@ export default function Workspace({
   const trackCount = useStore(library, (s) => s.tracks.length);
   const music = true;
   const app = useInstall();
+  const { mode, setMode } = useTheme();
   const online = useOnline();
 
   // another app shared something to Hank62: the address says so (?share=1) and the sheet asks where it goes
@@ -133,6 +136,7 @@ export default function Workspace({
     const list = [
       ...NAVIGATION.map((item) => ({ id: `go-${item.id}`, label: `Go to ${item.label}`, hint: 'Navigate', icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
       { id: 'new-task', label: 'New task for an agent', hint: 'Action', icon: Plus, keywords: 'dispatch assign', run: () => setTaskOpen(true) },
+      ...THEME_CHOICES.filter(({ id }) => id !== mode).map(({ id, label, short, icon }) => ({ id: `theme-${id}`, label: id === 'auto' ? 'Theme: follow the time of day' : `Theme: ${label.toLowerCase()}`, hint: short ?? 'Appearance', icon, keywords: 'dark light mode appearance night day auto time sunrise sunset', run: () => setMode(id) })),
       { id: 'pause', label: paused ? 'Resume the floor' : 'Pause the floor', hint: 'Action', icon: paused ? Play : Pause, keywords: 'stop animation', run: onPause },
       {
         id: 'brand-css',
@@ -162,7 +166,7 @@ export default function Workspace({
       );
     }
     return list;
-  }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing]);
+  }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing, mode, setMode]);
 
   const shellTabs = useMemo(() => NAVIGATION.map(({ id, label }) => ({ id, label })), []);
 

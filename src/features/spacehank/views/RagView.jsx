@@ -58,12 +58,12 @@ function Message({ message, onCopy }) {
     <div className="flex gap-3">
       <Orb size={32} />
       <div className="min-w-0 flex-1">
-        <div className="rounded-3xl rounded-tl-lg border border-white/8 bg-white/[0.04] px-5 py-4 text-bone backdrop-blur">
+        <div className="rounded-3xl rounded-tl-lg border border-wash/8 bg-wash/[0.04] px-5 py-4 text-bone backdrop-blur">
           <Markdown>{message.text}</Markdown>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-1">
           {Origin && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/[0.06] px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim">
+            <span className="inline-flex items-center gap-1 rounded-full bg-wash/[0.06] px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim">
               <Origin size={11} aria-hidden="true" /> {t(ORIGINS[message.source].key)}
             </span>
           )}
@@ -83,7 +83,7 @@ function Message({ message, onCopy }) {
               </span>
             )
           )}
-          <button type="button" onClick={() => onCopy(message.text)} aria-label="Copy the answer" className="ml-auto grid size-7 place-items-center rounded-full text-bone-faint transition-colors hover:bg-white/8 hover:text-bone">
+          <button type="button" onClick={() => onCopy(message.text)} aria-label="Copy the answer" className="ml-auto grid size-7 place-items-center rounded-full text-bone-faint transition-colors hover:bg-wash/8 hover:text-bone">
             <Copy size={13} aria-hidden="true" />
           </button>
         </div>
@@ -190,7 +190,7 @@ export default function RagView() {
             </div>
             <div className="grid grid-cols-1 w-full gap-2.5 sm:grid-cols-3">
               {ideas.map(({ icon: Icon, label, text }) => (
-                <button key={label} type="button" onClick={() => setComposer(text)} className="group flex items-center gap-3 rounded-2xl border border-white/8 bg-white/[0.04] p-4 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-signal/40 hover:bg-white/[0.07]">
+                <button key={label} type="button" onClick={() => setComposer(text)} className="group flex items-center gap-3 rounded-2xl border border-wash/8 bg-wash/[0.04] p-4 text-left backdrop-blur transition-all hover:-translate-y-0.5 hover:border-signal/40 hover:bg-wash/[0.07]">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">
                     <Icon size={18} aria-hidden="true" />
                   </span>
@@ -206,7 +206,7 @@ export default function RagView() {
         {busy && (
           <div className="flex items-center gap-3">
             <Orb size={32} busy />
-            <span className="flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.04] px-4 py-2.5 font-mono text-fine text-bone-dim" role="status">
+            <span className="flex items-center gap-1.5 rounded-full border border-wash/8 bg-wash/[0.04] px-4 py-2.5 font-mono text-fine text-bone-dim" role="status">
               <Dots size={6} className="text-signal" />
               <TextShimmer className="pl-1.5">{t('rag.thinking')}</TextShimmer>
             </span>
@@ -220,7 +220,7 @@ export default function RagView() {
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={ask} className="sticky bottom-24 z-10 flex items-end gap-2 rounded-[1.75rem] border border-white/10 bg-ink-1/80 p-2 pl-5 shadow-[0_20px_60px_-20px_rgb(0_0_0/0.9)] backdrop-blur-xl focus-within:border-signal/50 md:bottom-6">
+      <form onSubmit={ask} className="sticky bottom-24 z-10 flex items-end gap-2 rounded-[1.75rem] border border-wash/10 bg-ink-1/80 p-2 pl-5 shadow-[0_20px_60px_-20px_rgb(var(--shadow-rgb)/0.9)] backdrop-blur-xl focus-within:border-signal/50 md:bottom-6">
         <textarea
           ref={composerRef}
           aria-label={t('rag.placeholder')}

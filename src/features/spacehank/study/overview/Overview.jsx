@@ -79,7 +79,7 @@ function AgendaView({ list, now, onOpen }) {
       {groups.map((group) => (
         <section key={group.id} aria-label={group.label} data-group={group.id}>
           <h3 className={clsx('mb-2 flex items-center gap-2 px-1 font-mono text-[0.68rem] tracking-[0.12em] uppercase', group.id === 'overdue' ? 'text-danger' : 'text-bone-faint')}>
-            {group.label} <span className="rounded-full bg-white/[0.07] px-1.5 tabular-nums">{group.items.length}</span>
+            {group.label} <span className="rounded-full bg-wash/[0.07] px-1.5 tabular-nums">{group.items.length}</span>
           </h3>
           <ul className="flex flex-col gap-2">
             {group.items.map((item) => (
@@ -91,7 +91,7 @@ function AgendaView({ list, now, onOpen }) {
       {done.length > 0 && (
         <section aria-label="Completed">
           <button type="button" onClick={() => setShowDone((v) => !v)} aria-expanded={showDone} className="mb-2 flex items-center gap-2 px-1 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">
-            Completed <span className="rounded-full bg-white/[0.07] px-1.5 tabular-nums">{done.length}</span>
+            Completed <span className="rounded-full bg-wash/[0.07] px-1.5 tabular-nums">{done.length}</span>
             <ChevronDown size={13} className={clsx('transition-transform', showDone && 'rotate-180')} aria-hidden="true" />
           </button>
           {showDone && (
@@ -118,7 +118,7 @@ function BoardCard({ item, now, onOpen, onDragStart }) {
           <span className="mb-2 flex flex-wrap gap-1">
             {item.kind === 'exam' && <span className="rounded-full bg-warn/15 px-2 py-px font-mono text-[0.64rem] text-warn">Exam</span>}
             {item.priority === 'high' && !item.done && <span className="rounded-full bg-danger/15 px-2 py-px font-mono text-[0.64rem] text-danger">High</span>}
-            {item.priority === 'low' && !item.done && <span className="rounded-full bg-white/[0.07] px-2 py-px font-mono text-[0.64rem] text-bone-faint">Low</span>}
+            {item.priority === 'low' && !item.done && <span className="rounded-full bg-wash/[0.07] px-2 py-px font-mono text-[0.64rem] text-bone-faint">Low</span>}
           </span>
           <b className={clsx('block text-fine leading-snug font-medium', item.done ? 'text-bone-faint line-through' : 'text-bone')}>{item.title}</b>
           <span className="mt-2 flex items-center gap-2">
@@ -130,7 +130,7 @@ function BoardCard({ item, now, onOpen, onDragStart }) {
             )}
           </span>
           {steps.total > 0 && (
-            <span className="mt-2 block h-1 overflow-hidden rounded-full bg-white/10">
+            <span className="mt-2 block h-1 overflow-hidden rounded-full bg-wash/10">
               <i className="block h-full rounded-full bg-signal transition-[width] duration-500" style={{ width: `${steps.pct}%` }} />
             </span>
           )}
@@ -173,12 +173,12 @@ function BoardView({ list, now, onOpen, onAdd, onEditCourse, onNewCourse, onMove
                 <h3 className="truncate font-display text-lead text-bone">{course.name}</h3>
                 <p className="font-mono text-[0.66rem] text-bone-faint">{pct === null ? 'No deadlines yet' : `${pct}% done`}</p>
               </div>
-              <button type="button" aria-label={`Edit ${course.name}`} onClick={() => onEditCourse(course)} className="grid size-8 place-items-center rounded-full text-bone-faint hover:bg-white/10 hover:text-bone">
+              <button type="button" aria-label={`Edit ${course.name}`} onClick={() => onEditCourse(course)} className="grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/10 hover:text-bone">
                 <Pencil size={14} aria-hidden="true" />
               </button>
             </header>
             {pct !== null && (
-              <span className="mx-1 block h-1 overflow-hidden rounded-full bg-white/10">
+              <span className="mx-1 block h-1 overflow-hidden rounded-full bg-wash/10">
                 <i className="block h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: `hsl(${course.hue} 70% 58%)` }} />
               </span>
             )}
@@ -187,7 +187,7 @@ function BoardView({ list, now, onOpen, onAdd, onEditCourse, onNewCourse, onMove
                 <BoardCard key={item.id} item={item} now={now} onOpen={onOpen} onDragStart={(e, it) => e.dataTransfer.setData('text/plain', it.id)} />
               ))}
             </ul>
-            <button type="button" onClick={() => onAdd(course)} className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-fine text-bone-faint transition-colors hover:bg-white/[0.05] hover:text-bone">
+            <button type="button" onClick={() => onAdd(course)} className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-fine text-bone-faint transition-colors hover:bg-wash/[0.05] hover:text-bone">
               <Plus size={15} aria-hidden="true" /> Add a card
             </button>
           </section>

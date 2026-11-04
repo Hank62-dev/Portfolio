@@ -17,7 +17,7 @@ const BAR = { strong: 'bg-ok', fair: 'bg-warn', weak: 'bg-danger' };
 function ScoreMeter({ score, label }) {
   return (
     <span className="flex items-center gap-2" aria-label={`Score ${score} of 100, ${label}`}>
-      <span className="h-1.5 w-14 overflow-hidden rounded-full bg-white/10">
+      <span className="h-1.5 w-14 overflow-hidden rounded-full bg-wash/10">
         <i className={clsx('block h-full rounded-full', BAR[label] ?? 'bg-bone-faint')} style={{ width: `${score}%` }} />
       </span>
       <b className={clsx('w-6 text-right font-mono text-[0.72rem] tabular-nums', TONE[label])}>{score}</b>
@@ -150,7 +150,7 @@ export default function IdeasPanel({ onSaved }) {
             <ul className="flex flex-col gap-2" role="radiogroup" aria-label="Hooks">
               {pack.hooks.map((h, i) => (
                 <li key={i}>
-                  <button type="button" role="radio" aria-checked={hook === h.text} onClick={() => setHook(h.text)} className={clsx('flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors', hook === h.text ? 'border-bone bg-white/[0.05]' : 'border-line hover:border-line-strong')}>
+                  <button type="button" role="radio" aria-checked={hook === h.text} onClick={() => setHook(h.text)} className={clsx('flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors', hook === h.text ? 'border-bone bg-wash/[0.05]' : 'border-line hover:border-line-strong')}>
                     <span className="min-w-0 flex-1 text-fine leading-snug text-bone">{h.text}</span>
                     <span className="flex shrink-0 flex-col items-end gap-1">
                       <ScoreMeter score={h.score} label={h.label} />
@@ -169,7 +169,7 @@ export default function IdeasPanel({ onSaved }) {
           {pack.script && (
             <Panel title={pack.script.title || 'The script'} aside={<span className="font-mono text-[0.68rem] text-bone-faint">about {speakSeconds(prompterText)} s</span>}>
               <ol className="flex flex-col gap-2.5">
-                <li className="rounded-2xl border border-bone/40 bg-white/[0.04] p-3">
+                <li className="rounded-2xl border border-bone/40 bg-wash/[0.04] p-3">
                   <Label>Hook · 0-3 s</Label>
                   <p className="mt-1 text-fine leading-snug text-bone">{hook}</p>
                 </li>

@@ -7,7 +7,7 @@ import { groupRuns } from '../model/memory';
 // the tone of an event, from what the agent did
 const TONE = {
   started: { text: 'text-warn', bg: 'bg-warn/12' },
-  output: { text: 'text-bone-dim', bg: 'bg-white/8' },
+  output: { text: 'text-bone-dim', bg: 'bg-wash/8' },
   completed: { text: 'text-ok', bg: 'bg-ok/12' },
   failed: { text: 'text-danger', bg: 'bg-danger/12' },
   error: { text: 'text-danger', bg: 'bg-danger/12' },
@@ -41,7 +41,7 @@ function Row({ group, open, onToggle }) {
   const first = group.items[0];
   const many = group.items.length > 1;
   return (
-    <li className="rounded-xl transition-colors hover:bg-white/[0.04]" data-signal>
+    <li className="rounded-xl transition-colors hover:bg-wash/[0.04]" data-signal>
       <button type="button" onClick={onToggle} aria-expanded={open} className="flex w-full items-center gap-3 px-2.5 py-2 text-left">
         <span className="grid size-7 shrink-0 place-items-center rounded-full font-mono text-[0.7rem] font-semibold text-ink-0" style={{ background: group.color }}>
           {group.name.slice(0, 1)}
@@ -49,7 +49,7 @@ function Row({ group, open, onToggle }) {
         <span className="flex min-w-0 flex-1 items-center gap-2">
           <b className="shrink-0 text-fine font-medium text-bone">{group.name}</b>
           <span className={clsx('shrink-0 rounded-full px-2 py-px font-mono text-[0.68rem]', tone.text, tone.bg)}>{group.action}</span>
-          {many && <span className="shrink-0 rounded-full bg-white/10 px-1.5 py-px font-mono text-[0.68rem] text-bone-dim tabular-nums">×{group.items.length}</span>}
+          {many && <span className="shrink-0 rounded-full bg-wash/10 px-1.5 py-px font-mono text-[0.68rem] text-bone-dim tabular-nums">×{group.items.length}</span>}
           <span className={clsx('min-w-0 text-fine text-bone-dim', open ? 'sr-only' : 'truncate')}>{first.text}</span>
         </span>
         <time className={clsx('shrink-0 font-mono text-[0.68rem]', first.time === 'now' ? 'text-signal' : 'text-bone-faint')}>{first.time}</time>
@@ -163,7 +163,7 @@ export default function MemoryView({ events }) {
             <input aria-label="Search the stream" placeholder="Search signals…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-9 w-full rounded-full border border-line bg-ink-2 pr-4 pl-10 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
           </div>
           <div className="flex flex-wrap gap-1.5">
-            <button type="button" aria-pressed={!agent} onClick={() => setAgent('')} className={clsx('rounded-full px-3 py-1 font-mono text-[0.72rem] transition-colors', !agent ? 'bg-bone text-ink-0' : 'bg-white/8 text-bone-dim hover:text-bone')}>
+            <button type="button" aria-pressed={!agent} onClick={() => setAgent('')} className={clsx('rounded-full px-3 py-1 font-mono text-[0.72rem] transition-colors', !agent ? 'bg-bone text-ink-0' : 'bg-wash/8 text-bone-dim hover:text-bone')}>
               Everyone
             </button>
             {agents.map((a) => (

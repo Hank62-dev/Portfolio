@@ -110,26 +110,26 @@ export default function Writer({ day, entry, onClose, onNotify }) {
       <div className="flex flex-col gap-4 px-5 pt-2 pb-5" data-writer>
         <header className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-[0.68rem] tracking-[0.12em] text-[#a3bcd9] uppercase">{dayLabel(day)}</p>
-            <h2 className="font-display text-[2rem] leading-tight text-[#eef4fb]">Hôm nay của bạn thế nào?</h2>
+            <p className="font-mono text-[0.68rem] tracking-[0.12em] text-[color:var(--dz-text-3)] uppercase">{dayLabel(day)}</p>
+            <h2 className="font-display text-[2rem] leading-tight text-[color:var(--dz-text)]">Hôm nay của bạn thế nào?</h2>
           </div>
           <SheetClose label="Lưu và đóng" />
         </header>
 
         <div role="group" aria-label="Tâm trạng" className="flex justify-between gap-1">
           {[1, 2, 3, 4, 5].map((value) => (
-            <button key={value} type="button" aria-pressed={mood === value} aria-label={MOOD_WORDS[value - 1]} onClick={() => setMood(mood === value ? null : value)} className={clsx('flex flex-1 flex-col items-center gap-1 rounded-2xl py-1.5 transition-[transform,background-color] active:scale-90', mood === value ? 'scale-105 bg-[#2b4d7e]' : 'opacity-80 hover:opacity-100')}>
+            <button key={value} type="button" aria-pressed={mood === value} aria-label={MOOD_WORDS[value - 1]} onClick={() => setMood(mood === value ? null : value)} className={clsx('flex flex-1 flex-col items-center gap-1 rounded-2xl py-1.5 transition-[transform,background-color] active:scale-90', mood === value ? 'scale-105 bg-[color:var(--dz-soft-2)]' : 'opacity-80 hover:opacity-100')}>
               <MoodFace mood={value} size={46} ring={mood === value} />
-              <span className={clsx('font-body text-[0.74rem] leading-none', mood === value ? 'font-semibold text-[#eef4fb]' : 'text-[#a3bcd9]')}>{MOOD_WORDS[value - 1]}</span>
+              <span className={clsx('font-body text-[0.74rem] leading-none', mood === value ? 'font-semibold text-[color:var(--dz-text)]' : 'text-[color:var(--dz-text-3)]')}>{MOOD_WORDS[value - 1]}</span>
             </button>
           ))}
         </div>
 
-        <textarea ref={area} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Viết gì cũng được. Một dòng thôi cũng là một dấu chân…" aria-label="Nội dung nhật ký" className="min-h-40 w-full resize-none rounded-3xl border border-[#355b92] bg-[#102a52] p-4 font-display text-[1.3rem] leading-relaxed text-[#eef4fb] outline-none placeholder:text-[#7b9bc4] focus:border-[#e0a458]" />
+        <textarea ref={area} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Viết gì cũng được. Một dòng thôi cũng là một dấu chân…" aria-label="Nội dung nhật ký" className="min-h-40 w-full resize-none rounded-3xl border border-[color:var(--dz-photo)] bg-[color:var(--dz-field)] p-4 font-display text-[1.3rem] leading-relaxed text-[color:var(--dz-text)] outline-none placeholder:text-[color:var(--dz-text-4)] focus:border-[#e0a458]" />
 
         <div className="flex flex-wrap gap-2" aria-label="Gợi ý để bắt đầu">
           {today.map((text) => (
-            <button key={text} type="button" onClick={() => addPrompt(text)} className="rounded-full bg-[#2b4d7e] px-3.5 py-1.5 text-left font-body text-[0.85rem] leading-snug text-[#c6d6ea] transition-transform active:scale-95">
+            <button key={text} type="button" onClick={() => addPrompt(text)} className="rounded-full bg-[color:var(--dz-soft-2)] px-3.5 py-1.5 text-left font-body text-[0.85rem] leading-snug text-[color:var(--dz-text-2)] transition-transform active:scale-95">
               {text}
             </button>
           ))}
@@ -140,7 +140,7 @@ export default function Writer({ day, entry, onClose, onNotify }) {
             <Thumb key={id} id={id} onRemove={() => dropPhoto(id)} />
           ))}
           {photos.length < MAX_PHOTOS && (
-            <button type="button" onClick={() => file.current?.click()} disabled={busy} aria-label="Thêm ảnh" className="grid size-[72px] place-items-center rounded-2xl border-2 border-dashed border-[#456fa8] text-[#8eaad0] transition-colors hover:border-[#e0a458] hover:text-[#e0a458] disabled:opacity-50">
+            <button type="button" onClick={() => file.current?.click()} disabled={busy} aria-label="Thêm ảnh" className="grid size-[72px] place-items-center rounded-2xl border-2 border-dashed border-[color:var(--dz-handle)] text-[color:var(--dz-text-4)] transition-colors hover:border-[#e0a458] hover:text-[color:var(--dz-amber)] disabled:opacity-50">
               <ImagePlus size={22} aria-hidden="true" />
             </button>
           )}
@@ -149,7 +149,7 @@ export default function Writer({ day, entry, onClose, onNotify }) {
 
         <footer className="flex items-center gap-2 pt-1">
           {entry && (
-            <SoftButton tone="soft" onClick={discard} disabled={busy} aria-label={confirm ? 'Chắc chắn xoá trang này' : 'Xoá trang này'} className={clsx('px-4', confirm && '!bg-[#4a2a2a] !text-[#ff9f94]')}>
+            <SoftButton tone="soft" onClick={discard} disabled={busy} aria-label={confirm ? 'Chắc chắn xoá trang này' : 'Xoá trang này'} className={clsx('px-4', confirm && '!bg-[color:var(--dz-danger-bg)] !text-[color:var(--dz-danger)]')}>
               <Trash2 size={16} aria-hidden="true" /> {confirm ? 'Xoá thật nhé?' : 'Xoá'}
             </SoftButton>
           )}

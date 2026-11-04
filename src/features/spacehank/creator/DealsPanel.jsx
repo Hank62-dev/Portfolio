@@ -214,7 +214,7 @@ function QuoteSheet({ onClose }) {
           </Row>
         </div>
         <Textarea aria-label="Terms" rows={3} value={terms} onChange={(e) => setTerms(e.target.value)} />
-        <p className="flex justify-between rounded-2xl bg-white/[0.05] px-4 py-3 text-fine text-bone">
+        <p className="flex justify-between rounded-2xl bg-wash/[0.05] px-4 py-3 text-fine text-bone">
           <span>Total</span>
           <b className="font-mono tabular-nums" data-quote-total>
             {vnd(totals.total)}
@@ -349,7 +349,7 @@ export default function DealsPanel() {
               <section key={stage.id} aria-label={stage.label} data-deal-stage={stage.id} className="flex w-[16rem] shrink-0 snap-start flex-col gap-2 rounded-[1.75rem] border border-line bg-ink-1 p-3 max-md:w-[78vw]">
                 <header className="flex items-center justify-between px-1.5 pt-1">
                   <h4 className="font-mono text-[0.7rem] tracking-[0.12em] text-bone-faint uppercase">{stage.label}</h4>
-                  <span className="rounded-full bg-white/[0.07] px-2 font-mono text-[0.68rem] tabular-nums text-bone-dim">{list.length}</span>
+                  <span className="rounded-full bg-wash/[0.07] px-2 font-mono text-[0.68rem] tabular-nums text-bone-dim">{list.length}</span>
                 </header>
                 {list.length === 0 ? (
                   <p className="px-1.5 pb-2 text-[0.8rem] text-bone-faint">Empty</p>

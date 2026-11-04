@@ -17,7 +17,7 @@ function Wave({ peaks, progress, onSeek, live }) {
   return (
     <div className="flex h-12 min-w-0 flex-1 items-center gap-[3px] max-sm:order-1 max-sm:basis-full" role={onSeek ? 'slider' : 'img'} aria-label="Waveform" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} onClick={(e) => onSeek?.((e.clientX - e.currentTarget.getBoundingClientRect().left) / e.currentTarget.clientWidth)}>
       {peaks.map((p, i) => (
-        <i key={i} className={clsx('block flex-1 rounded-full transition-colors', live ? 'bg-signal' : i / peaks.length <= progress ? 'bg-signal' : 'bg-white/20')} style={{ height: `${Math.max(8, p * 100)}%` }} />
+        <i key={i} className={clsx('block flex-1 rounded-full transition-colors', live ? 'bg-signal' : i / peaks.length <= progress ? 'bg-signal' : 'bg-wash/20')} style={{ height: `${Math.max(8, p * 100)}%` }} />
       ))}
     </div>
   );
@@ -257,7 +257,7 @@ export default function MemosView({ onNotify }) {
             </div>
           )}
           {recording && heard && (
-            <p className="max-h-24 w-full overflow-y-auto rounded-2xl bg-black/25 p-3 text-center text-fine leading-relaxed text-bone" data-heard>
+            <p className="max-h-24 w-full overflow-y-auto rounded-2xl bg-shade/25 p-3 text-center text-fine leading-relaxed text-bone" data-heard>
               {heard}
             </p>
           )}

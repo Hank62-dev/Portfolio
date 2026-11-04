@@ -93,7 +93,7 @@ export default function Playbook({ onGo }) {
             <li key={s.name} className="rounded-2xl border border-line p-3">
               <p className="flex flex-wrap items-center justify-between gap-2">
                 <b className="text-fine text-bone">{s.name}</b>
-                <span className="rounded-full bg-white/[0.07] px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim">{s.status}</span>
+                <span className="rounded-full bg-wash/[0.07] px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim">{s.status}</span>
               </p>
               <p className="mt-1.5 text-[0.84rem] leading-snug text-bone-dim">{s.note}</p>
             </li>

@@ -199,7 +199,7 @@ export default function PipelinePanel() {
           <section key={stage.id} aria-label={stage.label} data-stage={stage.id} className="flex w-[16rem] shrink-0 snap-start flex-col gap-2 rounded-[1.75rem] border border-line bg-ink-1 p-3 max-md:w-[78vw]">
             <header className="flex items-center justify-between px-1.5 pt-1">
               <h4 className="font-mono text-[0.7rem] tracking-[0.12em] text-bone-faint uppercase">{stage.label}</h4>
-              <span className="rounded-full bg-white/[0.07] px-2 font-mono text-[0.68rem] tabular-nums text-bone-dim">{groups[stage.id].length}</span>
+              <span className="rounded-full bg-wash/[0.07] px-2 font-mono text-[0.68rem] tabular-nums text-bone-dim">{groups[stage.id].length}</span>
             </header>
             {groups[stage.id].length === 0 ? (
               <p className="px-1.5 pb-2 text-[0.8rem] text-bone-faint">Empty</p>
@@ -212,7 +212,7 @@ export default function PipelinePanel() {
                       {p.hook && <span className="line-clamp-2 text-[0.8rem] leading-snug text-bone-dim">“{p.hook}”</span>}
                       <span className="flex flex-wrap items-center gap-1.5">
                         {p.platforms.map((id) => (
-                          <span key={id} className="rounded-full bg-white/[0.07] px-2 py-px font-mono text-[0.62rem] text-bone-dim">
+                          <span key={id} className="rounded-full bg-wash/[0.07] px-2 py-px font-mono text-[0.62rem] text-bone-dim">
                             {platformLabel(id)}
                           </span>
                         ))}

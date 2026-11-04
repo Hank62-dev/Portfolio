@@ -86,7 +86,7 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
         style={slide.x ? { transform: `translateX(${slide.x}px)`, opacity: Math.max(0, 1 - slide.x / 280), transition: slide.dragging ? 'none' : 'transform 0.22s ease-out, opacity 0.22s ease-out' } : undefined}
         className="fixed inset-x-3 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] z-30 touch-pan-y"
       >
-        <div className="flex items-center gap-2.5 rounded-full border border-white/12 bg-ink-1/80 p-1.5 pr-2 shadow-[0_20px_44px_-16px_rgb(0_0_0/0.95)] backdrop-blur-2xl">
+        <div className="flex items-center gap-2.5 rounded-full border border-wash/12 bg-ink-1/80 p-1.5 pr-2 shadow-[0_20px_44px_-16px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur-2xl">
           <button type="button" onClick={onOpen} aria-label="Open Hank Music" className="flex min-w-0 flex-1 items-center gap-3 text-left">
             <span className="relative size-[3.1rem] shrink-0">
               <svg viewBox="0 0 100 100" className="absolute inset-0 size-full -rotate-90" aria-hidden="true">
@@ -94,7 +94,7 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
                 <circle cx="50" cy="50" r="47" fill="none" stroke="var(--color-signal)" strokeWidth="4" strokeLinecap="round" pathLength="100" strokeDasharray={`${Math.max(0.01, ratio * 100)} 100`} />
               </svg>
               <Cover track={track} className={clsx('absolute inset-[9%] [animation:disc_14s_linear_infinite]', !playing && '[animation-play-state:paused]')} rounded="rounded-full" />
-              <i className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-0 ring-1 ring-white/30" aria-hidden="true" />
+              <i className="absolute top-1/2 left-1/2 size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-0 ring-1 ring-wash/30" aria-hidden="true" />
             </span>
             <span className="min-w-0 leading-tight">
               <b className="block truncate font-display text-[1.02rem] font-normal text-bone" data-now-title>
@@ -123,7 +123,7 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
       onTouchEnd={lifted ? onTouchEnd : undefined}
       onTouchCancel={lifted ? onTouchEnd : undefined}
       style={lifted && slide.x ? { transform: `translateX(${slide.x}px)`, opacity: Math.max(0, 1 - slide.x / 280), transition: slide.dragging ? 'none' : 'transform 0.22s ease-out, opacity 0.22s ease-out' } : undefined}
-      className={clsx('fixed z-30 border-line bg-ink-0/90 backdrop-blur-xl', lifted ? 'touch-pan-y inset-x-2.5 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] overflow-hidden rounded-2xl border bg-ink-1/95 shadow-[0_18px_40px_-14px_rgb(0_0_0/0.9)]' : 'inset-x-0 bottom-0 border-t')}
+      className={clsx('fixed z-30 border-line bg-ink-0/90 backdrop-blur-xl', lifted ? 'touch-pan-y inset-x-2.5 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] overflow-hidden rounded-2xl border bg-ink-1/95 shadow-[0_18px_40px_-14px_rgb(var(--shadow-rgb)/0.9)]' : 'inset-x-0 bottom-0 border-t')}
       data-now-playing
     >
       <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 md:py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] md:gap-6 md:px-5">

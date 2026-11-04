@@ -64,7 +64,7 @@ export const Select = forwardRef(function Select({ className, children, compact,
             align="start"
             sideOffset={8}
             collisionPadding={12}
-            className="no-scrollbar z-[70] max-h-[min(20rem,var(--radix-dropdown-menu-content-available-height))] w-max min-w-[var(--radix-dropdown-menu-trigger-width)] max-w-[min(24rem,92vw)] animate-fade-in overflow-y-auto rounded-2xl border border-white/10 bg-ink-1/95 p-1.5 shadow-[0_28px_70px_-24px_rgb(0_0_0/0.95)] backdrop-blur-xl"
+            className="no-scrollbar z-[70] max-h-[min(20rem,var(--radix-dropdown-menu-content-available-height))] w-max min-w-[var(--radix-dropdown-menu-trigger-width)] max-w-[min(24rem,92vw)] animate-fade-in overflow-y-auto rounded-2xl border border-wash/10 bg-ink-1/95 p-1.5 shadow-[0_28px_70px_-24px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur-xl"
           >
             <DropdownMenu.RadioGroup value={current || NONE} onValueChange={(next) => onChange?.({ target: { value: next === NONE ? '' : next, name } })}>
               {options.map((option) => (
@@ -72,7 +72,7 @@ export const Select = forwardRef(function Select({ className, children, compact,
                   key={option.value}
                   value={option.value || NONE}
                   disabled={option.disabled}
-                  className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-fine text-bone-dim outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-white/8 data-[highlighted]:text-bone data-[state=checked]:text-bone"
+                  className="flex cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-fine text-bone-dim outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-wash/8 data-[highlighted]:text-bone data-[state=checked]:text-bone"
                 >
                   <span className="min-w-0 flex-1 truncate">{option.label}</span>
                   <DropdownMenu.ItemIndicator>

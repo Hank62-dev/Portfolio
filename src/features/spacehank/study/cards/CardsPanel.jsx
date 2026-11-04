@@ -22,10 +22,10 @@ const DAY_LETTER = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 /** The spread of a deck: how much is new, still being learnt, and well known, as one bar. */
 function SpreadBar({ stats }) {
-  if (!stats.total) return <div className="h-2 rounded-full bg-white/[0.06]" />;
+  if (!stats.total) return <div className="h-2 rounded-full bg-wash/[0.06]" />;
   const part = (n) => `${(n / stats.total) * 100}%`;
   return (
-    <div className="flex h-2 overflow-hidden rounded-full bg-white/[0.06]" role="img" aria-label={`${stats.mature} well known, ${stats.learning} learning, ${stats.new} new`}>
+    <div className="flex h-2 overflow-hidden rounded-full bg-wash/[0.06]" role="img" aria-label={`${stats.mature} well known, ${stats.learning} learning, ${stats.new} new`}>
       <i className="block bg-ok transition-[width] duration-500" style={{ width: part(stats.mature) }} />
       <i className="block bg-warn transition-[width] duration-500" style={{ width: part(stats.learning) }} />
       <i className="block bg-signal/80 transition-[width] duration-500" style={{ width: part(stats.new) }} />
@@ -42,7 +42,7 @@ function Forecast({ counts }) {
       {counts.map((n, i) => (
         <li key={i} className="flex flex-col items-center gap-1.5" title={`${i === 0 ? 'Today' : `In ${i} day${i > 1 ? 's' : ''}`}: ${n}`}>
           <span className="font-mono text-[0.62rem] text-bone-faint tabular-nums">{n || ''}</span>
-          <span className="flex h-12 w-full max-w-8 items-end overflow-hidden rounded-xl bg-white/[0.05]">
+          <span className="flex h-12 w-full max-w-8 items-end overflow-hidden rounded-xl bg-wash/[0.05]">
             <i className={clsx('block w-full rounded-xl transition-[height] duration-500', i === 0 ? 'bg-signal' : 'bg-bone/60')} style={{ height: n ? `${Math.max(10, (n / top) * 100)}%` : 0 }} />
           </span>
           <span className={clsx('font-mono text-[0.62rem]', i === 0 ? 'text-signal' : 'text-bone-faint')}>{DAY_LETTER[(today + i) % 7]}</span>
@@ -215,7 +215,7 @@ export default function CardsPanel() {
               >
                 {d.hue !== null && <i className="size-2 rounded-full" style={{ background: `hsl(${d.hue} 80% 65%)` }} aria-hidden="true" />}
                 {d.name}
-                <span className={clsx('rounded-full px-1.5 font-mono text-[0.68rem] tabular-nums', deck === d.id ? 'bg-ink-0/15' : 'bg-white/[0.07]')}>{due ? `${due} due` : mine.length}</span>
+                <span className={clsx('rounded-full px-1.5 font-mono text-[0.68rem] tabular-nums', deck === d.id ? 'bg-ink-0/15' : 'bg-wash/[0.07]')}>{due ? `${due} due` : mine.length}</span>
               </button>
             );
           })}

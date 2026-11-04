@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, X } from 'lucide-react';
 import { clsx } from '../../../lib/format';
+import { ThemePills } from './ThemeMenu';
 import { NAVIGATION, NAV_SECTIONS } from '../navigation';
 
 // The four places a phone reaches most often; everything else lives under "More".
@@ -76,7 +77,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
         style={{ '--notch': `${(at * 2 + 1) * 10}%` }}
         data-mobile-nav
       >
-        <span aria-hidden="true" className="notch-bar absolute inset-0 rounded-[1.8rem] border border-line bg-ink-1/95 shadow-[0_18px_40px_-14px_rgb(0_0_0/0.9)] backdrop-blur-xl" />
+        <span aria-hidden="true" className="notch-bar absolute inset-0 rounded-[1.8rem] border border-line bg-ink-1/95 shadow-[0_18px_40px_-14px_rgb(var(--shadow-rgb)/0.9)] backdrop-blur-xl" />
         <button
           type="button"
           tabIndex={-1}
@@ -106,7 +107,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
         <Dialog.Overlay className="fixed inset-0 z-40 animate-fade-in bg-black/65 backdrop-blur-sm" />
         <Dialog.Content
           aria-describedby={undefined}
-          className="fixed inset-x-0 bottom-0 z-50 flex max-h-[86dvh] flex-col rounded-t-[2rem] border border-b-0 border-line bg-ink-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-30px_80px_-30px_rgb(0_0_0/0.9)] [animation:sheet-up_0.38s_cubic-bezier(0.16,1,0.3,1)_backwards]"
+          className="fixed inset-x-0 bottom-0 z-50 flex max-h-[86dvh] flex-col rounded-t-[2rem] border border-b-0 border-line bg-ink-1 pb-[env(safe-area-inset-bottom)] shadow-[0_-30px_80px_-30px_rgb(var(--shadow-rgb)/0.9)] [animation:sheet-up_0.38s_cubic-bezier(0.16,1,0.3,1)_backwards]"
           style={{ transform: drag.y ? `translateY(${drag.y}px)` : undefined, transition: drag.active ? 'none' : 'transform 0.28s cubic-bezier(0.16,1,0.3,1)' }}
         >
           {/* hold the handle or the title and pull down to put the sheet away */}
@@ -123,7 +124,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             <span className="mx-auto mt-2.5 block h-1 w-10 rounded-full bg-line-strong" aria-hidden="true" />
             <div className="flex items-center justify-between px-5 pt-3 pb-2">
               <Dialog.Title className="font-display text-lead text-bone">Everything in Hank62</Dialog.Title>
-              <Dialog.Close aria-label="Close" className="grid size-9 place-items-center rounded-full text-bone-dim hover:bg-white/5 hover:text-bone">
+              <Dialog.Close aria-label="Close" className="grid size-9 place-items-center rounded-full text-bone-dim hover:bg-wash/5 hover:text-bone">
                 <X size={18} aria-hidden="true" />
               </Dialog.Close>
             </div>
@@ -159,6 +160,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
               </section>
             ))}
 
+            <ThemePills className="border-t border-line pt-4" />
             {!guest && <SyncStatus className="border-t border-line pt-3" />}
             <div className="flex flex-wrap gap-2 border-t border-line pt-4">
               {(app?.canInstall || app?.ios) && (
@@ -186,7 +188,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             aria-hidden={!more}
             aria-label="Scroll down for more"
             onClick={() => scroller.current?.scrollBy({ top: 240, behavior: 'smooth' })}
-            className={clsx('absolute bottom-2 left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full border border-line bg-ink-2/90 text-bone-dim shadow-[0_8px_20px_-8px_rgb(0_0_0/0.8)] backdrop-blur transition-all duration-300 active:scale-90', more ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0')}
+            className={clsx('absolute bottom-2 left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full border border-line bg-ink-2/90 text-bone-dim shadow-[0_8px_20px_-8px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur transition-all duration-300 active:scale-90', more ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0')}
             data-sheet-scroll-hint
           >
             <ChevronDown size={16} className="animate-nudge" aria-hidden="true" />

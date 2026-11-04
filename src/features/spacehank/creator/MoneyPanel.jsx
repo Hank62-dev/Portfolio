@@ -101,7 +101,7 @@ export default function MoneyPanel() {
         </p>
         {goal > 0 ? (
           <div className="mt-3">
-            <div className="h-2 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label="Progress to the goal" aria-valuemin={0} aria-valuemax={100} aria-valuenow={g.pct}>
+            <div className="h-2 overflow-hidden rounded-full bg-wash/10" role="progressbar" aria-label="Progress to the goal" aria-valuemin={0} aria-valuemax={100} aria-valuenow={g.pct}>
               <i className={clsx('block h-full rounded-full transition-[width] duration-500', g.reached ? 'bg-ok' : 'bg-signal')} style={{ width: `${g.pct}%` }} />
             </div>
             <p className="mt-1.5 flex justify-between text-[0.78rem] text-bone-dim">
@@ -148,7 +148,7 @@ export default function MoneyPanel() {
                     <span className="text-bone">{sourceLabel(s.source)}</span>
                     <span className="font-mono text-bone-dim tabular-nums">{vndShort(s.amount)} · {Math.round(s.share * 100)}%</span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-white/[0.07]">
+                  <div className="h-2 overflow-hidden rounded-full bg-wash/[0.07]">
                     <i className={clsx('block h-full rounded-full', BAR_COLOURS[i % BAR_COLOURS.length])} style={{ width: `${s.share * 100}%` }} />
                   </div>
                 </li>
@@ -161,7 +161,7 @@ export default function MoneyPanel() {
             {months.map((m, i) => (
               <li key={m.month} className="flex flex-col items-center gap-1.5">
                 <span className="font-mono text-[0.6rem] text-bone-faint tabular-nums">{m.total ? vndShort(m.total) : ''}</span>
-                <span className="flex h-24 w-full max-w-9 items-end overflow-hidden rounded-xl bg-white/[0.05]">
+                <span className="flex h-24 w-full max-w-9 items-end overflow-hidden rounded-xl bg-wash/[0.05]">
                   <i className={clsx('block w-full rounded-xl', i === months.length - 1 ? 'bg-signal' : 'bg-bone/60')} style={{ height: m.total ? `${Math.max(8, (m.total / topMonth) * 100)}%` : 0 }} />
                 </span>
                 <span className={clsx('font-mono text-[0.62rem]', i === months.length - 1 ? 'text-signal' : 'text-bone-faint')}>{monthName(m.month)}</span>

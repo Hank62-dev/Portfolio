@@ -75,7 +75,7 @@ function NoteCard({ note, query, onOpen, grid }) {
       <button
         type="button"
         onClick={() => onOpen(note.id)}
-        className="group relative flex w-full flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-ink-1 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_18px_40px_-20px_rgb(0_0_0/0.9)] max-md:gap-1.5 max-md:rounded-xl max-md:p-3 max-md:active:scale-[0.98]"
+        className="group relative flex w-full flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-ink-1 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_18px_40px_-20px_rgb(var(--shadow-rgb)/0.9)] max-md:gap-1.5 max-md:rounded-xl max-md:p-3 max-md:active:scale-[0.98]"
         style={{ backgroundImage: `linear-gradient(160deg, hsl(${hue} 55% 50% / 0.13), transparent 70%)` }}
       >
         <i className="absolute inset-x-0 top-0 h-0.5 opacity-80" style={{ background: `linear-gradient(90deg, hsl(${hue} 80% 60%), transparent)` }} aria-hidden="true" />
@@ -254,7 +254,7 @@ export default function NotesView() {
             <h2 className="font-display text-lead text-bone">Ask your notes</h2>
           </div>
           <form
-            className="mt-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-black/30 p-1.5 pl-4 backdrop-blur focus-within:border-signal/60"
+            className="mt-4 flex items-center gap-2 rounded-2xl border border-wash/10 bg-shade/30 p-1.5 pl-4 backdrop-blur focus-within:border-signal/60"
             onSubmit={(e) => {
               e.preventDefault();
               void ask(question);
@@ -275,7 +275,7 @@ export default function NotesView() {
           {suggestions.length > 0 && !answer && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {suggestions.map((s) => (
-                <button key={s} type="button" onClick={() => setQuestion(s)} className="max-w-full truncate rounded-full border border-white/10 bg-white/5 px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/50 hover:text-bone">
+                <button key={s} type="button" onClick={() => setQuestion(s)} className="max-w-full truncate rounded-full border border-wash/10 bg-wash/5 px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/50 hover:text-bone">
                   {s}
                 </button>
               ))}
@@ -287,7 +287,7 @@ export default function NotesView() {
             </p>
           )}
           {answer && (
-            <div className="mt-4 rounded-2xl border border-white/10 bg-black/30 p-4 backdrop-blur" data-answer>
+            <div className="mt-4 rounded-2xl border border-wash/10 bg-shade/30 p-4 backdrop-blur" data-answer>
               <Suspense
                 fallback={
                   <Loading label="Loading the answer">
@@ -298,7 +298,7 @@ export default function NotesView() {
                 <Markdown>{answer.text}</Markdown>
               </Suspense>
               {answer.sources.length > 0 && (
-                <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-white/10 pt-3">
+                <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-wash/10 pt-3">
                   <span className="font-mono text-[0.72rem] text-bone-faint">From</span>
                   {answer.sources.map((note, i) => (
                     <button
@@ -366,7 +366,7 @@ export default function NotesView() {
               ['grid', LayoutGrid, 'Grid view'],
               ['list', ListIcon, 'List view'],
             ].map(([id, Icon, label]) => (
-              <button key={id} type="button" aria-label={label} aria-pressed={layout === id} onClick={() => setLayout(id)} className={clsx('grid size-8 place-items-center rounded-full transition-colors', layout === id ? 'bg-white/12 text-bone' : 'text-bone-faint hover:text-bone')}>
+              <button key={id} type="button" aria-label={label} aria-pressed={layout === id} onClick={() => setLayout(id)} className={clsx('grid size-8 place-items-center rounded-full transition-colors', layout === id ? 'bg-wash/12 text-bone' : 'text-bone-faint hover:text-bone')}>
                 <Icon size={15} aria-hidden="true" />
               </button>
             ))}

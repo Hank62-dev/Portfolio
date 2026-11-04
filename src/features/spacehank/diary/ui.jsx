@@ -12,8 +12,8 @@ const BUTTON = 'inline-flex min-h-11 items-center justify-center gap-2 rounded-f
 export function SoftButton({ tone = 'fill', className, children, ...rest }) {
   const look = {
     fill: 'bg-[#e0a458] text-[#1b1407] shadow-[0_10px_22px_-10px_rgb(224_164_88/0.45)] hover:bg-[#e8b36d]',
-    soft: 'bg-[#29497a] text-[#e0eaf5] hover:bg-[#315888]',
-    glass: 'border border-white/30 bg-white/15 text-[#eef3f7] backdrop-blur hover:bg-white/25',
+    soft: 'bg-[color:var(--dz-soft)] text-[color:var(--dz-on-soft)] hover:bg-[color:var(--dz-soft-hover)]',
+    glass: 'border border-[color:var(--dz-text)]/30 bg-[color:var(--dz-text)]/15 text-[color:var(--dz-text)] backdrop-blur hover:bg-[color:var(--dz-text)]/25',
   }[tone];
   return (
     <button type="button" className={clsx(BUTTON, look, className)} {...rest}>
@@ -33,7 +33,7 @@ export function PaperSheet({ open, onClose, title, description, children }) {
         <Dialog.Content className="paper fixed inset-x-0 bottom-0 z-[86] mx-auto flex max-h-[94dvh] w-full max-w-[34rem] animate-sheet-up flex-col overflow-y-auto overscroll-contain rounded-t-[2rem] pb-[env(safe-area-inset-bottom)] outline-none md:top-1/2 md:bottom-auto md:max-h-[90dvh] md:-translate-y-1/2 md:rounded-[2rem]" {...drag.bind} style={drag.style}>
           <Dialog.Title className="sr-only">{title}</Dialog.Title>
           <Dialog.Description className="sr-only">{description}</Dialog.Description>
-          <span className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-[#456fa8] md:hidden" aria-hidden="true" />
+          <span className="mx-auto mt-2.5 h-1 w-10 shrink-0 rounded-full bg-[color:var(--dz-handle)] md:hidden" aria-hidden="true" />
           {children}
         </Dialog.Content>
       </Dialog.Portal>
@@ -42,7 +42,7 @@ export function PaperSheet({ open, onClose, title, description, children }) {
 }
 
 export const SheetClose = ({ label = 'Đóng' }) => (
-  <Dialog.Close aria-label={label} className="grid size-10 shrink-0 place-items-center rounded-full text-[#a3bcd9] transition-colors hover:bg-[#29497a]">
+  <Dialog.Close aria-label={label} className="grid size-10 shrink-0 place-items-center rounded-full text-[color:var(--dz-text-3)] transition-colors hover:bg-[color:var(--dz-soft)]">
     <X size={18} aria-hidden="true" />
   </Dialog.Close>
 );
@@ -51,7 +51,7 @@ export const SheetClose = ({ label = 'Đóng' }) => (
 export function Thumb({ id, size = 72, onRemove, className, alt = 'Ảnh kỷ niệm' }) {
   const url = usePhoto(id);
   return (
-    <span className={clsx('relative inline-block shrink-0 overflow-hidden rounded-2xl bg-[#355b92]', className)} style={{ width: size, height: size }}>
+    <span className={clsx('relative inline-block shrink-0 overflow-hidden rounded-2xl bg-[color:var(--dz-photo)]', className)} style={{ width: size, height: size }}>
       {url && <img src={url} alt={alt} className="size-full object-cover" />}
       {onRemove && (
         <button type="button" onClick={onRemove} aria-label="Bỏ ảnh này" className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-[#08183a]/70 text-white">

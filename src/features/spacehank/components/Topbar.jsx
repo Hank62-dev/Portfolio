@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronRight, Command, Pause, Play, Plus, Search } from 'lucide-react';
 import { Avatar, Badge, Button, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
+import { ThemeMenu } from './ThemeMenu';
 import { owner } from '../config';
 import { NAVIGATION, tabHue } from '../navigation';
 
@@ -68,11 +69,11 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
             </span>
           )}
           {tab === 'space' && (
-            <button type="button" aria-label={paused ? 'Resume floor' : 'Pause floor'} onClick={onPause} className="grid size-10 place-items-center rounded-full bg-white/7 text-bone-dim active:scale-90">
+            <button type="button" aria-label={paused ? 'Resume floor' : 'Pause floor'} onClick={onPause} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone-dim active:scale-90">
               {paused ? <Play size={17} aria-hidden="true" /> : <Pause size={17} aria-hidden="true" />}
             </button>
           )}
-          <button type="button" aria-label="Open the command palette" onClick={onPalette} className="grid size-10 place-items-center rounded-full bg-white/7 text-bone active:scale-90" data-palette-button>
+          <button type="button" aria-label="Open the command palette" onClick={onPalette} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone active:scale-90" data-palette-button>
             <Search size={18} aria-hidden="true" />
           </button>
           {agentsScreen && (
@@ -113,6 +114,7 @@ export default function Topbar({ tab, connected, link, guest, paused, onPause, o
         <Badge tone={guest ? 'warn' : LINK[linkOf(connected, link)].tone} dot>
           {guest ? 'DEMO' : LINK[linkOf(connected, link)].text}
         </Badge>
+        <ThemeMenu />
         <Tooltip content={pauseLabel} side="bottom">
           <Button variant="secondary" size="icon" aria-label={pauseLabel} onClick={onPause}>
             {paused ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}

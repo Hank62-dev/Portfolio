@@ -63,7 +63,7 @@ export default function CardEditor({ card, decks, deck: initialDeck = '', onClos
             <span className="text-[0.74rem] text-bone-faint">Select a word in the front, then tap.</span>
           </div>
           {cloze && (
-            <p className="rounded-2xl border border-line bg-black/20 px-3.5 py-2.5 text-fine text-bone-dim" data-preview>
+            <p className="rounded-2xl border border-line bg-shade/20 px-3.5 py-2.5 text-fine text-bone-dim" data-preview>
               <span className="mr-1.5 font-mono text-[0.62rem] tracking-[0.12em] text-bone-faint uppercase">Shows as</span>
               {clozeFront(front)}
             </p>

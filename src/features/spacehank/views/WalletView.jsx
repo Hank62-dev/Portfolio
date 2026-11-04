@@ -137,8 +137,8 @@ export default function WalletView() {
         </Button>
       </PageHead>
 
-      <form onSubmit={understand} className="rounded-[2rem] border border-white/10 bg-[radial-gradient(70%_130%_at_0%_0%,rgb(255_91_46/0.13),transparent_60%),radial-gradient(60%_120%_at_100%_100%,rgb(91_43_255/0.1),transparent_60%),var(--color-ink-1)] p-3 sm:p-4">
-        <div className="flex items-center gap-2.5 rounded-full bg-black/35 p-1.5 pl-2 ring-1 ring-white/10 transition-shadow focus-within:ring-2 focus-within:ring-signal/55">
+      <form onSubmit={understand} className="rounded-[2rem] border border-wash/10 bg-[radial-gradient(70%_130%_at_0%_0%,rgb(255_91_46/0.13),transparent_60%),radial-gradient(60%_120%_at_100%_100%,rgb(91_43_255/0.1),transparent_60%),var(--color-ink-1)] p-3 sm:p-4">
+        <div className="flex items-center gap-2.5 rounded-full bg-shade/35 p-1.5 pl-2 ring-1 ring-wash/10 transition-shadow focus-within:ring-2 focus-within:ring-signal/55">
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">
             <WalletIcon size={18} aria-hidden="true" />
           </span>
@@ -152,7 +152,7 @@ export default function WalletView() {
           <div className="mt-3 flex flex-wrap items-center gap-1.5 px-1" aria-label="Examples">
             <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Try</span>
             {EXAMPLES.map((example) => (
-              <button key={example} type="button" onClick={() => tryExample(example)} className="rounded-full border border-white/10 px-3 py-1 font-mono text-[0.74rem] text-bone-dim transition-colors hover:border-signal/50 hover:text-bone">
+              <button key={example} type="button" onClick={() => tryExample(example)} className="rounded-full border border-wash/10 px-3 py-1 font-mono text-[0.74rem] text-bone-dim transition-colors hover:border-signal/50 hover:text-bone">
                 {example}
               </button>
             ))}
@@ -160,7 +160,7 @@ export default function WalletView() {
         )}
 
         {draft && (
-          <div className="mt-4 flex animate-fade-in flex-col gap-3.5 border-t border-white/8 px-1 pt-4" data-draft>
+          <div className="mt-4 flex animate-fade-in flex-col gap-3.5 border-t border-wash/8 px-1 pt-4" data-draft>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
               <Segmented value={draft.type} onChange={retype} label="Type" options={[{ id: 'expense', label: 'Expense' }, { id: 'income', label: 'Income' }]} />
               {draft.amount ? (
@@ -178,7 +178,7 @@ export default function WalletView() {
                   role="radio"
                   aria-checked={draft.category === c.id}
                   onClick={() => setDraft({ ...draft, category: c.id })}
-                  className={clsx('inline-flex items-center gap-2 rounded-full border py-1 pr-3.5 pl-1 text-fine transition-colors', draft.category === c.id ? 'border-transparent bg-white/12 text-bone' : 'border-white/10 text-bone-dim hover:border-white/25 hover:text-bone')}
+                  className={clsx('inline-flex items-center gap-2 rounded-full border py-1 pr-3.5 pl-1 text-fine transition-colors', draft.category === c.id ? 'border-transparent bg-wash/12 text-bone' : 'border-wash/10 text-bone-dim hover:border-wash/25 hover:text-bone')}
                 >
                   <CatIcon id={c.id} size={13} className="size-6" /> {c.label}
                 </button>
@@ -221,8 +221,8 @@ export default function WalletView() {
             ['Income', formatVnd(sum.income), 'text-ok', TrendingUp],
             ['Biggest', lead ? categoryOf(lead.category).label : '-', 'text-bone', Target],
           ].map(([label, value, tone, Icon]) => (
-            <div key={label} className="flex items-center gap-3 rounded-2xl bg-black/25 px-4 py-3 backdrop-blur max-md:flex-col max-md:items-start max-md:gap-1.5 max-md:px-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white/8 text-bone-dim max-md:size-7">
+            <div key={label} className="flex items-center gap-3 rounded-2xl bg-shade/25 px-4 py-3 backdrop-blur max-md:flex-col max-md:items-start max-md:gap-1.5 max-md:px-3">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-wash/8 text-bone-dim max-md:size-7">
                 <Icon size={16} aria-hidden="true" />
               </span>
               <span className="min-w-0 leading-tight">
@@ -314,7 +314,7 @@ export default function WalletView() {
                       {list.map((e) => {
                         const cat = categoryOf(e.category);
                         return (
-                          <li key={e.id} className="group flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-white/[0.04]" data-entry>
+                          <li key={e.id} className="group flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-wash/[0.04]" data-entry>
                             <CatIcon id={e.category} size={15} className="size-8" />
                             <span className="min-w-0 flex-1 leading-tight">
                               <b className="block truncate text-fine font-medium text-bone">{e.note || cat.label}</b>

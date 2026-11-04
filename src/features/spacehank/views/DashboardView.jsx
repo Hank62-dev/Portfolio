@@ -57,7 +57,7 @@ function Launcher({ onTab }) {
         aria-expanded={more}
         aria-label={more ? 'Show fewer apps' : 'Show all apps'}
         onClick={() => setMore((open) => !open)}
-        className="mx-auto mt-3 grid size-9 place-items-center rounded-full border border-line bg-ink-2/80 text-bone-dim shadow-[0_8px_18px_-8px_rgb(0_0_0/0.8)] backdrop-blur transition-colors active:scale-90"
+        className="mx-auto mt-3 grid size-9 place-items-center rounded-full border border-line bg-ink-2/80 text-bone-dim shadow-[0_8px_18px_-8px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur transition-colors active:scale-90"
       >
         <ChevronDown size={17} className={`transition-transform duration-500 ${more ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>

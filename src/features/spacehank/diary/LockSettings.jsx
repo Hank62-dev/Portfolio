@@ -48,25 +48,25 @@ export default function LockSettings({ onClose, onNotify }) {
       <div className="flex flex-col gap-4 px-5 pt-2 pb-5" data-lock-settings>
         <header className="flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono text-[0.66rem] tracking-[0.12em] text-[#a3bcd9] uppercase">Riêng tư</p>
-            <h2 className="font-display text-[1.9rem] leading-tight text-[#eef4fb]">Khoá nhật ký</h2>
+            <p className="font-mono text-[0.66rem] tracking-[0.12em] text-[color:var(--dz-text-3)] uppercase">Riêng tư</p>
+            <h2 className="font-display text-[1.9rem] leading-tight text-[color:var(--dz-text)]">Khoá nhật ký</h2>
           </div>
           <SheetClose />
         </header>
 
-        <p className="font-body text-[0.9rem] leading-relaxed text-[#c6d6ea]">Khi bật, nhật ký chỉ mở bằng vân tay (hoặc khuôn mặt, hoặc mã khoá màn hình, tuỳ điện thoại của bạn). Các trang nhật ký cũng được ẩn khỏi Second Brain và bản đồ sao. Nhật ký tự khoá lại nếu bạn rời app hơn một phút.</p>
+        <p className="font-body text-[0.9rem] leading-relaxed text-[color:var(--dz-text-2)]">Khi bật, nhật ký chỉ mở bằng vân tay (hoặc khuôn mặt, hoặc mã khoá màn hình, tuỳ điện thoại của bạn). Các trang nhật ký cũng được ẩn khỏi Second Brain và bản đồ sao. Nhật ký tự khoá lại nếu bạn rời app hơn một phút.</p>
 
-        {supported === null && <p className="font-body text-[0.85rem] text-[#a3bcd9]">Đang hỏi điện thoại…</p>}
+        {supported === null && <p className="font-body text-[0.85rem] text-[color:var(--dz-text-3)]">Đang hỏi điện thoại…</p>}
         {supported === false && !enabled && (
-          <p className="rounded-2xl bg-[#29497a] p-3 font-body text-[0.85rem] leading-relaxed text-[#e0eaf5]" role="status">
+          <p className="rounded-2xl bg-[color:var(--dz-soft)] p-3 font-body text-[0.85rem] leading-relaxed text-[color:var(--dz-on-soft)]" role="status">
             Trình duyệt này chưa dùng được vân tay. Khoá cần trang https (hoặc localhost) và điện thoại đã cài khoá màn hình hay vân tay.
           </p>
         )}
 
         {enabled ? (
           <div className="flex flex-col gap-2">
-            <p className="flex items-center gap-2 font-body text-[0.95rem] font-medium text-[#eef4fb]" data-lock-on>
-              <ShieldCheck size={18} className="text-[#e0a458]" aria-hidden="true" /> Khoá đang bật
+            <p className="flex items-center gap-2 font-body text-[0.95rem] font-medium text-[color:var(--dz-text)]" data-lock-on>
+              <ShieldCheck size={18} className="text-[color:var(--dz-amber)]" aria-hidden="true" /> Khoá đang bật
             </p>
             <SoftButton tone="soft" onClick={lockNow}>
               <Lock size={16} aria-hidden="true" /> Khoá ngay
@@ -81,10 +81,10 @@ export default function LockSettings({ onClose, onNotify }) {
           </SoftButton>
         )}
 
-        <p className="min-h-5 font-body text-[0.85rem] text-[#ffd0a0]" role="alert">
+        <p className="min-h-5 font-body text-[0.85rem] text-[color:var(--dz-warn)]" role="alert">
           {error}
         </p>
-        <p className="font-body text-[0.76rem] leading-relaxed text-[#8eaad0]">Khoá này che nhật ký trên màn hình, chưa mã hoá dữ liệu. Các trang vẫn nằm trên máy này như trước.</p>
+        <p className="font-body text-[0.76rem] leading-relaxed text-[color:var(--dz-text-4)]">Khoá này che nhật ký trên màn hình, chưa mã hoá dữ liệu. Các trang vẫn nằm trên máy này như trước.</p>
       </div>
     </PaperSheet>
   );

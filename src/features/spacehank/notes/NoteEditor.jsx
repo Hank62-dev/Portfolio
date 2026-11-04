@@ -50,14 +50,14 @@ function Tool({ label, active, disabled, onClick, children }) {
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()} // keep the selection in the editor
       onClick={onClick}
-      className={clsx('grid size-8 place-items-center rounded-full transition-colors disabled:opacity-35', active ? 'bg-signal text-ink-0' : 'text-bone-dim hover:bg-white/10 hover:text-bone')}
+      className={clsx('grid size-8 place-items-center rounded-full transition-colors disabled:opacity-35', active ? 'bg-signal text-ink-0' : 'text-bone-dim hover:bg-wash/10 hover:text-bone')}
     >
       {children}
     </button>
   );
 }
 
-const Divider = () => <i className="mx-1 h-5 w-px bg-white/10" aria-hidden="true" />;
+const Divider = () => <i className="mx-1 h-5 w-px bg-wash/10" aria-hidden="true" />;
 
 /** The formatting bar: a floating pill that stays with you as you scroll the page. */
 function Toolbar({ editor }) {
@@ -92,7 +92,7 @@ function Toolbar({ editor }) {
 
   return (
     <div className="sticky top-[4.5rem] z-10 mx-auto flex w-fit max-w-full flex-col items-stretch" role="toolbar" aria-label="Formatting">
-      <div className="flex flex-wrap items-center justify-center gap-0.5 rounded-full border border-white/10 bg-ink-1/80 p-1 shadow-[0_10px_40px_-10px_rgb(0_0_0/0.8)] backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-center gap-0.5 rounded-full border border-wash/10 bg-ink-1/80 p-1 shadow-[0_10px_40px_-10px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur-xl">
         <Tool label="Heading 1" active={s.h1} onClick={run((c) => c.toggleHeading({ level: 1 }))}>
           <Heading1 size={16} aria-hidden="true" />
         </Tool>
@@ -141,7 +141,7 @@ function Toolbar({ editor }) {
       </div>
 
       {link !== null && (
-        <form onSubmit={applyLink} className="mt-2 flex items-center gap-2 rounded-full border border-white/10 bg-ink-1/90 p-1.5 pl-4 shadow-xl backdrop-blur-xl">
+        <form onSubmit={applyLink} className="mt-2 flex items-center gap-2 rounded-full border border-wash/10 bg-ink-1/90 p-1.5 pl-4 shadow-xl backdrop-blur-xl">
           <input
             autoFocus
             aria-label="Link address"
@@ -250,7 +250,7 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
             </div>
           )}
 
-          <div className="rich mx-auto min-h-[60vh] w-full max-w-3xl rounded-2xl border border-line bg-ink-1 px-6 py-8 shadow-[0_30px_80px_-40px_rgb(0_0_0/0.9)] focus-within:border-line-strong sm:px-12">
+          <div className="rich mx-auto min-h-[60vh] w-full max-w-3xl rounded-2xl border border-line bg-ink-1 px-6 py-8 shadow-[0_30px_80px_-40px_rgb(var(--shadow-rgb)/0.9)] focus-within:border-line-strong sm:px-12">
             <EditorContent editor={editor} />
           </div>
         </article>
@@ -286,7 +286,7 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
               <ul className="flex flex-col gap-1">
                 {related.map((r) => (
                   <li key={r.id}>
-                    <button type="button" onClick={() => onOpen(r.id)} className="w-full rounded-lg px-2 py-1.5 text-left text-fine text-bone-dim transition-colors hover:bg-white/5 hover:text-bone">
+                    <button type="button" onClick={() => onOpen(r.id)} className="w-full rounded-lg px-2 py-1.5 text-left text-fine text-bone-dim transition-colors hover:bg-wash/5 hover:text-bone">
                       {titleOf(r.text)}
                     </button>
                   </li>

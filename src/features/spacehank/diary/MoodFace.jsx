@@ -39,13 +39,13 @@ export default function MoodFace({ mood, size = 44, ring = false, className }) {
   if (!mood) {
     return (
       <svg viewBox="0 0 48 48" width={size} height={size} className={className} aria-hidden="true">
-        <circle cx="24" cy="24" r="21" fill="rgb(255 255 255 / 0.06)" stroke="#a3bcd9" strokeWidth="2" strokeDasharray="2 5" strokeLinecap="round" />
+        <circle cx="24" cy="24" r="21" fill="rgb(255 255 255 / 0.06)" stroke="var(--dz-text-3)" strokeWidth="2" strokeDasharray="2 5" strokeLinecap="round" />
       </svg>
     );
   }
   return (
     <svg viewBox="0 0 48 48" width={size} height={size} className={className} aria-hidden="true">
-      <circle cx="24" cy="24" r="22" fill={MOOD_COLORS[mood - 1]} stroke={ring ? '#eef3f7' : 'none'} strokeWidth="3" />
+      <circle cx="24" cy="24" r="22" fill={MOOD_COLORS[mood - 1]} stroke={ring ? 'var(--dz-text)' : 'none'} strokeWidth="3" />
       <ellipse cx="17" cy="12" rx="8" ry="4" fill="#fff" opacity="0.18" transform="rotate(-18 17 12)" />
       <g fill="none" stroke={PLUM} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         {FACES[mood - 1]}

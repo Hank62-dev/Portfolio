@@ -38,7 +38,7 @@ export default function FloorView({ agents, events, selected, onSelect, paused, 
           </div>
           <Badge>WebGL / telemetry</Badge>
         </div>
-        <div className="relative h-[clamp(380px,62vh,640px)] bg-ink-0">
+        <div className="dark-island relative h-[clamp(380px,62vh,640px)] bg-ink-0">
           <Suspense
             fallback={
               <Loading label="Loading the 3D floor" className="absolute inset-0 grid grid-cols-4 grid-rows-3 gap-3 p-4">

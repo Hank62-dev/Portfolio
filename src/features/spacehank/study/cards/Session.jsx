@@ -104,14 +104,14 @@ function Flip({ card, flipped, canSwipe, onFlip, onSwipe }) {
       <div className="[perspective:1400px]">
         <div className="grid motion-reduce:!transition-none" style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)', transition: 'transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
           <div
-            className="col-start-1 row-start-1 grid min-h-[17rem] place-items-center rounded-[2rem] border border-line bg-[radial-gradient(90%_70%_at_50%_0%,rgb(138_59_255/0.16),transparent_62%),var(--color-ink-1)] p-6 shadow-[0_30px_70px_-40px_rgb(0_0_0/0.95)]"
+            className="col-start-1 row-start-1 grid min-h-[17rem] place-items-center rounded-[2rem] border border-line bg-[radial-gradient(90%_70%_at_50%_0%,rgb(138_59_255/0.16),transparent_62%),var(--color-ink-1)] p-6 shadow-[0_30px_70px_-40px_rgb(var(--shadow-rgb)/0.95)]"
             style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
             aria-hidden={flipped}
           >
             <Side card={card} />
           </div>
           <div
-            className="col-start-1 row-start-1 grid min-h-[17rem] place-items-center rounded-[2rem] border border-signal/30 bg-[radial-gradient(90%_70%_at_50%_0%,rgb(255_91_46/0.14),transparent_62%),var(--color-ink-1)] p-6 shadow-[0_30px_70px_-40px_rgb(0_0_0/0.95)]"
+            className="col-start-1 row-start-1 grid min-h-[17rem] place-items-center rounded-[2rem] border border-signal/30 bg-[radial-gradient(90%_70%_at_50%_0%,rgb(255_91_46/0.14),transparent_62%),var(--color-ink-1)] p-6 shadow-[0_30px_70px_-40px_rgb(var(--shadow-rgb)/0.95)]"
             style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
             aria-hidden={!flipped}
           >
@@ -165,7 +165,7 @@ function Summary({ grades, startedAt, pool, onClose, onMore }) {
             {GRADES.map((g, i) => (
               <li key={g.id} className="flex items-center gap-3 font-mono text-[0.72rem] text-bone-dim">
                 <span className="w-12 text-left">{g.label}</span>
-                <span className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.06]">
+                <span className="h-2 flex-1 overflow-hidden rounded-full bg-wash/[0.06]">
                   <i className={clsx('block h-full rounded-full', TONE[i].bar)} style={{ width: `${(result.counts[i] / top) * 100}%` }} />
                 </span>
                 <span className="w-6 text-right tabular-nums">{result.counts[i]}</span>
@@ -264,7 +264,7 @@ export default function Session({ cards, onClose, onMore }) {
         <button type="button" onClick={leave} aria-label="Close the session" className="grid size-10 shrink-0 place-items-center rounded-full border border-line text-bone-dim transition-transform hover:text-bone active:scale-90">
           <X size={18} aria-hidden="true" />
         </button>
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/[0.07]" role="progressbar" aria-label="Session progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
+        <div className="h-2 flex-1 overflow-hidden rounded-full bg-wash/[0.07]" role="progressbar" aria-label="Session progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
           <i className="block h-full rounded-full bg-gradient-to-r from-signal to-[#8a3bff] transition-[width] duration-500" style={{ width: `${percent}%` }} />
         </div>
         <span className="w-12 shrink-0 text-right font-mono text-[0.72rem] text-bone-faint tabular-nums" data-progress>

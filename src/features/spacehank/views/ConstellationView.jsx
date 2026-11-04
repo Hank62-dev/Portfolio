@@ -514,12 +514,12 @@ export default function ConstellationView({ onOpenNote }) {
   const sparse = loaded && notes.length < 1; // one note is already a star
 
   const card = picked && (
-    <section key={picked.id} className="animate-fade-in rounded-3xl border border-line bg-ink-1 p-5 shadow-[0_30px_70px_-40px_rgb(0_0_0/0.95)]" data-selected>
+    <section key={picked.id} className="animate-fade-in rounded-3xl border border-line bg-ink-1 p-5 shadow-[0_30px_70px_-40px_rgb(var(--shadow-rgb)/0.95)]" data-selected>
       <div className="flex items-start justify-between gap-3">
         <span className="flex items-center gap-2 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">
           <i className="size-2 rounded-full" style={{ background: `hsl(${pickedNode?.hue ?? 30} 90% 70%)` }} aria-hidden="true" /> Selected star
         </span>
-        <button type="button" onClick={() => setSelected(null)} aria-label="Close" className="-mt-1 -mr-1 grid size-8 place-items-center rounded-full text-bone-faint hover:bg-white/5 hover:text-bone">
+        <button type="button" onClick={() => setSelected(null)} aria-label="Close" className="-mt-1 -mr-1 grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/5 hover:text-bone">
           <X size={15} aria-hidden="true" />
         </button>
       </div>
@@ -551,15 +551,15 @@ export default function ConstellationView({ onOpenNote }) {
       </PageHead>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="relative overflow-hidden rounded-3xl border border-line bg-[#07070a]">
+        <div className="dark-island relative overflow-hidden rounded-3xl border border-line bg-[#07070a]">
           <canvas ref={canvas} className="block h-[min(66dvh,600px)] min-h-[340px] w-full cursor-grab touch-none max-sm:h-[62dvh]" aria-label="A map of your notes. Use the list beside it for a keyboard-friendly version." data-sky />
 
           <div className="pointer-events-none absolute top-3 left-3 flex flex-col items-start gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-dim backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full border border-wash/10 bg-shade/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-dim backdrop-blur">
               <b className="font-medium text-bone">{graph.nodes.length}</b> {graph.nodes.length === 1 ? 'star' : 'stars'} <i className="size-1 rounded-full bg-bone-faint" aria-hidden="true" /> <b className="font-medium text-bone">{graph.edges.length}</b> {graph.edges.length === 1 ? 'thread' : 'threads'}
             </span>
             {!touched && !selected && !sparse && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-faint backdrop-blur" data-hint>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-wash/10 bg-shade/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-faint backdrop-blur" data-hint>
                 <Hand size={12} aria-hidden="true" /> Drag a star to move it, tap to read
               </span>
             )}
@@ -572,7 +572,7 @@ export default function ConstellationView({ onOpenNote }) {
               ['Fit to view', Crosshair, fit],
               ['Reset star positions', RotateCcw, relax],
             ].map(([label, Icon, run]) => (
-              <button key={label} type="button" aria-label={label} onClick={run} className="grid size-10 place-items-center rounded-full border border-white/10 bg-black/45 text-bone-dim backdrop-blur transition-colors hover:text-bone active:scale-95 sm:size-9">
+              <button key={label} type="button" aria-label={label} onClick={run} className="grid size-10 place-items-center rounded-full border border-wash/10 bg-shade/45 text-bone-dim backdrop-blur transition-colors hover:text-bone active:scale-95 sm:size-9">
                 <Icon size={15} aria-hidden="true" />
               </button>
             ))}
@@ -583,7 +583,7 @@ export default function ConstellationView({ onOpenNote }) {
             {tags.length > 0 && !picked && (
               <div className="flex flex-wrap gap-1.5 max-sm:[&>button:nth-child(n+7)]:hidden" role="group" aria-label="Filter by tag">
                 {tags.slice(0, 14).map((t) => (
-                  <button key={t} type="button" aria-pressed={tag === t} onClick={() => setTag(tag === t ? '' : t)} className={clsx('rounded-full border px-3 py-1 font-mono text-[0.7rem] backdrop-blur transition-colors', tag === t ? 'border-transparent bg-bone text-ink-0' : 'border-white/10 bg-black/45 text-bone-dim hover:text-bone')}>
+                  <button key={t} type="button" aria-pressed={tag === t} onClick={() => setTag(tag === t ? '' : t)} className={clsx('rounded-full border px-3 py-1 font-mono text-[0.7rem] backdrop-blur transition-colors', tag === t ? 'border-transparent bg-bone text-ink-0' : 'border-wash/10 bg-shade/45 text-bone-dim hover:text-bone')}>
                     #{t}
                   </button>
                 ))}
@@ -592,7 +592,7 @@ export default function ConstellationView({ onOpenNote }) {
           </div>
 
           {sparse && (
-            <div className="absolute inset-0 grid place-items-center bg-black/55 p-6 text-center backdrop-blur-[2px]">
+            <div className="absolute inset-0 grid place-items-center bg-shade/55 p-6 text-center backdrop-blur-[2px]">
               <div className="flex max-w-sm flex-col items-center gap-3">
                 <h2 className="font-display text-h3 leading-tight text-bone">The sky is empty</h2>
                 <p className="text-fine text-bone-dim">Every note is a star. Write one in Second Brain and it appears here.</p>
@@ -615,7 +615,7 @@ export default function ConstellationView({ onOpenNote }) {
             <ul className="flex max-h-72 flex-col gap-0.5 overflow-y-auto">
               {shownStars.map((n) => (
                 <li key={n.id}>
-                  <button type="button" onClick={() => setSelected(n.id === selected ? null : n.id)} onMouseEnter={() => lookAt(n.id)} onMouseLeave={() => lookAt(null)} onFocus={() => lookAt(n.id)} onBlur={() => lookAt(null)} aria-pressed={n.id === selected} className={clsx('flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-fine transition-colors hover:bg-white/5', n.id === selected ? 'bg-white/10 text-bone' : 'text-bone-dim')}>
+                  <button type="button" onClick={() => setSelected(n.id === selected ? null : n.id)} onMouseEnter={() => lookAt(n.id)} onMouseLeave={() => lookAt(null)} onFocus={() => lookAt(n.id)} onBlur={() => lookAt(null)} aria-pressed={n.id === selected} className={clsx('flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-fine transition-colors hover:bg-wash/5', n.id === selected ? 'bg-wash/10 text-bone' : 'text-bone-dim')}>
                     <i className="size-2 shrink-0 rounded-full" style={{ background: `hsl(${n.hue} 90% 70%)` }} aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate">{n.title}</span>
                     <small className="font-mono text-[0.64rem] text-bone-faint">{n.degree}</small>

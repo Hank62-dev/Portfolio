@@ -43,7 +43,7 @@ export default function SyncStatus({ compact = false, className }) {
   const detail = bad ? s.error : s.pending ? `${s.pending} change${s.pending > 1 ? 's' : ''} waiting` : s.skipped ? `${s.skipped} large file${s.skipped > 1 ? 's' : ''} stay on this device` : s.usage ? `${mb(s.usage.usedBytes)} of ${mb(s.usage.quotaBytes)} used` : '';
 
   return (
-    <button type="button" onClick={() => syncNow()} className={clsx('flex w-full items-start gap-2 rounded-xl px-2 py-1.5 text-left text-[0.76rem] leading-snug transition-colors hover:bg-white/[0.05]', bad ? 'text-danger' : 'text-bone-dim', className)} data-sync={s.state} aria-label={`${label}. Tap to sync now.`}>
+    <button type="button" onClick={() => syncNow()} className={clsx('flex w-full items-start gap-2 rounded-xl px-2 py-1.5 text-left text-[0.76rem] leading-snug transition-colors hover:bg-wash/[0.05]', bad ? 'text-danger' : 'text-bone-dim', className)} data-sync={s.state} aria-label={`${label}. Tap to sync now.`}>
       {busy ? <Ring size={14} thickness={2} className="mt-0.5" /> : bad ? <AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden="true" /> : offline ? <CloudOff size={14} className="mt-0.5 shrink-0" aria-hidden="true" /> : <Check size={14} className="mt-0.5 shrink-0 text-ok" aria-hidden="true" />}
       <span className="min-w-0">
         <b className="block font-medium">{label}</b>

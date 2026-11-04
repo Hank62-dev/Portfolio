@@ -29,6 +29,11 @@
 
   --shadow-pop: 0 24px 64px rgb(0 0 0 / 0.55);
 
+  /* Washes and wells: a faint lift (bg-wash/5) and a faint recess (bg-shade/30) that read on either theme.
+     White and black in the dark theme; ink and taupe on paper. Use these instead of white/black with an opacity. */
+  --color-wash: #ffffff;
+  --color-shade: #000000;
+
   /* Type */
   --font-display: 'Instrument Serif', 'Times New Roman', serif;
   --font-body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -212,6 +217,9 @@
   --color-warn: #8f5a08;
   --color-danger: #c4382e;
   --shadow-pop: 0 24px 64px rgb(23 20 15 / 0.2);
+  --color-wash: #17140f;
+  --color-shade: #b3a88e;
+  --shadow-rgb: 90 76 52;
 }
 
 /* A region that stays dark in either theme (the VR hall): the dark values, re-declared for everything inside. */
@@ -223,14 +231,18 @@
   --color-bone: #ece6da;
   --color-bone-dim: #a8a396;
   --color-bone-faint: #8a8579;
-  --color-signal: #ff5b2e;
+  --color-signal: hsl(var(--app-hue, 13) 100% 60%);
   --color-line: rgb(236 230 218 / 0.1);
   --color-line-strong: rgb(236 230 218 / 0.22);
+  --color-wash: #ffffff;
+  --color-shade: #000000;
+  --shadow-rgb: 0 0 0;
   color: var(--color-bone);
 }
 
 /* The pull cord's rope colour, and where it hangs: just inside the right edge, clear of the header controls. */
 :root {
+  --shadow-rgb: 0 0 0; /* the colour behind a floating bar's drop shadow (see the light theme) */
   --pullcord-top: 0px;
   --pullcord-right: clamp(1rem, 2.2vw, 2.4rem);
   --pullcord-z: 55;
@@ -794,22 +806,38 @@ input[data-own-clear]::-webkit-search-decoration {
   mask-image: radial-gradient(circle 2.3rem at var(--notch) 0.2rem, transparent 97%, #000 100%);
 }
 
-/* On a phone every tab is an app of its own, with its own colour: --app-hue is set per tab by the workspace. */
-@media (max-width: 767px) {
-  .app-shell {
-    --color-signal: hsl(var(--app-hue, 18) 88% 62%);
-    --color-signal-soft: hsl(var(--app-hue, 18) 88% 62% / 0.15);
-  }
-  :root[data-theme='light'] .app-shell {
-    --color-signal: hsl(var(--app-hue, 18) 78% 40%);
-    --color-signal-soft: hsl(var(--app-hue, 18) 78% 40% / 0.12);
-  }
+/* Every tab is an app of its own, with its own colour (--app-hue, set per tab by the workspace). The colour is kept in both
+   themes, and the theme still shows: the accent and the surfaces are tinted with the hue, deep and dark at night, pale and
+   airy by day, and a soft glow of the hue sits in the top corner. Text colours stay with the theme, so contrast is unchanged. */
+.app-shell {
+  --tab: var(--app-hue, 18);
+  --color-signal: hsl(var(--tab) 88% 62%);
+  --color-signal-soft: hsl(var(--tab) 88% 62% / 0.15);
+  --color-ink-0: hsl(var(--tab) 22% 5.5%);
+  --color-ink-1: hsl(var(--tab) 18% 7.8%);
+  --color-ink-2: hsl(var(--tab) 15% 10.5%);
+  --color-ink-3: hsl(var(--tab) 13% 14%);
+  background-image: radial-gradient(75% 48% at 0% 0%, hsl(var(--tab) 85% 55% / 0.13), transparent 70%), radial-gradient(60% 40% at 100% 100%, hsl(calc(var(--tab) + 40) 80% 55% / 0.06), transparent 70%);
+}
+:root[data-theme='light'] .app-shell {
+  --color-signal: hsl(var(--tab) 78% 38%);
+  --color-signal-soft: hsl(var(--tab) 78% 38% / 0.12);
+  --color-ink-0: hsl(var(--tab) 42% 95.5%);
+  --color-ink-1: hsl(var(--tab) 36% 92.5%);
+  --color-ink-2: hsl(var(--tab) 31% 89%);
+  --color-ink-3: hsl(var(--tab) 27% 84%);
+  background-image: radial-gradient(75% 48% at 0% 0%, hsl(var(--tab) 90% 62% / 0.2), transparent 70%), radial-gradient(60% 40% at 100% 100%, hsl(calc(var(--tab) + 40) 85% 62% / 0.12), transparent 70%);
 }
 
 /* "Ra chơi": a wooden desk with a squared notebook on it, everything in blue ballpoint. */
 .desk {
-  background-color: #8b5b34;
-  background-image: repeating-linear-gradient(90deg, rgb(0 0 0 / 0.1) 0 2px, transparent 2px 41px), repeating-linear-gradient(0deg, rgb(255 255 255 / 0.04) 0 1px, transparent 1px 9px), linear-gradient(140deg, #9b693c, #744a28);
+  background-color: #6a4426;
+  background-image: repeating-linear-gradient(90deg, rgb(0 0 0 / 0.14) 0 2px, transparent 2px 41px), repeating-linear-gradient(0deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 9px), linear-gradient(140deg, #7a4f2c, #51331b);
+}
+/* by day the desk is pale oak, and the page's own text and bars are the dark ones */
+:root[data-theme='light'] .desk {
+  background-color: #dcbf93;
+  background-image: repeating-linear-gradient(90deg, rgb(110 70 25 / 0.1) 0 2px, transparent 2px 41px), repeating-linear-gradient(0deg, rgb(255 255 255 / 0.14) 0 1px, transparent 1px 9px), linear-gradient(140deg, #e8cfa8, #d2ad78);
 }
 /* on a phone the desk is the whole screen (the workspace paints it behind the bars too), so the page's own copy goes */
 @media (max-width: 767px) {
@@ -933,6 +961,11 @@ input[data-own-clear]::-webkit-search-decoration {
   background-image: radial-gradient(1.5px 1.5px at 12% 8%, rgb(255 255 255 / 0.7), transparent), radial-gradient(1px 1px at 38% 4%, rgb(255 255 255 / 0.6), transparent), radial-gradient(1.5px 1.5px at 72% 10%, rgb(255 255 255 / 0.7), transparent), radial-gradient(1px 1px at 90% 3%, rgb(255 255 255 / 0.5), transparent), linear-gradient(180deg, #1c3f78 0%, #28558f 26%, #3277ab 54%, #4690bb 78%, #6aa7c0 92%, #a3ae86 100%);
   background-attachment: fixed;
 }
+/* by day: a bright blue sky, a sun glow in the corner, and a warm horizon (no stars) */
+:root[data-theme='light'] .sky {
+  background-color: #86bfee;
+  background-image: radial-gradient(55% 38% at 88% 4%, rgb(255 246 214 / 0.95), transparent 62%), linear-gradient(180deg, #5aa6e6 0%, #84bdee 30%, #b0d8f5 58%, #d9ebf7 80%, #f5e8c8 100%);
+}
 /* on a phone the sky is the whole screen (the workspace paints it behind the bars too) */
 @media (max-width: 767px) {
   [data-sky] {
@@ -940,11 +973,58 @@ input[data-own-clear]::-webkit-search-decoration {
   }
 }
 .paper {
-  color: #eef4fb;
-  background: rgb(22 52 96 / 0.9);
-  border: 1px solid #3a629c;
-  box-shadow: 0 14px 30px -16px rgb(5 20 50 / 0.8);
+  color: var(--dz-text);
+  background: var(--dz-paper);
+  border: 1px solid var(--dz-paper-line);
+  box-shadow: 0 14px 30px -16px var(--dz-paper-shadow);
   backdrop-filter: blur(10px);
+}
+
+/* The diary's own palette (night blue with amber). Defined on :root because its sheets open in a portal, outside the sky.
+   By day the same roles turn to navy ink on a bright sky. */
+:root {
+  --dz-text: #eef4fb;
+  --dz-text-2: #c6d6ea;
+  --dz-text-3: #a3bcd9;
+  --dz-text-4: #8eaad0;
+  --dz-on-soft: #e0eaf5;
+  --dz-amber: #e0a458;
+  --dz-warn: #ffd0a0;
+  --dz-danger: #ff9f94;
+  --dz-danger-bg: #4a2a2a;
+  --dz-soft: #29497a;
+  --dz-soft-2: #2b4d7e;
+  --dz-soft-hover: #315888;
+  --dz-photo: #355b92;
+  --dz-handle: #456fa8;
+  --dz-field: #102a52;
+  --dz-trail: #bcd3ec;
+  --dz-chip: rgb(0 0 0 / 0.25);
+  --dz-paper: rgb(22 52 96 / 0.9);
+  --dz-paper-line: #3a629c;
+  --dz-paper-shadow: rgb(5 20 50 / 0.8);
+}
+:root[data-theme='light'] {
+  --dz-text: #10294d;
+  --dz-text-2: #1c3d6b;
+  --dz-text-3: #2f5a8f;
+  --dz-text-4: #44709f;
+  --dz-on-soft: #17365f;
+  --dz-amber: #9a5a0c;
+  --dz-warn: #9a4308;
+  --dz-danger: #b3261e;
+  --dz-danger-bg: #f8d9d4;
+  --dz-soft: #d6e8f9;
+  --dz-soft-2: #cbe0f6;
+  --dz-soft-hover: #bcd8f2;
+  --dz-photo: #b7d3ec;
+  --dz-handle: #82acd9;
+  --dz-field: #f3f9ff;
+  --dz-trail: #2f6aa8;
+  --dz-chip: rgb(16 41 77 / 0.72);
+  --dz-paper: rgb(255 255 255 / 0.8);
+  --dz-paper-line: rgb(255 255 255 / 0.9);
+  --dz-paper-shadow: rgb(40 90 150 / 0.4);
 }
 
 /* ---- Loading ----

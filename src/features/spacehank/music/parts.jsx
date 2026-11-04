@@ -79,7 +79,7 @@ export function SheetRow({ track, index, ids, playlists, inPlaylist, onRemoveFro
     { id: 'rm', label: 'Delete from library', icon: Trash2, onSelect: () => removeTracks([track.id]) },
   ];
   return (
-    <li className={clsx('group flex items-center gap-3 rounded-2xl px-2.5 py-1.5 transition-colors hover:bg-white/8', current && 'bg-white/10')} data-sheet-track={track.title}>
+    <li className={clsx('group flex items-center gap-3 rounded-2xl px-2.5 py-1.5 transition-colors hover:bg-wash/8', current && 'bg-wash/10')} data-sheet-track={track.title}>
       <button type="button" onClick={() => (current ? togglePlay() : playTrack(track.id, ids))} aria-label={`${playing ? 'Pause' : 'Play'} ${track.title} from the list`} className="flex min-w-0 flex-1 items-center gap-3 text-left">
         <span className="w-5 shrink-0 text-center font-mono text-[0.72rem] text-bone-faint tabular-nums">{index + 1}</span>
         <Cover track={track} className="size-10" rounded="rounded-full" />

@@ -72,7 +72,7 @@ function Item({ toast }) {
   return (
     <li
       role={toast.tone === 'error' ? 'alert' : 'status'}
-      className="pointer-events-auto relative touch-pan-y overflow-hidden rounded-2xl border border-line-strong bg-ink-2/95 shadow-[0_20px_50px_-18px_rgb(0_0_0/0.95)] backdrop-blur-2xl select-none [animation:toast-in_0.4s_var(--ease-out-expo)_backwards] motion-reduce:[animation:none]"
+      className="pointer-events-auto relative touch-pan-y overflow-hidden rounded-2xl border border-line-strong bg-ink-2/95 shadow-[0_20px_50px_-18px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur-2xl select-none [animation:toast-in_0.4s_var(--ease-out-expo)_backwards] motion-reduce:[animation:none]"
       style={{ transform: drag.x || drag.y ? `translate(${drag.x}px, ${Math.min(0, drag.y)}px)` : undefined, opacity: drag.active ? Math.max(0.35, 1 - Math.abs(drag.x) / 220 - Math.max(0, -drag.y) / 160) : 1, transition: drag.active ? 'none' : 'transform 0.25s var(--ease-out-expo), opacity 0.25s' }}
       onPointerDown={(e) => {
         from.current = { x: e.clientX, y: e.clientY };

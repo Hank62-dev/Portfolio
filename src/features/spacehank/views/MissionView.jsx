@@ -25,7 +25,7 @@ function CardView({ card, agents, onOpen, onMove, onDragStart }) {
   const agent = agents.find((a) => a.id === card.agent);
   return (
     <li data-card={card.id} draggable onDragStart={(e) => onDragStart(e, card)} className="list-none">
-      <div className="group relative rounded-2xl border border-line bg-ink-2 p-3.5 transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_14px_30px_-18px_rgb(0_0_0/0.9)]">
+      <div className="group relative rounded-2xl border border-line bg-ink-2 p-3.5 transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_14px_30px_-18px_rgb(var(--shadow-rgb)/0.9)]">
         <button type="button" onClick={() => onOpen(card)} className="block w-full text-left" aria-label={`Open card: ${card.title}`}>
           {card.labels.length > 0 && (
             <span className="mb-2 flex flex-wrap gap-1">
@@ -129,7 +129,7 @@ function CardDialog({ card, agents, onClose, onHand }) {
           <span className="font-mono text-fine text-bone-dim">Checklist</span>
           <ul className="mt-1.5 flex flex-col gap-1">
             {draft.checklist.map((c) => (
-              <li key={c.id} className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-white/5">
+              <li key={c.id} className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-wash/5">
                 <button type="button" role="checkbox" aria-checked={c.done} aria-label={c.text} onClick={() => toggle(c.id)} className={clsx('grid size-5 shrink-0 place-items-center rounded-md border transition-colors', c.done ? 'border-signal bg-signal text-ink-0' : 'border-line-strong')}>
                   {c.done && <Check size={12} strokeWidth={3} aria-hidden="true" />}
                 </button>
@@ -301,8 +301,8 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
                 })()}
               </span>
               <h2 className="text-fine font-medium text-bone">{column.label}</h2>
-              <span className="rounded-full bg-white/8 px-2 py-px font-mono text-[0.68rem] text-bone-dim tabular-nums">{byColumn[column.id].length}</span>
-              <button type="button" aria-label={`Add a card to ${column.label}`} onClick={() => setAdding(adding === column.id ? null : column.id)} className="ml-auto grid size-7 place-items-center rounded-full text-bone-dim hover:bg-white/10 hover:text-bone">
+              <span className="rounded-full bg-wash/8 px-2 py-px font-mono text-[0.68rem] text-bone-dim tabular-nums">{byColumn[column.id].length}</span>
+              <button type="button" aria-label={`Add a card to ${column.label}`} onClick={() => setAdding(adding === column.id ? null : column.id)} className="ml-auto grid size-7 place-items-center rounded-full text-bone-dim hover:bg-wash/10 hover:text-bone">
                 <Plus size={15} aria-hidden="true" />
               </button>
             </header>

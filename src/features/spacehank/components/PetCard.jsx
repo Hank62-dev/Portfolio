@@ -53,11 +53,11 @@ export default function PetCard({ onTab }) {
             <b className="font-display text-h3 leading-none text-bone">{pet.name}</b>
             <span className="font-mono text-[0.66rem] tracking-[0.12em] text-bone-faint uppercase">{pet.stage.name}</span>
           </div>
-          <p className="mt-1.5 rounded-2xl rounded-tl-md bg-white/[0.07] px-3 py-2 text-fine leading-snug text-bone" role="status" data-pet-line>
+          <p className="mt-1.5 rounded-2xl rounded-tl-md bg-wash/[0.07] px-3 py-2 text-fine leading-snug text-bone" role="status" data-pet-line>
             {line}
           </p>
           <div className="mt-2" aria-label={pet.next ? `Còn ${pet.left} điểm nữa để lên ${pet.next.name}` : 'Mơ đã lớn hết cỡ'}>
-            <div className="h-1.5 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
+            <div className="h-1.5 overflow-hidden rounded-full bg-wash/10" aria-hidden="true">
               <i className="block h-full rounded-full bg-gradient-to-r from-[#ffb08a] to-[#ffd35e] transition-[width] duration-700" style={{ width: `${progress}%` }} />
             </div>
             <small className="mt-1 block font-mono text-[0.64rem] text-bone-faint">{pet.next ? `Còn ${pet.left} điểm nữa để thành ${pet.next.name}` : 'Mơ đã lớn hết cỡ rồi'}</small>

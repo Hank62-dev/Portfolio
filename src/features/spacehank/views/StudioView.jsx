@@ -62,7 +62,7 @@ function Switch({ checked, onChange, disabled, children }) {
       onClick={() => onChange(!checked)}
       className="flex w-full items-center gap-3 rounded-xl border border-line bg-ink-2 p-3 text-left transition-colors hover:border-line-strong disabled:opacity-50"
     >
-      <span className={clsx('relative h-6 w-10 shrink-0 rounded-full transition-colors', checked ? 'bg-signal' : 'bg-white/15')}>
+      <span className={clsx('relative h-6 w-10 shrink-0 rounded-full transition-colors', checked ? 'bg-signal' : 'bg-wash/15')}>
         <i className={clsx('absolute top-0.5 size-5 rounded-full bg-bone shadow transition-all', checked ? 'left-[1.15rem]' : 'left-0.5')} />
       </span>
       <span className="min-w-0 flex-1">{children}</span>
@@ -136,7 +136,7 @@ function Stage({ record, busy, shape, onFavorite, onReuse, onRemove }) {
         ) : busy ? (
           <Loading label={`Painting the picture, ${seconds} seconds so far`} className={clsx('relative w-[min(420px,86%)] overflow-hidden rounded-xl bg-ink-2', FRAME[shape])}>
             <Skeleton className="absolute inset-0 rounded-xl opacity-70" />
-            <i className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <i className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-wash/10 to-transparent" />
           </Loading>
         ) : (
           <div className="flex max-w-xs flex-col items-center gap-3 p-8 text-center">
@@ -315,7 +315,7 @@ function Create({ locked }) {
           <b className="block text-fine font-medium text-bone">On brand</b>
           <span className="flex items-center gap-1 pt-1">
             {['ink-1', 'bone', 'signal', 'bone-dim'].map((name) => (
-              <i key={name} className="size-3.5 rounded-full ring-1 ring-white/15" style={{ background: COLORS.find((c) => c.name === name).hex }} />
+              <i key={name} className="size-3.5 rounded-full ring-1 ring-wash/15" style={{ background: COLORS.find((c) => c.name === name).hex }} />
             ))}
             <small className="pl-1 font-mono text-[0.68rem] text-bone-faint">workspace palette and mood</small>
           </span>
@@ -395,7 +395,7 @@ function Create({ locked }) {
             <span className="font-mono text-[0.72rem] text-bone-faint">{images.length} on this device</span>
             <span className="ml-auto flex items-center gap-1.5">
               {['all', 'favorites'].map((id) => (
-                <button key={id} type="button" aria-pressed={only === id} onClick={() => setOnly(id)} className={clsx('rounded-full px-3 py-1 font-mono text-[0.72rem] capitalize transition-colors', only === id ? 'bg-bone text-ink-0' : 'bg-white/8 text-bone-dim hover:text-bone')}>
+                <button key={id} type="button" aria-pressed={only === id} onClick={() => setOnly(id)} className={clsx('rounded-full px-3 py-1 font-mono text-[0.72rem] capitalize transition-colors', only === id ? 'bg-bone text-ink-0' : 'bg-wash/8 text-bone-dim hover:text-bone')}>
                   {id}
                 </button>
               ))}
