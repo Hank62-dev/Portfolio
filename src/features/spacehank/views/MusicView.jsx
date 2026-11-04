@@ -401,7 +401,7 @@ function MusicDesktop() {
 
         {/* right: lyrics ribbon, or Hank DJ and what is next */}
         <div className="flex min-w-0 flex-col gap-6">
-          {current && <Lyrics track={current} time={time} />}
+          {current && <Lyrics track={current} time={time} duration={duration} />}
 
           {!empty && (
             <form

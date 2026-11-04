@@ -42,14 +42,14 @@ export function Orbit({ tracks = [], liked, className }) {
 }
 
 /** Lyrics as a soft ribbon: the line being sung is bright, and the others fade and blur away from it. */
-export function Ribbon({ lines, active }) {
+export function Ribbon({ lines, active, className = 'max-h-[300px] md:max-h-[540px]' }) {
   const box = useRef(null);
   useEffect(() => {
     const el = box.current?.querySelector('[data-active="true"]');
     if (el && box.current) box.current.scrollTo({ top: el.offsetTop - box.current.clientHeight / 2 + el.clientHeight / 2, behavior: 'smooth' });
   }, [active]);
   return (
-    <div ref={box} className="relative max-h-[300px] overflow-y-auto py-24 [mask-image:linear-gradient(transparent,#000_28%,#000_72%,transparent)]" aria-label="Lyrics" tabIndex={0}>
+    <div ref={box} className={clsx('relative overflow-y-auto py-24 [mask-image:linear-gradient(transparent,#000_28%,#000_72%,transparent)]', className)} aria-label="Lyrics" tabIndex={0}>
       {lines.map((line, i) => {
         const d = Math.abs(i - active);
         return (

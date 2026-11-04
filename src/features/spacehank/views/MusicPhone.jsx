@@ -313,7 +313,7 @@ function NowPlaying({ tracks, byId }) {
           <section className="mx-auto mt-8 w-full max-w-[22rem] rounded-[1.75rem] border border-wash/10 bg-shade/25 p-5 backdrop-blur" aria-label="Lyrics">
             <h3 className="font-mono text-[0.62rem] tracking-[0.24em] text-signal uppercase">Lyrics</h3>
             <div className="mt-3">
-              <Lyrics track={current} time={time} compact />
+              <Lyrics track={current} time={time} duration={duration} compact />
             </div>
           </section>
         )}

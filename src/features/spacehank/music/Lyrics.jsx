@@ -1,8 +1,11 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Button, Dots } from '../../../design-system';
-import { activeLine, parseLrc } from './lrc';
+import { useStore } from '../store';
+import { lyricPrefs } from './lyricModes';
 import { setLyrics } from './library';
-import { Ribbon } from './parts';
+import { estimateLines, parseLrc } from './lrc';
+import { seek } from './player';
+import { LyricsBar, LyricsStage, PlainLyrics, SyncedLyrics } from './LyricsView';
 import { useLyrics } from './useLyrics';
 
 const SAY = {
@@ -11,15 +14,6 @@ const SAY = {
   error: 'The lyrics service is busy right now.',
 };
 
-/** Lyrics without times are plain text you scroll; timed ones are a ribbon that follows the song. */
-function PlainLyrics({ text }) {
-  return (
-    <div className="max-h-[300px] overflow-y-auto py-3 font-display text-lead leading-relaxed whitespace-pre-line text-bone [mask-image:linear-gradient(transparent,#000_8%,#000_92%,transparent)]" aria-label="Lyrics" tabIndex={0} data-plain-lyrics>
-      {text}
-    </div>
-  );
-}
-
 const Link = ({ children, ...rest }) => (
   <button type="button" className="font-mono text-[0.72rem] text-bone-faint underline underline-offset-2 hover:text-bone disabled:no-underline disabled:opacity-50" {...rest}>
     {children}
@@ -27,15 +21,23 @@ const Link = ({ children, ...rest }) => (
 );
 
 /**
- * Everything about a song's lyrics in one place: they are looked up on LRCLIB the first time the song is shown, can be searched
- * again, and a .lrc file can still be attached by hand. `compact` is the phone's card (smaller type for the messages).
+ * Everything about a song's lyrics in one place: they are looked up on LRCLIB the first time the song is shown; timed ones
+ * can be shown in five looks (or on the whole screen), plain ones scroll along with the song; they can be searched again,
+ * and a .lrc file can still be attached by hand. `compact` is the phone's card (smaller type for the messages).
  */
-export default function Lyrics({ track, time, compact = false }) {
+export default function Lyrics({ track, time, duration = 0, compact = false }) {
   const { status, find } = useLyrics(track);
+  const { mode, size } = useStore(lyricPrefs);
+  const [stage, setStage] = useState(false);
   const file = useRef(null);
   const text = String(track?.lyrics ?? '');
-  const lines = useMemo(() => parseLrc(text), [text]);
-  const active = activeLine(lines, time);
+  const timed = useMemo(() => parseLrc(text), [text]);
+  // lyrics with no times are laid out along the song, so they slide and light up like timed ones (a guess, and said to be)
+  const length = duration || track?.duration || 0;
+  const guessed = useMemo(() => (timed.length ? [] : estimateLines(text, length)), [timed, text, length]);
+  const estimated = timed.length === 0 && guessed.length > 0;
+  const lines = estimated ? guessed : timed;
+  const seekTo = estimated ? undefined : seek; // a guessed time is not worth jumping the song to
   const hasText = text.trim().length > 0;
   const message = compact ? 'text-fine text-bone-dim' : 'font-display text-h3 leading-tight text-bone-dim';
   const busy = status === 'loading';
@@ -52,15 +54,18 @@ export default function Lyrics({ track, time, compact = false }) {
   if (hasText) {
     return (
       <div className="flex flex-col gap-2" data-lyrics={lines.length ? 'synced' : 'plain'}>
-        {lines.length ? <Ribbon lines={lines} active={active} /> : <PlainLyrics text={text} />}
+        {lines.length ? <SyncedLyrics lines={lines} time={time} mode={mode} size={size} onSeek={seekTo} /> : <PlainLyrics key={track.id} text={text} time={time} duration={length} size={size} />}
+        <LyricsBar synced={lines.length > 0} onStage={() => setStage(true)} />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          {track.lyricsSource === 'lrclib' && <span className="font-mono text-[0.68rem] text-bone-faint">{lines.length ? 'Timed lyrics' : 'Lyrics'} from LRCLIB</span>}
+          {track.lyricsSource === 'lrclib' && <span className="font-mono text-[0.68rem] text-bone-faint">{estimated ? 'Lyrics' : lines.length ? 'Timed lyrics' : 'Lyrics'} from LRCLIB</span>}
+          {estimated && <span className="font-mono text-[0.68rem] text-bone-faint" title="This song has no timed lyrics, so the lines are spread along the song">Timing is a guess</span>}
           <Link disabled={busy} onClick={() => void find()}>
             {busy ? 'Searching…' : 'Search again'}
           </Link>
           <Link onClick={() => file.current?.click()}>Use a .lrc file</Link>
         </div>
         {input}
+        {stage && <LyricsStage track={track} lines={lines} text={text} time={time} duration={length} onSeek={seekTo} onClose={() => setStage(false)} />}
       </div>
     );
   }

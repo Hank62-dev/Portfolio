@@ -29,3 +29,29 @@ describe('activeLine', () => {
     expect(activeLine([], 10)).toBe(-1);
   });
 });
+
+describe('laying untimed lyrics along a song', () => {
+  const text = 'first line here\nsecond one\n\nafter a verse break\nlast words of it all';
+
+  it('gives every sung line a time, in order, between an intro and an outro', async () => {
+    const { estimateLines } = await import('./lrc');
+    const lines = estimateLines(text, 200);
+    expect(lines.map((l) => l.text)).toEqual(['first line here', 'second one', 'after a verse break', 'last words of it all']);
+    expect(lines[0].time).toBe(10); // 5 % of 200 s
+    expect(lines.every((l, i) => i === 0 || l.time > lines[i - 1].time)).toBe(true);
+    expect(lines.at(-1).time).toBeLessThan(200 - 12); // before the outro
+  });
+
+  it('leaves more room after a line that is followed by a verse break', async () => {
+    const { estimateLines } = await import('./lrc');
+    const [a, b, c] = estimateLines('aaaaaaaaaa\nbbbbbbbbbb\n\ncccccccccc\ndddddddddd', 200);
+    expect(c.time - b.time).toBeGreaterThan(b.time - a.time);
+  });
+
+  it('has nothing to lay out without a length or without words', async () => {
+    const { estimateLines } = await import('./lrc');
+    expect(estimateLines(text, 0)).toEqual([]);
+    expect(estimateLines(text, 10)).toEqual([]);
+    expect(estimateLines('  \n \n', 200)).toEqual([]);
+  });
+});
