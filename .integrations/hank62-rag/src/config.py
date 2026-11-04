@@ -43,8 +43,8 @@ class Settings(BaseSettings):
         description="Lighter Gemini model for guard/router tasks",
     )
     gemini_fallback_model: str = Field(
-        default="",
-        description="Tried when the main Gemini model stays overloaded (503) after a few retries. Empty means none.",
+        default="gemini-3.5-flash-lite",
+        description="Tried when the main Gemini model stays overloaded (503) or its quota is spent (429). Empty means none.",
     )
 
     # --- Embedding ---

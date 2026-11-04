@@ -52,9 +52,30 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now, sleep = (ms) =
     throw new HttpError(502, `${what} is unavailable right now.`);
   };
 
-  const gemini = async (model, body) => {
+  // the text model whose quota is spent, and when it may be asked again: until then the fallback is asked first
+  const resting = new Map();
+
+  /** How long Gemini says to wait after a 429, in ms (its error body carries a RetryInfo like "11808s"); a minute if it says nothing. */
+  const waitAfterLimit = async (response) => {
+    try {
+      const body = await response.json();
+      const info = (body?.error?.details || []).find((d) => d?.retryDelay);
+      const seconds = parseFloat(info?.retryDelay);
+      if (Number.isFinite(seconds)) return Math.min(seconds * 1000, 6 * 60 * 60 * 1000);
+    } catch {
+      /* no readable body */
+    }
+    return 60 * 1000;
+  };
+
+  const gemini = async (wanted, body) => {
     if (!ai.geminiKey) throw new HttpError(503, 'AI is not configured: set GEMINI_API_KEY on the server.');
     spend();
+    // Only the text model has a stand-in. Its free daily quota is small, so when it is spent (429), or it stays overloaded,
+    // the lighter model answers instead, and the spent one is left alone until it says it is back.
+    let spare = wanted === ai.textModel && ai.textFallbackModel && ai.textFallbackModel !== wanted ? ai.textFallbackModel : '';
+    let model = wanted;
+    if (spare && (resting.get(wanted) ?? 0) > now()) [model, spare] = [spare, ''];
     // an overloaded model (503) is usually over in seconds: ask again twice, with a pause, before giving up (one call costs one unit of the budget)
     for (let attempt = 0; ; attempt += 1) {
       let response;
@@ -69,6 +90,11 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now, sleep = (ms) =
         throw new HttpError(502, 'Gemini is unreachable right now.');
       }
       if (response.ok) return response.json();
+      if (response.status === 429) resting.set(model, now() + (await waitAfterLimit(response.clone?.() ?? response)));
+      if (spare && (response.status === 429 || ([500, 503, 504].includes(response.status) && attempt >= 2))) {
+        [model, spare, attempt] = [spare, '', -1];
+        continue;
+      }
       if ([500, 503, 504].includes(response.status) && attempt < 2) {
         await sleep(1200 * 2 ** attempt);
         continue;

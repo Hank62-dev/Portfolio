@@ -82,7 +82,7 @@ Không đặt `SPACEHANK_CODEX_CMD`, `SPACEHANK_CLAUDE_CMD` và các biến `SPA
 | `REDIS_URL` | `rediss://default:pass@host:6379` | Mục 4.3 |
 | `CORS_ORIGINS` | `https://<ten-du-an>.vercel.app` | URL Vercel của bạn, không có `/` ở cuối. Nhiều origin thì cách nhau bằng dấu phẩy (ví dụ thêm domain riêng). Ở lần tạo đầu điền tạm `https://example.com`, rồi sửa lại ở bước 7 |
 
-Các biến đã có sẵn trong `render.yaml`: `PYTHON_VERSION`, `GEMINI_MODEL`, `GEMINI_FAST_MODEL`, `GEMINI_FALLBACK_MODEL`. Khi Gemini báo 503 (model quá tải), RAG tự thử lại 2 lần rồi chuyển sang model dự phòng này; để trống thì chỉ thử lại. Hãy kiểm tra tên model còn dùng được tại https://ai.google.dev/gemini-api/docs/models. Nếu cần đổi, sửa `GEMINI_MODEL` và `GEMINI_FAST_MODEL` trong Render.
+Các biến đã có sẵn trong `render.yaml`: `PYTHON_VERSION`, `GEMINI_MODEL`, `GEMINI_FAST_MODEL`, `GEMINI_FALLBACK_MODEL`. Khi Gemini báo 503 (model quá tải), RAG tự thử lại 2 lần rồi chuyển sang model dự phòng này; để trống thì chỉ thử lại. Khi model chính hết quota trong ngày (429, gói free của Gemini 3.8 Flash chỉ có 20 request/ngày), RAG không chờ nữa mà chuyển ngay sang model dự phòng, và các câu hỏi sau cũng đi thẳng sang đó cho đến khi quota hồi lại. Server Node (Hank DJ, bản tin, Creator Lab) làm tương tự với `GEMINI_TEXT_FALLBACK_MODEL` (mặc định `gemini-3.5-flash-lite`; đặt rỗng để tắt). Hãy kiểm tra tên model còn dùng được tại https://ai.google.dev/gemini-api/docs/models. Nếu cần đổi, sửa `GEMINI_MODEL` và `GEMINI_FAST_MODEL` trong Render.
 
 ## 4. Tạo các dịch vụ ngoài
 

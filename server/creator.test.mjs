@@ -125,6 +125,56 @@ describe('a pitch', () => {
   });
 });
 
+describe('a Gemini text model whose quota is spent', () => {
+  const spent = (seconds = 11808) => ({ ok: false, status: 429, json: async () => ({ error: { code: 429, details: [{ '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: `${seconds}s` }] } }) });
+  const busy = { ok: false, status: 503, json: async () => ({}) };
+  const modelOf = (call) => /models\/([^:]+):/.exec(call[0])[1];
+  const withSpare = (extra = {}) => aiConfig({ textFallbackModel: 'lite', ...extra });
+
+  it('hands the question to the lighter model at once, for the price of one unit', async () => {
+    const fetchImpl = vi.fn().mockResolvedValueOnce(spent()).mockResolvedValueOnce(geminiReply('A note.'));
+    const sleep = vi.fn();
+    const ai = createAi({ ai: withSpare(), fetchImpl, sleep });
+    await expect(ai.note({ context: {}, language: 'en' })).resolves.toEqual({ text: 'A note.' });
+    expect(fetchImpl.mock.calls.map(modelOf)).toEqual(['t', 'lite']);
+    expect(sleep).not.toHaveBeenCalled();
+    expect(ai.usage().used).toBe(1);
+  });
+
+  it('leaves the spent model alone until it says it is back', async () => {
+    let clock = 1_000_000;
+    const fetchImpl = vi.fn().mockResolvedValueOnce(spent(600)).mockResolvedValue(geminiReply('A note.'));
+    const ai = createAi({ ai: withSpare(), fetchImpl, now: () => clock });
+    await ai.note({ context: {}, language: 'en' });
+    await ai.note({ context: {}, language: 'en' });
+    expect(fetchImpl.mock.calls.map(modelOf)).toEqual(['t', 'lite', 'lite']);
+    clock += 601_000;
+    await ai.note({ context: {}, language: 'en' });
+    expect(modelOf(fetchImpl.mock.calls[3])).toBe('t');
+  });
+
+  it('also takes over when the main model stays overloaded', async () => {
+    const fetchImpl = vi.fn().mockResolvedValueOnce(busy).mockResolvedValueOnce(busy).mockResolvedValueOnce(busy).mockResolvedValueOnce(geminiReply('A note.'));
+    const ai = createAi({ ai: withSpare(), fetchImpl, sleep: vi.fn().mockResolvedValue() });
+    await expect(ai.note({ context: {}, language: 'en' })).resolves.toEqual({ text: 'A note.' });
+    expect(fetchImpl.mock.calls.map(modelOf)).toEqual(['t', 't', 't', 'lite']);
+  });
+
+  it('says the quota is reached when there is no stand-in, or the stand-in is spent too', async () => {
+    const alone = createAi({ ai: aiConfig(), fetchImpl: vi.fn().mockResolvedValue(spent()) });
+    await expect(alone.note({ context: {} })).rejects.toMatchObject({ status: 429 });
+    const both = createAi({ ai: withSpare(), fetchImpl: vi.fn().mockResolvedValue(spent()) });
+    await expect(both.note({ context: {} })).rejects.toMatchObject({ status: 429 });
+  });
+
+  it('does not swap the image model', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(spent());
+    const ai = createAi({ ai: withSpare(), fetchImpl });
+    await expect(ai.image({ prompt: 'a lighthouse' })).rejects.toMatchObject({ status: 429 });
+    expect(fetchImpl.mock.calls.map(modelOf)).toEqual(['i']);
+  });
+});
+
 describe('an overloaded Gemini', () => {
   const busy = { ok: false, status: 503, json: async () => ({}) };
 

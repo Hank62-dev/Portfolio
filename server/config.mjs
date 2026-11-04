@@ -30,6 +30,8 @@ export const loadConfig = (env = process.env) => {
       geminiKey: env.GEMINI_API_KEY || '',
       geminiBase: (env.GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, ''), // overridable so tests can point at a fake
       textModel: env.GEMINI_TEXT_MODEL || 'gemini-3.8-flash',
+      // asked instead when the text model is overloaded or its free quota for the day is spent; empty turns it off
+      textFallbackModel: env.GEMINI_TEXT_FALLBACK_MODEL ?? 'gemini-3.5-flash-lite',
       imageModel: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image',
       hfToken: env.HF_TOKEN || '',
       hfImageModel: env.HF_IMAGE_MODEL || 'black-forest-labs/FLUX.1-schnell',

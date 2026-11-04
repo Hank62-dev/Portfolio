@@ -5,6 +5,7 @@ import json
 import logging
 import random
 import re
+import time
 from typing import Any
 
 from google import genai
@@ -16,11 +17,42 @@ logger = logging.getLogger(__name__)
 
 RATE_LIMIT_RETRIES = 4  # waits as long as Gemini says to
 BUSY_RETRIES = 2  # a short pause each time, doubling
+MAX_RATE_WAIT = 90.0  # a longer wait than this is a spent quota (usually the day's), not a busy minute
 
 
 def is_busy(error_text: str) -> bool:
     """Whether Gemini failed for a reason that is likely to pass by itself: overloaded (503), a server error, or a timeout."""
     return bool(re.search(r"\b(500|503|504)\b|UNAVAILABLE|INTERNAL|DEADLINE_EXCEEDED|high demand", error_text))
+
+def is_rate_limited(error_text: str) -> bool:
+    """Whether Gemini refused because a quota is used up (429), per minute or per day."""
+    return "429" in error_text or "RESOURCE_EXHAUSTED" in error_text
+
+
+_DURATION = r"(?:\d+(?:\.\d+)?[hms])+"
+
+
+def retry_delay(error_text: str) -> float | None:
+    """How long Gemini says to wait, in seconds: from "retry in 3h16m48.7s", "retry in 14.2s" or "'retryDelay': '11808s'"."""
+    match = re.search(rf"retry in ({_DURATION})", error_text, re.IGNORECASE) or re.search(rf"retryDelay['\"]?: *['\"]?({_DURATION})", error_text)
+    if not match:
+        return None
+    units = {"h": 3600.0, "m": 60.0, "s": 1.0}
+    return sum(float(amount) * units[unit] for amount, unit in re.findall(r"(\d+(?:\.\d+)?)([hms])", match.group(1).lower()))
+
+
+def is_spent(error_text: str) -> bool:
+    """A rate limit that will not clear by waiting a moment: the per-day quota, or a wait longer than MAX_RATE_WAIT."""
+    if not is_rate_limited(error_text):
+        return False
+    if re.search(r"PerDay|per day", error_text, re.IGNORECASE):
+        return True
+    delay = retry_delay(error_text)
+    return delay is not None and delay > MAX_RATE_WAIT
+
+
+# model -> when (time.monotonic) its spent quota comes back; until then it is asked last, so it is not tried first every time
+_cooling: dict[str, float] = {}
 
 _client = None
 
@@ -79,9 +111,13 @@ class GeminiClient:
                 return await self.client.aio.models.generate_content(model=model, contents=contents, config=config)
             except Exception as e:
                 err_str = str(e)
-                if ("429" in err_str or "RESOURCE_EXHAUSTED" in err_str) and rate_waits < RATE_LIMIT_RETRIES:
-                    match = re.search(r"retry in (\d+(?:\.\d+)?)s", err_str, re.IGNORECASE)
-                    wait_time = float(match.group(1)) + 2.0 if match else 20.0
+                if is_spent(err_str):
+                    # the day's quota is gone: waiting is pointless, so remember it and let the caller try another model
+                    _cooling[model] = time.monotonic() + min(retry_delay(err_str) or 3600.0, 6 * 3600.0)
+                    logger.warning("Gemini quota for model '%s' is spent (%s).", model, err_str[:80].replace("\n", " "))
+                    raise
+                if is_rate_limited(err_str) and rate_waits < RATE_LIMIT_RETRIES:
+                    wait_time = (retry_delay(err_str) or 18.0) + 2.0
                     rate_waits += 1
                     logger.warning("Gemini Rate Limit (429) hit for model '%s'. Waiting %.1fs before retry (%d/%d)...", model, wait_time, rate_waits, RATE_LIMIT_RETRIES)
                     await asyncio.sleep(wait_time)
@@ -133,11 +169,14 @@ class GeminiClient:
         if web_search:
             config["tools"] = [{"google_search": {}}]
 
-        # An overloaded model (503) is usually over in seconds: try it again, and if it stays busy try the fallback model.
+        # An overloaded model (503) is usually over in seconds: try it again, and if it stays busy, or its quota is spent,
+        # try the fallback model. A model whose quota is known to be spent goes last.
         models = [target_model]
         fallback = settings.gemini_fallback_model.strip()
         if fallback and fallback != target_model:
             models.append(fallback)
+        now = time.monotonic()
+        models.sort(key=lambda name: _cooling.get(name, 0.0) > now)
 
         response = None
         for index, candidate in enumerate(models):
@@ -146,8 +185,8 @@ class GeminiClient:
                 target_model = candidate
                 break
             except Exception as e:
-                if index + 1 < len(models) and is_busy(str(e)):
-                    logger.warning("Gemini model '%s' is busy; trying '%s' instead.", candidate, models[index + 1])
+                if index + 1 < len(models) and (is_busy(str(e)) or is_rate_limited(str(e))):
+                    logger.warning("Gemini model '%s' cannot answer now; trying '%s' instead.", candidate, models[index + 1])
                     continue
                 raise
         answer = response.text
