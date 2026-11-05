@@ -47,7 +47,23 @@ import Lyrics from '../music/Lyrics';
 import { MOODS, Orbit, SheetRow, Slider, matches } from '../music/parts';
 import { cycleRepeat, next, playList, player, playTrack, previous, seek, setSleepTimer, toggleShuffle, togglePlay } from '../music/player';
 import { closePlayer, musicUi } from '../music/ui';
+import { useSlider } from '../components/useSlider';
 import { useStore } from '../store';
+
+/** Songs / Albums / Artists / Playlists as large titles, with an underline that glides to the chosen one. */
+function ShelfTitles({ shelf, onPick }) {
+  const { ref, marker } = useSlider(shelf, 'h-0.5 rounded-full bg-signal', { fit: 'x' });
+  return (
+    <div ref={ref} className="relative mx-5 flex gap-6" role="tablist" aria-label="Library shelves">
+      {marker}
+      {SHELVES.map(({ id, label }) => (
+        <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => onPick(id)} className={clsx('relative pb-2 font-display text-[1.2rem] transition-colors', shelf === id ? 'text-bone' : 'text-bone-faint')}>
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 // Hank Music on a phone. It keeps the shape people know from music apps (Home, Search, Library, a page for each
 // collection, a full-screen player) but has a look of its own: the record. Covers are discs that turn while a song
@@ -619,14 +635,7 @@ export default function MusicPhone() {
 
       {!empty && section === 'library' && (
         <>
-          <div className="flex gap-6 px-5" role="tablist" aria-label="Library shelves">
-            {SHELVES.map(({ id, label }) => (
-              <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => setShelf(id)} className={clsx('relative pb-2 font-display text-[1.2rem] transition-colors', shelf === id ? 'text-bone' : 'text-bone-faint')}>
-                {label}
-                <i className={clsx('absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-signal transition-transform duration-300', shelf === id ? 'scale-x-100' : 'scale-x-0')} aria-hidden="true" />
-              </button>
-            ))}
-          </div>
+          <ShelfTitles shelf={shelf} onPick={setShelf} />
           {shelf === 'songs' && (
             <div className="-mb-3 flex items-center gap-3 px-5">
               <button type="button" aria-label="Shuffle play" onClick={() => void playList(allIds, { shuffle: true })} className="grid size-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_10px_24px_-10px_var(--color-signal)] active:scale-95">

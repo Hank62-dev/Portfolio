@@ -8,7 +8,7 @@ import { createNote, deleteNote, exportNotes, importNotes, intents, loadNotes, n
 import { ensureUnlocked, readable } from '../diary/lock';
 import { useReadableNotes } from '../diary/useLock';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
-import { PageHead } from '../components/Page';
+import { PageHead, Segmented } from '../components/Page';
 import { useFab } from '../fab';
 import { useStore } from '../store';
 
@@ -343,13 +343,7 @@ export default function NotesView() {
 
       {/* filters */}
       <div className="flex flex-wrap items-center gap-2">
-        <div className="flex gap-1 rounded-full border border-line bg-ink-1 p-1" role="tablist" aria-label="Show">
-          {SCOPES.map(({ id, label }) => (
-            <button key={id} type="button" role="tab" aria-selected={scope === id} onClick={() => setScope(id)} className={clsx('rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors', scope === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}>
-              {label}
-            </button>
-          ))}
-        </div>
+        <Segmented round value={scope} onChange={setScope} options={SCOPES} label="Show" />
         <div className="relative min-w-44 flex-1 max-md:order-first max-md:basis-full sm:max-w-xs">
           <Search size={14} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-bone-faint" aria-hidden="true" />
           <input

@@ -4,7 +4,7 @@ import { wrapText } from './layout';
 // Everything the gallery says in words is drawn onto canvas textures: DOM text does not exist inside a
 // headset, and this keeps the scene self-contained (no font or image requests beyond the covers).
 
-export const SERIF = '400 {size}px "Instrument Serif", "Times New Roman", serif';
+export const SERIF = '400 {size}px "Newsreader", serif';
 export const MONO = '500 {size}px "Geist Mono", ui-monospace, Menlo, monospace';
 export const SANS = '400 {size}px "Geist", system-ui, sans-serif';
 

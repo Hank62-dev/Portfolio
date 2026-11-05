@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { BookmarkPlus, Download, Heart, ImagePlus, LockKeyhole, Palette, RotateCcw, Shapes, Sparkles, Trash2, Wand2 } from 'lucide-react';
 import { Badge, Button, Loading, Skeleton } from '../../../design-system';
 import { clsx } from '../../../lib/format';
+import { Segmented } from '../components/Page';
 import { aiUsage, base64ToBlob, generateImage } from '../api/owner';
 import { intents } from '../notes/library';
 import { useStore } from '../store';
@@ -440,20 +441,7 @@ export default function StudioView({ locked = false }) {
           </h1>
           <p className="mt-2 max-w-[60ch] text-bone-dim">Make pictures that look like they belong, and keep the brand's tokens within reach.</p>
         </div>
-        <div className="flex gap-1 rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur" role="tablist" aria-label="Studio">
-          {TABS.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              type="button"
-              role="tab"
-              aria-selected={tab === id}
-              onClick={() => setTab(id)}
-              className={clsx('inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 font-mono text-fine transition-colors', tab === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}
-            >
-              <Icon size={14} aria-hidden="true" /> {label}
-            </button>
-          ))}
-        </div>
+        <Segmented round large value={tab} onChange={setTab} options={TABS} label="Studio" />
       </header>
       {tab === 'images' ? (
         <Create locked={locked} />

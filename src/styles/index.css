@@ -35,7 +35,7 @@
   --color-shade: #000000;
 
   /* Type */
-  --font-display: 'Instrument Serif', 'Times New Roman', serif;
+  --font-display: 'Newsreader', serif;
   --font-body: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   /* the games are drawn in a school notebook: a pen for titles and numbers, a hand for the rest */
@@ -88,6 +88,37 @@
   --animate-orbit: orbit 32s linear infinite;
   --animate-nudge: nudge 1.9s ease-in-out infinite;
   --animate-sheet-up: sheet-up 0.38s var(--ease-out-expo) both;
+  --animate-bell: bell-ring 0.9s ease-in-out both;
+  --animate-pop-in: pop-in 0.22s var(--ease-out-expo) both;
+
+  @keyframes bell-ring {
+    0%,
+    100% {
+      transform: rotate(0);
+    }
+    15% {
+      transform: rotate(16deg);
+    }
+    30% {
+      transform: rotate(-13deg);
+    }
+    45% {
+      transform: rotate(9deg);
+    }
+    60% {
+      transform: rotate(-6deg);
+    }
+    75% {
+      transform: rotate(3deg);
+    }
+  }
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.97);
+    }
+  }
 
   @keyframes sheet-up {
     from {

@@ -115,7 +115,7 @@ export const drawCover = ({ title, artist, hue }) =>
       ctx.stroke();
     }
     ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.font = '600 44px "Instrument Serif", Georgia, serif';
+    ctx.font = '600 44px "Newsreader", serif';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText(title, 28, size - 64, size - 56);
     ctx.fillStyle = 'rgba(255,255,255,0.7)';

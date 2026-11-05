@@ -44,7 +44,7 @@ describe('exports', () => {
     const json = JSON.parse(toJson());
     expect(json.color.signal.value).toBe('#ff5b2e');
     expect(Object.keys(json.color)).toHaveLength(COLORS.length);
-    expect(json.font.display.family).toBe('Instrument Serif');
+    expect(json.font.display.family).toBe('Newsreader');
   });
 
   it('describes the look for the image prompt using the real colours', () => {

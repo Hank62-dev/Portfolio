@@ -1,4 +1,5 @@
 import { clsx } from '../../../lib/format';
+import { useSlider } from './useSlider';
 
 /** The heading every tab opens with: a small label, a serif title with an italic accent word, and room for actions. */
 export function PageHead({ eyebrow, title, accent, description, children, keepOnPhone = false }) {
@@ -17,10 +18,12 @@ export function PageHead({ eyebrow, title, accent, description, children, keepOn
   );
 }
 
-/** A row of pill buttons where one is chosen (a tab strip, or a filter). */
-export function Segmented({ value, onChange, options, label }) {
+/** A row of pill buttons where one is chosen (a tab strip, or a filter); the chosen marker glides between them. */
+export function Segmented({ value, onChange, options, label, large = false, round = false }) {
+  const { ref, marker } = useSlider(value, 'rounded-full bg-bone');
   return (
-    <div className={clsx('flex max-w-full gap-1 rounded-[1.5rem] border border-line bg-ink-1 p-1', options.length > 3 && 'flex-wrap')} role="tablist" aria-label={label}>
+    <div ref={ref} className={clsx('relative flex max-w-full gap-1 border border-line bg-ink-1 p-1', round ? 'rounded-full' : 'rounded-[1.5rem]', options.length > 3 && 'flex-wrap')} role="tablist" aria-label={label}>
+      {marker}
       {options.map(({ id, label: text, icon: Icon }) => (
         <button
           key={id}
@@ -28,9 +31,9 @@ export function Segmented({ value, onChange, options, label }) {
           role="tab"
           aria-selected={value === id}
           onClick={() => onChange(id)}
-          className={clsx('inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors', value === id ? 'bg-bone text-ink-0' : 'text-bone-dim hover:text-bone')}
+          className={clsx('relative z-10 inline-flex items-center gap-1.5 rounded-full font-mono transition-colors duration-300', large ? 'px-4 py-1.5 text-fine' : 'px-3.5 py-1 text-[0.78rem]', value === id ? 'text-ink-0' : 'text-bone-dim hover:text-bone')}
         >
-          {Icon && <Icon size={13} aria-hidden="true" />} {text}
+          {Icon && <Icon size={large ? 14 : 13} aria-hidden="true" />} {text}
         </button>
       ))}
     </div>

@@ -16,7 +16,7 @@ export const COLORS = [
 ];
 
 export const FONTS = [
-  { name: 'display', family: 'Instrument Serif', fallback: "'Times New Roman', serif", use: 'Headlines' },
+  { name: 'display', family: 'Newsreader', fallback: 'serif', use: 'Headlines' },
   { name: 'body', family: 'Geist', fallback: "system-ui, -apple-system, 'Segoe UI', sans-serif", use: 'Text and controls' },
   { name: 'mono', family: 'Geist Mono', fallback: "ui-monospace, 'SFMono-Regular', Menlo, monospace", use: 'Labels, numbers, code' },
 ];

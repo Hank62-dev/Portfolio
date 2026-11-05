@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Flame, Layers, Play, Plus, Search, Sparkles } from 'lucide-react';
 import { Badge, Button, Input, pushToast } from '../../../../design-system';
 import { clsx } from '../../../../lib/format';
+import { useSlider } from '../../components/useSlider';
 import { useFab } from '../../fab';
 import { loadNotes } from '../../notes/library';
 import { useReadableNotes } from '../../diary/useLock';
@@ -86,6 +87,7 @@ export default function CardsPanel() {
   const { log } = useStore(reviewLog);
   const notes = useReadableNotes();
   const [deck, setDeck] = useState('all');
+  const { ref: deckRow, marker: deckMarker } = useSlider(deck, 'rounded-full bg-bone');
   const [query, setQuery] = useState('');
   const [shown, setShown] = useState(PAGE);
   const [session, setSession] = useState(null); // { key, cards }
@@ -196,7 +198,8 @@ export default function CardsPanel() {
 
       {/* decks */}
       <section aria-label="Decks">
-        <div className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:px-0" role="tablist" aria-label="Deck">
+        <div ref={deckRow} className="no-scrollbar relative -mx-5 flex gap-2 overflow-x-auto px-5 pb-1 md:mx-0 md:flex-wrap md:px-0" role="tablist" aria-label="Deck">
+          {deckMarker}
           {[{ id: 'all', name: 'All', hue: null }, ...decks].map((d) => {
             const mine = d.id === 'all' ? cardList : cardList.filter((c) => c.deck === d.id);
             if (d.id === '' && mine.length === 0 && deck !== '') return null;
@@ -211,7 +214,7 @@ export default function CardsPanel() {
                   setDeck(d.id);
                   setShown(PAGE);
                 }}
-                className={clsx('inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[0.82rem] transition-colors active:scale-95', deck === d.id ? 'border-bone bg-bone text-ink-0' : 'border-line text-bone-dim hover:border-line-strong hover:text-bone')}
+                className={clsx('relative z-10 inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-[0.82rem] transition-colors duration-300 active:scale-95', deck === d.id ? 'border-transparent text-ink-0' : 'border-line text-bone-dim hover:border-line-strong hover:text-bone')}
               >
                 {d.hue !== null && <i className="size-2 rounded-full" style={{ background: `hsl(${d.hue} 80% 65%)` }} aria-hidden="true" />}
                 {d.name}

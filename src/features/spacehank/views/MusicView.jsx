@@ -50,6 +50,7 @@ import { MOODS, Orbit, SheetRow, Slider, matches } from '../music/parts';
 import RadialVisualizer from '../music/RadialVisualizer';
 import { closePlayer, musicUi } from '../music/ui';
 import MusicPhone from './MusicPhone';
+import { useSlider } from '../components/useSlider';
 import { storageEstimate } from '../storage';
 import { useStore } from '../store';
 
@@ -463,13 +464,7 @@ function MusicDesktop() {
       {!empty && (
         <section className="relative pb-6" aria-label="Library">
           <div className="flex flex-wrap items-center gap-2 px-5 pb-4 sm:px-7">
-            <div className="flex flex-wrap gap-1 rounded-[1.5rem] border border-wash/10 bg-shade/25 p-1 backdrop-blur max-md:border-0 max-md:bg-transparent max-md:p-0" role="tablist" aria-label="Library shelves">
-              {SHELVES.map(({ id, label }) => (
-                <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => { setShelf(id); setSheet(null); }} className={clsx('rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors max-md:py-1.5', shelf === id ? 'bg-bone text-ink-0 max-md:bg-signal' : 'text-bone-dim hover:text-bone max-md:bg-wash/8')}>
-                  {label}
-                </button>
-              ))}
-            </div>
+            <ShelfTabs shelf={shelf} onPick={(id) => { setShelf(id); setSheet(null); }} />
             <span className="ml-auto font-mono text-[0.68rem] text-bone-faint max-md:hidden">
               {tracks.length} songs · {playlists.length} playlists{usage ? ` · ${(usage.used / 1024 / 1024).toFixed(1)} MB` : ''}
             </span>
@@ -656,6 +651,21 @@ function MusicDesktop() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** The library shelves: a glass pill with a marker that glides to the chosen one; on a phone, loose chips. */
+function ShelfTabs({ shelf, onPick }) {
+  const { ref, marker } = useSlider(shelf, 'rounded-full bg-bone max-md:hidden');
+  return (
+    <div ref={ref} className="relative flex flex-wrap gap-1 rounded-[1.5rem] border border-wash/10 bg-shade/25 p-1 backdrop-blur max-md:border-0 max-md:bg-transparent max-md:p-0" role="tablist" aria-label="Library shelves">
+      {marker}
+      {SHELVES.map(({ id, label }) => (
+        <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => onPick(id)} className={clsx('relative z-10 rounded-full px-3.5 py-1 font-mono text-[0.78rem] transition-colors duration-300 max-md:py-1.5', shelf === id ? 'text-ink-0 max-md:bg-signal' : 'text-bone-dim hover:text-bone max-md:bg-wash/8')}>
+          {label}
+        </button>
+      ))}
     </div>
   );
 }
