@@ -1,6 +1,7 @@
 import alarmUrl from '../../../assets/sounds/focus-alarm.mp3';
 import { player, bindSystemKeys } from '../music/player';
 import { clock } from '../study/model';
+import { notify as inbox } from '../notifications/center';
 import { recordSession } from './log';
 import { createStore } from '../store';
 
@@ -188,6 +189,8 @@ const finish = () => {
   setTitle('');
   ring();
   void notify(mode === 'focus' ? 'Focus session done' : 'Break over', mode === 'focus' ? 'Time for a short break.' : 'Ready for the next round?', true);
+  // the phone already got its own notification above; this is for the list in the bell
+  inbox({ key: `focus:${Date.now()}`, kind: 'focus', title: mode === 'focus' ? 'Focus session done' : 'Break over', body: mode === 'focus' ? 'Time for a short break.' : 'Ready for the next round?', tab: 'study', tone: 'success', announce: false });
   if (hasSession() && !musicIsPlaying()) {
     navigator.mediaSession.metadata = new MediaMetadata({ title: mode === 'focus' ? 'Focus done' : 'Break over', artist: 'Hank62', album: 'Focus timer', artwork: [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }] });
     navigator.mediaSession.playbackState = 'playing';

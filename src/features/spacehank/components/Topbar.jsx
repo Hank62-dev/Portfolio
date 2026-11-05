@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronRight, Command, Pause, Play, Plus, Search } from 'lucide-react';
 import { Avatar, Badge, Button, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
+import NotificationBell from '../notifications/NotificationBell';
 import { ThemeMenu } from './ThemeMenu';
 import { owner } from '../config';
 import { NAVIGATION, tabAccent, tabHue } from '../navigation';
@@ -33,7 +34,7 @@ function useScrolled(distance = 12) {
  * The phone's title bar, as in a native app: the screen's icon and name in large type that folds down to a compact bar
  * when you scroll, the colour of the screen glowing behind it, and only the actions that belong to this screen.
  */
-function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNewTask, onPalette }) {
+function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNewTask, onPalette, onTab }) {
   const scrolled = useScrolled();
   const hue = tabHue(tab);
   const Icon = current.icon;
@@ -73,6 +74,7 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
               {paused ? <Play size={17} aria-hidden="true" /> : <Pause size={17} aria-hidden="true" />}
             </button>
           )}
+          <NotificationBell phone onOpenTab={onTab} />
           <button type="button" aria-label="Open the command palette" onClick={onPalette} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone active:scale-90" data-palette-button>
             <Search size={18} aria-hidden="true" />
           </button>
@@ -87,12 +89,12 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
   );
 }
 
-export default function Topbar({ tab, connected, link, guest, paused, onPause, onNewTask, onPalette }) {
+export default function Topbar({ tab, connected, link, guest, paused, onPause, onNewTask, onPalette, onTab }) {
   const current = NAVIGATION.find((item) => item.id === tab) || NAVIGATION[0];
   const pauseLabel = paused ? 'Resume floor' : 'Pause floor';
   return (
     <>
-      <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} />
+      <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} onTab={onTab} />
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line bg-ink-0/85 px-gutter backdrop-blur max-md:hidden">
       <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 font-mono text-fine text-bone-faint">
         <span>HANK62</span>
@@ -114,6 +116,7 @@ export default function Topbar({ tab, connected, link, guest, paused, onPause, o
         <Badge tone={guest ? 'warn' : LINK[linkOf(connected, link)].tone} dot>
           {guest ? 'DEMO' : LINK[linkOf(connected, link)].text}
         </Badge>
+        <NotificationBell onOpenTab={onTab} />
         <ThemeMenu />
         <Tooltip content={pauseLabel} side="bottom">
           <Button variant="secondary" size="icon" aria-label={pauseLabel} onClick={onPause}>

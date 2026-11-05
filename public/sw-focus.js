@@ -40,19 +40,22 @@ self.addEventListener('periodicsync', (event) => {
 });
 
 // ---- tapping a notification -------------------------------------------------------------------------------------
-// Either one brings the app to the front. The update one also tells it to switch to the new version.
+// Each brings the app to the front. The update one also tells it to switch to the new version; a reminder from the
+// notification centre takes it to the tab it is about.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const update = event.notification.tag === UPDATE_TAG;
+  const tab = String(event.notification.data?.tab ?? '').replace(/[^a-z-]/gi, ''); // a reminder from the notification centre names its tab
   event.waitUntil(
     (async () => {
       const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
       const open = windows.find((client) => client.url.includes('/spacehank'));
       if (open) {
         if (update) open.postMessage({ type: 'hank62-apply-update' });
+        else if (tab) open.postMessage({ type: 'hank62-open-tab', tab });
         return open.focus();
       }
-      return self.clients.openWindow(update ? '/spacehank?update=1' : '/spacehank?tab=study');
+      return self.clients.openWindow(update ? '/spacehank?update=1' : `/spacehank?tab=${tab || 'study'}`);
     })()
   );
 });

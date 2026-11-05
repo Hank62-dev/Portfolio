@@ -29,6 +29,7 @@ import Fab from './components/Fab';
 import FocusWidget from './components/FocusWidget';
 import ShareSheet from './components/ShareSheet';
 import NowPlayingBar from './music/NowPlayingBar';
+import { useNotifications } from './notifications/useNotifications';
 import { openPlayer } from './music/ui';
 import { next, player, previous, setSleepTimer, togglePlay } from './music/player';
 import { toCss } from './studio/brand';
@@ -97,6 +98,7 @@ export default function Workspace({
   const trackCount = useStore(library, (s) => s.tracks.length);
   const music = true;
   const app = useInstall();
+  useNotifications({ guest, connected, agents, onTab });
   const { mode, setMode } = useTheme();
 
   // another app shared something to Hank62: the address says so (?share=1) and the sheet asks where it goes
@@ -291,7 +293,7 @@ export default function Workspace({
             />
           )}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <Topbar tab={tab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
+            <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
               <div key={tab} className={clsx('animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
