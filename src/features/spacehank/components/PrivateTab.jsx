@@ -4,6 +4,7 @@ import { NAVIGATION } from '../navigation';
 
 // One line on what is behind each private tab: enough to know it exists, not enough to see how it looks.
 const BLURB = {
+  hank: 'Your daily briefing, your agents and your pet.',
   space: 'A 3D floor where the AI agents work.',
   rag: 'Ask Hank anything, with answers drawn from your own documents.',
   pulse: 'Projects, commits and uptime at a glance.',
@@ -40,7 +41,7 @@ export default function PrivateTab({ tab, onHome, onSignIn }) {
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         <Button variant="ghost" size="sm" onClick={onHome}>
-          Back to Home
+          Try Ra chơi
         </Button>
         <Button size="sm" onClick={onSignIn}>
           Sign in

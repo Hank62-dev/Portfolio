@@ -9,8 +9,11 @@ export const DEMO_URL = '/spacehank?demo';
 export const WORKSPACE_URL = '/spacehank';
 
 /**
- * What a guest may open. Most of the workspace is the owner's own (notes, diary, documents, the AI helpers), so a guest gets
- * the home screen and a few light places to look around; the rest shows a short introduction and asks for the password.
+ * What a guest may open. Most of the workspace is the owner's own (the home screen with its briefing and pet, notes, diary,
+ * documents, the AI helpers), so a guest gets a few light places to look around; the rest, the home screen included, shows a
+ * short introduction and asks for the password.
  */
-export const GUEST_TABS = ['hank', 'play', 'habits', 'study'];
+export const GUEST_TABS = ['play', 'habits', 'study'];
+/** Where a guest lands, since the home screen is the owner's. */
+export const GUEST_HOME = 'play';
 export const guestCan = (tab) => GUEST_TABS.includes(tab);

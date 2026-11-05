@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import LoginScreen, { AuthLoading, ServerUnreachable } from './components/LoginScreen';
 import { Toast } from '../../design-system';
-import { DEMO_URL, WORKSPACE_URL, isDemo } from './demo/mode';
+import { DEMO_URL, GUEST_HOME, WORKSPACE_URL, isDemo } from './demo/mode';
 import { resetDemo, seedDemo } from './demo/seed';
 import { useDemo } from './hooks/useDemo';
 import { useRealtime } from './hooks/useRealtime';
@@ -13,9 +13,9 @@ import { spacehankConfig } from './config';
 import { DEFAULT_TAB, NAVIGATION } from './navigation';
 
 // the open tab lives in the address (/spacehank?tab=notes), which is also what an installed app's shortcuts use
-const tabOf = (params) => {
+const tabOf = (params, fallback) => {
   const wanted = params.get('tab');
-  return NAVIGATION.some((item) => item.id === wanted) ? wanted : DEFAULT_TAB;
+  return NAVIGATION.some((item) => item.id === wanted) ? wanted : fallback;
 };
 import Workspace from './Workspace';
 
@@ -27,7 +27,7 @@ export default function SpaceHank() {
   const [ready, setReady] = useState(!guest);
   const demo = useDemo(guest, live.notify);
   const [params, setParams] = useSearchParams();
-  const tab = tabOf(params);
+  const tab = tabOf(params, guest ? GUEST_HOME : DEFAULT_TAB);
   // each tab is its own history entry, so the browser's Back button returns to the tab you came from
   const setTab = (next) => {
     if (next === tab) return;

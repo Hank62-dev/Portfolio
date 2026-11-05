@@ -15,7 +15,7 @@ import Topbar from './components/Topbar';
 import { interpretCommand } from './api/owner';
 import { buildCatalog, validate } from './model/nlcommands';
 import { DEFAULT_TAB, NAVIGATION, tabHue } from './navigation';
-import { guestCan } from './demo/mode';
+import { GUEST_HOME, guestCan } from './demo/mode';
 import PrivateTab from './components/PrivateTab';
 import { sendIntent } from './notes/library';
 import { useShellContext, playMood } from './hooks/useShellContext';
@@ -269,8 +269,8 @@ export default function Workspace({
   };
   const fit = tab === 'shell'; // Git Bash fills the screen and scrolls inside itself, not the page
   const home = <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
-  // a guest only gets a few light places; the owner's own tabs say they are private
-  const page = guest && tab !== DEFAULT_TAB && !guestCan(tab) ? <PrivateTab tab={tab} onHome={() => onTab(DEFAULT_TAB)} onSignIn={onLogout} /> : views[tab] || home;
+  // a guest only gets a few light places; the owner's own tabs, the home screen too, say they are private
+  const page = guest && !guestCan(tab) ? <PrivateTab tab={tab} onHome={() => onTab(GUEST_HOME)} onSignIn={onLogout} /> : views[tab] || home;
 
   return (
     <SoftContext.Provider value>
