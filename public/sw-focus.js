@@ -39,6 +39,33 @@ self.addEventListener('periodicsync', (event) => {
   if (event.tag === 'hank62-update-check') event.waitUntil(self.registration.update().catch(() => {}));
 });
 
+// ---- a push from the server ---------------------------------------------------------------------------------------
+// The server (server/push.mjs) sends reminders even when the app is closed. If the app is open in front it already shows
+// them itself, so it is only told; otherwise the phone's own screen shows it. Tapping it goes to the tab it is about.
+
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data?.json() ?? {};
+  } catch {
+    data = { title: event.data?.text() };
+  }
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      windows.forEach((client) => client.postMessage({ type: 'hank62-push', payload: data }));
+      if (windows.some((client) => client.visibilityState === 'visible')) return;
+      await self.registration.showNotification(data.title || 'Hank62', {
+        body: data.body || '',
+        tag: data.key || undefined, // the app's own copy of the same reminder takes this one's place instead of doubling it
+        icon: '/icons/logo-192.png',
+        badge: '/icons/logo-192.png',
+        data: { tab: data.tab },
+      });
+    })()
+  );
+});
+
 // ---- tapping a notification -------------------------------------------------------------------------------------
 // Each brings the app to the front. The update one also tells it to switch to the new version; a reminder from the
 // notification centre takes it to the tab it is about.

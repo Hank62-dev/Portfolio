@@ -45,6 +45,14 @@ export const loadConfig = (env = process.env) => {
       maxBlobBytes: Math.max(100 * 1024, Number(env.SYNC_MAX_BLOB_MB || 4) * 1024 * 1024),
       quotaBytes: Math.max(10 * 1024 * 1024, Number(env.SYNC_QUOTA_MB || 300) * 1024 * 1024),
     },
+    // Web Push: the server's identity towards the browsers' push services (made once with `npx web-push generate-vapid-keys`),
+    // and the time zone the reminders keep ("evening" means the owner's evening, not the server's)
+    push: {
+      publicKey: env.VAPID_PUBLIC_KEY || '',
+      privateKey: env.VAPID_PRIVATE_KEY || '',
+      subject: env.VAPID_SUBJECT || '',
+      zone: env.PUSH_TIMEZONE || 'Asia/Ho_Chi_Minh',
+    },
     maxTaskChars: 20000,
     maxTasks: 200,
     maxEvents: 40,

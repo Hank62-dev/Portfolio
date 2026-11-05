@@ -66,6 +66,8 @@ Các biến đã có sẵn trong `render.yaml`, không cần nhập: `NODE_VERSI
 | `GEMINI_API_KEY` | Hank DJ (chọn nhạc theo tâm trạng) và bản tin buổi sáng | Cùng key Gemini ở mục 3.3 |
 | `HF_TOKEN` | Image Studio (tạo ảnh bằng FLUX qua Hugging Face) | https://huggingface.co/settings/tokens → tạo token loại Read. Có hạn mức free, hạn mức đổi theo thời điểm nên hãy xem trang của Hugging Face |
 | `CALENDAR_ICS_URL` | Lịch hôm nay trong bản tin | Google Calendar → Settings → chọn lịch → "Secret address in iCal format". Link này là bí mật, chỉ đặt trên Render, không đặt vào biến `VITE_*` |
+| `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Thông báo đẩy (Web Push): nhắc việc ngay cả khi đã đóng app | Tạo khoá ở mục 4.2c. `VAPID_SUBJECT` là `mailto:` cộng email của bạn. Cần cả `DATABASE_URL` |
+| `PUSH_TIMEZONE` | Múi giờ để tính "buổi tối", "sáng" cho nhắc việc | Tuỳ chọn, mặc định `Asia/Ho_Chi_Minh` |
 
 Tạo ảnh bằng Gemini cũng được (khi không có `HF_TOKEN`), nhưng model ảnh của Gemini có thể không nằm trong gói free, nên Image Studio ưu tiên Hugging Face.
 
@@ -117,6 +119,47 @@ Ghi chú, nhật ký, ảnh, thói quen, thu chi, thẻ ôn, Creator Lab… đư
 4. Dữ liệu đã có sẵn trên từng máy sẽ được tải lên một lần ở lần đồng bộ đầu tiên; máy mới chỉ cần đăng nhập để kéo về.
 
 Giới hạn: nhạc (file quá lớn), file ghi âm và ảnh trên 4 MB (`SYNC_MAX_BLOB_MB`) chỉ ở lại trên máy; dung lượng đồng bộ tối đa 300 MB (`SYNC_QUOTA_MB`) để không làm đầy database miễn phí (Neon free 0,5 GB, dùng chung với RAG). Hai máy sửa cùng một bản ghi cùng lúc thì lần sửa sau thắng. Dữ liệu trong database không được mã hoá đầu cuối: chủ database và Neon đọc được.
+
+### 4.2c. Thông báo đẩy (Web Push): nhắc việc khi đã đóng app
+
+Chuông trong app tự chạy được mà không cần setup gì. Phần này chỉ để thêm **thông báo gửi từ server**, hiện trên màn hình điện thoại hoặc máy tính **ngay cả khi app đã đóng**: thẻ ôn tới hạn, task đến hạn hoặc quá hạn, sự kiện lịch sắp bắt đầu (trước 15 phút), thói quen chưa làm buổi tối, ngân sách dùng tới 80% hoặc hết, nhắc viết nhật ký.
+
+Cách chạy: mỗi phút server đọc dữ liệu đã đồng bộ (mục 4.2b) và lịch ICS, rồi gửi những gì đến hạn. Mỗi việc chỉ gửi một lần. **Bắt buộc phải có `DATABASE_URL` ở mục 4.2b**, vì server lấy dữ liệu từ đó. Muốn có nhắc lịch thì cần thêm `CALENDAR_ICS_URL` (mục 3.2).
+
+**Bước 1. Tạo cặp khoá VAPID (làm một lần, trên máy bạn).**
+
+    npx web-push generate-vapid-keys
+
+Lệnh in ra `Public Key` và `Private Key`. Private key là bí mật như mật khẩu: chỉ đặt trên Render, đừng commit, đừng gửi cho ai.
+
+**Bước 2. Thêm biến trên Render.** Render → service `hank62-realtime` → **Environment**:
+
+| Biến | Giá trị |
+|---|---|
+| `VAPID_PUBLIC_KEY` | Public Key vừa tạo |
+| `VAPID_PRIVATE_KEY` | Private Key vừa tạo |
+| `VAPID_SUBJECT` | `mailto:email-của-bạn` (ví dụ `mailto:ban@gmail.com`) |
+| `PUSH_TIMEZONE` | Tuỳ chọn. Mặc định `Asia/Ho_Chi_Minh` |
+
+Bấm **Save, rebuild, and deploy**. Các biến này đã có sẵn trong `render.yaml` (đánh dấu `sync: false`), bạn chỉ cần điền giá trị. Không đổi cặp khoá về sau: đổi khoá thì mọi thiết bị phải tắt rồi bật lại thông báo.
+
+**Bước 3. Giữ server không ngủ.** Service free ngủ sau 15 phút không có request, mà server ngủ thì không gửi được gì. Tạo một monitor miễn phí ở https://cron-job.org (hoặc https://uptimerobot.com) gọi:
+
+    https://<ten-realtime-service>.onrender.com/health
+
+mỗi **5 phút**. Mỗi lần ping vừa đánh thức server vừa làm server kiểm tra việc đến hạn.
+
+Lưu ý hạn mức giờ chạy: gói free tính 750 giờ mỗi tháng **cho cả tài khoản**, mà một service chạy suốt ngày đã gần 744 giờ. Nếu `hank62-rag` cũng được dùng nhiều thì tổng có thể vượt và Render dừng service đến hết tháng. Cách an toàn: chỉ ping `hank62-realtime` (đừng ping RAG), và đặt khung giờ cho monitor chỉ chạy ban ngày, ví dụ 06:00 đến 23:59 giờ Việt Nam (khoảng 560 giờ mỗi tháng). Ban đêm bạn ngủ nên cũng không cần nhắc.
+
+**Bước 4. Bật trên từng thiết bị.** Mở app đã triển khai (không phải `localhost`), đăng nhập, bấm chuông ở thanh trên, bấm biểu tượng thanh trượt, bật **On this device**, chọn **Allow** khi trình duyệt hỏi, rồi bấm **Send a test**. Có thông báo hiện lên là toàn bộ đường đi đã chạy. Làm một lần cho mỗi thiết bị (điện thoại, laptop). Ở cùng trang đó bạn bật hoặc tắt từng loại nhắc.
+
+Giới hạn và lưu ý:
+
+- **iPhone:** chỉ nhận được khi app đã được **Thêm vào Màn hình chính** (Share → Add to Home Screen) và máy chạy iOS 16.4 trở lên. Mở bằng Safari thường thì không có thông báo đẩy. Android và máy tính không cần bước này.
+- Thông báo có thể trễ vài phút (khoảng ping 5 phút và lúc server thức dậy mất khoảng 1 phút). Nhắc "sắp bắt đầu trong 15 phút" nên được xem là gần đúng.
+- Server dev chạy `npm run dev` không có service worker nên bật thông báo đẩy sẽ báo lỗi. Hãy thử trên bản đã deploy.
+- Thiết bị đã gỡ app hoặc thu hồi quyền sẽ tự bị server quên.
+- Demo (`?demo`) và khách không có thông báo đẩy.
 
 ### 4.3. Redis (cache và bộ nhớ hội thoại)
 
@@ -257,6 +300,11 @@ Task và event lưu trong bộ nhớ. Restart server là mất lịch sử và p
 | Truy cập lần đầu chậm khoảng 1 phút | Service free đang ngủ | Bình thường ở gói free. Chờ rồi tải lại |
 | Câu hỏi về kho tri thức trả về trống sau khi RAG restart | Dữ liệu đồ thị LightRAG mất vì không có ổ đĩa | Xem mục 2. Hạn chế của gói free |
 | Qdrant báo không kết nối được sau thời gian dài không dùng | Cluster free bị tạm dừng | Vào https://cloud.qdrant.io kích hoạt lại cluster |
+| Công tắc "On this device" báo "Push is not set up on the server yet" (hoặc công tắc không đổi thành thông báo đẩy thật) | Thiếu một trong `DATABASE_URL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` trên `hank62-realtime`, hoặc chưa redeploy | Điền đủ rồi Save, rebuild, and deploy (mục 4.2c) |
+| "The app's service worker is not running here" | Đang mở bản dev (`localhost`) hoặc trình duyệt chặn service worker | Thử trên bản đã deploy, tải lại trang một lần |
+| Bấm Send a test không thấy gì | Quyền thông báo bị chặn, hoặc iPhone chưa Thêm vào Màn hình chính | Cho phép thông báo cho trang trong cài đặt trình duyệt. iPhone: cài app vào Màn hình chính |
+| Có Send a test nhưng nhắc việc không tới khi đóng app | Server đang ngủ, chưa có monitor ping `/health`, hoặc chưa có dữ liệu đồng bộ | Làm bước 3 mục 4.2c; kiểm tra dòng "Synced" ở thanh bên (mục 4.2b) |
+| Nhắc "buổi tối" tới sai giờ | Múi giờ | Đặt `PUSH_TIMEZONE` (ví dụ `Asia/Ho_Chi_Minh`) |
 
 ## 11. Bảo mật
 

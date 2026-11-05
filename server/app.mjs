@@ -8,6 +8,7 @@ import { createCalendar } from './calendar.mjs';
 import { createDiscord } from './discord.mjs';
 import { HttpError, createResponder, readBytes, readJson } from './http.mjs';
 import { createHub } from './hub.mjs';
+import { createPush } from './push.mjs';
 import { createSync } from './sync.mjs';
 import { createTaskService } from './tasks.mjs';
 
@@ -16,7 +17,7 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 // Behind Render's proxy the socket address is the proxy, so prefer the forwarded client address.
 const clientKey = (req) => req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
 
-export const createApp = (config, { fetchImpl = fetch, db = null } = {}) => {
+export const createApp = (config, { fetchImpl = fetch, db = null, sendPush } = {}) => {
   const agents = createAgents();
   const hub = createHub({ agents, maxEvents: config.maxEvents, maxTasks: config.maxTasks });
   const auth = createAuth(config);
@@ -32,6 +33,9 @@ export const createApp = (config, { fetchImpl = fetch, db = null } = {}) => {
     if (!sync) throw new HttpError(503, 'Sync is not set up: add DATABASE_URL (a Postgres address) to the realtime service.');
     return sync;
   };
+  // reminders that reach a device with the app closed (see push.mjs); off without a database and VAPID keys
+  const push = createPush({ db, sync, calendar, vapid: config.push, zone: config.push.zone, send: sendPush });
+  push.start();
   const query = (req) => new URL(req.url, 'http://localhost').searchParams;
 
   const requireAuth = (req) => {
@@ -47,14 +51,16 @@ export const createApp = (config, { fetchImpl = fetch, db = null } = {}) => {
   };
 
   const routes = {
-    'GET /health': (req, res) =>
-      json(res, 200, {
+    'GET /health': (req, res) => {
+      push.nudge(); // an uptime ping that wakes a sleeping server also gets the reminders looked at
+      return json(res, 200, {
         ok: true,
         mode: 'production',
         uptime: process.uptime(),
         agents: agents.length,
         configuredWorkers: configuredWorkers(config.env, agents),
-      }),
+      });
+    },
 
     // Asking who is signed in also renews a lapsed access token from the refresh token, so a page that wakes up after a while
     // (or after the server slept) gets a fresh session in the same call.
@@ -93,6 +99,28 @@ export const createApp = (config, { fetchImpl = fetch, db = null } = {}) => {
     'POST /api/tasks': async (req, res) => {
       requireAuth(req);
       json(res, 201, tasks.create(await readJson(req, config.maxBodyBytes)));
+    },
+
+    // ---- Web Push (see push.mjs): the app asks for the key, subscribes this device, and can send itself a test
+    'GET /api/push/key': (req, res) => {
+      requireAuth(req);
+      json(res, 200, { enabled: push.enabled, publicKey: push.publicKey });
+    },
+
+    'POST /api/push/subscribe': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await push.subscribe(await readJson(req, config.maxBodyBytes)));
+    },
+
+    'POST /api/push/unsubscribe': async (req, res) => {
+      requireAuth(req);
+      const body = await readJson(req, config.maxBodyBytes);
+      json(res, 200, await push.unsubscribe(body.endpoint));
+    },
+
+    'POST /api/push/test': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await push.sendTest());
     },
 
     // Owner-only helpers. Each is behind the session and the origin check, and the AI ones share a daily budget.
@@ -276,6 +304,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null } = {}) => {
     close: () =>
       new Promise((resolve) => {
         clearInterval(heartbeat);
+        push.stop();
         for (const client of [...wss.clients, ...battleWss.clients]) client.terminate();
         wss.close(() => battleWss.close(() => server.close(() => resolve())));
       }),

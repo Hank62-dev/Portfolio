@@ -28,6 +28,14 @@ services:
       # Leave blank and each device keeps its own copy.
       - key: DATABASE_URL
         sync: false
+      # Web Push: reminders that arrive with the app closed. Make the pair once with `npx web-push generate-vapid-keys`; the
+      # subject is mailto: and your address. Needs DATABASE_URL too. PUSH_TIMEZONE is optional (default Asia/Ho_Chi_Minh).
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        sync: false
       # Creator Lab: post announcements to your own Discord server. A webhook address (Server Settings, Integrations, Webhooks). Leave blank to switch it off.
       - key: DISCORD_WEBHOOK_URL
         sync: false

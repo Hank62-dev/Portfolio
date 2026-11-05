@@ -100,3 +100,20 @@ Then, on the production URL:
 - Session tokens are signed with a key made from `SPACEHANK_PASSWORD`, so changing the password signs every device out. Set `SPACEHANK_SESSION_SECRET` to sign with a separate key instead. Logging out clears the cookies on that device only; a token cannot be taken back before it runs out (30 min for access, 30 days for refresh).
 - Set a long random password and rotate it if exposed.
 - Configure database/vector/Redis backups before indexing production documents.
+
+## Push notifications (reminders with the app closed)
+
+The bell inside the app works on its own. To also get reminders when the app is closed (a flashcard review, a task due, an
+event in 15 minutes, a habit left for the evening, a budget at 80%), the realtime service sends Web Push. It needs `DATABASE_URL`
+(it reads the synced data) and a pair of VAPID keys:
+
+1. Make the keys once, on any computer: `npx web-push generate-vapid-keys`.
+2. On the realtime service in Render add `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` and `VAPID_SUBJECT` (`mailto:` and your address).
+   `PUSH_TIMEZONE` is optional and defaults to `Asia/Ho_Chi_Minh`: "evening" means evening there.
+3. A free Render service sleeps after 15 minutes, and a sleeping server sends nothing. Make a free monitor at cron-job.org or
+   UptimeRobot that opens `https://your-realtime-service.onrender.com/health` every 5 minutes. That keeps it awake, and each ping
+   also makes it look for what is due.
+4. In the app: bell, then the sliders icon, then switch on "On this device" (once per device). "Send a test" checks the whole path.
+
+On iPhone push only works for the app added to the Home Screen (iOS 16.4 or newer). Reminders are sent once each; changing the
+keys later means switching the device off and on again.

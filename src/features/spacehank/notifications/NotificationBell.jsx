@@ -7,8 +7,9 @@ import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { clsx } from '../../../lib/format';
 import { tabAccent, tabHue } from '../navigation';
 import { useStore } from '../store';
-import { ago, center, clearAll, groupByDay, markAllRead, markRead, permission, remove, sendTest, setKind, setPush, unreadCount } from './center';
+import { ago, center, clearAll, groupByDay, markAllRead, markRead, permission, remove, setKind, setPush, unreadCount } from './center';
 import { KINDS, kindOf } from './kinds';
+import { disablePush, enablePush, pushState, refreshPush, syncPushKinds, testNotification } from './push';
 
 function Switch({ checked, onChange, label }) {
   return (
@@ -42,7 +43,25 @@ function Row({ item, onOpen }) {
 
 function Settings({ prefs }) {
   const state = permission();
-  const system = state === 'unsupported' ? 'This browser cannot show notifications outside the app.' : state === 'denied' ? 'Blocked for this site. Allow notifications in the browser’s site settings.' : 'Reminders also appear on the screen of this device while the app is in the background.';
+  const server = useStore(pushState);
+  useEffect(() => {
+    void refreshPush();
+  }, []);
+
+  // with the server set up, "on this device" means a real push subscription (it works with the app closed)
+  const on = server.available ? server.subscribed : prefs.push && state === 'granted';
+  const toggle = (next) => (server.available ? (next ? void enablePush() : void disablePush()) : void setPush(next));
+  const system =
+    state === 'unsupported'
+      ? 'This browser cannot show notifications outside the app. On iPhone, add the app to the Home Screen first.'
+      : state === 'denied'
+        ? 'Blocked for this site. Allow notifications in the browser’s site settings.'
+        : server.available
+          ? on
+            ? 'Reminders reach this device even when the app is closed.'
+            : 'Turn on to get reminders even when the app is closed.'
+          : 'Reminders appear on this device while the app is open or in the background.';
+
   return (
     <div className="flex flex-col gap-4 px-3.5 pb-4">
       <section className="rounded-2xl border border-line bg-ink-2/60 p-3.5">
@@ -51,10 +70,15 @@ function Settings({ prefs }) {
             <b className="block text-fine font-medium text-bone">On this device</b>
             <small className="mt-1 block font-mono text-[0.72rem] leading-snug text-bone-faint">{system}</small>
           </span>
-          {state !== 'unsupported' && state !== 'denied' && <Switch label="Notifications on this device" checked={prefs.push && state === 'granted'} onChange={(on) => void setPush(on)} />}
+          {state !== 'unsupported' && state !== 'denied' && <Switch label="Notifications on this device" checked={on} onChange={toggle} />}
         </div>
-        {state === 'granted' && prefs.push && (
-          <button type="button" onClick={sendTest} className="mt-3 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">
+        {server.error && (
+          <p className="mt-2 font-mono text-[0.72rem] leading-snug text-danger" role="alert">
+            {server.error}
+          </p>
+        )}
+        {on && (
+          <button type="button" disabled={server.busy} onClick={() => void testNotification()} className="mt-3 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone disabled:opacity-50">
             Send a test
           </button>
         )}
@@ -71,7 +95,7 @@ function Settings({ prefs }) {
                 <b className="block text-fine font-medium text-bone">{label}</b>
                 <small className="block font-mono text-[0.68rem] text-bone-faint">{hint}</small>
               </span>
-              <Switch label={label} checked={prefs.kinds[id]} onChange={(on) => setKind(id, on)} />
+              <Switch label={label} checked={prefs.kinds[id]} onChange={(next) => { setKind(id, next); void syncPushKinds(); }} />
             </li>
           ))}
         </ul>

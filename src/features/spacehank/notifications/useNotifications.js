@@ -118,10 +118,15 @@ export function useNotifications({ guest, connected, agents, onTab }) {
     if (update.ready && !guest) notify({ key: `update:${Date.now()}`, kind: 'system', title: 'A new version is ready', body: 'Tap the update pill to switch to it.', tone: 'info' });
   }, [update.ready, guest]);
 
-  // a tapped phone notification, with the app already open, asks it to go to a tab
+  // a tapped phone notification, with the app already open, asks it to go to a tab; a push from the server lands in the list
   useEffect(() => {
     const onMessage = (event) => {
       if (event.data?.type === 'hank62-open-tab' && event.data.tab) onTab(event.data.tab);
+      // the server sent a reminder while the app was open: it goes in the list like any other (the same key never doubles)
+      if (event.data?.type === 'hank62-push' && event.data.payload?.title) {
+        const { key, kind, title, body, tab, tone } = event.data.payload;
+        notify({ key, kind: kind || 'system', title, body, tab, tone });
+      }
     };
     navigator.serviceWorker?.addEventListener('message', onMessage);
     return () => navigator.serviceWorker?.removeEventListener('message', onMessage);
