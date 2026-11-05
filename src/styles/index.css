@@ -413,6 +413,37 @@
   border-top: 1px solid var(--color-line-strong);
   margin: 1.2em 0;
 }
+.rich .rich-body table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin: 1em 0;
+  overflow: hidden;
+}
+.rich .rich-body th,
+.rich .rich-body td {
+  position: relative;
+  min-width: 3em;
+  padding: 0.45rem 0.7rem;
+  vertical-align: top;
+  border: 1px solid var(--color-line-strong);
+}
+.rich .rich-body th {
+  font-weight: 600;
+  text-align: left;
+  background: color-mix(in srgb, var(--color-wash) 6%, transparent);
+}
+.rich .rich-body td > p,
+.rich .rich-body th > p {
+  margin: 0;
+}
+.rich .rich-body .selectedCell::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--color-wash) 12%, transparent);
+}
 .rich .rich-body p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;

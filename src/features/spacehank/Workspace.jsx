@@ -308,7 +308,7 @@ export default function Workspace({
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}
           {phone && <Fab raised={hasTrack} />}
-          {music && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => { if (phone) openPlayer(); onTab('music'); }} lifted={phone} />}
+          {music && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => { if (phone) openPlayer(); onTab('music'); }} lifted={phone} rail={rail} />}
           <CommandPalette
             open={paletteOpen}
             onOpenChange={setPaletteOpen}

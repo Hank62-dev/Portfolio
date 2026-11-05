@@ -38,7 +38,7 @@ function Slider({ label, value, max, step = 1, onChange, className }) {
 }
 
 /** The player: track on the left, transport and progress in the middle, queue and volume on the right. */
-export default function NowPlayingBar({ onOpen, lifted = false }) {
+export default function NowPlayingBar({ onOpen, lifted = false, rail = false }) {
   const { trackId, playing, loading, time, duration, volume, shuffle, repeat, error } = useStore(player);
   const track = useStore(library, (s) => s.tracks.find((t) => t.id === trackId));
 
@@ -123,7 +123,7 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
       onTouchEnd={lifted ? onTouchEnd : undefined}
       onTouchCancel={lifted ? onTouchEnd : undefined}
       style={lifted && slide.x ? { transform: `translateX(${slide.x}px)`, opacity: Math.max(0, 1 - slide.x / 280), transition: slide.dragging ? 'none' : 'transform 0.22s ease-out, opacity 0.22s ease-out' } : undefined}
-      className={clsx('fixed z-30 border-line bg-ink-0/90 backdrop-blur-xl', lifted ? 'touch-pan-y inset-x-2.5 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] overflow-hidden rounded-2xl border bg-ink-1/95 shadow-[0_18px_40px_-14px_rgb(var(--shadow-rgb)/0.9)]' : 'inset-x-0 bottom-0 border-t')}
+      className={clsx('fixed z-30 border-line bg-ink-0/90 backdrop-blur-xl', lifted ? 'touch-pan-y inset-x-2.5 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] overflow-hidden rounded-2xl border bg-ink-1/95 shadow-[0_18px_40px_-14px_rgb(var(--shadow-rgb)/0.9)]' : clsx('right-0 bottom-0 border-t transition-[left] duration-300 ease-out-expo', rail ? 'left-[68px]' : 'left-64'))}
       data-now-playing
     >
       <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 md:py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] md:gap-6 md:px-5">

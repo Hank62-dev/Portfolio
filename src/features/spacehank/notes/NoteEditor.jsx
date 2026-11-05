@@ -3,12 +3,14 @@ import { EditorContent, useEditor, useEditorState } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Placeholder } from '@tiptap/extensions';
+import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table';
 import {
   ArrowLeft,
   Bold,
   CalendarDays,
   Check,
   Code2,
+  Grid3x3,
   Heading1,
   Heading2,
   Italic,
@@ -22,6 +24,7 @@ import {
   Quote,
   Redo2,
   Strikethrough,
+  Table as TableIcon,
   Trash2,
   Undo2,
 } from 'lucide-react';
@@ -50,8 +53,16 @@ function Tool({ label, active, disabled, onClick, children }) {
       disabled={disabled}
       onMouseDown={(e) => e.preventDefault()} // keep the selection in the editor
       onClick={onClick}
-      className={clsx('grid size-8 place-items-center rounded-full transition-colors disabled:opacity-35', active ? 'bg-signal text-ink-0' : 'text-bone-dim hover:bg-wash/10 hover:text-bone')}
+      className={clsx('grid size-8 place-items-center rounded-lg transition-colors disabled:opacity-35', active ? 'bg-signal text-ink-0' : 'text-bone-dim hover:bg-wash/10 hover:text-bone')}
     >
+      {children}
+    </button>
+  );
+}
+
+function TableTool({ danger, onClick, children }) {
+  return (
+    <button type="button" onClick={onClick} className={clsx('h-8 rounded-lg px-2.5 font-mono text-[0.72rem] transition-colors', danger ? 'text-danger hover:bg-danger/10' : 'text-bone-dim hover:bg-wash/10 hover:text-bone')}>
       {children}
     </button>
   );
@@ -75,6 +86,7 @@ function Toolbar({ editor }) {
       tasks: e.isActive('taskList'),
       quote: e.isActive('blockquote'),
       code: e.isActive('codeBlock'),
+      inTable: e.isActive('table'),
       link: e.isActive('link'),
       canUndo: e.can().undo(),
       canRedo: e.can().redo(),
@@ -92,7 +104,7 @@ function Toolbar({ editor }) {
 
   return (
     <div className="sticky top-[4.5rem] z-10 mx-auto flex w-fit max-w-full flex-col items-stretch" role="toolbar" aria-label="Formatting">
-      <div className="flex flex-wrap items-center justify-center gap-0.5 rounded-full border border-wash/10 bg-ink-1/80 p-1 shadow-[0_10px_40px_-10px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur-xl">
+      <div className="flex flex-wrap items-center justify-center gap-0.5 rounded-xl border border-wash/10 bg-ink-1/80 p-1 shadow-[0_10px_40px_-10px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur-xl">
         <Tool label="Heading 1" active={s.h1} onClick={run((c) => c.toggleHeading({ level: 1 }))}>
           <Heading1 size={16} aria-hidden="true" />
         </Tool>
@@ -131,6 +143,12 @@ function Toolbar({ editor }) {
         <Tool label="Divider line" onClick={run((c) => c.setHorizontalRule())}>
           <Minus size={16} aria-hidden="true" />
         </Tool>
+        <Tool label="Table (with a header row)" active={s.inTable} onClick={run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }))}>
+          <TableIcon size={16} aria-hidden="true" />
+        </Tool>
+        <Tool label="Grid (plain cells)" onClick={run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: false }))}>
+          <Grid3x3 size={16} aria-hidden="true" />
+        </Tool>
         <Divider />
         <Tool label="Undo" disabled={!s.canUndo} onClick={run((c) => c.undo())}>
           <Undo2 size={15} aria-hidden="true" />
@@ -140,8 +158,19 @@ function Toolbar({ editor }) {
         </Tool>
       </div>
 
+      {s.inTable && (
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-0.5 rounded-xl border border-wash/10 bg-ink-1/80 p-1 shadow-xl backdrop-blur-xl" aria-label="Table">
+          <TableTool onClick={run((c) => c.addRowAfter())}>+ Row</TableTool>
+          <TableTool onClick={run((c) => c.addColumnAfter())}>+ Column</TableTool>
+          <TableTool onClick={run((c) => c.deleteRow())}>− Row</TableTool>
+          <TableTool onClick={run((c) => c.deleteColumn())}>− Column</TableTool>
+          <TableTool onClick={run((c) => c.toggleHeaderRow())}>Header row</TableTool>
+          <TableTool danger onClick={run((c) => c.deleteTable())}>Delete table</TableTool>
+        </div>
+      )}
+
       {link !== null && (
-        <form onSubmit={applyLink} className="mt-2 flex items-center gap-2 rounded-full border border-wash/10 bg-ink-1/90 p-1.5 pl-4 shadow-xl backdrop-blur-xl">
+        <form onSubmit={applyLink} className="mt-2 flex items-center gap-2 rounded-xl border border-wash/10 bg-ink-1/90 p-1.5 pl-4 shadow-xl backdrop-blur-xl">
           <input
             autoFocus
             aria-label="Link address"
@@ -191,6 +220,10 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
       StarterKit.configure({ heading: { levels: [1, 2, 3] }, link: { openOnClick: false, autolink: true } }),
       TaskList,
       TaskItem.configure({ nested: true }),
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
       Placeholder.configure({ placeholder: 'Start with a title, then write. Type # for a heading, - for a list, [ ] for a checklist, #tag to label it.' }),
     ],
     content: latest.current.html,

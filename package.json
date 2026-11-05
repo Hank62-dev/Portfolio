@@ -24,6 +24,7 @@
     "@react-three/postprocessing": "^2.19.1",
     "@react-three/xr": "^6.6.32",
     "@tiptap/extension-placeholder": "^3.32.2",
+    "@tiptap/extension-table": "^3.32.2",
     "@tiptap/extension-task-item": "^3.32.2",
     "@tiptap/extension-task-list": "^3.32.2",
     "@tiptap/pm": "^3.32.2",
