@@ -19,10 +19,10 @@ export function PageHead({ eyebrow, title, accent, description, children, keepOn
 }
 
 /** A row of pill buttons where one is chosen (a tab strip, or a filter); the chosen marker glides between them. */
-export function Segmented({ value, onChange, options, label, large = false, round = false }) {
+export function Segmented({ value, onChange, options, label, large = false, round = false, scroll = false }) {
   const { ref, marker } = useSlider(value, 'rounded-full bg-bone');
   return (
-    <div ref={ref} className={clsx('relative flex max-w-full gap-1 border border-line bg-ink-1 p-1', round ? 'rounded-full' : 'rounded-[1.5rem]', options.length > 3 && 'flex-wrap')} role="tablist" aria-label={label}>
+    <div ref={ref} className={clsx('relative flex max-w-full gap-1 border border-line bg-ink-1 p-1', round ? 'rounded-full' : 'rounded-[1.5rem]', options.length > 3 && !scroll && 'flex-wrap', scroll && 'no-scrollbar overflow-x-auto')} role="tablist" aria-label={label}>
       {marker}
       {options.map(({ id, label: text, icon: Icon }) => (
         <button
@@ -30,8 +30,11 @@ export function Segmented({ value, onChange, options, label, large = false, roun
           type="button"
           role="tab"
           aria-selected={value === id}
-          onClick={() => onChange(id)}
-          className={clsx('relative z-10 inline-flex items-center gap-1.5 rounded-full font-mono transition-colors duration-300', large ? 'px-4 py-1.5 text-fine' : 'px-3.5 py-1 text-[0.78rem]', value === id ? 'text-ink-0' : 'text-bone-dim hover:text-bone')}
+          onClick={(event) => {
+            onChange(id);
+            if (scroll) event.currentTarget.scrollIntoView?.({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+          }}
+          className={clsx('relative z-10 inline-flex items-center gap-1.5 rounded-full font-mono transition-colors duration-300', scroll && 'shrink-0', large ? 'px-4 py-1.5 text-fine' : 'px-3.5 py-1 text-[0.78rem]', value === id ? 'text-ink-0' : 'text-bone-dim hover:text-bone')}
         >
           {Icon && <Icon size={large ? 14 : 13} aria-hidden="true" />} {text}
         </button>

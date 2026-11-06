@@ -1178,3 +1178,112 @@ input[data-own-clear]::-webkit-search-decoration {
     background-image: none;
   }
 }
+
+/* ---- Creator Lab: the money tab. Glass surfaces lit from the top, a hero with the tab's own colour (--app-hue) glowing in
+   from the corners, and numbers that catch the light. Everything reads on the paper theme too: lifts come from --color-wash. */
+.cl-surface {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--color-wash) 5%, transparent), color-mix(in srgb, var(--color-wash) 1%, transparent)),
+    var(--color-ink-1);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-wash) 8%, transparent),
+    0 28px 60px -44px rgb(var(--shadow-rgb) / 0.9);
+}
+.cl-card {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--color-wash) 4%, transparent), transparent), var(--color-ink-2);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-wash) 6%, transparent);
+  transition:
+    transform 0.35s var(--ease-out-expo),
+    border-color 0.25s,
+    box-shadow 0.35s;
+}
+.cl-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-line-strong);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-wash) 9%, transparent),
+    0 18px 36px -22px rgb(var(--shadow-rgb) / 0.9);
+}
+.cl-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 130% at 0% 0%, hsl(var(--app-hue) 90% 58% / 0.24), transparent 62%),
+    radial-gradient(55% 110% at 100% 0%, hsl(calc(var(--app-hue) + 34) 85% 62% / 0.16), transparent 66%),
+    radial-gradient(60% 90% at 60% 120%, hsl(calc(var(--app-hue) - 14) 80% 50% / 0.12), transparent 70%),
+    var(--color-ink-1);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-wash) 10%, transparent),
+    0 40px 80px -50px hsl(var(--app-hue) 90% 40% / 0.55);
+}
+/* a fine grain keeps the glow from banding and gives the card some paper */
+.cl-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.cl-gleam {
+  background-image: linear-gradient(100deg, var(--color-bone) 35%, hsl(calc(var(--app-hue) + 16) 95% 72%) 50%, var(--color-bone) 65%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: cl-gleam 9s ease-in-out infinite;
+}
+@keyframes cl-gleam {
+  0%,
+  55% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+.cl-rise {
+  animation: cl-rise 0.55s var(--ease-out-expo) backwards;
+}
+@keyframes cl-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.cl-fill {
+  transform-origin: left;
+  animation: cl-fill 1.1s var(--ease-out-expo) backwards 0.15s;
+}
+@keyframes cl-fill {
+  from {
+    transform: scaleX(0);
+  }
+}
+.cl-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: cl-draw 1.3s var(--ease-out-expo) backwards 0.2s;
+}
+@keyframes cl-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cl-gleam {
+    animation: none;
+    background-position: 0 0;
+  }
+  .cl-rise,
+  .cl-fill,
+  .cl-draw {
+    animation: none;
+  }
+  .cl-card:hover {
+    transform: none;
+  }
+}

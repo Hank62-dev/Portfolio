@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Clapperboard, ListPlus, Sparkles, Wand2 } from 'lucide-react';
+import { Clapperboard, ListPlus, Lightbulb, Send, Sparkles, Trophy, Wand2 } from 'lucide-react';
 import { Button, DatePicker, Input, Select, Textarea, pushToast } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { generateContent } from '../api/owner';
@@ -104,7 +104,7 @@ export default function IdeasPanel({ onSaved }) {
 
   return (
     <div className="flex flex-col gap-4" data-ideas>
-      <Panel title="What is the video about?" aside={<Segmented label="Language" value={settings.language} onChange={(language) => setSetting({ language })} options={[{ id: 'vi', label: 'Tiếng Việt' }, { id: 'en', label: 'English' }]} />}>
+      <Panel title="What is the video about?" icon={Lightbulb} hue={46} aside={<Segmented label="Language" value={settings.language} onChange={(language) => setSetting({ language })} options={[{ id: 'vi', label: 'Tiếng Việt' }, { id: 'en', label: 'English' }]} />}>
         <div className="flex flex-col gap-3">
           <Textarea aria-label="Idea" rows={3} placeholder="e.g. Why my Discord bot kept crashing at 3am, and the one line that fixed it" value={topic} onChange={(e) => setTopic(e.target.value)} />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -146,7 +146,7 @@ export default function IdeasPanel({ onSaved }) {
 
       {pack && (
         <>
-          <Panel title="Choose your opening line" aside={<span className="font-mono text-[0.68rem] text-bone-faint">{pack.source === 'ai' ? 'written by AI' : 'from hook formulas'}</span>}>
+          <Panel title="Choose your opening line" icon={Trophy} hue={22} aside={<span className="font-mono text-[0.68rem] text-bone-faint">{pack.source === 'ai' ? 'written by AI' : 'from hook formulas'}</span>}>
             <ul className="flex flex-col gap-2" role="radiogroup" aria-label="Hooks">
               {pack.hooks.map((h, i) => (
                 <li key={i}>
@@ -167,7 +167,7 @@ export default function IdeasPanel({ onSaved }) {
           </Panel>
 
           {pack.script && (
-            <Panel title={pack.script.title || 'The script'} aside={<span className="font-mono text-[0.68rem] text-bone-faint">about {speakSeconds(prompterText)} s</span>}>
+            <Panel title={pack.script.title || 'The script'} icon={Clapperboard} hue={208} aside={<span className="font-mono text-[0.68rem] text-bone-faint">about {speakSeconds(prompterText)} s</span>}>
               <ol className="flex flex-col gap-2.5">
                 <li className="rounded-2xl border border-bone/40 bg-wash/[0.04] p-3">
                   <Label>Hook · 0-3 s</Label>
@@ -203,7 +203,7 @@ export default function IdeasPanel({ onSaved }) {
           )}
 
           {(pack.caption || pack.discord || pack.thread?.length > 0) && (
-            <Panel title="Ready to post">
+            <Panel title="Ready to post" icon={Send} hue={150}>
               <div className="flex flex-col gap-4">
                 {pack.caption && (
                   <div>
@@ -239,7 +239,7 @@ export default function IdeasPanel({ onSaved }) {
             </Panel>
           )}
 
-          <Panel title="Keep it">
+          <Panel title="Keep it" icon={ListPlus} hue={270}>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap gap-1.5" role="group" aria-label="Platforms">
                 {PLATFORMS.map((p) => (

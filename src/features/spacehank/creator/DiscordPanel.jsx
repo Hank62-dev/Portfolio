@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ShieldCheck } from 'lucide-react';
+import { Hash, Megaphone, ShieldCheck } from 'lucide-react';
 import { Input } from '../../../design-system';
 import { useStore } from '../store';
 import DiscordComposer from './DiscordComposer';
@@ -22,7 +22,7 @@ export default function DiscordPanel() {
 
   return (
     <div className="flex flex-col gap-4" data-discord>
-      <Panel title="Plan your server" aside={<CopyButton text={text} label="Copy checklist" what="Checklist copied" />}>
+      <Panel title="Plan your server" icon={Hash} hue={235} aside={<CopyButton text={text} label="Copy checklist" what="Checklist copied" />}>
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Kind of community">
             {BLUEPRINT_KINDS.map((k) => (
@@ -36,7 +36,7 @@ export default function DiscordPanel() {
           </Row>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {plan.categories.map((c) => (
-              <div key={c.name} className="rounded-2xl border border-line p-3">
+              <div key={c.name} className="cl-card rounded-2xl border border-line p-3.5">
                 <Label className="mb-2">{c.name}</Label>
                 <ul className="flex flex-col gap-1.5">
                   {c.channels.map((ch) => (
@@ -51,7 +51,7 @@ export default function DiscordPanel() {
             ))}
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div className="rounded-2xl border border-line p-3">
+            <div className="cl-card rounded-2xl border border-line p-3.5">
               <Label className="mb-2">Roles</Label>
               <ul className="flex flex-col gap-1.5 text-[0.84rem] leading-snug">
                 {plan.roles.map((r) => (
@@ -61,7 +61,7 @@ export default function DiscordPanel() {
                 ))}
               </ul>
             </div>
-            <div className="rounded-2xl border border-line p-3">
+            <div className="cl-card rounded-2xl border border-line p-3.5">
               <Label className="mb-2">Tiers</Label>
               <ul className="flex flex-col gap-2 text-[0.84rem] leading-snug">
                 {plan.tiers.map((t) => (
@@ -75,7 +75,7 @@ export default function DiscordPanel() {
               <p className="mt-2 text-[0.76rem] leading-relaxed text-bone-faint">Discord's own paid subscriptions are available only to creators in the US (per Discord's support pages when this was written; check them again). A paid tier here means an outside page for payment and a role you give by hand.</p>
             </div>
           </div>
-          <div className="rounded-2xl border border-line p-3">
+          <div className="cl-card rounded-2xl border border-line p-3.5">
             <Label className="mb-2">Welcome message</Label>
             <p className="text-fine leading-snug text-bone-dim">{plan.welcome}</p>
             <CopyButton className="mt-2" text={plan.welcome} label="Copy welcome" />
@@ -83,11 +83,11 @@ export default function DiscordPanel() {
         </div>
       </Panel>
 
-      <Panel title="Post to your server">
+      <Panel title="Post to your server" icon={Megaphone} hue={22}>
         <DiscordComposer />
       </Panel>
 
-      <Panel title="Lines not to cross" aside={<ShieldCheck size={16} className="text-ok" aria-hidden="true" />}>
+      <Panel title="Lines not to cross" icon={ShieldCheck} hue={150} aside={<ShieldCheck size={16} className="text-ok" aria-hidden="true" />}>
         <ul className="flex flex-col gap-2 text-fine leading-snug text-bone-dim" data-guardrails>
           <li>
             <b className="text-bone">No self-bots, no mass DMs.</b> Discord forbids automating a user account and unsolicited messages. This app only posts to your own server through a webhook.

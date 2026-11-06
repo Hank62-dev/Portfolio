@@ -7,7 +7,7 @@ import { useStore } from '../store';
 import DiscordComposer from './DiscordComposer';
 import { PLATFORMS, STAGES, byStage, dueToPost, hashtagLine, moveStage, newPiece } from './model';
 import { content } from './store';
-import { Chip, CopyButton, Label, Row } from './ui';
+import { Chip, CopyButton, Label, PlatformTag, Row, STAGE_HUE } from './ui';
 
 const platformLabel = (id) => PLATFORMS.find((p) => p.id === id)?.label ?? id;
 const dayInput = (at) => {
@@ -170,7 +170,7 @@ export default function PipelinePanel() {
   return (
     <div className="flex flex-col gap-4" data-pipeline>
       {due.length > 0 && (
-        <section className="rounded-[1.75rem] border border-warn/40 bg-warn/10 p-4" aria-label="Due today" data-due-today>
+        <section className="cl-rise rounded-[1.75rem] border border-warn/35 bg-[linear-gradient(135deg,rgb(240_180_90/0.16),transparent_70%)] p-4 md:p-5" aria-label="Due today" data-due-today>
           <Label className="mb-2 flex items-center gap-1.5 text-warn">
             <CalendarClock size={13} aria-hidden="true" /> To post today
           </Label>
@@ -196,25 +196,27 @@ export default function PipelinePanel() {
 
       <div className="no-scrollbar -mx-5 flex scroll-px-5 snap-x snap-mandatory items-start gap-3 overflow-x-auto px-5 pb-3 md:mx-0 md:scroll-px-0 md:px-0" data-board>
         {STAGES.map((stage) => (
-          <section key={stage.id} aria-label={stage.label} data-stage={stage.id} className="flex w-[16rem] shrink-0 snap-start flex-col gap-2 rounded-[1.75rem] border border-line bg-ink-1 p-3 max-md:w-[78vw]">
+          <section key={stage.id} aria-label={stage.label} data-stage={stage.id} className="cl-surface relative flex w-[16.5rem] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-[1.75rem] border border-line p-3 max-md:w-[78vw]">
+            <i className="pointer-events-none absolute inset-x-6 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62% / 0.8), transparent)` }} aria-hidden="true" />
             <header className="flex items-center justify-between px-1.5 pt-1">
-              <h4 className="font-mono text-[0.7rem] tracking-[0.12em] text-bone-faint uppercase">{stage.label}</h4>
+              <h4 className="flex items-center gap-2 font-mono text-[0.7rem] tracking-[0.12em] text-bone-dim uppercase">
+                <i className="size-2 rounded-full" style={{ background: `hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62%)`, boxShadow: `0 0 10px hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62% / 0.6)` }} aria-hidden="true" />
+                {stage.label}
+              </h4>
               <span className="rounded-full bg-wash/[0.07] px-2 font-mono text-[0.68rem] tabular-nums text-bone-dim">{groups[stage.id].length}</span>
             </header>
             {groups[stage.id].length === 0 ? (
-              <p className="px-1.5 pb-2 text-[0.8rem] text-bone-faint">Empty</p>
+              <p className="rounded-2xl border border-dashed border-line px-3 py-6 text-center font-mono text-[0.7rem] text-bone-faint">Nothing here yet</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {groups[stage.id].map((p) => (
                   <li key={p.id}>
-                    <button type="button" onClick={() => setOpen(p.id)} className="flex w-full flex-col gap-2 rounded-2xl border border-line bg-ink-2 p-3 text-left transition-colors hover:border-line-strong" data-piece={p.title}>
+                    <button type="button" onClick={() => setOpen(p.id)} className="cl-card flex w-full flex-col gap-2.5 rounded-2xl border border-line p-3.5 text-left" data-piece={p.title}>
                       <b className="text-fine leading-snug font-medium text-bone">{p.title}</b>
                       {p.hook && <span className="line-clamp-2 text-[0.8rem] leading-snug text-bone-dim">“{p.hook}”</span>}
                       <span className="flex flex-wrap items-center gap-1.5">
                         {p.platforms.map((id) => (
-                          <span key={id} className="rounded-full bg-wash/[0.07] px-2 py-px font-mono text-[0.62rem] text-bone-dim">
-                            {platformLabel(id)}
-                          </span>
+                          <PlatformTag key={id} id={id} label={platformLabel(id)} />
                         ))}
                         {p.scheduledAt && <span className={clsx('font-mono text-[0.66rem]', p.stage !== 'posted' && p.scheduledAt < Date.now() - 86400000 ? 'text-danger' : 'text-bone-faint')}>{when(p.scheduledAt)}</span>}
                         {p.stage === 'posted' && p.results?.views > 0 && <span className="font-mono text-[0.66rem] text-ok">{p.results.views.toLocaleString('en-GB')} views</span>}

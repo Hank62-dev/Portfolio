@@ -8,7 +8,7 @@ import { Segmented } from '../components/Page';
 import { useStore } from '../store';
 import { CHANNELS, DEAL_KINDS, DEAL_STAGES, dueFollowUps, forgotten, newDeal, packagePrice, pipelineValue, quoteHtml, quoteTotals, sponsorRate, vnd, vndShort, winRate } from './model';
 import { creatorSettings, deals, setSetting } from './store';
-import { CopyButton, Label, Panel, Row, Stat } from './ui';
+import { CopyButton, Label, Panel, Row, STAGE_HUE, Stat } from './ui';
 
 const KIND_LABEL = Object.fromEntries(DEAL_KINDS.map((k) => [k.id, k.label]));
 const dayInput = (at) => {
@@ -304,7 +304,7 @@ export default function DealsPanel() {
       </div>
 
       {due.length > 0 && (
-        <section className="rounded-[1.75rem] border border-warn/40 bg-warn/10 p-4" aria-label="Follow up today" data-follow-ups>
+        <section className="cl-rise rounded-[1.75rem] border border-warn/35 bg-[linear-gradient(135deg,rgb(240_180_90/0.16),transparent_70%)] p-4 md:p-5" aria-label="Follow up today" data-follow-ups>
           <Label className="mb-2 flex items-center gap-1.5 text-warn">
             <CalendarClock size={13} aria-hidden="true" /> Follow up
           </Label>
@@ -346,18 +346,22 @@ export default function DealsPanel() {
           {DEAL_STAGES.map((stage) => {
             const list = items.filter((d) => d.stage === stage.id);
             return (
-              <section key={stage.id} aria-label={stage.label} data-deal-stage={stage.id} className="flex w-[16rem] shrink-0 snap-start flex-col gap-2 rounded-[1.75rem] border border-line bg-ink-1 p-3 max-md:w-[78vw]">
+              <section key={stage.id} aria-label={stage.label} data-deal-stage={stage.id} className="cl-surface relative flex w-[16.5rem] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-[1.75rem] border border-line p-3 max-md:w-[78vw]">
+                <i className="pointer-events-none absolute inset-x-6 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62% / 0.8), transparent)` }} aria-hidden="true" />
                 <header className="flex items-center justify-between px-1.5 pt-1">
-                  <h4 className="font-mono text-[0.7rem] tracking-[0.12em] text-bone-faint uppercase">{stage.label}</h4>
+                  <h4 className="flex items-center gap-2 font-mono text-[0.7rem] tracking-[0.12em] text-bone-dim uppercase">
+                <i className="size-2 rounded-full" style={{ background: `hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62%)`, boxShadow: `0 0 10px hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62% / 0.6)` }} aria-hidden="true" />
+                {stage.label}
+              </h4>
                   <span className="rounded-full bg-wash/[0.07] px-2 font-mono text-[0.68rem] tabular-nums text-bone-dim">{list.length}</span>
                 </header>
                 {list.length === 0 ? (
-                  <p className="px-1.5 pb-2 text-[0.8rem] text-bone-faint">Empty</p>
+                  <p className="rounded-2xl border border-dashed border-line px-3 py-6 text-center font-mono text-[0.7rem] text-bone-faint">Nothing here yet</p>
                 ) : (
                   <ul className="flex flex-col gap-2">
                     {list.map((d) => (
                       <li key={d.id}>
-                        <button type="button" onClick={() => setSheet({ deal: d })} className="flex w-full flex-col gap-2 rounded-2xl border border-line bg-ink-2 p-3 text-left transition-colors hover:border-line-strong" data-deal={d.name}>
+                        <button type="button" onClick={() => setSheet({ deal: d })} className="cl-card flex w-full flex-col gap-2.5 rounded-2xl border border-line p-3.5 text-left" data-deal={d.name}>
                           <b className="text-fine leading-snug font-medium text-bone">{d.name}</b>
                           <span className="flex flex-wrap items-center gap-1.5">
                             <Badge>{KIND_LABEL[d.kind] ?? d.kind}</Badge>

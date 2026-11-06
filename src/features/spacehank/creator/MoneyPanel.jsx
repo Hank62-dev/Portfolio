@@ -1,16 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Plus, Target, Trash2, TrendingUp } from 'lucide-react';
+import { AlertTriangle, ChartColumn, ChartPie, Check, CheckCircle2, Info, Plus, Receipt, Sparkles, Target, Trash2, Trophy } from 'lucide-react';
 import { Button, Dialog, Input, Select } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { useFab } from '../fab';
 import { useStore } from '../store';
 import { SOURCES, bySource, earningsByPiece, goalProgress, insights, monthKeyOf, monthTotal, newIncome, sourceLabel, trend, vnd, vndShort } from './model';
 import { content, creatorSettings, income, setSetting } from './store';
-import { Label, Panel, Row, Stat } from './ui';
+import { EmptyNote, IconBubble, Label, Panel, Row, Stat } from './ui';
 
-const TONE = { good: 'border-ok/40 bg-ok/10 text-ok', warn: 'border-warn/40 bg-warn/10 text-warn', info: 'border-line bg-ink-2 text-bone-dim' };
+const TONE = { good: 'border-ok/30 bg-ok/[0.07] text-bone', warn: 'border-warn/30 bg-warn/[0.07] text-bone', info: 'border-line bg-wash/[0.03] text-bone-dim' };
+const TONE_ICON = { good: [CheckCircle2, 'text-ok'], warn: [AlertTriangle, 'text-warn'], info: [Info, 'text-bone-faint'] };
 const monthName = (key) => new Date(`${key}-01T00:00:00`).toLocaleDateString('en-GB', { month: 'short' });
-const BAR_COLOURS = ['bg-signal', 'bg-ok', 'bg-warn', 'bg-[#6aa7ff]', 'bg-[#c9a5ff]', 'bg-[#ff8ab3]', 'bg-bone/60', 'bg-bone/40'];
+const SOURCE_HUES = [22, 150, 46, 215, 270, 330, 180, 90];
 
 function AddIncome({ pieces, onClose }) {
   const [amount, setAmount] = useState('');
@@ -92,118 +93,166 @@ export default function MoneyPanel() {
 
   return (
     <div className="flex flex-col gap-4" data-money>
-      <section className="rounded-[1.75rem] border border-line bg-[radial-gradient(80%_120%_at_0%_0%,rgb(61_220_151/0.10),transparent_60%),var(--color-ink-1)] p-5 max-md:p-4" aria-label="This month">
-        <Label>{new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}</Label>
-        <p className="mt-1 flex items-baseline gap-2">
-          <b className="font-display text-[2.4rem] leading-none tabular-nums text-bone" data-month-total>
-            {vnd(total)}
-          </b>
-        </p>
+      <Panel
+        title="Pace and goal"
+        icon={Target}
+        hue={22}
+        aside={
+          <Button size="sm" onClick={() => setAdding(true)} className="max-md:hidden" data-add-income>
+            <Plus size={14} aria-hidden="true" /> Log income
+          </Button>
+        }
+      >
         {goal > 0 ? (
-          <div className="mt-3">
-            <div className="h-2 overflow-hidden rounded-full bg-wash/10" role="progressbar" aria-label="Progress to the goal" aria-valuemin={0} aria-valuemax={100} aria-valuenow={g.pct}>
-              <i className={clsx('block h-full rounded-full transition-[width] duration-500', g.reached ? 'bg-ok' : 'bg-signal')} style={{ width: `${g.pct}%` }} />
+          <div className="mb-5">
+            <div className="relative h-3 overflow-hidden rounded-full bg-wash/10" role="progressbar" aria-label="Progress to the goal" aria-valuemin={0} aria-valuemax={100} aria-valuenow={g.pct}>
+              <i
+                className={clsx('cl-fill block h-full rounded-full', g.reached ? 'bg-gradient-to-r from-ok to-[#b6f0cf]' : 'bg-gradient-to-r from-[hsl(var(--app-hue)_95%_58%)] to-[hsl(calc(var(--app-hue)+34)_95%_70%)]')}
+                style={{ width: `${g.pct}%`, boxShadow: '0 0 18px hsl(var(--app-hue) 95% 60% / 0.5)' }}
+              />
             </div>
-            <p className="mt-1.5 flex justify-between text-[0.78rem] text-bone-dim">
-              <span>{g.pct}% of {vnd(goal)}</span>
+            <p className="mt-2 flex justify-between font-mono text-[0.72rem] text-bone-dim tabular-nums">
+              <span>
+                {vnd(total)} · {g.pct}%
+              </span>
               <span>{g.reached ? 'Goal reached' : `${vnd(g.remaining)} to go`}</span>
             </p>
           </div>
         ) : (
-          <p className="mt-2 text-fine text-bone-dim">Set a goal for the month to see how far you are.</p>
+          <p className="mb-4 text-fine text-bone-dim">Set a goal for the month to see how far you are and what each remaining day has to bring.</p>
         )}
-        <div className="mt-4 grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2.5">
           <Stat value={vndShort(g.projected)} label="At this pace" tone={goal > 0 && g.projected >= goal ? 'text-ok' : 'text-bone'} />
-          <Stat value={goal > 0 && !g.reached ? vndShort(g.neededPerDay) : '–'} label="Per day" />
+          <Stat value={goal > 0 && !g.reached ? vndShort(g.neededPerDay) : '–'} label="Needed per day" />
           <Stat value={previous ? `${Math.round(((total - previous) / previous) * 100)}%` : '–'} label="vs last month" tone={previous && total >= previous ? 'text-ok' : 'text-bone'} />
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-          <Target size={15} className="text-bone-faint" aria-hidden="true" />
-          <Input aria-label="Monthly goal in dong" inputMode="numeric" placeholder="Goal for the month (₫)" value={goalText} onChange={(e) => setGoalText(e.target.value)} compact className="min-w-0 flex-1" />
+          <Label className="mr-1">Monthly goal</Label>
+          <Input aria-label="Monthly goal in dong" inputMode="numeric" placeholder="e.g. 10000000" value={goalText} onChange={(e) => setGoalText(e.target.value)} compact className="min-w-0 flex-1" />
           <Button variant="ghost" size="sm" onClick={saveGoal} data-save-goal>
             Set goal
           </Button>
         </div>
-      </section>
+      </Panel>
 
-      <Panel title="What the numbers say" aside={<TrendingUp size={16} className="text-bone-faint" aria-hidden="true" />}>
+      <Panel title="What the numbers say" icon={Sparkles} hue={46}>
         <ul className="flex flex-col gap-2" data-insights>
-          {notes.map((n, i) => (
-            <li key={i} className={clsx('rounded-2xl border px-3.5 py-2.5 text-fine leading-snug', TONE[n.tone])}>
-              {n.text}
-            </li>
-          ))}
+          {notes.map((n, i) => {
+            const [Icon, color] = TONE_ICON[n.tone] ?? TONE_ICON.info;
+            return (
+              <li key={i} className={clsx('flex items-start gap-3 rounded-2xl border px-3.5 py-3 text-fine leading-snug', TONE[n.tone] ?? TONE.info)}>
+                <Icon size={16} className={clsx('mt-0.5 shrink-0', color)} aria-hidden="true" />
+                {n.text}
+              </li>
+            );
+          })}
         </ul>
       </Panel>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Panel title="By source">
+        <Panel title="By source" icon={ChartPie} hue={150}>
           {sources.length === 0 ? (
-            <p className="text-fine text-bone-faint">Nothing logged this month.</p>
+            <EmptyNote icon={ChartPie} title="Nothing logged this month">
+              Log the first payment and the sources will fill in here.
+            </EmptyNote>
           ) : (
-            <ul className="flex flex-col gap-3" data-sources>
-              {sources.map((s, i) => (
-                <li key={s.source}>
-                  <div className="mb-1 flex justify-between text-[0.82rem]">
-                    <span className="text-bone">{sourceLabel(s.source)}</span>
-                    <span className="font-mono text-bone-dim tabular-nums">{vndShort(s.amount)} · {Math.round(s.share * 100)}%</span>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-wash/[0.07]">
-                    <i className={clsx('block h-full rounded-full', BAR_COLOURS[i % BAR_COLOURS.length])} style={{ width: `${s.share * 100}%` }} />
-                  </div>
-                </li>
-              ))}
+            <ul className="flex flex-col gap-3.5" data-sources>
+              {sources.map((s, i) => {
+                const hue = SOURCE_HUES[i % SOURCE_HUES.length];
+                return (
+                  <li key={s.source}>
+                    <div className="mb-1.5 flex items-center justify-between gap-3 text-[0.84rem]">
+                      <span className="flex items-center gap-2 text-bone">
+                        <i className="size-2 rounded-full" style={{ background: `hsl(${hue} 75% 62%)` }} aria-hidden="true" />
+                        {sourceLabel(s.source)}
+                      </span>
+                      <span className="font-mono text-[0.76rem] text-bone-dim tabular-nums">
+                        {vndShort(s.amount)} · {Math.round(s.share * 100)}%
+                      </span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-wash/[0.07]">
+                      <i className="cl-fill block h-full rounded-full" style={{ width: `${s.share * 100}%`, background: `linear-gradient(90deg, hsl(${hue} 80% 58%), hsl(${hue + 24} 85% 70%))`, animationDelay: `${i * 70}ms` }} />
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </Panel>
-        <Panel title="Last six months">
-          <ol className="grid grid-cols-6 gap-2" aria-label="Income by month" data-trend>
-            {months.map((m, i) => (
-              <li key={m.month} className="flex flex-col items-center gap-1.5">
-                <span className="font-mono text-[0.6rem] text-bone-faint tabular-nums">{m.total ? vndShort(m.total) : ''}</span>
-                <span className="flex h-24 w-full max-w-9 items-end overflow-hidden rounded-xl bg-wash/[0.05]">
-                  <i className={clsx('block w-full rounded-xl', i === months.length - 1 ? 'bg-signal' : 'bg-bone/60')} style={{ height: m.total ? `${Math.max(8, (m.total / topMonth) * 100)}%` : 0 }} />
-                </span>
-                <span className={clsx('font-mono text-[0.62rem]', i === months.length - 1 ? 'text-signal' : 'text-bone-faint')}>{monthName(m.month)}</span>
-              </li>
-            ))}
+        <Panel title="Last six months" icon={ChartColumn} hue={215}>
+          <ol className="grid grid-cols-6 gap-2.5" aria-label="Income by month" data-trend>
+            {months.map((m, i) => {
+              const last = i === months.length - 1;
+              return (
+                <li key={m.month} className="flex flex-col items-center gap-2">
+                  <span className={clsx('font-mono text-[0.6rem] tabular-nums', last ? 'text-bone' : 'text-bone-faint')}>{m.total ? vndShort(m.total) : ''}</span>
+                  <span className="flex h-28 w-full max-w-10 items-end overflow-hidden rounded-xl bg-wash/[0.05]">
+                    <i
+                      className="block w-full rounded-xl transition-[height] duration-700 ease-out-expo"
+                      style={{
+                        height: m.total ? `${Math.max(8, (m.total / topMonth) * 100)}%` : 0,
+                        background: last ? 'linear-gradient(180deg, hsl(calc(var(--app-hue) + 20) 95% 68%), hsl(var(--app-hue) 90% 54%))' : 'linear-gradient(180deg, color-mix(in srgb, var(--color-bone) 55%, transparent), color-mix(in srgb, var(--color-bone) 22%, transparent))',
+                        boxShadow: last ? '0 0 20px hsl(var(--app-hue) 95% 58% / 0.4)' : undefined,
+                      }}
+                    />
+                  </span>
+                  <span className={clsx('font-mono text-[0.62rem]', last ? 'text-signal' : 'text-bone-faint')}>{monthName(m.month)}</span>
+                </li>
+              );
+            })}
           </ol>
         </Panel>
       </div>
 
       {earners.length > 0 && (
-        <Panel title="Content that earned">
-          <ul className="flex flex-col gap-2">
-            {earners.map((e) => (
-              <li key={e.piece.id} className="flex items-center justify-between gap-3 text-fine">
+        <Panel title="Content that earned" icon={Trophy} hue={46}>
+          <ul className="flex flex-col gap-1">
+            {earners.map((e, i) => (
+              <li key={e.piece.id} className="flex items-center gap-3 rounded-2xl px-2 py-2 text-fine transition-colors hover:bg-wash/[0.04]">
+                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-wash/[0.07] font-mono text-[0.72rem] text-bone-dim">{i + 1}</span>
                 <span className="min-w-0 flex-1 truncate text-bone">{e.piece.title}</span>
-                <b className="font-mono text-[0.8rem] text-ok tabular-nums">{vndShort(e.amount)}</b>
+                <b className="font-mono text-[0.84rem] text-ok tabular-nums">{vndShort(e.amount)}</b>
               </li>
             ))}
           </ul>
         </Panel>
       )}
 
-      <Panel title="Recent" aside={<Button size="sm" onClick={() => setAdding(true)} className="max-md:hidden" data-add-income><Plus size={14} aria-hidden="true" /> Log income</Button>}>
+      <Panel
+        title="Recent"
+        icon={Receipt}
+        hue={22}
+        aside={
+          <Button size="sm" onClick={() => setAdding(true)} className="md:hidden" aria-label="Log income">
+            <Plus size={14} aria-hidden="true" /> Log
+          </Button>
+        }
+      >
         {items.length === 0 ? (
-          <p className="text-fine text-bone-faint">No income logged yet.</p>
+          <EmptyNote icon={Receipt} title="No income logged yet">
+            Log money when it reaches you, not when it is promised. The goal, the charts and the insights all start from here.
+          </EmptyNote>
         ) : (
-          <ul className="flex flex-col divide-y divide-line" data-income-list>
-            {items.slice(0, 12).map((e) => (
-              <li key={e.id} className="flex items-center gap-3 py-2.5">
-                <span className="min-w-0 flex-1 leading-tight">
-                  <b className="block truncate text-fine font-medium text-bone">{sourceLabel(e.source)}</b>
-                  <small className="block truncate text-[0.74rem] text-bone-faint">
-                    {new Date(e.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
-                    {e.note ? ` · ${e.note}` : ''}
-                  </small>
-                </span>
-                <b className="font-mono text-[0.84rem] text-bone tabular-nums">{vnd(e.amount)}</b>
-                <button type="button" aria-label={`Delete ${sourceLabel(e.source)} ${vnd(e.amount)}`} onClick={() => income.remove(e.id)} className="p-1.5 text-bone-faint hover:text-danger">
-                  <Trash2 size={14} aria-hidden="true" />
-                </button>
-              </li>
-            ))}
+          <ul className="flex flex-col" data-income-list>
+            {items.slice(0, 12).map((e) => {
+              const index = Math.max(0, SOURCES.findIndex((x) => x.id === e.source));
+              return (
+                <li key={e.id} className="group flex items-center gap-3 rounded-2xl px-2 py-2.5 transition-colors hover:bg-wash/[0.04]">
+                  <IconBubble icon={Receipt} hue={SOURCE_HUES[index % SOURCE_HUES.length]} size="sm" />
+                  <span className="min-w-0 flex-1 leading-tight">
+                    <b className="block truncate text-fine font-medium text-bone">{sourceLabel(e.source)}</b>
+                    <small className="block truncate text-[0.74rem] text-bone-faint">
+                      {new Date(e.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                      {e.note ? ` · ${e.note}` : ''}
+                    </small>
+                  </span>
+                  <b className="font-mono text-[0.86rem] text-bone tabular-nums">+{vnd(e.amount)}</b>
+                  <button type="button" aria-label={`Delete ${sourceLabel(e.source)} ${vnd(e.amount)}`} onClick={() => income.remove(e.id)} className="p-1.5 text-bone-faint transition-opacity hover:text-danger md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100">
+                    <Trash2 size={14} aria-hidden="true" />
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Panel>

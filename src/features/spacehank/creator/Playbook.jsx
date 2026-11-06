@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ArrowRight, Download, Upload } from 'lucide-react';
+import { ArrowRight, Compass, Download, Map as MapIcon, ShieldAlert, Store, Upload, Database } from 'lucide-react';
 import { Button, pushToast } from '../../../design-system';
 import { useSyncStatus } from '../sync/useSync';
 import { buildBackup, parseBackup } from './backup';
@@ -58,16 +58,17 @@ export default function Playbook({ onGo }) {
   const sync = useSyncStatus();
   return (
     <div className="flex flex-col gap-4" data-playbook>
-      <Panel title="The idea">
+      <Panel title="The idea" icon={Compass} hue={22}>
         <p className="text-fine leading-relaxed text-bone-dim">
           You are a developer with an AI workspace. Money comes from what you can <b className="text-bone">build for other people</b>, what an <b className="text-bone">audience</b> will pay for, and what you can <b className="text-bone">package</b> and sell more than once. At the start, content is not the product: it is how people find you. So the loop is: <b className="text-bone">make short videos in a niche → bring people to a small community → turn the people who need help into clients and sponsors → write down the numbers → repeat what worked.</b> Every part of this tab is one step of that loop.
         </p>
       </Panel>
 
-      <Panel title="30 days, one loop">
+      <Panel title="30 days, one loop" icon={MapIcon} hue={208}>
         <ol className="flex flex-col gap-3">
           {WEEKS.map((w) => (
-            <li key={w.week} className="rounded-2xl border border-line p-3.5">
+            <li key={w.week} className="cl-card relative overflow-hidden rounded-2xl border border-line p-4">
+              <span className="pointer-events-none absolute -top-3 right-3 font-display text-[5rem] leading-none text-wash/[0.05] select-none" aria-hidden="true">{w.week.replace('Week ', '')}</span>
               <div className="mb-2 flex items-center justify-between gap-2">
                 <p className="flex items-baseline gap-2">
                   <Label>{w.week}</Label>
@@ -87,10 +88,10 @@ export default function Playbook({ onGo }) {
         </ol>
       </Panel>
 
-      <Panel title="Where the money can come from">
+      <Panel title="Where the money can come from" icon={Store} hue={150}>
         <ul className="flex flex-col gap-2.5" data-sources-table>
           {SOURCES.map((s) => (
-            <li key={s.name} className="rounded-2xl border border-line p-3">
+            <li key={s.name} className="cl-card rounded-2xl border border-line p-3.5">
               <p className="flex flex-wrap items-center justify-between gap-2">
                 <b className="text-fine text-bone">{s.name}</b>
                 <span className="rounded-full bg-wash/[0.07] px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim">{s.status}</span>
@@ -102,7 +103,7 @@ export default function Playbook({ onGo }) {
         <p className="mt-3 text-[0.76rem] leading-relaxed text-bone-faint">These notes come from searches of platform pages and third-party guides; several sources disagree. Treat them as a reason to check, not as the rules.</p>
       </Panel>
 
-      <Panel title="Your data">
+      <Panel title="Your data" icon={Database} hue={270}>
         <p className="text-fine leading-relaxed text-bone-dim">
           {sync.enabled ? 'Your Creator Lab data is kept in your database and follows you to every device you sign in on. ' : 'Sync is off, so your Creator Lab data lives in this browser only. '}
           Your income log is worth a copy of its own: download one now and then, and restore it if you ever need to start over.
@@ -129,7 +130,7 @@ export default function Playbook({ onGo }) {
         </div>
       </Panel>
 
-      <Panel title="Lines not to cross">
+      <Panel title="Lines not to cross" icon={ShieldAlert} hue={4}>
         <ul className="flex list-disc flex-col gap-1.5 pl-5 text-fine leading-snug text-bone-dim">
           {GUARDRAILS.map((g) => (
             <li key={g}>{g}</li>
