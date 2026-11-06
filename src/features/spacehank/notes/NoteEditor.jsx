@@ -32,6 +32,7 @@ import { Badge, Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { MOODS, tagsOf, textToHtml, titleOf } from './notes';
 import { togglePin, updateNote } from './library';
+import ScrollTopButton from './ScrollTopButton';
 import { locale, tr } from '../lang';
 
 const plain = (editor) => editor.getText({ blockSeparator: '\n' });
@@ -330,6 +331,7 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
           )}
         </aside>
       </div>
+      <ScrollTopButton />
     </div>
   );
 }
