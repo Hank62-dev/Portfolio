@@ -1,4 +1,4 @@
-import { tr } from '../lang';
+import { tr } from '../lang.js';
 // The Wallet as plain functions: reading "ăn trưa 45k" into an entry, and the sums behind the charts.
 
 export const CATEGORIES = [

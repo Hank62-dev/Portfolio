@@ -1,4 +1,4 @@
-import { tr } from '../lang';
+import { tr } from '../lang.js';
 // Bắn tàu: the notebook-paper naval game. Ten by ten squares, a fleet of ten boats (one of four squares, two of three,
 // three of two, four of one), and the boats may not touch, even at a corner. Pure rules and a computer opponent.
 
