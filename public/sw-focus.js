@@ -17,7 +17,7 @@ const announceUpdate = async () => {
     body: vi ? 'Chạm để mở app và cập nhật.' : 'Tap to open the app and update.',
     tag: UPDATE_TAG,
     icon: '/icons/logo-192.png',
-    badge: '/icons/logo-192.png',
+    badge: '/icons/badge-96.png',
     data: { kind: 'update' },
   });
 };
@@ -59,7 +59,7 @@ self.addEventListener('push', (event) => {
         body: data.body || '',
         tag: data.key || undefined, // the app's own copy of the same reminder takes this one's place instead of doubling it
         icon: '/icons/logo-192.png',
-        badge: '/icons/logo-192.png',
+        badge: '/icons/badge-96.png',
         data: { tab: data.tab },
       });
     })()
@@ -82,7 +82,9 @@ self.addEventListener('notificationclick', (event) => {
         else if (tab) open.postMessage({ type: 'hank62-open-tab', tab });
         return open.focus();
       }
-      return self.clients.openWindow(update ? '/spacehank?update=1' : `/spacehank?tab=${tab || 'study'}`);
+      // a full address inside the manifest's scope: Chrome on Android opens that in the installed app, where a bare path can end up in a browser tab
+      const target = new URL(update ? '/spacehank?update=1' : `/spacehank?tab=${tab || 'study'}`, self.location.origin).href;
+      return self.clients.openWindow(target);
     })()
   );
 });

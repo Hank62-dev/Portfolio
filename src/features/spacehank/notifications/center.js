@@ -49,7 +49,7 @@ export const permission = () => (typeof Notification === 'undefined' ? 'unsuppor
 
 const showSystem = async (item) => {
   if (permission() !== 'granted' || !center.get().prefs.push) return;
-  const options = { body: item.body, tag: item.key || item.id, icon: '/icons/logo-192.png', badge: '/icons/logo-192.png', data: { tab: item.tab || kindOf(item.kind).tab } };
+  const options = { body: item.body, tag: item.key || item.id, icon: '/icons/logo-192.png', badge: '/icons/badge-96.png', data: { tab: item.tab || kindOf(item.kind).tab } };
   try {
     const registration = await navigator.serviceWorker?.ready;
     if (registration?.showNotification) await registration.showNotification(item.title, options);

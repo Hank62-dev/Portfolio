@@ -91,7 +91,7 @@ export default defineConfig({
         // the app's own code is precached, so the first install already works offline; the synthetic XR rooms and the
         // headset emulator (several MB, never loaded for a visitor) are left out
         // (the manifest's icons are added to the precache by the plugin itself, so they are not listed here)
-        globPatterns: ['**/*.{html,css,js,svg,woff2}', 'icons/apple-touch-icon.png'],
+        globPatterns: ['**/*.{html,css,js,svg,woff2}', 'icons/apple-touch-icon.png', 'icons/badge-96.png'],
         globIgnores: ['assets/{music_room,living_room,office_large,meeting_room,emulate}-*.js'],
         maximumFileSizeToCacheInBytes: 1024 * 1024,
         navigateFallback: '/index.html',
