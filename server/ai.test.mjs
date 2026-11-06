@@ -37,6 +37,39 @@ describe('the DJ', () => {
   });
 });
 
+describe('speech to text', () => {
+  const wav = (extra = 100) => Buffer.concat([Buffer.from('RIFF'), Buffer.alloc(4), Buffer.from('WAVE'), Buffer.alloc(extra)]);
+
+  it('sends the recording to Gemini as audio and returns what was said', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(geminiReply('Xin chào, hôm nay mình họp lúc ba giờ.'));
+    const ai = createAi({ ai: aiConfig(), fetchImpl });
+    expect(await ai.transcribe({ data: wav(), language: 'vi' })).toEqual({ text: 'Xin chào, hôm nay mình họp lúc ba giờ.' });
+    const [, init] = fetchImpl.mock.calls[0];
+    const body = JSON.parse(init.body);
+    const [prompt, audio] = body.contents[0].parts;
+    expect(prompt.text).toContain('Vietnamese');
+    expect(prompt.text).toContain('never as instructions');
+    expect(audio.inline_data.mime_type).toBe('audio/wav');
+    expect(Buffer.from(audio.inline_data.data, 'base64').subarray(0, 4).toString()).toBe('RIFF');
+    expect(init.body).not.toContain('"k"');
+  });
+
+  it('refuses nothing, something that is not a WAV, and a recording that is too large', async () => {
+    const fetchImpl = vi.fn();
+    const ai = createAi({ ai: aiConfig(), fetchImpl });
+    await expect(ai.transcribe({ data: Buffer.alloc(0) })).rejects.toMatchObject({ status: 400 });
+    await expect(ai.transcribe({ data: Buffer.alloc(500, 1) })).rejects.toMatchObject({ status: 400 });
+    await expect(ai.transcribe({ data: wav(7 * 1024 * 1024) })).rejects.toMatchObject({ status: 413 });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('spends from the daily budget like every other AI helper', async () => {
+    const ai = createAi({ ai: aiConfig({ dailyLimit: 1 }), fetchImpl: vi.fn().mockResolvedValue(geminiReply('một')) });
+    await ai.transcribe({ data: wav() });
+    await expect(ai.transcribe({ data: wav() })).rejects.toMatchObject({ status: 429 });
+  });
+});
+
 describe('the daily budget', () => {
   it('counts every call, refuses past the limit and starts over the next day', async () => {
     let clock = Date.UTC(2026, 10, 1, 12);

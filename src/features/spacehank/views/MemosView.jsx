@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AudioLines, Download, FileText, Languages, Mic, Pause, Play, Square, Trash2 } from 'lucide-react';
+import { AudioLines, Download, FileText, Languages, Mic, Pause, Play, Sparkles, Square, Trash2 } from 'lucide-react';
 import { Badge, Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { PageHead, Segmented } from '../components/Page';
+import { transcribeRecording } from '../memos/audio';
 import { LANGUAGES, asNote, bars, canTranscribe, formatDuration, titleFrom } from '../memos/model';
 import { memos } from '../memos/store';
 import { createNote } from '../notes/library';
@@ -24,9 +25,13 @@ function Wave({ peaks, progress, onSeek, live }) {
   );
 }
 
-function Memo({ memo, playing, progress, onPlay, onSeek, onNotify }) {
+function Memo({ memo, playing, progress, onPlay, onSeek, onNotify, writing, onWrite }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(memo.title);
+  useEffect(() => setTitle(memo.title), [memo.title]); // the words just written may have named it
+  useEffect(() => {
+    if (writing?.done) setOpen(true); // the words that just arrived are shown
+  }, [writing]);
   const send = async () => {
     await createNote(asNote({ ...memo, title }), { html: textToHtml(asNote({ ...memo, title })) });
     onNotify?.(tr('Saved to Second Brain'));
@@ -56,6 +61,9 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify }) {
           <Button variant="secondary" size="icon" aria-label={tr('Show the transcript')} aria-pressed={open} onClick={() => setOpen(!open)}>
             <FileText size={14} aria-hidden="true" />
           </Button>
+          <Button variant="secondary" size="icon" aria-label={memo.transcript ? tr('Write it down again with AI') : tr('Write it down with AI')} title={memo.transcript ? tr('Write it down again with AI') : tr('Write it down with AI')} loading={Boolean(writing?.busy)} onClick={() => onWrite(memo)}>
+            <Sparkles size={14} className="text-signal" aria-hidden="true" />
+          </Button>
           <Button variant="secondary" size="icon" aria-label={tr('Save to Second Brain')} onClick={send}>
             <FileText size={14} className="text-signal" aria-hidden="true" />
           </Button>
@@ -67,8 +75,19 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify }) {
           </Button>
         </span>
       </div>
+      {writing?.busy && (
+        <p className="mt-3 font-mono text-fine text-bone-dim" role="status">
+          {tr('Writing down what was said…')}
+        </p>
+      )}
+      {writing?.error && (
+        <p className="mt-3 rounded-2xl border border-danger/40 bg-danger/10 px-3 py-2 font-mono text-fine text-danger" role="alert">
+          {writing.error}
+        </p>
+      )}
       {open && (
         <textarea
+          key={memo.transcript}
           aria-label={tr('Transcript')}
           rows={4}
           defaultValue={memo.transcript}
@@ -95,6 +114,27 @@ export default function MemosView({ onNotify }) {
   const transcribes = canTranscribe();
   const heardRef = useRef('');
   heardRef.current = heard;
+  const langRef = useRef(lang);
+  langRef.current = lang;
+
+  // The browser's own speech-to-text only works while recording, and only in some browsers. This one works on any
+  // recording, in any browser: the server's speech model listens to it afterwards (see memos/audio.js).
+  const [writing, setWriting] = useState({}); // memo id -> { busy } | { error } | { done }
+  const writeDown = useCallback(async (memo) => {
+    const mark = (state) => setWriting((all) => ({ ...all, [memo.id]: state }));
+    mark({ busy: true });
+    try {
+      const text = await transcribeRecording(memo.blob, langRef.current === 'en-US' ? 'en' : 'vi');
+      if (!text) {
+        mark({ error: tr('No words were heard in this recording.') });
+        return;
+      }
+      await memos.update(memo.id, { transcript: text, ...(/^Memo /.test(memo.title) ? { title: titleFrom(text) } : {}) });
+      mark({ done: true });
+    } catch (error) {
+      mark({ error: error.message });
+    }
+  }, []);
 
   useEffect(() => {
     void memos.load();
@@ -196,11 +236,12 @@ export default function MemosView({ onNotify }) {
     setStatus(tr('idle'));
     setLive([]);
     if (blob.size && duration >= 0.5) {
-      await memos.create({ title: titleFrom(transcript), transcript, duration, blob, mime: r.mime, peaks: bars(r.peaks, PEAKS), at: Date.now() });
+      const memo = await memos.create({ title: titleFrom(transcript), transcript, duration, blob, mime: r.mime, peaks: bars(r.peaks, PEAKS), at: Date.now() });
       onNotify?.('Memo saved');
+      if (!transcript) void writeDown(memo); // the browser heard nothing (or cannot listen): the server writes it down
     }
     setHeard('');
-  }, [onNotify]);
+  }, [onNotify, writeDown]);
 
   const play = (memo) => {
     if (playing.id === memo.id && audio.current && !audio.current.paused) {
@@ -264,16 +305,13 @@ export default function MemosView({ onNotify }) {
           )}
           {!recording && (
             <div className="flex flex-wrap items-center justify-center gap-3 text-fine text-bone-dim">
-              {transcribes ? (
-                <div className="flex items-center gap-2.5">
-                  <span className="inline-flex items-center gap-1.5 font-mono text-[0.78rem]">
-                    <Languages size={14} aria-hidden="true" /> {tr('Speaking')}
-                  </span>
-                  <Segmented label={tr('Language')} value={lang} onChange={setLang} options={LANGUAGES.map((l) => ({ id: l.id, label: l.label }))} />
-                </div>
-              ) : (
-                <Badge tone="warn">{tr('No speech-to-text in this browser, recording only')}</Badge>
-              )}
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex items-center gap-1.5 font-mono text-[0.78rem]">
+                  <Languages size={14} aria-hidden="true" /> {tr('Speaking')}
+                </span>
+                <Segmented label={tr('Language')} value={lang} onChange={setLang} options={LANGUAGES.map((l) => ({ id: l.id, label: l.label }))} />
+              </div>
+              {!transcribes && <Badge>{tr('This browser cannot type while you speak: the words are written down after you stop.')}</Badge>}
             </div>
           )}
           {problem && (
@@ -295,7 +333,7 @@ export default function MemosView({ onNotify }) {
       ) : (
         <ul className="flex flex-col gap-3" aria-label={tr('Memos')}>
           {items.map((m) => (
-            <Memo key={m.id} memo={m} playing={playing.id === m.id} progress={playing.id === m.id ? playing.progress : 0} onPlay={play} onSeek={seek} onNotify={onNotify} />
+            <Memo key={m.id} memo={m} playing={playing.id === m.id} progress={playing.id === m.id ? playing.progress : 0} onPlay={play} onSeek={seek} onNotify={onNotify} writing={writing[m.id]} onWrite={writeDown} />
           ))}
         </ul>
       )}

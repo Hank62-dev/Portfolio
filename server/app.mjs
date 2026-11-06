@@ -189,6 +189,13 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush } = {
       bytes(res, 200, file.data, file.mime);
     },
 
+    // a recording (WAV) in the body, the language in the query: the words come back as text
+    'POST /api/ai/transcribe': async (req, res) => {
+      requireAuth(req);
+      const data = await readBytes(req, config.maxAudioBytes);
+      json(res, 200, await ai.transcribe({ data, language: query(req).get('lang') }));
+    },
+
     'POST /api/ai/content': async (req, res) => {
       requireAuth(req);
       json(res, 200, await ai.content(await readJson(req, config.maxBodyBytes)));

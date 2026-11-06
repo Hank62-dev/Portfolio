@@ -7,20 +7,21 @@ import * as demo from '../demo/mock';
 const { realtimeApiUrl } = spacehankConfig;
 
 // Owner-only helpers on the realtime server (AI and calendar). The session cookie authorises them.
-const send = (path, method, body) =>
+const send = (path, method, body, raw) =>
   fetch(`${realtimeApiUrl}${path}`, {
     method,
     credentials: 'include',
-    headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: raw ? { 'Content-Type': raw } : body === undefined ? undefined : { 'Content-Type': 'application/json' },
+    body: raw ? body : body === undefined ? undefined : JSON.stringify(body),
   });
 
-const call = async (path, { method = 'GET', body } = {}) => {
+// `raw`: the content type of a body that is sent as it is (a recording) instead of as JSON
+const call = async (path, { method = 'GET', body, raw } = {}) => {
   let response;
   try {
-    response = await send(path, method, body);
+    response = await send(path, method, body, raw);
     // the short access token ran out: renew it from the refresh cookie and try once more
-    if (response.status === 401 && (await refreshSession())) response = await send(path, method, body);
+    if (response.status === 401 && (await refreshSession())) response = await send(path, method, body, raw);
   } catch {
     throw new Error(tr('The realtime server is unreachable. Check that it is running.'));
   }
@@ -51,6 +52,11 @@ export const base64ToBlob = (data, mime) => {
 // ---- Creator Lab: the AI content engine, pitches, and posting to the owner's own Discord server (the webhook stays on the server)
 const owner = () => {
   if (isDemo()) throw new Error(tr('The Creator Lab is private. Sign in to use it.'));
+};
+/** The words in a recording (a WAV Blob). `language` is 'vi' or 'en'. */
+export const transcribeAudio = (wav, language) => {
+  if (isDemo()) throw new Error(tr('Turning speech into text needs you to sign in.'));
+  return call(`/api/ai/transcribe?lang=${language === 'en' ? 'en' : 'vi'}`, { method: 'POST', body: wav, raw: 'audio/wav' });
 };
 export const generateContent = (input) => (owner(), call('/api/ai/content', { method: 'POST', body: input }));
 export const generatePitch = (input) => (owner(), call('/api/ai/pitch', { method: 'POST', body: input }));

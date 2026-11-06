@@ -25,6 +25,7 @@ export const loadConfig = (env = process.env) => {
     refreshTtlMs: 30 * 24 * HOUR,
     sessionSecret: env.SPACEHANK_SESSION_SECRET || '', // empty: the tokens are signed with a key made from the password
     maxBodyBytes: 64 * 1024,
+    maxAudioBytes: 7 * 1024 * 1024, // a recording to be turned into text (see ai.transcribe)
     maxAiBodyBytes: 128 * 1024, // a music library's track list rides along with a DJ request
     ai: {
       geminiKey: env.GEMINI_API_KEY || '',

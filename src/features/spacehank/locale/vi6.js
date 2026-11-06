@@ -59,6 +59,16 @@ export const vi6 = {
   'Full screen': 'Toàn màn hình',
   'Exit full screen': 'Thoát toàn màn hình',
 
+  // speech to text for voice memos
+  'Write it down with AI': 'Viết lại lời nói bằng AI',
+  'Write it down again with AI': 'Viết lại lời nói bằng AI lần nữa',
+  'Writing down what was said…': 'Đang viết lại những gì đã nói…',
+  'No words were heard in this recording.': 'Không nghe thấy lời nói nào trong bản ghi này.',
+  'This browser cannot type while you speak: the words are written down after you stop.': 'Trình duyệt này không gõ chữ lúc bạn nói được: lời nói sẽ được viết lại sau khi bạn dừng ghi.',
+  'This browser could not read the recording to write it down.': 'Trình duyệt này không đọc được bản ghi để viết lại.',
+  'This memo is longer than 20 minutes, which is too long to write down in one go.': 'Bản ghi dài hơn 20 phút, quá dài để viết lại một lần.',
+  'Turning speech into text needs you to sign in.': 'Chuyển giọng nói thành chữ cần bạn đăng nhập.',
+
   // importing files as notes
   'Import files (.md .docx .xlsx .txt .csv .json)': 'Nhập tệp (.md .docx .xlsx .txt .csv .json)',
   'Drop files to make notes': 'Thả tệp vào đây để tạo ghi chú',
