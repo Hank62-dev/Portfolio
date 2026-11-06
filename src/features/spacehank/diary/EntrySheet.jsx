@@ -1,20 +1,27 @@
 import { PenLine } from 'lucide-react';
+import { useState } from 'react';
 import MoodFace from './MoodFace';
+import PhotoViewer from './PhotoViewer';
 import { bodyOf, dayLabel, moodWord } from './model';
 import { PaperSheet, SheetClose, SoftButton, Thumb } from './ui';
 import { usePhoto } from './photos';
 import { tr } from '../lang';
 
-/** A big picture inside a page being read. */
-function Photo({ id }) {
+/** A big picture inside a page being read. Tapping it opens it full screen. */
+function Photo({ id, onOpen }) {
   const url = usePhoto(id);
-  return <div className="overflow-hidden rounded-3xl bg-[color:var(--dz-photo)]">{url && <img src={url} alt={tr('Ảnh kỷ niệm')} className="max-h-80 w-full object-cover" />}</div>;
+  return (
+    <button type="button" onClick={onOpen} aria-label={tr('Xem ảnh lớn')} className="block w-full cursor-zoom-in overflow-hidden rounded-3xl bg-[color:var(--dz-photo)] transition-transform active:scale-[0.99]">
+      {url && <img src={url} alt={tr('Ảnh kỷ niệm')} className="max-h-80 w-full object-cover" />}
+    </button>
+  );
 }
 
 /** Reading one day's page again. `label` is a line above the date ("Một tuần trước"), for pages brought back as memories. */
 export default function EntrySheet({ entry, label, onClose, onEdit }) {
   const body = bodyOf(entry.text);
   const photos = entry.photos ?? [];
+  const [viewing, setViewing] = useState(null); // the picture open full screen
   return (
     <PaperSheet open onClose={onClose} title={tr('Nhật ký {0}', dayLabel(entry.day))} description={tr('Đọc lại trang nhật ký.')}>
       <article className="flex flex-col gap-4 px-5 pt-2 pb-5" data-entry>
@@ -30,11 +37,13 @@ export default function EntrySheet({ entry, label, onClose, onEdit }) {
           </div>
           <SheetClose />
         </header>
-        {photos.length === 1 && <Photo id={photos[0]} />}
+        {photos.length === 1 && <Photo id={photos[0]} onOpen={() => setViewing(0)} />}
         {photos.length > 1 && (
           <div className="flex flex-wrap gap-2">
-            {photos.map((id) => (
-              <Thumb key={id} id={id} size={92} />
+            {photos.map((id, index) => (
+              <button key={id} type="button" onClick={() => setViewing(index)} aria-label={tr('Xem ảnh lớn')} className="cursor-zoom-in rounded-2xl transition-transform active:scale-[0.96]">
+                <Thumb id={id} size={92} />
+              </button>
             ))}
           </div>
         )}
@@ -45,6 +54,7 @@ export default function EntrySheet({ entry, label, onClose, onEdit }) {
           </SoftButton>
         </footer>
       </article>
+      {viewing !== null && <PhotoViewer ids={photos} start={viewing} onClose={() => setViewing(null)} />}
     </PaperSheet>
   );
 }
