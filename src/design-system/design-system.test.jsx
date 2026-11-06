@@ -6,6 +6,10 @@ import { Badge, Button, Dots, EmptyState, ErrorState, Field, Input, Loading, Rin
 const html = (node) => renderToStaticMarkup(<MemoryRouter>{node}</MemoryRouter>);
 
 describe('Button', () => {
+  it('takes a ref, which a menu, popover or tooltip needs from its trigger to know where to open (without it the menu opens off screen)', () => {
+    expect(Button.$$typeof).toBe(Symbol.for('react.forward_ref'));
+  });
+
   it('renders a <button> by default and a link for `to` / `href`', () => {
     expect(html(<Button>Go</Button>)).toMatch(/^<button type="button"/);
     expect(html(<Button to="/work">Go</Button>)).toMatch(/^<a [^>]*href="\/work"/);

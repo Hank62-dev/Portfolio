@@ -1,3 +1,4 @@
+import { forwardRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { clsx } from '../lib/format';
 import { useMagnetic } from '../hooks/useMotion';
@@ -32,12 +33,21 @@ const SIZES = {
  *   icon     trailing arrow-style icon that nudges on hover
  *   loading  hides the label behind three waving dots and disables the button
  */
-const Button = ({ variant = 'primary', size = 'md', to, href, children, className, icon, loading = false, ...rest }) => {
+const Button = forwardRef(function Button({ variant = 'primary', size = 'md', to, href, children, className, icon, loading = false, ...rest }, forwarded) {
   const soft = useSoft();
   const look = soft ? VARIANTS[variant].replace('rounded-sm', 'rounded-full') : VARIANTS[variant];
   const cls = clsx(BASE, look, variant !== 'link' && SIZES[size], loading && 'relative', className);
   // The pointer-follow effect belongs to full-size calls to action only.
-  const magnet = useMagnetic(variant !== 'link' && size === 'md');
+  const own = useMagnetic(variant !== 'link' && size === 'md');
+  // a menu, popover or tooltip puts its own ref on the trigger to know where to open: both refs get the element
+  const magnet = useCallback(
+    (node) => {
+      own.current = node;
+      if (typeof forwarded === 'function') forwarded(node);
+      else if (forwarded) forwarded.current = node;
+    },
+    [own, forwarded]
+  );
   const content = (
     <>
       <span className={clsx('inline-flex items-center gap-2 transition-opacity', loading && 'opacity-0')}>{children}</span>
@@ -86,6 +96,6 @@ const Button = ({ variant = 'primary', size = 'md', to, href, children, classNam
       {content}
     </button>
   );
-};
+});
 
 export default Button;
