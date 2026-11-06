@@ -247,27 +247,51 @@ export default function MemosView({ onNotify }) {
     setHeard('');
   }, [onNotify, writeDown]);
 
+  // How long a memo is. A recording made by the browser (webm) carries no length of its own, so the audio element says
+  // "Infinity" until it has played to the end: the length kept with the memo is used then.
+  const lengthOf = (el, memo) => (Number.isFinite(el.duration) && el.duration > 0 ? el.duration : memo.duration || 1);
+
+  const frame = useRef(0);
+  const settle = () => {
+    window.cancelAnimationFrame(frame.current);
+    frame.current = 0;
+  };
+  useEffect(() => settle, []); // stops the playhead when the page closes
+
   const play = (memo) => {
     if (playing.id === memo.id && audio.current && !audio.current.paused) {
       audio.current.pause();
+      settle();
       setPlaying({ id: null, progress: 0 });
       return;
     }
     audio.current?.pause();
+    settle();
     const url = URL.createObjectURL(memo.blob);
     const el = new Audio(url);
     audio.current = el;
-    el.ontimeupdate = () => setPlaying({ id: memo.id, progress: el.duration ? el.currentTime / el.duration : 0 });
-    el.onended = () => {
+    const finish = () => {
+      settle();
       URL.revokeObjectURL(url);
-      setPlaying({ id: null, progress: 0 });
+      if (audio.current === el) setPlaying({ id: null, progress: 0 });
     };
+    // the playhead moves with every frame, not with the few updates a second the audio element reports
+    const follow = () => {
+      setPlaying({ id: memo.id, progress: Math.min(1, el.currentTime / lengthOf(el, memo)) });
+      frame.current = window.requestAnimationFrame(follow);
+    };
+    el.onended = finish;
+    el.onerror = finish;
+    el.onpause = () => !el.ended && settle();
     setPlaying({ id: memo.id, progress: 0 });
-    void el.play().catch(() => setPlaying({ id: null, progress: 0 }));
+    void el.play().then(() => {
+      settle();
+      frame.current = window.requestAnimationFrame(follow);
+    }, finish);
   };
 
   const seek = (memo, fraction) => {
-    if (playing.id === memo.id && audio.current?.duration) audio.current.currentTime = Math.max(0, Math.min(1, fraction)) * audio.current.duration;
+    if (playing.id === memo.id && audio.current) audio.current.currentTime = Math.max(0, Math.min(1, fraction)) * lengthOf(audio.current, memo);
     else play(memo);
   };
 
