@@ -53,8 +53,18 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
   const enabled = Boolean(db && sync && vapid?.publicKey && vapid?.privateKey && vapid?.subject);
   const deliver = send ?? ((subscription, payload) => webpush.sendNotification(subscription, payload, { TTL: 3600, urgency: 'normal', vapidDetails: { subject: vapid.subject, publicKey: vapid.publicKey, privateKey: vapid.privateKey } }));
 
+  // The database is asked as seldom as possible, because a free database goes to sleep when nobody asks and every question
+  // keeps it awake (and counted). So the devices and the facts the rules look at are kept here, and read again only when they
+  // can have changed: a device came or went, the owner's data was written (sync.version() moves), a flashcard's time came,
+  // or many hours passed. Between those the check each minute is plain arithmetic on what is already in memory.
+  const REFRESH = 6 * 3600 * 1000;
+  let subsCache = null; // { rows, at }
+  let factsCache = null; // { data, at, version, nextCard }
+  const claimed = new Set(); // occasions already sent, so a reminder that stays due all evening costs no query
+  let touched = false; // did this check reach the database?
+
   let ready = null;
-  const init = () => (ready ??= (async () => {
+  const init =() => (ready ??= (async () => {
     await sync.init();
     for (const statement of SCHEMA) await db.query(statement);
   })().catch((error) => {
@@ -83,6 +93,7 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
        ON CONFLICT (endpoint) DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, kinds = EXCLUDED.kinds, lang = EXCLUDED.lang`,
       [endpoint, p256dh, auth, JSON.stringify(wanted), now(), lang === 'vi' ? 'vi' : 'en']
     );
+    subsCache = null;
     return { subscribed: true };
   };
 
@@ -90,6 +101,7 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     need();
     await init();
     await db.query(`DELETE FROM push_subs WHERE endpoint = $1`, [text(endpoint, 1000)]);
+    subsCache = null;
     return { subscribed: false };
   };
 
@@ -105,8 +117,10 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
         await deliver({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
         sent += 1;
       } catch (error) {
-        if (error?.statusCode === 404 || error?.statusCode === 410) await db.query(`DELETE FROM push_subs WHERE endpoint = $1`, [sub.endpoint]);
-        else console.warn('Push could not be sent:', error?.statusCode ?? error?.message);
+        if (error?.statusCode === 404 || error?.statusCode === 410) {
+          await db.query(`DELETE FROM push_subs WHERE endpoint = $1`, [sub.endpoint]);
+          subsCache = null;
+        } else console.warn('Push could not be sent:', error?.statusCode ?? error?.message);
       }
     }
     return sent;
@@ -130,22 +144,52 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
   const facts = async (at) => {
     const live = `store = $1 AND NOT deleted`;
     const [cards, tasks, habits, spending, budgets, diary] = await Promise.all([
-      db.query(`SELECT 1 AS due FROM sync_docs WHERE ${live} AND CASE WHEN doc->>'due' ~ '^[0-9.]+$' THEN (doc->>'due')::numeric END <= $2`, ['cards', at]),
+      // how many are due now, and when the next one will be (the copy of the facts is out of date from that moment)
+      db.query(
+        `SELECT COUNT(*) FILTER (WHERE d <= $2) AS due, MIN(d) FILTER (WHERE d > $2) AS next
+         FROM (SELECT CASE WHEN doc->>'due' ~ '^[0-9.]+$' THEN (doc->>'due')::numeric END AS d FROM sync_docs WHERE ${live}) cards`,
+        ['cards', at]
+      ),
       db.query(`SELECT id, doc->>'title' AS title, doc->>'column' AS "column", doc->>'due' AS due FROM sync_docs WHERE ${live} AND doc->>'column' IS DISTINCT FROM 'done' AND COALESCE(doc->>'due', '') <> ''`, ['tasks']),
       db.query(`SELECT doc->>'name' AS name, doc->'days' AS days FROM sync_docs WHERE ${live}`, ['habits']),
       db.query(`SELECT doc FROM sync_docs WHERE ${live} AND CASE WHEN doc->>'at' ~ '^[0-9]+$' THEN (doc->>'at')::bigint ELSE 0 END >= $2`, ['expenses', at - 32 * DAY]),
       db.query(`SELECT doc FROM sync_docs WHERE ${live}`, ['budgets']),
       db.query(`SELECT doc->>'day' AS day FROM sync_docs WHERE ${live} AND doc->>'day' >= $2`, ['notes', day(at - 3 * DAY)]),
     ]);
+    const next = cards.rows[0].next;
     return {
-      // a card is due once its time has come; the rules only count them
-      cards: cards.rows.map(() => ({ due: 0 })),
-      tasks: tasks.rows.map((row) => ({ id: row.id, title: row.title ?? 'A task', column: row.column, due: row.due })),
-      habits: habits.rows.map((row) => ({ name: row.name ?? 'A habit', days: Array.isArray(row.days) ? row.days : [] })),
-      entries: spending.rows.map((row) => row.doc),
-      budgets: budgets.rows.map((row) => row.doc),
-      notes: diary.rows.map((row) => ({ day: row.day })),
+      data: {
+        // a card is due once its time has come; the rules only count them
+        cards: Array.from({ length: Number(cards.rows[0].due) }, () => ({ due: 0 })),
+        tasks: tasks.rows.map((row) => ({ id: row.id, title: row.title ?? 'A task', column: row.column, due: row.due })),
+        habits: habits.rows.map((row) => ({ name: row.name ?? 'A habit', days: Array.isArray(row.days) ? row.days : [] })),
+        entries: spending.rows.map((row) => row.doc),
+        budgets: budgets.rows.map((row) => row.doc),
+        notes: diary.rows.map((row) => ({ day: row.day })),
+      },
+      nextCard: next === null || next === undefined ? null : Number(next),
     };
+  };
+
+  /** The devices, from memory unless they may have changed. */
+  const devices = async (at) => {
+    if (!subsCache || at - subsCache.at > REFRESH) {
+      subsCache = { rows: await subscriptions(), at };
+      touched = true;
+    }
+    return subsCache.rows;
+  };
+
+  /** The facts, from memory unless the data was written since, a card has become due, or it has been a long while. */
+  const current = async (at) => {
+    const version = sync.version();
+    const stale = !factsCache || factsCache.version !== version || at - factsCache.at > REFRESH || (factsCache.nextCard !== null && at >= factsCache.nextCard);
+    if (stale) {
+      const { data, nextCard } = await facts(at);
+      factsCache = { data, at, version, nextCard };
+      touched = true;
+    }
+    return factsCache.data;
   };
 
   let busy = false;
@@ -159,7 +203,8 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     try {
       await init();
       last = now();
-      const subs = await subscriptions();
+      touched = false;
+      const subs = await devices(last);
       if (!subs.length) return { sent: 0 };
 
       let events = [];
@@ -170,15 +215,19 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
           /* the feed is down: the rest still goes out */
         }
       }
-      const data = { now: new Date(last), zone, events, ...(await facts(last)) };
+      // the version is read before the facts: a write that lands while they are being read makes the next check read them again
+      const data = { now: new Date(last), zone, events, ...(await current(last)) };
       const due = reminders(data); // the occasions; each is then told in the language of the device it goes to
       const langs = [...new Set(subs.map((s) => s.lang))];
       const told = Object.fromEntries(langs.map((lang) => [lang, new Map(reminders({ ...data, t: translator(lang) }).map((item) => [item.key, item]))]));
 
       let sent = 0;
       for (const item of due) {
+        if (claimed.has(item.key)) continue;
         // claim the occasion first, so two ticks at once (or a restart) can never send it twice
         const claim = await db.query(`INSERT INTO push_sent (key, sent_at) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING key`, [item.key, last]);
+        touched = true;
+        claimed.add(item.key);
         if (!claim.rows.length) continue;
         for (const lang of langs) {
           const text = told[lang].get(item.key) ?? item;
@@ -186,9 +235,11 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
         }
       }
 
-      if (last - cleaned > 3600 * 1000) {
+      // tidying is not worth waking the database for: it waits for a check that reached it anyway
+      if (touched && last - cleaned > 3600 * 1000) {
         cleaned = last;
         await db.query(`DELETE FROM push_sent WHERE sent_at < $1`, [last - KEEP_SENT]);
+        if (claimed.size > 5000) claimed.clear();
       }
       return { sent };
     } catch (error) {

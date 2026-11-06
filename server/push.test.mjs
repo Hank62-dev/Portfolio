@@ -1,5 +1,5 @@
 import { PGlite } from '@electric-sql/pglite';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPush, parseSubscription } from './push.mjs';
 import { createSync } from './sync.mjs';
 
@@ -121,6 +121,49 @@ describe('what is due', () => {
     await sync.push([doc('notes', 'n1', { text: 'x', day: '2026-11-06' })]);
     await withCalendar.tick();
     expect(sent).toMatchObject([{ title: 'PRN212 starts in 10 min', body: '21:40 · A2', kind: 'calendar' }]);
+  });
+});
+
+describe('asking the database', () => {
+  // a free database sleeps when nobody asks, and each question wakes it: between changes the check must not ask at all
+  it('stays quiet while nothing changed, and reads again when the data is written', async () => {
+    await push.subscribe({ subscription: SUB });
+    await sync.push([doc('habits', 'h1', { name: 'Read', days: [] }), doc('notes', 'n1', { text: 'x', day: '2026-11-06' })]);
+    await push.tick();
+    expect(sent).toHaveLength(1);
+
+    const asked = vi.spyOn(db, 'query');
+    for (let minute = 1; minute <= 10; minute += 1) {
+      clock += 60 * 1000;
+      await push.tick();
+    }
+    expect(asked).not.toHaveBeenCalled();
+
+    await sync.push([doc('cards', 'c1', { due: EVENING - 1000 })]);
+    asked.mockClear();
+    clock += 60 * 1000;
+    await push.tick();
+    expect(asked).toHaveBeenCalled();
+    expect(sent.map((n) => n.title)).toContain('1 flashcard due');
+  });
+
+  it('notices a flashcard whose time comes while the data stays the same', async () => {
+    await push.subscribe({ subscription: SUB });
+    await sync.push([doc('cards', 'c1', { due: EVENING + 10 * 60 * 1000 }), doc('notes', 'n1', { text: 'x', day: '2026-11-06' })]);
+    await push.tick();
+    expect(sent).toHaveLength(0);
+    clock += 11 * 60 * 1000;
+    await push.tick();
+    expect(sent.map((n) => n.title)).toEqual(['1 flashcard due']);
+  });
+
+  it('picks up a device that arrives later', async () => {
+    await sync.push([doc('cards', 'c1', { due: EVENING - 1000 }), doc('notes', 'n1', { text: 'x', day: '2026-11-06' })]);
+    expect(await push.tick()).toEqual({ sent: 0 }); // nobody to tell yet
+    await push.subscribe({ subscription: SUB });
+    clock += 60 * 1000;
+    await push.tick();
+    expect(sent.map((n) => n.title)).toEqual(['1 flashcard due']);
   });
 });
 

@@ -85,6 +85,10 @@ export const createSync = ({ db, maxBlobBytes = 4 * 1024 * 1024, quotaBytes = 30
     return { records: num(docs.rows[0].records), files: num(blobs.rows[0].files), usedBytes: used, quotaBytes };
   };
 
+  // counts every record this process has written, so something that keeps a copy of the data (the push reminders) knows,
+  // without asking the database, when its copy is out of date
+  let version = 0;
+
   /**
    * Applies a batch of changes: [{ store, id, doc, deleted, updatedAt }]. A change older than what is stored is ignored (the
    * newest edit wins). Returns { applied, skipped, cursor }.
@@ -113,7 +117,10 @@ export const createSync = ({ db, maxBlobBytes = 4 * 1024 * 1024, quotaBytes = 30
          RETURNING seq`,
         [change.store, change.id, json, deleted, updatedAt]
       );
-      if (result.rows.length) applied += 1;
+      if (result.rows.length) {
+        applied += 1;
+        version += 1;
+      }
       if (result.rows.length && deleted && SYNC_STORES[change.store].blob) await db.query(`DELETE FROM sync_blobs WHERE store = $1 AND id = $2`, [change.store, change.id]);
     }
     const cursor = await db.query(`SELECT COALESCE(MAX(seq), 0) AS cursor FROM sync_docs`);
@@ -176,5 +183,5 @@ export const createSync = ({ db, maxBlobBytes = 4 * 1024 * 1024, quotaBytes = 30
     return { mime: result.rows[0].mime, data: Buffer.from(result.rows[0].data) };
   };
 
-  return { init, push, pull, putBlob, getBlob, usage };
+  return { init, push, pull, putBlob, getBlob, usage, version: () => version };
 };
