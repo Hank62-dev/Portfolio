@@ -56,6 +56,8 @@ export const vi6 = {
   'Saved to Second Brain.': 'Đã lưu vào Second Brain.',
 
   'Back to top': 'Lên đầu trang',
+  'Full screen': 'Toàn màn hình',
+  'Exit full screen': 'Thoát toàn màn hình',
 
   // importing files as notes
   'Import files (.md .docx .xlsx .txt .csv .json)': 'Nhập tệp (.md .docx .xlsx .txt .csv .json)',

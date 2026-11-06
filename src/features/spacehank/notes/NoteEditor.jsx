@@ -18,6 +18,8 @@ import {
   List,
   ListChecks,
   ListOrdered,
+  Maximize2,
+  Minimize2,
   Minus,
   Pin,
   PinOff,
@@ -73,7 +75,7 @@ function TableTool({ danger, onClick, children }) {
 const Divider = () => <i className="mx-1 h-5 w-px bg-wash/10" aria-hidden="true" />;
 
 /** The formatting bar: a floating pill that stays with you as you scroll the page. */
-function Toolbar({ editor }) {
+function Toolbar({ editor, full }) {
   const [link, setLink] = useState(null); // null: closed, otherwise the address being typed
   const s = useEditorState({
     editor,
@@ -105,7 +107,7 @@ function Toolbar({ editor }) {
   };
 
   return (
-    <div className="sticky top-[4.5rem] z-10 mx-auto flex w-fit max-w-full flex-col items-stretch" role="toolbar" aria-label={tr('Formatting')}>
+    <div className={clsx('sticky z-10 mx-auto flex w-fit max-w-full flex-col items-stretch', full ? 'top-0' : 'top-[4.5rem]')} role="toolbar" aria-label={tr('Formatting')}>
       <div className="flex flex-wrap items-center justify-center gap-0.5 rounded-xl border border-wash/10 bg-ink-1/80 p-1 shadow-[0_10px_40px_-10px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur-xl">
         <Tool label={tr('Heading 1')} active={s.h1} onClick={run((c) => c.toggleHeading({ level: 1 }))}>
           <Heading1 size={16} aria-hidden="true" />
@@ -244,8 +246,46 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
   // leaving the note (or the tab) saves what is there
   useEffect(() => () => save(), []); // eslint-disable-line react-hooks/exhaustive-deps -- runs when this editor closes
 
+  // Full screen: the note fills the whole screen, in the browser's own full screen where it has one (computers, tablets,
+  // Android) and as a layer over the app where it does not (iPhone). Esc leaves it either way.
+  const root = useRef(null);
+  const native = useRef(false); // is it the browser's full screen, which also ends on its own (Esc, swipe)?
+  const [full, setFull] = useState(false);
+  const enterFull = () => {
+    setFull(true);
+    const ask = root.current?.requestFullscreen?.();
+    if (ask) ask.then(() => (native.current = true)).catch(() => {});
+  };
+  const leaveFull = () => {
+    setFull(false);
+    if (native.current && document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+    native.current = false;
+  };
+  useEffect(() => {
+    if (!full) return undefined;
+    const onChange = () => {
+      if (native.current && !document.fullscreenElement) {
+        native.current = false;
+        setFull(false);
+      }
+    };
+    const onKey = (event) => event.key === 'Escape' && !native.current && setFull(false);
+    document.addEventListener('fullscreenchange', onChange);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [full]);
+  useEffect(
+    () => () => {
+      if (native.current && document.fullscreenElement) void document.exitFullscreen().catch(() => {});
+    },
+    []
+  );
+
   return (
-    <div className="flex flex-col gap-5" data-note-editor>
+    <div ref={root} className={clsx('flex flex-col gap-5', full && 'fixed inset-0 z-[88] overflow-y-auto bg-ink-0 px-4 py-4 sm:px-10 sm:py-8')} data-note-editor>
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="ghost" size="sm" onClick={onBack}>
           <ArrowLeft size={14} aria-hidden="true" /> {tr('All notes')}
@@ -255,6 +295,9 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
           {state === 'saved' ? tr('Saved on this device') : tr('Saving…')}
         </span>
         <span className="ml-auto flex items-center gap-1.5">
+          <Button variant="secondary" size="icon" aria-label={full ? tr('Exit full screen') : tr('Full screen')} title={full ? tr('Exit full screen') : tr('Full screen')} onClick={full ? leaveFull : enterFull}>
+            {full ? <Minimize2 size={14} aria-hidden="true" /> : <Maximize2 size={14} aria-hidden="true" />}
+          </Button>
           <Button variant="secondary" size="icon" aria-label={note.pinned ? tr('Unpin') : tr('Pin')} onClick={() => togglePin(note.id)}>
             {note.pinned ? <PinOff size={14} aria-hidden="true" /> : <Pin size={14} aria-hidden="true" />}
           </Button>
@@ -264,9 +307,9 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
         </span>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
+      <div className={clsx('grid grid-cols-1 items-start gap-6', !full && 'xl:grid-cols-[minmax(0,1fr)_260px]')}>
         <article className="flex min-w-0 flex-col gap-4">
-          {editor && <Toolbar editor={editor} />}
+          {editor && <Toolbar editor={editor} full={full} />}
 
           {note.day && (
             <div className="mx-auto flex w-full max-w-3xl flex-wrap items-center gap-2" role="group" aria-label={tr('Mood')}>
@@ -285,7 +328,7 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
             </div>
           )}
 
-          <div className="rich mx-auto min-h-[60vh] w-full max-w-3xl rounded-2xl border border-line bg-ink-1 px-6 py-8 shadow-[0_30px_80px_-40px_rgb(var(--shadow-rgb)/0.9)] focus-within:border-line-strong sm:px-12">
+          <div className={clsx('rich mx-auto w-full rounded-2xl border border-line bg-ink-1 px-6 py-8 shadow-[0_30px_80px_-40px_rgb(var(--shadow-rgb)/0.9)] focus-within:border-line-strong sm:px-12', full ? 'min-h-[calc(100dvh-9rem)] max-w-5xl' : 'min-h-[60vh] max-w-3xl')}>
             <EditorContent editor={editor} />
           </div>
         </article>
@@ -331,7 +374,7 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
           )}
         </aside>
       </div>
-      <ScrollTopButton />
+      <ScrollTopButton container={full ? root.current : null} low={full} />
     </div>
   );
 }
