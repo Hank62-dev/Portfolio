@@ -1,6 +1,7 @@
 import { createStore } from '../store';
 import { countPlay, coverUrl, getBlob, library } from './library';
 import { REPEAT, advance, createQueue, enqueue, playNext, prune, retreat } from './queue';
+import { tr } from '../lang';
 
 // One audio element for the whole workspace, so music keeps playing as you move between tabs.
 
@@ -61,7 +62,7 @@ const ensureAudio = () => {
   });
   audio.addEventListener('ended', () => goNext({ auto: true }));
   audio.addEventListener('error', () => {
-    player.set({ playing: false, loading: false, error: 'This file could not be played.' });
+    player.set({ playing: false, loading: false, error: tr('This file could not be played.') });
   });
   return audio;
 };
@@ -100,7 +101,7 @@ const publishToSystem = async (track) => {
   const sizes = ['96x96', '192x192', '256x256', '384x384', '512x512'];
   navigator.mediaSession.metadata = new MediaMetadata({
     title: track.title,
-    artist: track.artist || 'Hank Music',
+    artist: track.artist || tr('Hank Music'),
     album: track.album || 'Hank62',
     artwork: art ? sizes.map((size) => ({ src: art, sizes: size })) : [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }],
   });
@@ -139,7 +140,7 @@ const startCurrent = async (autoplay = true) => {
   const blob = await getBlob(id);
   if (mine !== token) return;
   if (!blob) {
-    player.set({ loading: false, error: `"${track.title}" is missing from this device.` });
+    player.set({ loading: false, error: tr('"{0}" is missing from this device.', track.title) });
     return;
   }
   const element = ensureAudio();
@@ -155,7 +156,7 @@ const startCurrent = async (autoplay = true) => {
       await element.play();
       void countPlay(id);
     } catch {
-      player.set({ playing: false, error: 'The browser blocked playback. Press play.' });
+      player.set({ playing: false, error: tr('The browser blocked playback. Press play.') });
     }
   }
 };
@@ -188,7 +189,7 @@ export const togglePlay = async () => {
     try {
       await element.play();
     } catch {
-      player.set({ error: 'The browser blocked playback. Press play.' });
+      player.set({ error: tr('The browser blocked playback. Press play.') });
     }
   } else element.pause();
 };

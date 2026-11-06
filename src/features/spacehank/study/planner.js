@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // The study planner as plain functions. A course keeps `exams` and `deadlines`: [{ id, title, at, done?, priority?, steps? }].
 // `steps` are small checklist items: [{ id, text, done }]. These functions only read and rebuild that data.
 
@@ -35,7 +36,7 @@ export const BUCKETS = [
   { id: 'overdue', label: 'Overdue' },
   { id: 'today', label: 'Today' },
   { id: 'tomorrow', label: 'Tomorrow' },
-  { id: 'week', label: 'This week' },
+  { id: 'week', label: tr('This week') },
   { id: 'later', label: 'Later' },
 ];
 

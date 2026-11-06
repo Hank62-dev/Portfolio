@@ -1,3 +1,4 @@
+import { locale, tr } from '../lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Download, Flame, LayoutGrid, List as ListIcon, Pin, Plus, Search, Sparkles, Upload } from 'lucide-react';
 import { Badge, Button, Loading, Menu, Skeleton, SkeletonLines } from '../../../design-system';
@@ -16,9 +17,9 @@ const Markdown = lazy(() => import('../components/Markdown'));
 const NoteEditor = lazy(() => import('../notes/NoteEditor'));
 
 const SCOPES = [
-  { id: 'all', label: 'All' },
-  { id: 'pinned', label: 'Pinned' },
-  { id: 'journal', label: 'Journal' },
+  { id: 'all', label: tr('All') },
+  { id: 'pinned', label: tr('Pinned') },
+  { id: 'journal', label: tr('Journal') },
 ];
 
 const download = (name, text) => {
@@ -34,8 +35,8 @@ const ago = (time) => {
   const days = Math.floor((Date.now() - time) / 86400000);
   if (days <= 0) return 'Today';
   if (days === 1) return 'Yesterday';
-  if (days < 7) return new Date(time).toLocaleDateString(undefined, { weekday: 'long' });
-  return new Date(time).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  if (days < 7) return new Date(time).toLocaleDateString(locale(), { weekday: 'long' });
+  return new Date(time).toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
 };
 
 const words = (text) => (text.trim() ? text.trim().split(/\s+/).length : 0);
@@ -53,11 +54,11 @@ function Stat({ value, label }) {
 function MoodChart({ notes }) {
   const series = useMemo(() => moodSeries(notes, 30), [notes]);
   return (
-    <div className="flex h-14 items-end gap-[3px]" role="img" aria-label="Mood over the last 30 days">
+    <div className="flex h-14 items-end gap-[3px]" role="img" aria-label={tr('Mood over the last 30 days')}>
       {series.map(({ day, mood }) => (
         <i
           key={day}
-          title={mood ? `${day}: ${MOODS[mood - 1].label}` : `${day}: not written`}
+          title={mood ? `${day}: ${MOODS[mood - 1].label}` : tr('{0}: not written', day)}
           className={clsx('block flex-1 rounded-full', mood ? 'bg-gradient-to-t from-signal to-[#ffb38a]' : 'bg-line')}
           style={{ height: mood ? `${14 + mood * 17}%` : '7%', opacity: mood ? 0.45 + mood * 0.11 : 1 }}
         />
@@ -81,11 +82,11 @@ function NoteCard({ note, query, onOpen, grid }) {
         <i className="absolute inset-x-0 top-0 h-0.5 opacity-80" style={{ background: `linear-gradient(90deg, hsl(${hue} 80% 60%), transparent)` }} aria-hidden="true" />
         <span className="flex items-start gap-2">
           <b className="min-w-0 flex-1 font-display text-lead leading-snug text-bone max-md:line-clamp-2 max-md:text-[1.02rem]">{titleOf(note.text)}</b>
-          {note.pinned && <Pin size={13} className="mt-1.5 shrink-0 text-signal" aria-label="Pinned" />}
+          {note.pinned && <Pin size={13} className="mt-1.5 shrink-0 text-signal" aria-label={tr('Pinned')} />}
         </span>
         <span className={clsx('text-fine leading-relaxed text-bone-dim max-md:text-[0.8rem] max-md:leading-snug', grid ? 'line-clamp-6 max-md:line-clamp-5' : 'line-clamp-2')}>{excerpt((note.text.replace(/^.*\n/, '') || note.text).replace(/(^|\s)#[\p{L}\p{N}_-]+/gu, '$1').trim(), query, 220)}</span>
         <span className="mt-1 flex flex-wrap items-center gap-1.5 max-md:mt-0.5 max-md:gap-1">
-          {note.day && <Badge tone="signal">JOURNAL</Badge>}
+          {note.day && <Badge tone="signal">{tr('JOURNAL')}</Badge>}
           {mood && <Badge className="max-md:hidden">{mood}</Badge>}
           {tags.slice(0, 3).map((t) => (
             <span key={t} className="rounded-full px-2 py-0.5 font-mono text-[0.68rem]" style={{ background: `hsl(${hueOf(t)} 60% 50% / 0.16)`, color: `hsl(${hueOf(t)} 80% 78%)` }}>
@@ -93,7 +94,7 @@ function NoteCard({ note, query, onOpen, grid }) {
             </span>
           ))}
           <span className="ml-auto font-mono text-[0.68rem] text-bone-faint max-md:hidden">
-            {ago(note.updatedAt)} · {words(note.text)} w
+            {ago(note.updatedAt)} · {words(note.text)} {tr('w')}
           </span>
         </span>
       </button>
@@ -130,7 +131,7 @@ export default function NotesView() {
       try {
         const found = searchNotes(readable(notesStore.get().notes), q, 6);
         if (!found.length) {
-          setAnswer({ question: q, text: 'None of your notes mention that, so there is nothing to answer from.', sources: [] });
+          setAnswer({ question: q, text: tr('None of your notes mention that, so there is nothing to answer from.'), sources: [] });
           return;
         }
         const result = await askNotes({ question: q, notes: found.map(({ note }) => ({ title: titleOf(note.text), text: note.text })) });
@@ -172,7 +173,7 @@ export default function NotesView() {
   const streak = useMemo(() => journalStreak(notes), [notes]);
   const totalWords = useMemo(() => notes.reduce((n, note) => n + words(note.text), 0), [notes]);
   const suggestions = useMemo(
-    () => [...notes.slice(0, 3).map((n) => `What did I write about ${titleOf(n.text)}?`), ...tags.slice(0, 1).map((t) => `Summarise my notes tagged #${t}`)].slice(0, 3),
+    () => [...notes.slice(0, 3).map((n) => tr('What did I write about {0}?', titleOf(n.text))), ...tags.slice(0, 1).map((t) => tr('Summarise my notes tagged #{0}', t))].slice(0, 3),
     [notes, tags]
   );
   const related = useMemo(() => {
@@ -195,13 +196,13 @@ export default function NotesView() {
   const pinnedNotes = visible.filter((n) => n.pinned);
   const groups = scope === 'all' && !query.trim() && pinnedNotes.length > 0 && pinnedNotes.length < visible.length;
   const list = (items) => (
-    <ul className={clsx(gridView ? 'columns-2 gap-2.5 xl:columns-3 xl:gap-3' : 'flex flex-col gap-2')} aria-label="Notes">
+    <ul className={clsx(gridView ? 'columns-2 gap-2.5 xl:columns-3 xl:gap-3' : 'flex flex-col gap-2')} aria-label={tr('Notes')}>
       {items.map((note) => (
         <NoteCard key={note.id} note={note} query={query} onOpen={setSelected} grid={gridView} />
       ))}
     </ul>
   );
-  useFab(selected ? null : { label: 'New note', icon: Plus, onPress: newNote });
+  useFab(selected ? null : { label: tr('New note'), icon: Plus, onPress: newNote });
   const remove = async () => {
     await deleteNote(current.id);
     setSelected(null);
@@ -209,7 +210,7 @@ export default function NotesView() {
   const restore = async (file) => {
     try {
       const added = await importNotes(await file.text());
-      setProblem(added ? '' : 'Nothing new in that file.');
+      setProblem(added ? '' : tr('Nothing new in that file.'));
     } catch (e) {
       setProblem(e.message);
     }
@@ -219,7 +220,7 @@ export default function NotesView() {
     return (
       <Suspense
         fallback={
-          <Loading label="Opening the note" className="flex min-h-[50vh] flex-col gap-4 py-6">
+          <Loading label={tr('Opening the note')} className="flex min-h-[50vh] flex-col gap-4 py-6">
             <Skeleton className="h-9 w-2/3" />
             <SkeletonLines lines={6} />
           </Loading>
@@ -232,15 +233,15 @@ export default function NotesView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead keepOnPhone eyebrow="Private notes" title="Second" accent="Brain." description="Notes and a daily journal, kept on this device. Ask them a question and Hank answers from what you wrote.">
+      <PageHead keepOnPhone eyebrow={tr('Private notes')} title={tr('Second')} accent="Brain." description={tr('Notes and a daily journal, kept on this device. Ask them a question and Hank answers from what you wrote.')}>
         <Button variant="ghost" size="sm" onClick={today}>
-          <BookOpen size={15} aria-hidden="true" /> Today's journal
+          <BookOpen size={15} aria-hidden="true" /> {tr('Today\'s journal')}
         </Button>
         <Button variant="ghost" size="sm" aria-expanded={askOpen} onClick={() => setAskOpen((open) => !open)} className="md:hidden">
-          <Sparkles size={15} aria-hidden="true" /> Ask your notes
+          <Sparkles size={15} aria-hidden="true" /> {tr('Ask your notes')}
         </Button>
         <Button size="sm" onClick={newNote} className="max-md:hidden">
-          <Plus size={15} aria-hidden="true" /> New note
+          <Plus size={15} aria-hidden="true" /> {tr('New note')}
         </Button>
       </PageHead>
 
@@ -251,7 +252,7 @@ export default function NotesView() {
             <span className="grid size-8 place-items-center rounded-full bg-signal text-ink-0">
               <Sparkles size={15} aria-hidden="true" />
             </span>
-            <h2 className="font-display text-lead text-bone">Ask your notes</h2>
+            <h2 className="font-display text-lead text-bone">{tr('Ask your notes')}</h2>
           </div>
           <form
             className="mt-4 flex items-center gap-2 rounded-2xl border border-wash/10 bg-shade/30 p-1.5 pl-4 backdrop-blur focus-within:border-signal/60"
@@ -261,15 +262,15 @@ export default function NotesView() {
             }}
           >
             <input
-              aria-label="Ask your notes"
-              placeholder={notes.length ? 'When is my flight? What did I decide about the logo?' : 'Write a few notes first, then ask them anything'}
+              aria-label={tr('Ask your notes')}
+              placeholder={notes.length ? tr('When is my flight? What did I decide about the logo?') : tr('Write a few notes first, then ask them anything')}
               className="h-10 min-w-0 flex-1 bg-transparent text-body text-bone placeholder:text-bone-faint focus-visible:outline-none disabled:opacity-60"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               disabled={!notes.length}
             />
             <Button type="submit" size="sm" loading={asking} disabled={!question.trim() || !notes.length}>
-              Ask
+              {tr('Ask')}
             </Button>
           </form>
           {suggestions.length > 0 && !answer && (
@@ -290,7 +291,7 @@ export default function NotesView() {
             <div className="mt-4 rounded-2xl border border-wash/10 bg-shade/30 p-4 backdrop-blur" data-answer>
               <Suspense
                 fallback={
-                  <Loading label="Loading the answer">
+                  <Loading label={tr('Loading the answer')}>
                     <SkeletonLines lines={3} />
                   </Loading>
                 }
@@ -299,7 +300,7 @@ export default function NotesView() {
               </Suspense>
               {answer.sources.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-1.5 border-t border-wash/10 pt-3">
-                  <span className="font-mono text-[0.72rem] text-bone-faint">From</span>
+                  <span className="font-mono text-[0.72rem] text-bone-faint">{tr('From')}</span>
                   {answer.sources.map((note, i) => (
                     <button
                       key={note.id}
@@ -316,39 +317,39 @@ export default function NotesView() {
           )}
         </section>
 
-        <section className="flex flex-col justify-between gap-4 rounded-3xl border border-line bg-ink-1 p-5 max-md:hidden sm:p-6" aria-label="Journal">
+        <section className="flex flex-col justify-between gap-4 rounded-3xl border border-line bg-ink-1 p-5 max-md:hidden sm:p-6" aria-label={tr('Journal')}>
           <div className="flex items-start justify-between gap-3">
             <div>
-              <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Journal</span>
-              <h2 className="font-display text-lead text-bone">Last 30 days</h2>
+              <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Journal')}</span>
+              <h2 className="font-display text-lead text-bone">{tr('Last 30 days')}</h2>
             </div>
             {streak > 0 && (
               <Badge tone="signal">
-                <Flame size={11} aria-hidden="true" /> {streak} day{streak > 1 ? 's' : ''}
+                <Flame size={11} aria-hidden="true" /> {streak} {tr('day')}{streak > 1 ? tr('s') : ''}
               </Badge>
             )}
           </div>
           <MoodChart notes={notes} />
           <Button variant="ghost" size="sm" onClick={today}>
-            <BookOpen size={14} aria-hidden="true" /> Write today
+            <BookOpen size={14} aria-hidden="true" /> {tr('Write today')}
           </Button>
         </section>
       </div>
 
       <div className="grid grid-cols-3 gap-3 max-md:hidden">
-        <Stat value={notes.length} label="Notes" />
-        <Stat value={totalWords.toLocaleString()} label="Words" />
-        <Stat value={tags.length} label="Tags" />
+        <Stat value={notes.length} label={tr('Notes')} />
+        <Stat value={totalWords.toLocaleString()} label={tr('Words')} />
+        <Stat value={tags.length} label={tr('Tags')} />
       </div>
 
       {/* filters */}
       <div className="flex flex-wrap items-center gap-2">
-        <Segmented round value={scope} onChange={setScope} options={SCOPES} label="Show" />
+        <Segmented round value={scope} onChange={setScope} options={SCOPES} label={tr('Show')} />
         <div className="relative min-w-44 flex-1 max-md:order-first max-md:basis-full sm:max-w-xs">
           <Search size={14} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-bone-faint" aria-hidden="true" />
           <input
-            aria-label="Search notes"
-            placeholder="Search notes…"
+            aria-label={tr('Search notes')}
+            placeholder={tr('Search notes…')}
             className="h-10 w-full rounded-full border border-line bg-ink-1 pr-4 pl-10 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none max-md:h-11 max-md:bg-ink-2"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -357,8 +358,8 @@ export default function NotesView() {
         <div className="ml-auto flex items-center gap-1.5 max-md:hidden">
           <div className="flex rounded-full border border-line bg-ink-1 p-1">
             {[
-              ['grid', LayoutGrid, 'Grid view'],
-              ['list', ListIcon, 'List view'],
+              ['grid', LayoutGrid, tr('Grid view')],
+              ['list', ListIcon, tr('List view')],
             ].map(([id, Icon, label]) => (
               <button key={id} type="button" aria-label={label} aria-pressed={layout === id} onClick={() => setLayout(id)} className={clsx('grid size-8 place-items-center rounded-full transition-colors', layout === id ? 'bg-wash/12 text-bone' : 'text-bone-faint hover:text-bone')}>
                 <Icon size={15} aria-hidden="true" />
@@ -368,13 +369,13 @@ export default function NotesView() {
           <Menu
             align="end"
             trigger={
-              <Button variant="ghost" size="sm" aria-label="Backup">
-                Backup
+              <Button variant="ghost" size="sm" aria-label={tr('Backup')}>
+                {tr('Backup')}
               </Button>
             }
             items={[
-              { id: 'export', label: 'Export notes (.json)', icon: Download, onSelect: () => notes.length && download('hank62-notes.json', exportNotes()) },
-              { id: 'import', label: 'Import notes', icon: Upload, onSelect: () => importer.current?.click() },
+              { id: 'export', label: tr('Export notes (.json)'), icon: Download, onSelect: () => notes.length && download('hank62-notes.json', exportNotes()) },
+              { id: 'import', label: tr('Import notes'), icon: Upload, onSelect: () => importer.current?.click() },
             ]}
           />
           <input
@@ -392,7 +393,7 @@ export default function NotesView() {
       </div>
 
       {tags.length > 0 && (
-        <div className="-mt-3 flex flex-wrap gap-1.5 max-md:mt-0" aria-label="Tags">
+        <div className="-mt-3 flex flex-wrap gap-1.5 max-md:mt-0" aria-label={tr('Tags')}>
           {(phone && !tagsOpen ? tags.slice(0, 4) : tags).map((t) => (
             <button
               key={t}
@@ -407,7 +408,7 @@ export default function NotesView() {
           ))}
           {phone && tags.length > 4 && (
             <button type="button" onClick={() => setTagsOpen((open) => !open)} className="rounded-full border border-dashed border-line px-3 py-1 font-mono text-[0.72rem] text-bone-faint">
-              {tagsOpen ? 'Less' : `+${tags.length - 4}`}
+              {tagsOpen ? tr('Less') : `+${tags.length - 4}`}
             </button>
           )}
         </div>
@@ -415,19 +416,19 @@ export default function NotesView() {
 
       {/* notes */}
       {!loaded ? (
-        <p className="font-mono text-fine text-bone-faint">Opening your notes…</p>
+        <p className="font-mono text-fine text-bone-faint">{tr('Opening your notes…')}</p>
       ) : error ? (
         <p className="font-mono text-fine text-danger">{error}</p>
       ) : visible.length ? (
         <div className="flex flex-col gap-5">
           {groups ? (
             <>
-              <section aria-label="Pinned notes">
-                <h2 className="mb-2 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">Pinned</h2>
+              <section aria-label={tr('Pinned notes')}>
+                <h2 className="mb-2 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Pinned')}</h2>
                 {list(pinnedNotes)}
               </section>
-              <section aria-label="Other notes">
-                <h2 className="mb-2 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">Others</h2>
+              <section aria-label={tr('Other notes')}>
+                <h2 className="mb-2 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Others')}</h2>
                 {list(visible.filter((n) => !n.pinned))}
               </section>
             </>
@@ -441,15 +442,15 @@ export default function NotesView() {
             <span className="grid size-14 place-items-center rounded-full bg-signal-soft text-signal">
               <BookOpen size={24} aria-hidden="true" />
             </span>
-            <h2 className="font-display text-h3 leading-tight text-bone">{notes.length ? 'No note matches' : 'Start your second brain'}</h2>
-            <p className="text-fine text-bone-dim">{notes.length ? 'Try other words, or clear the filters.' : 'Write down what you would otherwise forget. It stays on this device, and you can ask it questions later.'}</p>
+            <h2 className="font-display text-h3 leading-tight text-bone">{notes.length ? tr('No note matches') : tr('Start your second brain')}</h2>
+            <p className="text-fine text-bone-dim">{notes.length ? tr('Try other words, or clear the filters.') : tr('Write down what you would otherwise forget. It stays on this device, and you can ask it questions later.')}</p>
             {!notes.length && (
               <div className="flex gap-2">
                 <Button size="sm" onClick={newNote}>
-                  New note
+                  {tr('New note')}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={today}>
-                  Today's journal
+                  {tr('Today\'s journal')}
                 </Button>
               </div>
             )}

@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // Bắn tàu: the notebook-paper naval game. Ten by ten squares, a fleet of ten boats (one of four squares, two of three,
 // three of two, four of one), and the boats may not touch, even at a corner. Pure rules and a computer opponent.
 
@@ -46,7 +47,7 @@ export const randomFleet = (random = Math.random) => {
     }
     if (ok) return ships;
   }
-  throw new Error('Could not place the fleet');
+  throw new Error(tr('Could not place the fleet'));
 };
 
 /**

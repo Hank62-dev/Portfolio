@@ -2,6 +2,7 @@ import { createStore } from '../store';
 import { storage } from '../storage';
 import { onSynced } from '../sync/events';
 import { dayKey, journalTemplate, textToHtml } from './notes';
+import { tr } from '../lang';
 
 // Notes live in this browser's IndexedDB, like the music. A note is { id, text, createdAt, updatedAt, pinned,
 // day?, mood? }: `day` marks a journal entry, `mood` is 1 to 5.
@@ -15,7 +16,7 @@ export const loadNotes = async () => {
   try {
     notesStore.set({ loaded: true, notes: (await storage.notes.all()).sort(order), error: '' });
   } catch {
-    notesStore.set({ loaded: true, error: 'This browser would not open its private storage, so notes cannot be kept.' });
+    notesStore.set({ loaded: true, error: tr('This browser would not open its private storage, so notes cannot be kept.') });
   }
 };
 
@@ -70,9 +71,9 @@ export const importNotes = async (json) => {
   try {
     data = JSON.parse(json);
   } catch {
-    throw new Error('That file is not a notes export.');
+    throw new Error(tr('That file is not a notes export.'));
   }
-  if (data?.kind !== 'notes' || !Array.isArray(data.notes)) throw new Error('That file is not a notes export.');
+  if (data?.kind !== 'notes' || !Array.isArray(data.notes)) throw new Error(tr('That file is not a notes export.'));
   let added = 0;
   for (const raw of data.notes) {
     if (typeof raw?.id !== 'string' || typeof raw.text !== 'string') continue;

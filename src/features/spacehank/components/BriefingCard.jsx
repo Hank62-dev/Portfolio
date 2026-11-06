@@ -29,12 +29,13 @@ import { demoSchedule } from '../model/demo';
 import { isWorking } from '../model/agents';
 import { CONDITION_TEXT, summarize } from '../model/weather';
 import { useStore } from '../store';
+import { getLang, locale, tr } from '../lang';
 
 const ICONS = { clear: Sun, partly: CloudSun, cloudy: Cloud, fog: CloudFog, drizzle: CloudDrizzle, rain: CloudRain, snow: CloudSnow, storm: CloudLightning };
 
-const clock = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const clock = (iso) => new Date(iso).toLocaleTimeString(locale(), { hour: '2-digit', minute: '2-digit' });
 
-const GUEST_NOTE = 'A calm morning on the floor: three agents are already at work, the standup is first, and the afternoon is clear for deep work.';
+const GUEST_NOTE = tr('A calm morning on the floor: three agents are already at work, the standup is first, and the afternoon is clear for deep work.');
 
 const TILE = 'flex min-w-0 flex-col gap-3 p-4';
 
@@ -73,15 +74,15 @@ function Weather({ weather, problem }) {
         </span>
         <div className="flex items-baseline gap-0.5 leading-none">
           <b className="font-display text-[2.7rem] leading-none text-bone tabular-nums">{weather.temperature}</b>
-          <span className="font-display text-lead text-bone-dim">°C</span>
+          <span className="font-display text-lead text-bone-dim">{tr('°C')}</span>
         </div>
         <div className="ml-auto text-right leading-tight">
           <p className="font-display text-lead text-bone italic" data-weather>
-            {CONDITION_TEXT.en[weather.condition]}
+            {CONDITION_TEXT[getLang()][weather.condition]}
             <span className="sr-only">
               {' '}
-              in {spacehankConfig.home.name}. Feels like {weather.feelsLike}°, high {weather.high}°, low {weather.low}°
-              {weather.rainChance != null ? `, ${weather.rainChance}% chance of rain.` : '.'}
+              {tr('in')} {spacehankConfig.home.name}{tr('. Feels like')} {weather.feelsLike}{tr('°, high')} {weather.high}{tr('°, low')} {weather.low}°
+              {weather.rainChance != null ? tr(', {0}% chance of rain.', weather.rainChance) : '.'}
             </span>
           </p>
           <small className="font-mono text-[0.72rem] text-bone-faint tabular-nums">
@@ -90,11 +91,11 @@ function Weather({ weather, problem }) {
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
-        <Chip icon={Thermometer}>Feels {weather.feelsLike}°</Chip>
-        <Chip icon={Wind}>{weather.wind} km/h</Chip>
+        <Chip icon={Thermometer}>{tr('Feels')} {weather.feelsLike}°</Chip>
+        <Chip icon={Wind}>{weather.wind} {tr('km/h')}</Chip>
         {weather.rainChance != null && (
           <Chip icon={Droplets} tone={wet ? 'signal' : undefined}>
-            Rain {weather.rainChance}%
+            {tr('Rain')} {weather.rainChance}%
           </Chip>
         )}
       </div>
@@ -105,7 +106,7 @@ function Weather({ weather, problem }) {
 /** Today's events as a compact timeline: the one under way glows, the next is accented, finished ones fade. */
 function Schedule({ events, next, now }) {
   return (
-    <ol className="relative flex flex-col" aria-label="Today's events">
+    <ol className="relative flex flex-col" aria-label={tr('Today\'s events')}>
       <i className="absolute top-2 bottom-2 left-[3.95rem] w-px bg-line" aria-hidden="true" />
       {events.slice(0, 4).map((event) => {
         const start = new Date(event.start);
@@ -116,7 +117,7 @@ function Schedule({ events, next, now }) {
         return (
           <li key={`${event.start}-${event.title}`} className={clsx('relative flex items-center gap-2.5 py-1.5', done && 'opacity-45')} data-event>
             <time className="w-14 shrink-0 text-right font-mono text-[0.72rem] whitespace-nowrap text-bone-faint tabular-nums">
-              {event.allDay ? 'All day' : clock(event.start)}
+              {event.allDay ? tr('All day') : clock(event.start)}
             </time>
             <span
               className={clsx('relative z-10 size-2 shrink-0 rounded-full ring-4 ring-ink-1', live ? 'animate-pulse-ring bg-signal' : isNext ? 'bg-signal' : 'bg-bone-faint')}
@@ -128,14 +129,14 @@ function Schedule({ events, next, now }) {
             </span>
             {live && (
               <Badge tone="signal" dot>
-                NOW
+                {tr('NOW')}
               </Badge>
             )}
-            {isNext && <Badge>NEXT</Badge>}
+            {isNext && <Badge>{tr('NEXT')}</Badge>}
           </li>
         );
       })}
-      {events.length > 4 && <li className="pl-[4.5rem] font-mono text-[0.68rem] text-bone-faint">+{events.length - 4} more</li>}
+      {events.length > 4 && <li className="pl-[4.5rem] font-mono text-[0.68rem] text-bone-faint">+{events.length - 4} {tr('more')}</li>}
     </ol>
   );
 }
@@ -148,20 +149,20 @@ function EmptyDay({ connected, onPreview }) {
         <Icon size={17} aria-hidden="true" />
       </span>
       <div className="min-w-0 leading-tight">
-        <b className="block text-fine font-medium text-bone">{connected ? 'Your day is open' : 'Connect your calendar'}</b>
+        <b className="block text-fine font-medium text-bone">{connected ? tr('Your day is open') : tr('Connect your calendar')}</b>
         <small className="font-mono text-[0.72rem] text-bone-faint">
           {connected ? (
-            'Nothing on the calendar today.'
+            tr('Nothing on the calendar today.')
           ) : (
             <>
-              Set <code className="rounded-sm bg-ink-3 px-1 py-px text-bone-dim">CALENDAR_ICS_URL</code> on the server.
+              {tr('Set')} <code className="rounded-sm bg-ink-3 px-1 py-px text-bone-dim">{tr('CALENDAR_ICS_URL')}</code> {tr('on the server.')}
             </>
           )}
         </small>
       </div>
       {onPreview && (
         <Button variant="ghost" size="sm" className="ml-auto shrink-0" onClick={onPreview}>
-          Preview
+          {tr('Preview')}
         </Button>
       )}
     </div>
@@ -193,11 +194,11 @@ export default function BriefingCard({ owner, agents, connected }) {
     setError('');
     try {
       const { text } = await aiNote({
-        language: 'en',
+        language: getLang(),
         context: {
           date: now.toDateString(),
           place: spacehankConfig.home.name,
-          weather: summarize(weather, 'en') || 'unknown',
+          weather: summarize(weather, getLang()) || 'unknown',
           schedule: (events ?? []).map((e) => `${e.allDay ? 'all day' : clock(e.start)} ${e.title}`),
           agentsWorking: working,
         },
@@ -211,10 +212,10 @@ export default function BriefingCard({ owner, agents, connected }) {
   };
 
   return (
-    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.1fr_1fr_1fr]" aria-label="Today's briefing" data-briefing>
+    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1.1fr_1fr_1fr]" aria-label={tr('Today\'s briefing')} data-briefing>
       <Card className={TILE}>
         <div className="flex items-center justify-between gap-2">
-          <Eyebrow>{now.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' })}</Eyebrow>
+          <Eyebrow>{now.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long' })}</Eyebrow>
           <span className="inline-flex items-center gap-1 font-mono text-[0.68rem] text-bone-faint max-sm:hidden">
             <MapPin size={11} aria-hidden="true" /> {spacehankConfig.home.name}
           </span>
@@ -224,13 +225,13 @@ export default function BriefingCard({ owner, agents, connected }) {
 
       <Card className={TILE}>
         <div className="flex items-center justify-between gap-2">
-          <Eyebrow>Today</Eyebrow>
+          <Eyebrow>{tr('Today')}</Eyebrow>
           {(!owner || preview) && (
             <span className="flex items-center gap-2">
-              <Badge>SAMPLE</Badge>
+              <Badge>{tr('SAMPLE')}</Badge>
               {preview && (
                 <button type="button" className="font-mono text-[0.68rem] text-bone-faint underline hover:text-bone" onClick={() => setPreview(false)}>
-                  Hide
+                  {tr('Hide')}
                 </button>
               )}
             </span>
@@ -253,7 +254,7 @@ export default function BriefingCard({ owner, agents, connected }) {
           <span className="grid size-6 place-items-center rounded-full bg-signal text-ink-0">
             <Sparkles size={12} aria-hidden="true" />
           </span>
-          <Eyebrow>From Hank</Eyebrow>
+          <Eyebrow>{tr('From Hank')}</Eyebrow>
         </div>
         {note ? (
           <p className="line-clamp-4 font-display text-[1.1rem] leading-snug text-bone" data-note>
@@ -261,16 +262,16 @@ export default function BriefingCard({ owner, agents, connected }) {
           </p>
         ) : (
           <p className="font-display text-[1.1rem] leading-snug text-bone-dim">
-            {working ? `${working} agent${working > 1 ? 's are' : ' is'} at work. ` : 'The floor is quiet. '}
-            {next ? `Next up: ${next.title} at ${clock(next.start)}.` : 'Ask for a short note on the day.'}
+            {working ? tr('{0} agent{1} at work. ', working, working > 1 ? tr('s are') : tr(' is')) : tr('The floor is quiet. ')}
+            {next ? tr('Next up: {0} at {1}.', next.title, clock(next.start)) : tr('Ask for a short note on the day.')}
           </p>
         )}
         {(focusToday.today.minutes > 0 || focusToday.streak > 0) && (
           <div className="flex flex-wrap gap-1.5" data-focus-line>
-            <Chip icon={Timer}>Focus {hoursMinutes(focusToday.today.minutes)}</Chip>
+            <Chip icon={Timer}>{tr('Focus')} {hoursMinutes(focusToday.today.minutes)}</Chip>
             {focusToday.streak > 0 && (
               <Chip icon={Flame} tone="signal">
-                {focusToday.streak}-day streak
+                {focusToday.streak}{tr('-day streak')}
               </Chip>
             )}
           </div>
@@ -282,7 +283,7 @@ export default function BriefingCard({ owner, agents, connected }) {
         )}
         <div className="mt-auto">
           <Button variant="ghost" size="sm" loading={busy} onClick={askForNote}>
-            <Sparkles size={13} aria-hidden="true" /> {note ? 'Write another' : 'Write my briefing'}
+            <Sparkles size={13} aria-hidden="true" /> {note ? tr('Write another') : tr('Write my briefing')}
           </Button>
         </div>
       </Card>

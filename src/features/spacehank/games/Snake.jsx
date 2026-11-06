@@ -3,6 +3,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Pause, Play, RotateCcw } fro
 import { newSnake, stepSnake } from './logic';
 import { INK, InkBox, InkButton, Note, RED, Score } from './ink';
 import { useBest } from './shared';
+import { tr } from '../lang';
 
 const KEYS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', w: 'up', s: 'down', a: 'left', d: 'right' };
 const SIZE = 14;
@@ -66,14 +67,14 @@ export default function Snake() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="điểm" value={state.score} tone={RED} />
-        <Score label="kỷ lục" value={best ?? '-'} />
+        <Score label={tr('điểm')} value={state.score} tone={RED} />
+        <Score label={tr('kỷ lục')} value={best ?? '-'} />
       </div>
       <svg
         viewBox={`-4 -4 ${side + 8} ${side + 8}`}
         className="block w-full touch-none rounded-sm bg-[#fdfaf0]"
         role="img"
-        aria-label={`Snake board, score ${state.score}`}
+        aria-label={tr('Snake board, score {0}', state.score)}
         onTouchStart={(e) => {
           touch.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         }}
@@ -107,7 +108,7 @@ export default function Snake() {
         <Pad dir="up" icon={ArrowUp} turn={turn} />
         <span />
         <Pad dir="left" icon={ArrowLeft} turn={turn} />
-        <InkBox as="button" type="button" aria-label={running ? 'Pause' : 'Start'} onClick={() => setRunning((r) => !r)} className="size-14 transition-transform active:scale-90" tone={RED}>
+        <InkBox as="button" type="button" aria-label={running ? tr('Pause') : tr('Start')} onClick={() => setRunning((r) => !r)} className="size-14 transition-transform active:scale-90" tone={RED}>
           <span className="grid size-14 place-items-center" style={{ color: RED }}>
             {running ? <Pause size={22} aria-hidden="true" /> : <Play size={22} aria-hidden="true" />}
           </span>
@@ -118,9 +119,9 @@ export default function Snake() {
         <span />
       </div>
       {state.over && (
-        <Note title="Hết rồi!" detail={`Ăn được ${state.score} con mồi`}>
+        <Note title={tr('Hết rồi!')} detail={tr('Ăn được {0} con mồi', state.score)}>
           <InkButton onClick={again}>
-            <RotateCcw size={15} aria-hidden="true" /> Chơi lại
+            <RotateCcw size={15} aria-hidden="true" /> {tr('Chơi lại')}
           </InkButton>
         </Note>
       )}
@@ -130,7 +131,7 @@ export default function Snake() {
 
 function Pad({ dir, icon: Icon, turn }) {
   return (
-    <InkBox as="button" type="button" aria-label={`Go ${dir}`} onClick={() => turn(dir)} className="size-14 transition-transform active:scale-90">
+    <InkBox as="button" type="button" aria-label={tr('Go {0}', dir)} onClick={() => turn(dir)} className="size-14 transition-transform active:scale-90">
       <span className="grid size-14 place-items-center" style={{ color: INK }}>
         <Icon size={22} strokeWidth={2.4} aria-hidden="true" />
       </span>

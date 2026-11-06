@@ -1,17 +1,19 @@
+import { tr } from '../lang';
 import { useEffect, useState } from 'react';
 import { ChevronRight, Command, Pause, Play, Plus, Search } from 'lucide-react';
 import { Avatar, Badge, Button, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import NotificationBell from '../notifications/NotificationBell';
+import { LangMenu } from './LangSwitch';
 import { ThemeMenu } from './ThemeMenu';
 import { owner } from '../config';
 import { NAVIGATION, tabAccent, tabHue } from '../navigation';
 
 // the realtime link: green when open, amber while it is being (re)opened, red when it is not coming back
 const LINK = {
-  online: { tone: 'ok', dot: 'bg-ok shadow-[0_0_0_4px_rgb(60_200_130/0.18)]', text: 'REALTIME LINK', title: 'Realtime link' },
-  connecting: { tone: 'warn', dot: 'bg-warn', text: 'RECONNECTING', title: 'Reconnecting to the server' },
-  offline: { tone: 'danger', dot: 'bg-danger', text: 'SERVER OFFLINE', title: 'Server offline' },
+  online: { tone: 'ok', dot: 'bg-ok shadow-[0_0_0_4px_rgb(60_200_130/0.18)]', text: 'REALTIME LINK', title: tr('Realtime link') },
+  connecting: { tone: 'warn', dot: 'bg-warn', text: 'RECONNECTING', title: tr('Reconnecting to the server') },
+  offline: { tone: 'danger', dot: 'bg-danger', text: 'SERVER OFFLINE', title: tr('Server offline') },
 };
 const linkOf = (connected, link) => (connected ? 'online' : link === 'connecting' ? 'connecting' : 'offline');
 
@@ -55,13 +57,13 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
           <Icon size={scrolled ? 16 : 22} strokeWidth={1.5} />
         </span>
         <h1 className="min-w-0 flex-1 leading-none">
-          <small className={clsx('block overflow-hidden font-mono text-[0.58rem] tracking-[0.18em] text-signal uppercase transition-all duration-300', scrolled ? 'mb-0 max-h-0 opacity-0' : 'mb-1.5 max-h-4 opacity-100')}>{current.section}</small>
+          <small className={clsx('block overflow-hidden font-mono text-[0.58rem] tracking-[0.18em] text-signal uppercase transition-all duration-300', scrolled ? 'mb-0 max-h-0 opacity-0' : 'mb-1.5 max-h-4 opacity-100')}>{tr(current.section)}</small>
           <b className={clsx('block truncate font-display font-normal tracking-tight text-bone transition-[font-size] duration-300', scrolled ? 'text-[1.2rem]' : 'text-[1.65rem]')}>{current.label}</b>
         </h1>
         <div className="flex shrink-0 items-center gap-1.5">
           {guest ? (
             <span className="inline-flex h-7 items-center gap-1.5 rounded-full border border-warn/40 bg-warn/10 px-2.5 font-mono text-[0.62rem] tracking-[0.12em] text-warn">
-              <i className="size-1.5 rounded-full bg-warn" aria-hidden="true" /> DEMO
+              <i className="size-1.5 rounded-full bg-warn" aria-hidden="true" /> {tr('DEMO')}
             </span>
           ) : (
             <span role="status" className="grid size-7 place-items-center" title={LINK[linkOf(connected, link)].title}>
@@ -70,16 +72,16 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
             </span>
           )}
           {tab === 'space' && (
-            <button type="button" aria-label={paused ? 'Resume floor' : 'Pause floor'} onClick={onPause} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone-dim active:scale-90">
+            <button type="button" aria-label={paused ? tr('Resume floor') : tr('Pause floor')} onClick={onPause} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone-dim active:scale-90">
               {paused ? <Play size={17} aria-hidden="true" /> : <Pause size={17} aria-hidden="true" />}
             </button>
           )}
           <NotificationBell phone onOpenTab={onTab} />
-          <button type="button" aria-label="Open the command palette" onClick={onPalette} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone active:scale-90" data-palette-button>
+          <button type="button" aria-label={tr('Open the command palette')} onClick={onPalette} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone active:scale-90" data-palette-button>
             <Search size={18} aria-hidden="true" />
           </button>
           {agentsScreen && (
-            <button type="button" aria-label="New task" onClick={onNewTask} className="grid size-10 place-items-center rounded-full bg-signal text-ink-0 shadow-[0_8px_18px_-8px_var(--color-signal)] active:scale-90">
+            <button type="button" aria-label={tr('New task')} onClick={onNewTask} className="grid size-10 place-items-center rounded-full bg-signal text-ink-0 shadow-[0_8px_18px_-8px_var(--color-signal)] active:scale-90">
               <Plus size={19} strokeWidth={2.2} aria-hidden="true" />
             </button>
           )}
@@ -91,13 +93,13 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
 
 export default function Topbar({ tab, connected, link, guest, paused, onPause, onNewTask, onPalette, onTab }) {
   const current = NAVIGATION.find((item) => item.id === tab) || NAVIGATION[0];
-  const pauseLabel = paused ? 'Resume floor' : 'Pause floor';
+  const pauseLabel = paused ? tr('Resume floor') : tr('Pause floor');
   return (
     <>
       <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} onTab={onTab} />
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line bg-ink-0/85 px-gutter backdrop-blur max-md:hidden">
-      <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 font-mono text-fine text-bone-faint">
-        <span>HANK62</span>
+      <nav aria-label={tr('Breadcrumb')} className="flex min-w-0 items-center gap-1.5 font-mono text-fine text-bone-faint">
+        <span>{tr('HANK62')}</span>
         <ChevronRight size={14} aria-hidden="true" className="shrink-0" />
         <b className="truncate font-medium text-bone">{current.label.toUpperCase()}</b>
       </nav>
@@ -105,28 +107,29 @@ export default function Topbar({ tab, connected, link, guest, paused, onPause, o
         <button
           type="button"
           onClick={onPalette}
-          aria-label="Open the command palette"
+          aria-label={tr('Open the command palette')}
           className="flex h-9 items-center gap-2 rounded-sm border border-line bg-ink-2 px-3 font-mono text-fine text-bone-dim transition-colors hover:border-line-strong hover:text-bone"
           data-palette-button
         >
           <Command size={14} aria-hidden="true" />
-          <span>Search</span>
-          <kbd className="rounded-sm border border-line px-1 text-[0.68rem] text-bone-faint">{isMac ? '⌘K' : 'Ctrl K'}</kbd>
+          <span>{tr('Search')}</span>
+          <kbd className="rounded-sm border border-line px-1 text-[0.68rem] text-bone-faint">{isMac ? tr('⌘K') : tr('Ctrl K')}</kbd>
         </button>
         <Badge tone={guest ? 'warn' : LINK[linkOf(connected, link)].tone} dot>
-          {guest ? 'DEMO' : LINK[linkOf(connected, link)].text}
+          {guest ? tr('DEMO') : LINK[linkOf(connected, link)].text}
         </Badge>
         <NotificationBell onOpenTab={onTab} />
+        <LangMenu />
         <ThemeMenu />
         <Tooltip content={pauseLabel} side="bottom">
           <Button variant="secondary" size="icon" aria-label={pauseLabel} onClick={onPause}>
             {paused ? <Play size={16} aria-hidden="true" /> : <Pause size={16} aria-hidden="true" />}
           </Button>
         </Tooltip>
-        <Button size="sm" onClick={onNewTask} aria-label="New task">
-          <Plus size={15} aria-hidden="true" /> New task
+        <Button size="sm" onClick={onNewTask} aria-label={tr('New task')}>
+          <Plus size={15} aria-hidden="true" /> {tr('New task')}
         </Button>
-        <Avatar>{guest ? 'G' : owner.initials}</Avatar>
+        <Avatar>{guest ? tr('G') : owner.initials}</Avatar>
       </div>
     </header>
     </>

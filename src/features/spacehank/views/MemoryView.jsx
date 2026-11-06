@@ -3,6 +3,7 @@ import { BrainCircuit, ChevronDown, Search } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { spacehankConfig } from '../config';
 import { groupRuns } from '../model/memory';
+import { tr } from '../lang';
 
 // the tone of an event, from what the agent did
 const TONE = {
@@ -20,7 +21,7 @@ function Ring({ value, max }) {
   const c = 2 * Math.PI * r;
   const pct = Math.min(1, value / max);
   return (
-    <div className="relative grid size-20 shrink-0 place-items-center" role="img" aria-label={`${value} of ${max} signals kept`}>
+    <div className="relative grid size-20 shrink-0 place-items-center" role="img" aria-label={tr('{0} of {1} signals kept', value, max)}>
       <svg viewBox="0 0 72 72" className="absolute inset-0 -rotate-90">
         <circle cx="36" cy="36" r={r} fill="none" stroke="var(--color-line)" strokeWidth="6" />
         <circle cx="36" cy="36" r={r} fill="none" stroke="url(#mem)" strokeWidth="6" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - pct)} className="transition-[stroke-dashoffset] duration-700" />
@@ -92,20 +93,20 @@ export default function MemoryView({ events }) {
     <div className="flex flex-col gap-5">
       <header className="flex flex-wrap items-end justify-between gap-4 max-md:justify-end">
         <div className="max-md:hidden">
-          <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">Long-term context</span>
+          <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Long-term context')}</span>
           <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone">
-            Memory <em className="serif-accent">Stream.</em>
+            {tr('Memory')} <em className="serif-accent">{tr('Stream.')}</em>
           </h1>
         </div>
         <span className={clsx('inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 font-mono text-[0.78rem]', events.length ? 'border-ok/40 text-ok' : 'border-warn/40 text-warn')}>
-          <i className={clsx('size-1.5 rounded-full', events.length ? 'animate-pulse bg-ok' : 'bg-warn')} aria-hidden="true" /> {events.length ? 'Synced' : 'Waiting'}
+          <i className={clsx('size-1.5 rounded-full', events.length ? 'animate-pulse bg-ok' : 'bg-warn')} aria-hidden="true" /> {events.length ? tr('Synced') : tr('Waiting')}
         </span>
       </header>
 
       {/* the glance: the newest signal, how full the memory is, and who has been talking */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
-        <section className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(80%_120%_at_0%_0%,rgb(255_91_46/0.12),transparent_60%),var(--color-ink-1)] p-5" aria-label="Latest signal">
-          <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Latest signal</span>
+        <section className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(80%_120%_at_0%_0%,rgb(255_91_46/0.12),transparent_60%),var(--color-ink-1)] p-5" aria-label={tr('Latest signal')}>
+          <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Latest signal')}</span>
           {latest ? (
             <div className="mt-3 flex items-start gap-3.5">
               <span className="grid size-10 shrink-0 place-items-center rounded-full font-mono text-fine font-semibold text-ink-0" style={{ background: latest.color }}>
@@ -122,7 +123,7 @@ export default function MemoryView({ events }) {
             </div>
           ) : (
             <p className="mt-3 flex items-center gap-2 text-fine text-bone-dim">
-              <BrainCircuit size={16} aria-hidden="true" /> Waiting for the first signal from the floor.
+              <BrainCircuit size={16} aria-hidden="true" /> {tr('Waiting for the first signal from the floor.')}
             </p>
           )}
         </section>
@@ -130,13 +131,13 @@ export default function MemoryView({ events }) {
         <section className="flex items-center gap-4 rounded-3xl border border-line bg-ink-1 p-5 max-md:hidden">
           <Ring value={events.length} max={spacehankConfig.maxEvents} />
           <div className="leading-tight">
-            <h2 className="font-display text-lead text-bone">Memory</h2>
-            <p className="mt-1 text-fine text-bone-dim">Newest {spacehankConfig.maxEvents} signals kept.</p>
+            <h2 className="font-display text-lead text-bone">{tr('Memory')}</h2>
+            <p className="mt-1 text-fine text-bone-dim">{tr('Newest')} {spacehankConfig.maxEvents} {tr('signals kept.')}</p>
           </div>
         </section>
 
         <section className="rounded-3xl border border-line bg-ink-1 p-5">
-          <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Who is talking</span>
+          <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Who is talking')}</span>
           {agents.length ? (
             <ul className="mt-3 flex flex-wrap gap-1.5">
               {agents.slice(0, 6).map((a) => (
@@ -150,21 +151,21 @@ export default function MemoryView({ events }) {
               ))}
             </ul>
           ) : (
-            <p className="mt-3 font-mono text-fine text-bone-faint">Nobody yet.</p>
+            <p className="mt-3 font-mono text-fine text-bone-faint">{tr('Nobody yet.')}</p>
           )}
         </section>
       </div>
 
       {/* the timeline: a panel of its own height, so the page never grows with the stream */}
-      <section className="flex flex-col overflow-hidden rounded-3xl border border-line bg-ink-1" aria-label="Recent signals">
+      <section className="flex flex-col overflow-hidden rounded-3xl border border-line bg-ink-1" aria-label={tr('Recent signals')}>
         <div className="flex flex-wrap items-center gap-2 border-b border-line px-4 py-3">
           <div className="relative min-w-44 flex-1 sm:max-w-xs">
             <Search size={14} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-bone-faint" aria-hidden="true" />
-            <input aria-label="Search the stream" placeholder="Search signals…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-9 w-full rounded-full border border-line bg-ink-2 pr-4 pl-10 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
+            <input aria-label={tr('Search the stream')} placeholder={tr('Search signals…')} value={query} onChange={(e) => setQuery(e.target.value)} className="h-9 w-full rounded-full border border-line bg-ink-2 pr-4 pl-10 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
           </div>
           <div className="flex flex-wrap gap-1.5">
             <button type="button" aria-pressed={!agent} onClick={() => setAgent('')} className={clsx('rounded-full px-3 py-1 font-mono text-[0.72rem] transition-colors', !agent ? 'bg-bone text-ink-0' : 'bg-wash/8 text-bone-dim hover:text-bone')}>
-              Everyone
+              {tr('Everyone')}
             </button>
             {agents.map((a) => (
               <button
@@ -180,12 +181,12 @@ export default function MemoryView({ events }) {
             ))}
           </div>
           <span className="ml-auto font-mono text-[0.68rem] text-bone-faint">
-            {groups.length} rows · {shown.length} signals
+            {groups.length} {tr('rows ·')} {shown.length} {tr('signals')}
           </span>
         </div>
 
         {groups.length ? (
-          <ol className="max-h-[min(52vh,460px)] overflow-y-auto p-2" aria-label="Signals">
+          <ol className="max-h-[min(52vh,460px)] overflow-y-auto p-2" aria-label={tr('Signals')}>
             {groups.map((group, index) => {
               const key = `${group.name}-${group.action}-${index}`;
               return <Row key={key} group={group} open={openKey === key} onToggle={() => setOpenKey(openKey === key ? null : key)} />;
@@ -196,8 +197,8 @@ export default function MemoryView({ events }) {
             <span className="grid size-12 place-items-center rounded-full bg-ink-2 text-bone-faint">
               <BrainCircuit size={22} aria-hidden="true" />
             </span>
-            <h2 className="font-display text-lead text-bone">{events.length ? 'No signal matches' : 'No realtime events yet'}</h2>
-            <p className="max-w-xs text-fine text-bone-dim">{events.length ? 'Try other words, or show everyone.' : 'Signals from the agent floor appear here as they happen.'}</p>
+            <h2 className="font-display text-lead text-bone">{events.length ? tr('No signal matches') : tr('No realtime events yet')}</h2>
+            <p className="max-w-xs text-fine text-bone-dim">{events.length ? tr('Try other words, or show everyone.') : tr('Signals from the agent floor appear here as they happen.')}</p>
           </div>
         )}
       </section>

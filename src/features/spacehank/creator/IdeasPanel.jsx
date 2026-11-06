@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useMemo, useState } from 'react';
 import { Clapperboard, ListPlus, Lightbulb, Send, Sparkles, Trophy, Wand2 } from 'lucide-react';
 import { Button, DatePicker, Input, Select, Textarea, pushToast } from '../../../design-system';
@@ -16,7 +17,7 @@ const BAR = { strong: 'bg-ok', fair: 'bg-warn', weak: 'bg-danger' };
 /** A hook line with its score and the reasons for it. */
 function ScoreMeter({ score, label }) {
   return (
-    <span className="flex items-center gap-2" aria-label={`Score ${score} of 100, ${label}`}>
+    <span className="flex items-center gap-2" aria-label={tr('Score {0} of 100, {1}', score, label)}>
       <span className="h-1.5 w-14 overflow-hidden rounded-full bg-wash/10">
         <i className={clsx('block h-full rounded-full', BAR[label] ?? 'bg-bone-faint')} style={{ width: `${score}%` }} />
       </span>
@@ -30,10 +31,10 @@ function HookLab({ value, onChange }) {
   const result = useMemo(() => scoreHook(value), [value]);
   return (
     <div className="flex flex-col gap-2.5" data-hook-lab>
-      <Textarea aria-label="Your opening line" rows={2} placeholder="Type the first line you will say…" value={value} onChange={(e) => onChange(e.target.value)} />
+      <Textarea aria-label={tr('Your opening line')} rows={2} placeholder={tr('Type the first line you will say…')} value={value} onChange={(e) => onChange(e.target.value)} />
       <div className="flex items-center justify-between gap-3">
         <ScoreMeter score={result.score} label={result.label} />
-        <span className="font-mono text-[0.68rem] text-bone-faint">a rule of thumb, not a prediction</span>
+        <span className="font-mono text-[0.68rem] text-bone-faint">{tr('a rule of thumb, not a prediction')}</span>
       </div>
       <ul className="flex flex-col gap-1">
         {result.reasons.map((r, i) => (
@@ -78,7 +79,7 @@ export default function IdeasPanel({ onSaved }) {
   const quick = () => {
     const hooks = rankHooks(hookFormulas(topic, settings.language));
     if (!hooks.length) {
-      setError('Say what the video is about first.');
+      setError(tr('Say what the video is about first.'));
       return;
     }
     setError('');
@@ -95,7 +96,7 @@ export default function IdeasPanel({ onSaved }) {
   const save = async () => {
     const at = date ? new Date(`${date}T09:00:00`).getTime() : null;
     await content.create(newPiece({ title: pack?.script?.title || topic, hook, platforms: platforms.length ? platforms : ['tiktok'], pack: pack?.source === 'ai' ? { script: pack.script, caption: pack.caption, hashtags: pack.hashtags, discord: pack.discord, thread: pack.thread } : null, scheduledAt: at }));
-    pushToast('Saved to the pipeline', { tone: 'success' });
+    pushToast(tr('Saved to the pipeline'), { tone: 'success' });
     onSaved?.();
   };
 
@@ -104,35 +105,35 @@ export default function IdeasPanel({ onSaved }) {
 
   return (
     <div className="flex flex-col gap-4" data-ideas>
-      <Panel title="What is the video about?" icon={Lightbulb} hue={46} aside={<Segmented label="Language" value={settings.language} onChange={(language) => setSetting({ language })} options={[{ id: 'vi', label: 'Tiếng Việt' }, { id: 'en', label: 'English' }]} />}>
+      <Panel title={tr('What is the video about?')} icon={Lightbulb} hue={46} aside={<Segmented label={tr('Language')} value={settings.language} onChange={(language) => setSetting({ language })} options={[{ id: 'vi', label: tr('Tiếng Việt') }, { id: 'en', label: tr('English') }]} />}>
         <div className="flex flex-col gap-3">
-          <Textarea aria-label="Idea" rows={3} placeholder="e.g. Why my Discord bot kept crashing at 3am, and the one line that fixed it" value={topic} onChange={(e) => setTopic(e.target.value)} />
+          <Textarea aria-label={tr('Idea')} rows={3} placeholder={tr('e.g. Why my Discord bot kept crashing at 3am, and the one line that fixed it')} value={topic} onChange={(e) => setTopic(e.target.value)} />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Row label="Your niche">
-              <Input aria-label="Niche" placeholder="e.g. coding, student life" value={settings.niche} onChange={(e) => setSetting({ niche: e.target.value })} compact />
+            <Row label={tr('Your niche')}>
+              <Input aria-label={tr('Niche')} placeholder={tr('e.g. coding, student life')} value={settings.niche} onChange={(e) => setSetting({ niche: e.target.value })} compact />
             </Row>
-            <Row label="Who watches">
-              <Input aria-label="Audience" placeholder="e.g. beginner developers" value={settings.audience} onChange={(e) => setSetting({ audience: e.target.value })} compact />
+            <Row label={tr('Who watches')}>
+              <Input aria-label={tr('Audience')} placeholder={tr('e.g. beginner developers')} value={settings.audience} onChange={(e) => setSetting({ audience: e.target.value })} compact />
             </Row>
-            <Row label="Length">
-              <Select aria-label="Length" value={seconds} onChange={(e) => setSeconds(e.target.value)} compact>
+            <Row label={tr('Length')}>
+              <Select aria-label={tr('Length')} value={seconds} onChange={(e) => setSeconds(e.target.value)} compact>
                 {[15, 30, 45, 60, 90].map((s) => (
                   <option key={s} value={s}>
-                    {s} seconds
+                    {s} {tr('seconds')}
                   </option>
                 ))}
               </Select>
             </Row>
-            <Row label="Tone (optional)">
-              <Input aria-label="Tone" placeholder="funny, calm, direct…" value={tone} onChange={(e) => setTone(e.target.value)} compact />
+            <Row label={tr('Tone (optional)')}>
+              <Input aria-label={tr('Tone')} placeholder={tr('funny, calm, direct…')} value={tone} onChange={(e) => setTone(e.target.value)} compact />
             </Row>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button onClick={write} loading={busy} disabled={topic.trim().length < 3} data-write-pack>
-              <Sparkles size={15} aria-hidden="true" /> Write the pack with AI
+              <Sparkles size={15} aria-hidden="true" /> {tr('Write the pack with AI')}
             </Button>
             <Button variant="ghost" onClick={quick} disabled={!topic.trim()} data-quick-hooks>
-              <Wand2 size={15} aria-hidden="true" /> Quick hooks, no AI
+              <Wand2 size={15} aria-hidden="true" /> {tr('Quick hooks, no AI')}
             </Button>
           </div>
           {error && (
@@ -140,14 +141,14 @@ export default function IdeasPanel({ onSaved }) {
               {error}
             </p>
           )}
-          <p className="text-[0.76rem] leading-relaxed text-bone-faint">The AI is told never to promise income or invent stories or numbers. Where it needs a fact only you know it writes [brackets]: fill them in with what is true before you film.</p>
+          <p className="text-[0.76rem] leading-relaxed text-bone-faint">{tr('The AI is told never to promise income or invent stories or numbers. Where it needs a fact only you know it writes [brackets]: fill them in with what is true before you film.')}</p>
         </div>
       </Panel>
 
       {pack && (
         <>
-          <Panel title="Choose your opening line" icon={Trophy} hue={22} aside={<span className="font-mono text-[0.68rem] text-bone-faint">{pack.source === 'ai' ? 'written by AI' : 'from hook formulas'}</span>}>
-            <ul className="flex flex-col gap-2" role="radiogroup" aria-label="Hooks">
+          <Panel title={tr('Choose your opening line')} icon={Trophy} hue={22} aside={<span className="font-mono text-[0.68rem] text-bone-faint">{pack.source === 'ai' ? tr('written by AI') : tr('from hook formulas')}</span>}>
+            <ul className="flex flex-col gap-2" role="radiogroup" aria-label={tr('Hooks')}>
               {pack.hooks.map((h, i) => (
                 <li key={i}>
                   <button type="button" role="radio" aria-checked={hook === h.text} onClick={() => setHook(h.text)} className={clsx('flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition-colors', hook === h.text ? 'border-bone bg-wash/[0.05]' : 'border-line hover:border-line-strong')}>
@@ -161,68 +162,68 @@ export default function IdeasPanel({ onSaved }) {
               ))}
             </ul>
             <div className="mt-4 border-t border-line pt-4">
-              <Label className="mb-2">Hook lab: edit it and watch the score</Label>
+              <Label className="mb-2">{tr('Hook lab: edit it and watch the score')}</Label>
               <HookLab value={hook} onChange={setHook} />
             </div>
           </Panel>
 
           {pack.script && (
-            <Panel title={pack.script.title || 'The script'} icon={Clapperboard} hue={208} aside={<span className="font-mono text-[0.68rem] text-bone-faint">about {speakSeconds(prompterText)} s</span>}>
+            <Panel title={pack.script.title || tr('The script')} icon={Clapperboard} hue={208} aside={<span className="font-mono text-[0.68rem] text-bone-faint">{tr('about')} {speakSeconds(prompterText)} {tr('s')}</span>}>
               <ol className="flex flex-col gap-2.5">
                 <li className="rounded-2xl border border-bone/40 bg-wash/[0.04] p-3">
-                  <Label>Hook · 0-3 s</Label>
+                  <Label>{tr('Hook · 0-3 s')}</Label>
                   <p className="mt-1 text-fine leading-snug text-bone">{hook}</p>
                 </li>
                 {pack.script.beats.slice(1).map((b, i) => (
                   <li key={i} className="rounded-2xl border border-line p-3">
                     <Label>{b.at}</Label>
                     <p className="mt-1 text-fine leading-snug text-bone">{b.say}</p>
-                    {b.show && <p className="mt-1 text-[0.78rem] text-bone-faint">On screen: {b.show}</p>}
+                    {b.show && <p className="mt-1 text-[0.78rem] text-bone-faint">{tr('On screen:')} {b.show}</p>}
                   </li>
                 ))}
                 {pack.script.cta && (
                   <li className="rounded-2xl border border-signal/40 bg-signal/10 p-3">
-                    <Label>Call to action</Label>
+                    <Label>{tr('Call to action')}</Label>
                     <p className="mt-1 text-fine leading-snug text-bone">{pack.script.cta}</p>
                   </li>
                 )}
               </ol>
               <div className="mt-3 flex flex-wrap gap-2">
                 <Button onClick={() => setPrompter(true)} data-open-prompter>
-                  <Clapperboard size={15} aria-hidden="true" /> Teleprompter
+                  <Clapperboard size={15} aria-hidden="true" /> {tr('Teleprompter')}
                 </Button>
-                <CopyButton text={scriptSheet({ ...pack.script, beats: [{ at: '0-3s', say: hook, show: '' }, ...pack.script.beats.slice(1)] })} label="Copy script" />
+                <CopyButton text={scriptSheet({ ...pack.script, beats: [{ at: '0-3s', say: hook, show: '' }, ...pack.script.beats.slice(1)] })} label={tr('Copy script')} />
               </div>
             </Panel>
           )}
 
           {pack.source === 'formulas' && (
             <Button variant="ghost" onClick={() => setPrompter(true)} className="self-start">
-              <Clapperboard size={15} aria-hidden="true" /> Open this line in the teleprompter
+              <Clapperboard size={15} aria-hidden="true" /> {tr('Open this line in the teleprompter')}
             </Button>
           )}
 
           {(pack.caption || pack.discord || pack.thread?.length > 0) && (
-            <Panel title="Ready to post" icon={Send} hue={150}>
+            <Panel title={tr('Ready to post')} icon={Send} hue={150}>
               <div className="flex flex-col gap-4">
                 {pack.caption && (
                   <div>
-                    <Label className="mb-1.5">Caption</Label>
+                    <Label className="mb-1.5">{tr('Caption')}</Label>
                     <p className="text-fine leading-snug text-bone-dim">{pack.caption}</p>
                     {pack.hashtags.length > 0 && <p className="mt-1.5 text-[0.82rem] text-signal">{hashtagLine(pack.hashtags)}</p>}
-                    <CopyButton className="mt-2" text={[pack.caption, hashtagLine(pack.hashtags)].filter(Boolean).join('\n')} label="Copy caption" />
+                    <CopyButton className="mt-2" text={[pack.caption, hashtagLine(pack.hashtags)].filter(Boolean).join('\n')} label={tr('Copy caption')} />
                   </div>
                 )}
                 {pack.discord && (
                   <div>
-                    <Label className="mb-1.5">Discord announcement</Label>
+                    <Label className="mb-1.5">{tr('Discord announcement')}</Label>
                     <p className="text-fine leading-snug whitespace-pre-line text-bone-dim">{pack.discord}</p>
-                    <CopyButton className="mt-2" text={pack.discord} label="Copy for Discord" />
+                    <CopyButton className="mt-2" text={pack.discord} label={tr('Copy for Discord')} />
                   </div>
                 )}
                 {pack.thread?.length > 0 && (
                   <div>
-                    <Label className="mb-1.5">Thread (X / Threads)</Label>
+                    <Label className="mb-1.5">{tr('Thread (X / Threads)')}</Label>
                     <ol className="flex flex-col gap-1.5">
                       {pack.thread.map((t, i) => (
                         <li key={i} className="text-fine leading-snug text-bone-dim">
@@ -231,17 +232,17 @@ export default function IdeasPanel({ onSaved }) {
                         </li>
                       ))}
                     </ol>
-                    <CopyButton className="mt-2" text={pack.thread.map((t, i) => `${i + 1}/ ${t}`).join('\n\n')} label="Copy thread" />
+                    <CopyButton className="mt-2" text={pack.thread.map((t, i) => `${i + 1}/ ${t}`).join('\n\n')} label={tr('Copy thread')} />
                   </div>
                 )}
-                <CopyButton text={everything} label="Copy everything" what="Whole pack copied" />
+                <CopyButton text={everything} label={tr('Copy everything')} what={tr('Whole pack copied')} />
               </div>
             </Panel>
           )}
 
-          <Panel title="Keep it" icon={ListPlus} hue={270}>
+          <Panel title={tr('Keep it')} icon={ListPlus} hue={270}>
             <div className="flex flex-col gap-3">
-              <div className="flex flex-wrap gap-1.5" role="group" aria-label="Platforms">
+              <div className="flex flex-wrap gap-1.5" role="group" aria-label={tr('Platforms')}>
                 {PLATFORMS.map((p) => (
                   <Chip key={p.id} on={platforms.includes(p.id)} onClick={() => togglePlatform(p.id)}>
                     {p.label}
@@ -249,9 +250,9 @@ export default function IdeasPanel({ onSaved }) {
                 ))}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <DatePicker aria-label="Post on" value={date} onChange={setDate} placeholder="Post on… (optional)" compact className="w-52" />
+                <DatePicker aria-label={tr('Post on')} value={date} onChange={setDate} placeholder={tr('Post on… (optional)')} compact className="w-52" />
                 <Button onClick={save} data-save-piece>
-                  <ListPlus size={15} aria-hidden="true" /> Save to the pipeline
+                  <ListPlus size={15} aria-hidden="true" /> {tr('Save to the pipeline')}
                 </Button>
               </div>
             </div>

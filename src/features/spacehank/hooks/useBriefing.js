@@ -3,6 +3,7 @@ import { calendarBetween } from '../api/owner';
 import { spacehankConfig } from '../config';
 import { demoSchedule } from '../model/demo';
 import { forecastUrl, parseForecast } from '../model/weather';
+import { tr } from '../lang';
 
 const CACHE_KEY = 'hank62.weather';
 const CACHE_MS = 15 * 60 * 1000;
@@ -42,7 +43,7 @@ export function useBriefing({ owner }) {
         writeCache(forecast);
         setWeather(forecast);
       })
-      .catch(() => live && setProblem('The weather could not be loaded.'));
+      .catch(() => live && setProblem(tr('The weather could not be loaded.')));
     return () => {
       live = false;
     };

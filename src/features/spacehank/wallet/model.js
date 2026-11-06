@@ -1,15 +1,16 @@
+import { tr } from '../lang';
 // The Wallet as plain functions: reading "ăn trưa 45k" into an entry, and the sums behind the charts.
 
 export const CATEGORIES = [
-  { id: 'food', label: 'Food & drink', icon: 'utensils', hue: 22, words: ['ăn', 'cơm', 'phở', 'bún', 'bánh', 'trà sữa', 'trà', 'cafe', 'cà phê', 'coffee', 'nhậu', 'bữa', 'lunch', 'dinner', 'breakfast', 'nước', 'quán', 'pizza', 'kem'] },
-  { id: 'transport', label: 'Transport', icon: 'bus', hue: 205, words: ['grab', 'xe', 'xăng', 'gửi xe', 'taxi', 'bus', 'buýt', 'vé xe', 'đi lại', 'be ', 'gojek', 'tàu', 'máy bay'] },
-  { id: 'home', label: 'Home & bills', icon: 'home', hue: 150, words: ['nhà', 'trọ', 'điện', 'nước sinh hoạt', 'wifi', 'internet', 'điện thoại', 'sim', 'gas'] },
-  { id: 'study', label: 'Study', icon: 'study', hue: 265, words: ['sách', 'học', 'khóa', 'khoá', 'course', 'học phí', 'in ấn', 'photo', 'udemy', 'văn phòng phẩm'] },
-  { id: 'fun', label: 'Fun', icon: 'fun', hue: 330, words: ['phim', 'game', 'netflix', 'spotify', 'giải trí', 'du lịch', 'karaoke', 'concert', 'youtube', 'steam'] },
-  { id: 'health', label: 'Health', icon: 'health', hue: 0, words: ['thuốc', 'khám', 'gym', 'bác sĩ', 'răng', 'vitamin', 'y tế'] },
-  { id: 'shopping', label: 'Shopping', icon: 'bag', hue: 48, words: ['mua', 'quần', 'áo', 'giày', 'shopee', 'lazada', 'tiki', 'đồ', 'túi'] },
-  { id: 'income', label: 'Income', icon: 'cash', hue: 140, words: [] },
-  { id: 'other', label: 'Other', icon: 'other', hue: 220, words: [] },
+  { id: 'food', label: tr('Food & drink'), icon: 'utensils', hue: 22, words: ['ăn', 'cơm', 'phở', 'bún', 'bánh', 'trà sữa', 'trà', 'cafe', 'cà phê', 'coffee', 'nhậu', 'bữa', 'lunch', 'dinner', 'breakfast', 'nước', 'quán', 'pizza', 'kem'] },
+  { id: 'transport', label: tr('Transport'), icon: 'bus', hue: 205, words: ['grab', 'xe', 'xăng', 'gửi xe', 'taxi', 'bus', 'buýt', 'vé xe', 'đi lại', 'be ', 'gojek', 'tàu', 'máy bay'] },
+  { id: 'home', label: tr('Home & bills'), icon: 'home', hue: 150, words: ['nhà', 'trọ', 'điện', 'nước sinh hoạt', 'wifi', 'internet', 'điện thoại', 'sim', 'gas'] },
+  { id: 'study', label: tr('Study'), icon: 'study', hue: 265, words: ['sách', 'học', 'khóa', 'khoá', 'course', 'học phí', 'in ấn', 'photo', 'udemy', 'văn phòng phẩm'] },
+  { id: 'fun', label: tr('Fun'), icon: 'fun', hue: 330, words: ['phim', 'game', 'netflix', 'spotify', 'giải trí', 'du lịch', 'karaoke', 'concert', 'youtube', 'steam'] },
+  { id: 'health', label: tr('Health'), icon: 'health', hue: 0, words: ['thuốc', 'khám', 'gym', 'bác sĩ', 'răng', 'vitamin', 'y tế'] },
+  { id: 'shopping', label: tr('Shopping'), icon: 'bag', hue: 48, words: ['mua', 'quần', 'áo', 'giày', 'shopee', 'lazada', 'tiki', 'đồ', 'túi'] },
+  { id: 'income', label: tr('Income'), icon: 'cash', hue: 140, words: [] },
+  { id: 'other', label: tr('Other'), icon: 'other', hue: 220, words: [] },
 ];
 
 export const categoryOf = (id) => CATEGORIES.find((c) => c.id === id) ?? CATEGORIES[CATEGORIES.length - 1];

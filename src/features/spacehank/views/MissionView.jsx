@@ -8,6 +8,7 @@ import { COLUMNS, dueLabel, dueState, inColumn, moveCard, newCard, progress } fr
 import { missions } from '../missions/store';
 import { hueOf } from '../notes/notes';
 import { useStore } from '../store';
+import { tr } from '../lang';
 
 // each column has its own icon and colour, so the board reads at a glance
 const COLUMN_STYLE = {
@@ -26,7 +27,7 @@ function CardView({ card, agents, onOpen, onMove, onDragStart }) {
   return (
     <li data-card={card.id} draggable onDragStart={(e) => onDragStart(e, card)} className="list-none">
       <div className="group relative rounded-2xl border border-line bg-ink-2 p-3.5 transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_14px_30px_-18px_rgb(var(--shadow-rgb)/0.9)]">
-        <button type="button" onClick={() => onOpen(card)} className="block w-full text-left" aria-label={`Open card: ${card.title}`}>
+        <button type="button" onClick={() => onOpen(card)} className="block w-full text-left" aria-label={tr('Open card: {0}', card.title)}>
           {card.labels.length > 0 && (
             <span className="mb-2 flex flex-wrap gap-1">
               {card.labels.map((l) => (
@@ -66,13 +67,13 @@ function CardView({ card, agents, onOpen, onMove, onDragStart }) {
         <Menu
           align="end"
           trigger={
-            <button type="button" aria-label={`Move or delete ${card.title}`} className="absolute top-2 right-2 grid size-6 place-items-center rounded-full text-bone-faint opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-bone max-sm:opacity-100">
+            <button type="button" aria-label={tr('Move or delete {0}', card.title)} className="absolute top-2 right-2 grid size-6 place-items-center rounded-full text-bone-faint opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-bone max-sm:opacity-100">
               <MoreHorizontal size={14} aria-hidden="true" />
             </button>
           }
           items={[
-            ...COLUMNS.filter((c) => c.id !== card.column).map((c) => ({ id: c.id, label: `Move to ${c.label}`, onSelect: () => onMove(card, c.id) })),
-            { id: 'rm', label: 'Delete', icon: Trash2, onSelect: () => missions.remove(card.id) },
+            ...COLUMNS.filter((c) => c.id !== card.column).map((c) => ({ id: c.id, label: tr('Move to {0}', c.label), onSelect: () => onMove(card, c.id) })),
+            { id: 'rm', label: tr('Delete'), icon: Trash2, onSelect: () => missions.remove(card.id) },
           ]}
         />
       </div>
@@ -100,33 +101,33 @@ function CardDialog({ card, agents, onClose, onHand }) {
       onOpenChange={(open) => !open && onClose()}
       eyebrow={COLUMNS.find((c) => c.id === draft.column)?.label.toUpperCase()}
       title={draft.title}
-      description="Edit the card. Changes are saved as you go."
+      description={tr('Edit the card. Changes are saved as you go.')}
       footer={
         <>
           <Button variant="danger" size="sm" onClick={() => { void missions.remove(card.id); onClose(); }}>
-            <Trash2 size={14} aria-hidden="true" /> Delete
+            <Trash2 size={14} aria-hidden="true" /> {tr('Delete')}
           </Button>
           <Button size="sm" onClick={onClose}>
-            Done
+            {tr('Done')}
           </Button>
         </>
       }
     >
       <div className="flex flex-col gap-3.5">
-        <Input aria-label="Title" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} onBlur={() => draft.title.trim() && save({ title: draft.title.trim() })} />
-        <Textarea aria-label="Notes" rows={3} placeholder="Notes" value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} onBlur={() => save({ notes: draft.notes })} />
+        <Input aria-label={tr('Title')} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} onBlur={() => draft.title.trim() && save({ title: draft.title.trim() })} />
+        <Textarea aria-label={tr('Notes')} rows={3} placeholder={tr('Notes')} value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} onBlur={() => save({ notes: draft.notes })} />
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1 font-mono text-fine text-bone-dim">
-            Due
-            <DatePicker value={draft.due} onChange={(due) => save({ due })} placeholder="No date" />
+            {tr('Due')}
+            <DatePicker value={draft.due} onChange={(due) => save({ due })} placeholder={tr('No date')} />
           </label>
           <label className="flex flex-col gap-1 font-mono text-fine text-bone-dim">
-            Labels
-            <Input aria-label="Labels" placeholder="design, bug" defaultValue={draft.labels.join(', ')} onBlur={(e) => save({ labels: e.target.value.split(',').map((l) => l.trim().toLowerCase()).filter(Boolean).slice(0, 5) })} />
+            {tr('Labels')}
+            <Input aria-label={tr('Labels')} placeholder={tr('design, bug')} defaultValue={draft.labels.join(', ')} onBlur={(e) => save({ labels: e.target.value.split(',').map((l) => l.trim().toLowerCase()).filter(Boolean).slice(0, 5) })} />
           </label>
         </div>
         <div>
-          <span className="font-mono text-fine text-bone-dim">Checklist</span>
+          <span className="font-mono text-fine text-bone-dim">{tr('Checklist')}</span>
           <ul className="mt-1.5 flex flex-col gap-1">
             {draft.checklist.map((c) => (
               <li key={c.id} className="flex items-center gap-2.5 rounded-lg px-1.5 py-1 hover:bg-wash/5">
@@ -134,24 +135,24 @@ function CardDialog({ card, agents, onClose, onHand }) {
                   {c.done && <Check size={12} strokeWidth={3} aria-hidden="true" />}
                 </button>
                 <span className={clsx('flex-1 text-fine', c.done ? 'text-bone-faint line-through' : 'text-bone')}>{c.text}</span>
-                <button type="button" aria-label={`Remove ${c.text}`} onClick={() => save({ checklist: draft.checklist.filter((x) => x.id !== c.id) })} className="text-bone-faint hover:text-danger">
+                <button type="button" aria-label={tr('Remove {0}', c.text)} onClick={() => save({ checklist: draft.checklist.filter((x) => x.id !== c.id) })} className="text-bone-faint hover:text-danger">
                   <X size={13} aria-hidden="true" />
                 </button>
               </li>
             ))}
           </ul>
           <form onSubmit={addItem} className="mt-1.5 flex gap-2">
-            <Input aria-label="Add a checklist item" placeholder="Add an item" value={item} onChange={(e) => setItem(e.target.value)} />
+            <Input aria-label={tr('Add a checklist item')} placeholder={tr('Add an item')} value={item} onChange={(e) => setItem(e.target.value)} />
             <Button type="submit" size="sm" disabled={!item.trim()}>
-              Add
+              {tr('Add')}
             </Button>
           </form>
         </div>
         <div className="flex items-end gap-2 rounded-2xl border border-line bg-ink-2 p-3">
           <label className="flex flex-1 flex-col gap-1 font-mono text-fine text-bone-dim">
-            Hand it to an agent
-            <Select aria-label="Agent" value={draft.agent} onChange={(e) => save({ agent: e.target.value })}>
-              <option value="">Nobody</option>
+            {tr('Hand it to an agent')}
+            <Select aria-label={tr('Agent')} value={draft.agent} onChange={(e) => save({ agent: e.target.value })}>
+              <option value="">{tr('Nobody')}</option>
               {agents.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.name} · {a.role}
@@ -160,7 +161,7 @@ function CardDialog({ card, agents, onClose, onHand }) {
             </Select>
           </label>
           <Button size="sm" disabled={!draft.agent} onClick={() => { onHand({ ...draft }); onClose(); }}>
-            <Sparkles size={14} aria-hidden="true" /> Send
+            <Sparkles size={14} aria-hidden="true" /> {tr('Send')}
           </Button>
         </div>
       </div>
@@ -197,7 +198,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
       if (waiting) {
         const changed = moveCard(missions.store.get().items, waiting.id, 'done', 0);
         void missions.putMany(changed);
-        onNotify?.(`${e.name} finished “${waiting.title}”`);
+        onNotify?.(tr('{0} finished “{1}”', e.name, waiting.title));
       }
     }
   }, [events, agents, onNotify]);
@@ -214,7 +215,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
     if (!onNewTask(text, card.agent)) return;
     await missions.update(card.id, { agent: card.agent });
     move(card, 'agent');
-    onNotify?.(`Sent to ${agent?.name ?? 'the agent'}`);
+    onNotify?.(tr('Sent to {0}', agent?.name ?? tr('the agent')));
   };
 
   const add = async (e) => {
@@ -236,21 +237,21 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
     if (column === 'agent' && !card.agent) setOpen({ ...card, column });
   };
 
-  useFab(open ? null : { label: 'Add a card', icon: Plus, onPress: () => setAdding(col) });
+  useFab(open ? null : { label: tr('Add a card'), icon: Plus, onPress: () => setAdding(col) });
   const turn = (by) => setCol((now) => COLUMNS[Math.max(0, Math.min(COLUMNS.length - 1, COLUMNS.findIndex((c) => c.id === now) + by))].id);
   const total = cards.length;
   const doneCount = byColumn.done.length;
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead eyebrow="Plan" title="Mission" accent="Board." description="Ideas on the left, finished work on the right. Hand a card to an agent and it comes back to Done when they finish.">
+      <PageHead eyebrow={tr('Plan')} title={tr('Mission')} accent="Board." description={tr('Ideas on the left, finished work on the right. Hand a card to an agent and it comes back to Done when they finish.')}>
         <span className="font-mono text-fine text-bone-dim">
-          {doneCount} of {total} done
+          {doneCount} {tr('of')} {total} {tr('done')}
         </span>
-        {!connected && <Badge tone="warn" dot>AGENTS OFFLINE</Badge>}
+        {!connected && <Badge tone="warn" dot>{tr('AGENTS OFFLINE')}</Badge>}
         {cards.some((c) => c.sample) && (
           <Button variant="ghost" size="sm" onClick={() => Promise.all(cards.filter((c) => c.sample).map((c) => missions.remove(c.id)))}>
-            Remove samples
+            {tr('Remove samples')}
           </Button>
         )}
       </PageHead>
@@ -258,14 +259,14 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
       {loaded && total === 0 && (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
           <div className="min-w-[min(100%,15rem)] flex-1">
-            <h2 className="font-display text-lead text-bone">The board is empty</h2>
-            <p className="text-fine text-bone-dim">Add a card in any column below.</p>
+            <h2 className="font-display text-lead text-bone">{tr('The board is empty')}</h2>
+            <p className="text-fine text-bone-dim">{tr('Add a card in any column below.')}</p>
           </div>
         </div>
       )}
 
       <div className="md:hidden">
-        <Segmented value={col} onChange={setCol} label="Column" options={COLUMNS.map((c) => ({ id: c.id, label: `${c.label.replace('With an agent', 'Agent').replace('In progress', 'Doing')} ${byColumn[c.id].length}` }))} />
+        <Segmented value={col} onChange={setCol} label={tr('Column')} options={COLUMNS.map((c) => ({ id: c.id, label: `${c.label.replace('With an agent', 'Agent').replace('In progress', 'Doing')} ${byColumn[c.id].length}` }))} />
       </div>
 
       <div
@@ -302,15 +303,15 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
               </span>
               <h2 className="text-fine font-medium text-bone">{column.label}</h2>
               <span className="rounded-full bg-wash/8 px-2 py-px font-mono text-[0.68rem] text-bone-dim tabular-nums">{byColumn[column.id].length}</span>
-              <button type="button" aria-label={`Add a card to ${column.label}`} onClick={() => setAdding(adding === column.id ? null : column.id)} className="ml-auto grid size-7 place-items-center rounded-full text-bone-dim hover:bg-wash/10 hover:text-bone">
+              <button type="button" aria-label={tr('Add a card to {0}', column.label)} onClick={() => setAdding(adding === column.id ? null : column.id)} className="ml-auto grid size-7 place-items-center rounded-full text-bone-dim hover:bg-wash/10 hover:text-bone">
                 <Plus size={15} aria-hidden="true" />
               </button>
             </header>
             {adding === column.id && (
               <form onSubmit={add} className="flex gap-1.5">
-                <Input autoFocus aria-label={`New card in ${column.label}`} placeholder="Card title" value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setAdding(null)} compact />
+                <Input autoFocus aria-label={tr('New card in {0}', column.label)} placeholder={tr('Card title')} value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setAdding(null)} compact />
                 <Button type="submit" size="sm" disabled={!title.trim()}>
-                  Add
+                  {tr('Add')}
                 </Button>
               </form>
             )}

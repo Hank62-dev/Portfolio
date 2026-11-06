@@ -4,6 +4,7 @@ import { FlipHorizontal2, Minus, Pause, Play, Plus, RotateCcw, X } from 'lucide-
 import { clsx } from '../../../lib/format';
 import { useHistoryLayer } from '../hooks/useHistoryLayer';
 import { prompterLines, speakSeconds } from './model';
+import { tr } from '../lang';
 
 const SPEEDS = [20, 30, 40, 55, 70, 90, 120]; // pixels a second
 
@@ -83,7 +84,7 @@ export default function Teleprompter({ text, onClose }) {
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex flex-col bg-black text-white" role="dialog" aria-label="Teleprompter" data-prompter>
+    <div className="fixed inset-0 z-[80] flex flex-col bg-black text-white" role="dialog" aria-label={tr('Teleprompter')} data-prompter>
       <div className="relative min-h-0 flex-1">
         <div ref={box} onClick={() => !count && setPlaying((p) => !p)} className="no-scrollbar h-full overflow-y-auto px-6 select-none" style={{ transform: mirror ? 'scaleX(-1)' : undefined }}>
           <div style={{ height: '42vh' }} aria-hidden="true" />
@@ -101,36 +102,36 @@ export default function Teleprompter({ text, onClose }) {
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-2 border-t border-white/10 bg-black px-3 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-        <button type="button" onClick={leave} aria-label="Close the teleprompter" className="grid size-11 place-items-center rounded-full border border-white/20 active:scale-90">
+        <button type="button" onClick={leave} aria-label={tr('Close the teleprompter')} className="grid size-11 place-items-center rounded-full border border-white/20 active:scale-90">
           <X size={18} aria-hidden="true" />
         </button>
-        <button type="button" onClick={restart} aria-label="Start again from the top" className="grid size-11 place-items-center rounded-full border border-white/20 active:scale-90">
+        <button type="button" onClick={restart} aria-label={tr('Start again from the top')} className="grid size-11 place-items-center rounded-full border border-white/20 active:scale-90">
           <RotateCcw size={17} aria-hidden="true" />
         </button>
-        <button type="button" onClick={() => (playing ? setPlaying(false) : setCount(count ? 0 : 3))} aria-label={playing ? 'Pause' : 'Start with a countdown'} className="grid size-14 place-items-center rounded-full bg-white text-black active:scale-90">
+        <button type="button" onClick={() => (playing ? setPlaying(false) : setCount(count ? 0 : 3))} aria-label={playing ? tr('Pause') : tr('Start with a countdown')} className="grid size-14 place-items-center rounded-full bg-white text-black active:scale-90">
           {playing ? <Pause size={22} fill="currentColor" aria-hidden="true" /> : <Play size={22} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
         </button>
-        <div className="flex items-center gap-1 rounded-full border border-white/20 px-1.5" role="group" aria-label="Speed">
-          <button type="button" aria-label="Slower" onClick={() => setSpeed((s) => Math.max(0, s - 1))} className="grid size-10 place-items-center active:scale-90">
+        <div className="flex items-center gap-1 rounded-full border border-white/20 px-1.5" role="group" aria-label={tr('Speed')}>
+          <button type="button" aria-label={tr('Slower')} onClick={() => setSpeed((s) => Math.max(0, s - 1))} className="grid size-10 place-items-center active:scale-90">
             <Minus size={16} aria-hidden="true" />
           </button>
           <span className="w-10 text-center font-mono text-[0.75rem] tabular-nums">{SPEEDS[speed]}</span>
-          <button type="button" aria-label="Faster" onClick={() => setSpeed((s) => Math.min(SPEEDS.length - 1, s + 1))} className="grid size-10 place-items-center active:scale-90">
+          <button type="button" aria-label={tr('Faster')} onClick={() => setSpeed((s) => Math.min(SPEEDS.length - 1, s + 1))} className="grid size-10 place-items-center active:scale-90">
             <Plus size={16} aria-hidden="true" />
           </button>
         </div>
-        <div className="flex items-center gap-1 rounded-full border border-white/20 px-1.5" role="group" aria-label="Text size">
-          <button type="button" aria-label="Smaller text" onClick={() => setSize((s) => Math.max(20, s - 4))} className="grid size-10 place-items-center font-display text-[0.9rem] active:scale-90">
-            A
+        <div className="flex items-center gap-1 rounded-full border border-white/20 px-1.5" role="group" aria-label={tr('Text size')}>
+          <button type="button" aria-label={tr('Smaller text')} onClick={() => setSize((s) => Math.max(20, s - 4))} className="grid size-10 place-items-center font-display text-[0.9rem] active:scale-90">
+            {tr('A')}
           </button>
-          <button type="button" aria-label="Larger text" onClick={() => setSize((s) => Math.min(72, s + 4))} className="grid size-10 place-items-center font-display text-[1.3rem] active:scale-90">
-            A
+          <button type="button" aria-label={tr('Larger text')} onClick={() => setSize((s) => Math.min(72, s + 4))} className="grid size-10 place-items-center font-display text-[1.3rem] active:scale-90">
+            {tr('A')}
           </button>
         </div>
-        <button type="button" onClick={() => setMirror((m) => !m)} aria-pressed={mirror} aria-label="Mirror the text" className={clsx('grid size-11 place-items-center rounded-full border active:scale-90', mirror ? 'border-white bg-white text-black' : 'border-white/20')}>
+        <button type="button" onClick={() => setMirror((m) => !m)} aria-pressed={mirror} aria-label={tr('Mirror the text')} className={clsx('grid size-11 place-items-center rounded-full border active:scale-90', mirror ? 'border-white bg-white text-black' : 'border-white/20')}>
           <FlipHorizontal2 size={17} aria-hidden="true" />
         </button>
-        <span className="w-full text-center font-mono text-[0.68rem] text-white/50">About {speakSeconds(text)} s to say · tap the text to pause · space to start or stop</span>
+        <span className="w-full text-center font-mono text-[0.68rem] text-white/50">{tr('About')} {speakSeconds(text)} {tr('s to say · tap the text to pause · space to start or stop')}</span>
       </div>
     </div>,
     document.querySelector('.app-shell') ?? document.body

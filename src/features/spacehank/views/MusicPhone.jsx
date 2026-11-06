@@ -49,12 +49,13 @@ import { cycleRepeat, next, playList, player, playTrack, previous, seek, setSlee
 import { closePlayer, musicUi } from '../music/ui';
 import { useSlider } from '../components/useSlider';
 import { useStore } from '../store';
+import { tr } from '../lang';
 
 /** Songs / Albums / Artists / Playlists as large titles, with an underline that glides to the chosen one. */
 function ShelfTitles({ shelf, onPick }) {
   const { ref, marker } = useSlider(shelf, 'h-0.5 rounded-full bg-signal', { fit: 'x' });
   return (
-    <div ref={ref} className="relative mx-5 flex gap-6" role="tablist" aria-label="Library shelves">
+    <div ref={ref} className="relative mx-5 flex gap-6" role="tablist" aria-label={tr('Library shelves')}>
       {marker}
       {SHELVES.map(({ id, label }) => (
         <button key={id} type="button" role="tab" aria-selected={shelf === id} onClick={() => onPick(id)} className={clsx('relative pb-2 font-display text-[1.2rem] transition-colors', shelf === id ? 'text-bone' : 'text-bone-faint')}>
@@ -71,15 +72,15 @@ function ShelfTitles({ shelf, onPick }) {
 // of progress, and the colours come from the song that is playing, over a warm gold.
 
 const SECTIONS = [
-  { id: 'home', label: 'Home', icon: House },
-  { id: 'search', label: 'Search', icon: Search },
-  { id: 'library', label: 'Library', icon: Library },
+  { id: 'home', label: tr('Home'), icon: House },
+  { id: 'search', label: tr('Search'), icon: Search },
+  { id: 'library', label: tr('Library'), icon: Library },
 ];
 const SHELVES = [
-  { id: 'songs', label: 'Songs' },
-  { id: 'playlists', label: 'Playlists' },
-  { id: 'albums', label: 'Albums' },
-  { id: 'artists', label: 'Artists' },
+  { id: 'songs', label: tr('Songs') },
+  { id: 'playlists', label: tr('Playlists') },
+  { id: 'albums', label: tr('Albums') },
+  { id: 'artists', label: tr('Artists') },
 ];
 
 const GOLD = '232 178 74';
@@ -140,7 +141,7 @@ function TrackRow({ track, ids }) {
   const playing = useStore(player, (s) => s.trackId === track.id && s.playing);
   return (
     <li className="flex items-center px-3" data-track={track.title}>
-      <button type="button" onClick={() => (current ? togglePlay() : playTrack(track.id, ids))} aria-label={`${current && playing ? 'Pause' : 'Play'} ${track.title}`} className="flex min-w-0 flex-1 items-center gap-3.5 rounded-2xl px-2 py-1.5 text-left active:bg-wash/6">
+      <button type="button" onClick={() => (current ? togglePlay() : playTrack(track.id, ids))} aria-label={`${current && playing ? tr('Pause') : tr('Play')} ${track.title}`} className="flex min-w-0 flex-1 items-center gap-3.5 rounded-2xl px-2 py-1.5 text-left active:bg-wash/6">
         <span className="relative shrink-0">
           <Cover track={track} className={clsx('size-[3.2rem] ring-1 ring-wash/12 [animation:disc_14s_linear_infinite]', !(current && playing) && '[animation-play-state:paused]')} rounded="rounded-full" />
           <i className="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-0 ring-1 ring-wash/25" aria-hidden="true" />
@@ -155,12 +156,12 @@ function TrackRow({ track, ids }) {
                 <i />
               </span>
             )}
-            <span className="truncate">{track.artist || 'Unknown artist'}</span>
+            <span className="truncate">{track.artist || tr('Unknown artist')}</span>
           </small>
         </span>
         <span className="shrink-0 font-mono text-[0.68rem] text-bone-faint tabular-nums">{formatTime(track.duration)}</span>
       </button>
-      <button type="button" aria-label={track.favorite ? `Remove ${track.title} from favorites` : `Add ${track.title} to favorites`} aria-pressed={track.favorite} onClick={() => toggleFavorite(track.id)} className={clsx('grid size-11 shrink-0 place-items-center rounded-full active:scale-90', track.favorite ? 'text-signal' : 'text-bone-faint')}>
+      <button type="button" aria-label={track.favorite ? tr('Remove {0} from favorites', track.title) : tr('Add {0} to favorites', track.title)} aria-pressed={track.favorite} onClick={() => toggleFavorite(track.id)} className={clsx('grid size-11 shrink-0 place-items-center rounded-full active:scale-90', track.favorite ? 'text-signal' : 'text-bone-faint')}>
         <Heart size={18} fill={track.favorite ? 'currentColor' : 'none'} aria-hidden="true" />
       </button>
     </li>
@@ -171,7 +172,7 @@ function TrackRow({ track, ids }) {
 function CollectionRow({ item, onOpen }) {
   return (
     <li className="px-3">
-      <button type="button" onClick={() => onOpen(item.open)} aria-label={`Open ${item.title}`} className="flex w-full items-center gap-3.5 rounded-2xl px-2 py-1.5 text-left active:bg-wash/6">
+      <button type="button" onClick={() => onOpen(item.open)} aria-label={tr('Open {0}', item.title)} className="flex w-full items-center gap-3.5 rounded-2xl px-2 py-1.5 text-left active:bg-wash/6">
         <Orbit tracks={item.tracks} liked={item.liked} className="size-[3.2rem] shrink-0 rounded-xl! ring-1 ring-wash/12" />
         <span className="min-w-0 flex-1 leading-tight">
           <b className="block truncate font-display text-[1.08rem] font-normal text-bone">{item.title}</b>
@@ -199,18 +200,18 @@ function CollectionPage({ data, playlists, onClose, onDeleted }) {
     <Layer>
       <div className="fixed inset-0 z-[25] animate-sheet-up overflow-y-auto overscroll-contain bg-ink-0 pb-48" style={{ ...drag.style, backgroundImage: `radial-gradient(90% 40% at 50% 0%, rgb(${accent} / 0.5), transparent 75%)` }} {...drag.bind} data-collection-page>
         <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2">
-          <button type="button" aria-label="Back" onClick={leave} className="grid size-10 place-items-center rounded-full border border-wash/12 bg-shade/35 text-bone backdrop-blur active:scale-90">
+          <button type="button" aria-label={tr('Back')} onClick={leave} className="grid size-10 place-items-center rounded-full border border-wash/12 bg-shade/35 text-bone backdrop-blur active:scale-90">
             <ChevronLeft size={22} aria-hidden="true" />
           </button>
           {data.playlist && (
             <Menu
               align="end"
               trigger={
-                <button type="button" aria-label="More" className="grid size-10 place-items-center rounded-full border border-wash/12 bg-shade/35 text-bone backdrop-blur active:scale-90">
+                <button type="button" aria-label={tr('More')} className="grid size-10 place-items-center rounded-full border border-wash/12 bg-shade/35 text-bone backdrop-blur active:scale-90">
                   <MoreHorizontal size={20} aria-hidden="true" />
                 </button>
               }
-              items={[{ id: 'del', label: 'Delete this playlist', icon: Trash2, onSelect: () => { void deletePlaylist(data.playlist.id); onDeleted(); } }]}
+              items={[{ id: 'del', label: tr('Delete this playlist'), icon: Trash2, onSelect: () => { void deletePlaylist(data.playlist.id); onDeleted(); } }]}
             />
           )}
         </div>
@@ -225,27 +226,27 @@ function CollectionPage({ data, playlists, onClose, onDeleted }) {
         </div>
 
         <div className="px-5 pt-6">
-          <span className="font-mono text-[0.62rem] tracking-[0.24em] text-signal uppercase">{data.sub ?? 'Library'}</span>
+          <span className="font-mono text-[0.62rem] tracking-[0.24em] text-signal uppercase">{data.sub ?? tr('Library')}</span>
           <h1 className="mt-1.5 font-display text-[2.2rem] leading-[1.02] text-bone">{data.title}</h1>
-          <p className="mt-1.5 font-mono text-[0.72rem] text-bone-faint">{data.tracks.length} songs</p>
+          <p className="mt-1.5 font-mono text-[0.72rem] text-bone-faint">{data.tracks.length} {tr('songs')}</p>
           <div className="mt-5 flex items-center gap-3">
-            <button type="button" aria-label="Shuffle play" disabled={!ids.length} onClick={() => void playList(ids, { shuffle: true })} className="grid size-12 place-items-center rounded-full border border-wash/15 text-bone-dim active:scale-90 disabled:opacity-40">
+            <button type="button" aria-label={tr('Shuffle play')} disabled={!ids.length} onClick={() => void playList(ids, { shuffle: true })} className="grid size-12 place-items-center rounded-full border border-wash/15 text-bone-dim active:scale-90 disabled:opacity-40">
               <Shuffle size={18} aria-hidden="true" />
             </button>
             {/* off, then the whole list again and again, then one song again and again */}
-            <button type="button" aria-label={`Repeat: ${repeat}`} aria-pressed={repeat !== 'off'} onClick={cycleRepeat} className={clsx('grid size-12 place-items-center rounded-full border active:scale-90', repeat === 'off' ? 'border-wash/15 text-bone-dim' : 'border-signal/50 bg-signal-soft text-signal')} data-repeat-list>
+            <button type="button" aria-label={tr('Repeat: {0}', repeat)} aria-pressed={repeat !== 'off'} onClick={cycleRepeat} className={clsx('grid size-12 place-items-center rounded-full border active:scale-90', repeat === 'off' ? 'border-wash/15 text-bone-dim' : 'border-signal/50 bg-signal-soft text-signal')} data-repeat-list>
               <RepeatIcon size={18} aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Play all" disabled={!ids.length} onClick={() => void playList(ids)} className="ml-auto grid size-[3.7rem] place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_14px_30px_-10px_var(--color-signal)] ring-4 ring-signal/20 active:scale-95 disabled:opacity-40">
+            <button type="button" aria-label={tr('Play all')} disabled={!ids.length} onClick={() => void playList(ids)} className="ml-auto grid size-[3.7rem] place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_14px_30px_-10px_var(--color-signal)] ring-4 ring-signal/20 active:scale-95 disabled:opacity-40">
               <Play size={25} fill="currentColor" className="translate-x-px" aria-hidden="true" />
             </button>
           </div>
         </div>
-        <ul className="mt-4 px-2" aria-label="Songs">
+        <ul className="mt-4 px-2" aria-label={tr('Songs')}>
           {data.tracks.length ? (
             data.tracks.map((track, i) => <SheetRow key={track.id} track={track} index={i} ids={ids} playlists={playlists} inPlaylist={Boolean(data.playlist)} onRemoveFromPlaylist={() => {}} />)
           ) : (
-            <li className="px-4 py-8 text-center font-mono text-fine text-bone-faint">Nothing here yet.</li>
+            <li className="px-4 py-8 text-center font-mono text-fine text-bone-faint">{tr('Nothing here yet.')}</li>
           )}
         </ul>
       </div>
@@ -267,18 +268,18 @@ function NowPlaying({ tracks, byId }) {
     <Layer>
       <div className="fixed inset-0 z-[60] animate-sheet-up overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-10" style={{ ...drag.style, background: `radial-gradient(120% 55% at 50% 0%, rgb(${accent} / 0.55), transparent 75%), var(--color-ink-0)` }} {...drag.bind} data-now-playing-page>
         <div className="flex items-center justify-between">
-          <button type="button" aria-label="Close the player" onClick={leave} className="grid size-10 place-items-center rounded-full border border-wash/12 bg-wash/8 text-bone active:scale-90">
+          <button type="button" aria-label={tr('Close the player')} onClick={leave} className="grid size-10 place-items-center rounded-full border border-wash/12 bg-wash/8 text-bone active:scale-90">
             <ChevronDown size={22} aria-hidden="true" />
           </button>
-          <span className="font-mono text-[0.62rem] tracking-[0.24em] text-bone-dim uppercase">Now playing</span>
+          <span className="font-mono text-[0.62rem] tracking-[0.24em] text-bone-dim uppercase">{tr('Now playing')}</span>
           <Menu
             align="end"
             trigger={
-              <button type="button" aria-label="Sleep timer" className={clsx('grid size-10 place-items-center rounded-full border border-wash/12 bg-wash/8 active:scale-90', sleepAt ? 'text-signal' : 'text-bone')}>
+              <button type="button" aria-label={tr('Sleep timer')} className={clsx('grid size-10 place-items-center rounded-full border border-wash/12 bg-wash/8 active:scale-90', sleepAt ? 'text-signal' : 'text-bone')}>
                 <MoonStar size={18} aria-hidden="true" />
               </button>
             }
-            items={[...[15, 30, 60].map((m) => ({ id: `s${m}`, label: `Stop after ${m} min`, onSelect: () => setSleepTimer(m) })), { id: 'off', label: 'No sleep timer', onSelect: () => setSleepTimer(0) }]}
+            items={[...[15, 30, 60].map((m) => ({ id: `s${m}`, label: tr('Stop after {0} min', m), onSelect: () => setSleepTimer(m) })), { id: 'off', label: tr('No sleep timer'), onSelect: () => setSleepTimer(0) }]}
           />
         </div>
 
@@ -287,19 +288,19 @@ function NowPlaying({ tracks, byId }) {
         <div className="mx-auto mt-8 flex w-full max-w-[22rem] items-center gap-3">
           <div className="min-w-0 flex-1 leading-tight">
             <h2 className="truncate font-display text-[1.85rem] text-bone" data-now-title>
-              {current?.title ?? 'Nothing playing'}
+              {current?.title ?? tr('Nothing playing')}
             </h2>
-            <p className="mt-1.5 truncate font-mono text-[0.74rem] tracking-wide text-bone-dim">{current ? [current.artist, current.album].filter(Boolean).join(' · ') || 'Unknown artist' : 'Pick a song from the library'}</p>
+            <p className="mt-1.5 truncate font-mono text-[0.74rem] tracking-wide text-bone-dim">{current ? [current.artist, current.album].filter(Boolean).join(' · ') || tr('Unknown artist') : tr('Pick a song from the library')}</p>
           </div>
           {current && (
-            <button type="button" aria-label={current.favorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={current.favorite} onClick={() => toggleFavorite(current.id)} className={clsx('grid size-11 place-items-center rounded-full active:scale-90', current.favorite ? 'text-signal' : 'text-bone-dim')}>
+            <button type="button" aria-label={current.favorite ? tr('Remove from favorites') : tr('Add to favorites')} aria-pressed={current.favorite} onClick={() => toggleFavorite(current.id)} className={clsx('grid size-11 place-items-center rounded-full active:scale-90', current.favorite ? 'text-signal' : 'text-bone-dim')}>
               <Heart size={24} fill={current.favorite ? 'currentColor' : 'none'} aria-hidden="true" />
             </button>
           )}
         </div>
 
         <div className="mx-auto mt-4 w-full max-w-[22rem]">
-          <Slider label="Seek" value={Math.floor(time)} max={Math.max(1, Math.floor(duration))} onChange={seek} className="w-full" />
+          <Slider label={tr('Seek')} value={Math.floor(time)} max={Math.max(1, Math.floor(duration))} onChange={seek} className="w-full" />
           <div className="mt-1 flex justify-between font-mono text-[0.68rem] text-bone-faint tabular-nums">
             <span>{formatTime(time)}</span>
             <span>-{formatTime(Math.max(0, duration - time))}</span>
@@ -307,27 +308,27 @@ function NowPlaying({ tracks, byId }) {
         </div>
 
         <div className="mx-auto mt-3 flex w-full max-w-[22rem] items-center justify-between">
-          <button type="button" aria-label="Shuffle" aria-pressed={shuffle} onClick={toggleShuffle} className={clsx('grid size-11 place-items-center rounded-full active:scale-90', shuffle ? 'text-signal' : 'text-bone-dim')}>
+          <button type="button" aria-label={tr('Shuffle')} aria-pressed={shuffle} onClick={toggleShuffle} className={clsx('grid size-11 place-items-center rounded-full active:scale-90', shuffle ? 'text-signal' : 'text-bone-dim')}>
             <Shuffle size={20} aria-hidden="true" />
           </button>
-          <button type="button" aria-label="Previous track" onClick={previous} className="grid size-12 place-items-center rounded-full text-bone active:scale-90">
+          <button type="button" aria-label={tr('Previous track')} onClick={previous} className="grid size-12 place-items-center rounded-full text-bone active:scale-90">
             <SkipBack size={27} fill="currentColor" aria-hidden="true" />
           </button>
-          <button type="button" aria-label={playing ? 'Pause' : 'Play'} onClick={togglePlay} className={clsx('grid size-[4.6rem] place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_18px_38px_-12px_var(--color-signal)] ring-[6px] ring-signal/20 active:scale-95', loading && 'animate-pulse')}>
+          <button type="button" aria-label={playing ? tr('Pause') : tr('Play')} onClick={togglePlay} className={clsx('grid size-[4.6rem] place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_18px_38px_-12px_var(--color-signal)] ring-[6px] ring-signal/20 active:scale-95', loading && 'animate-pulse')}>
             {playing ? <Pause size={30} fill="currentColor" aria-hidden="true" /> : <Play size={30} fill="currentColor" className="translate-x-0.5" aria-hidden="true" />}
           </button>
-          <button type="button" aria-label="Next track" onClick={next} className="grid size-12 place-items-center rounded-full text-bone active:scale-90">
+          <button type="button" aria-label={tr('Next track')} onClick={next} className="grid size-12 place-items-center rounded-full text-bone active:scale-90">
             <SkipForward size={27} fill="currentColor" aria-hidden="true" />
           </button>
-          <button type="button" aria-label={`Repeat: ${repeat}`} aria-pressed={repeat !== 'off'} onClick={cycleRepeat} className={clsx('grid size-11 place-items-center rounded-full active:scale-90', repeat !== 'off' ? 'text-signal' : 'text-bone-dim')}>
+          <button type="button" aria-label={tr('Repeat: {0}', repeat)} aria-pressed={repeat !== 'off'} onClick={cycleRepeat} className={clsx('grid size-11 place-items-center rounded-full active:scale-90', repeat !== 'off' ? 'text-signal' : 'text-bone-dim')}>
             <RepeatIcon size={20} aria-hidden="true" />
           </button>
         </div>
         {error && <p className="mt-3 text-center font-mono text-fine text-danger">{error}</p>}
 
         {current && (
-          <section className="mx-auto mt-8 w-full max-w-[22rem] rounded-[1.75rem] border border-wash/10 bg-shade/25 p-5 backdrop-blur" aria-label="Lyrics">
-            <h3 className="font-mono text-[0.62rem] tracking-[0.24em] text-signal uppercase">Lyrics</h3>
+          <section className="mx-auto mt-8 w-full max-w-[22rem] rounded-[1.75rem] border border-wash/10 bg-shade/25 p-5 backdrop-blur" aria-label={tr('Lyrics')}>
+            <h3 className="font-mono text-[0.62rem] tracking-[0.24em] text-signal uppercase">{tr('Lyrics')}</h3>
             <div className="mt-3">
               <Lyrics track={current} time={time} duration={duration} compact />
             </div>
@@ -335,9 +336,9 @@ function NowPlaying({ tracks, byId }) {
         )}
 
         {upNext.length > 0 && (
-          <section className="mx-auto mt-7 w-full max-w-[22rem]" aria-label="Next in queue">
+          <section className="mx-auto mt-7 w-full max-w-[22rem]" aria-label={tr('Next in queue')}>
             <h3 className="mb-2 flex items-center gap-2 font-mono text-[0.62rem] tracking-[0.24em] text-signal uppercase">
-              <ListMusic size={13} aria-hidden="true" /> Up next
+              <ListMusic size={13} aria-hidden="true" /> {tr('Up next')}
             </h3>
             <ul>
               {upNext.map((t) => (
@@ -346,7 +347,7 @@ function NowPlaying({ tracks, byId }) {
                     <Cover track={t} className="size-11 ring-1 ring-wash/12" rounded="rounded-full" />
                     <span className="min-w-0 leading-tight">
                       <b className="block truncate font-display text-[1.02rem] font-normal text-bone">{t.title}</b>
-                      <small className="block truncate font-mono text-[0.68rem] text-bone-faint">{t.artist || 'Unknown artist'}</small>
+                      <small className="block truncate font-mono text-[0.68rem] text-bone-faint">{t.artist || tr('Unknown artist')}</small>
                     </span>
                   </button>
                 </li>
@@ -390,18 +391,18 @@ export default function MusicPhone() {
   const empty = loaded && !tracks.length;
   const hasSamples = tracks.some((t) => t.sample);
 
-  const albumItems = albums.map((g) => ({ key: g.key, title: g.title, sub: g.subtitle || 'Album', tracks: of(g), open: { kind: 'album', key: g.key } }));
-  const artistItems = artists.map((g) => ({ key: g.key, title: g.title, sub: `${g.trackIds.length} songs`, tracks: of(g), open: { kind: 'artist', key: g.key } }));
-  const likedItem = { key: 'liked', title: 'Liked Songs', sub: `${liked.length} songs`, liked: true, tracks: liked, open: { kind: 'liked' } };
-  const playlistItems = playlists.map((p) => ({ key: p.id, title: p.name, sub: `${p.trackIds.length} songs`, tracks: p.trackIds.map((id) => byId.get(id)).filter(Boolean), open: { kind: 'playlist', key: p.id } }));
+  const albumItems = albums.map((g) => ({ key: g.key, title: g.title, sub: g.subtitle || tr('Album'), tracks: of(g), open: { kind: 'album', key: g.key } }));
+  const artistItems = artists.map((g) => ({ key: g.key, title: g.title, sub: tr('{0} songs', g.trackIds.length), tracks: of(g), open: { kind: 'artist', key: g.key } }));
+  const likedItem = { key: 'liked', title: tr('Liked Songs'), sub: tr('{0} songs', liked.length), liked: true, tracks: liked, open: { kind: 'liked' } };
+  const playlistItems = playlists.map((p) => ({ key: p.id, title: p.name, sub: tr('{0} songs', p.trackIds.length), tracks: p.trackIds.map((id) => byId.get(id)).filter(Boolean), open: { kind: 'playlist', key: p.id } }));
 
   const pageData = useMemo(() => {
     if (!page) return null;
-    if (page.kind === 'liked') return { title: 'Liked Songs', sub: 'Playlist', tracks: liked, liked: true };
-    if (page.kind === 'album') return { title: page.key, sub: 'Album', tracks: tracks.filter((t) => t.album === page.key) };
-    if (page.kind === 'artist') return { title: page.key, sub: 'Artist', tracks: tracks.filter((t) => t.artist === page.key) };
+    if (page.kind === 'liked') return { title: tr('Liked Songs'), sub: tr('Playlist'), tracks: liked, liked: true };
+    if (page.kind === 'album') return { title: page.key, sub: tr('Album'), tracks: tracks.filter((t) => t.album === page.key) };
+    if (page.kind === 'artist') return { title: page.key, sub: tr('Artist'), tracks: tracks.filter((t) => t.artist === page.key) };
     const p = playlists.find((x) => x.id === page.key);
-    return p ? { title: p.name, sub: 'Playlist', tracks: p.trackIds.map((id) => byId.get(id)).filter(Boolean), playlist: p } : null;
+    return p ? { title: p.name, sub: tr('Playlist'), tracks: p.trackIds.map((id) => byId.get(id)).filter(Boolean), playlist: p } : null;
   }, [page, tracks, liked, playlists, byId]);
 
   const recent = useMemo(() => {
@@ -415,9 +416,9 @@ export default function MusicPhone() {
 
   const add = async (files) => {
     if (!files.length) return;
-    setNotice('Reading your files…');
+    setNotice(tr('Reading your files…'));
     const result = await importFiles(files, () => {});
-    setNotice([`${result.added} added`, result.skipped && `${result.skipped} already there`, result.failed && `${result.failed} could not be read`].filter(Boolean).join(' · '));
+    setNotice([tr('{0} added', result.added), result.skipped && tr('{0} already there', result.skipped), result.failed && tr('{0} could not be read', result.failed)].filter(Boolean).join(' · '));
   };
   const askDj = async (wish) => {
     const text = (wish ?? dj.text).trim();
@@ -425,7 +426,7 @@ export default function MusicPhone() {
     setDj({ busy: true, note: '', error: '', text });
     try {
       const pick = await djPick({ mood: text, tracks: tracks.map((t) => ({ id: t.id, title: t.title, artist: t.artist, genre: t.genre })) });
-      if (!pick.ids.length) throw new Error('Nothing in your library fits that. Try other words.');
+      if (!pick.ids.length) throw new Error(tr('Nothing in your library fits that. Try other words.'));
       await playList(pick.ids);
       setDj({ busy: false, note: pick.note, error: '', text });
     } catch (e) {
@@ -457,7 +458,7 @@ export default function MusicPhone() {
 
       {/* Home, Search, Library on a glass bar with a gold marker that slides, and adding music */}
       <div className="flex items-center gap-2.5 px-5">
-        <div className="relative grid flex-1 grid-cols-3 rounded-full border border-wash/10 bg-wash/[0.05] p-1 backdrop-blur" role="tablist" aria-label="Music">
+        <div className="relative grid flex-1 grid-cols-3 rounded-full border border-wash/10 bg-wash/[0.05] p-1 backdrop-blur" role="tablist" aria-label={tr('Music')}>
           <i className="absolute top-1 bottom-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-full bg-signal shadow-[0_8px_22px_-8px_var(--color-signal)] transition-transform duration-500 ease-out-expo" style={{ transform: `translateX(${sectionIndex * 100}%)` }} aria-hidden="true" />
           {SECTIONS.map(({ id, label, icon: Icon }) => (
             <button key={id} type="button" role="tab" aria-selected={section === id} onClick={() => setSection(id)} className={clsx('relative z-10 inline-flex h-10 items-center justify-center gap-1.5 rounded-full font-mono text-[0.76rem] transition-colors duration-300', section === id ? 'font-medium text-ink-0' : 'text-bone-dim')}>
@@ -468,15 +469,15 @@ export default function MusicPhone() {
         <Menu
           align="end"
           trigger={
-            <button type="button" aria-label="Add music" className="grid size-12 shrink-0 place-items-center rounded-full border border-signal/50 bg-signal-soft text-signal active:scale-90">
+            <button type="button" aria-label={tr('Add music')} className="grid size-12 shrink-0 place-items-center rounded-full border border-signal/50 bg-signal-soft text-signal active:scale-90">
               <Plus size={20} aria-hidden="true" />
             </button>
           }
           items={[
-            { id: 'songs', label: 'Add songs', icon: Upload, onSelect: () => filePicker.current?.click() },
-            { id: 'folder', label: 'Add a folder', icon: FolderPlus, onSelect: () => folderPicker.current?.click() },
-            { id: 'playlist', label: 'New playlist', icon: ListMusic, onSelect: () => { setSection('library'); setShelf('playlists'); setNewPlaylist(''); } },
-            ...(hasSamples ? [{ id: 'rm', label: 'Remove the sample songs', icon: Trash2, onSelect: () => removeSamples() }] : []),
+            { id: 'songs', label: tr('Add songs'), icon: Upload, onSelect: () => filePicker.current?.click() },
+            { id: 'folder', label: tr('Add a folder'), icon: FolderPlus, onSelect: () => folderPicker.current?.click() },
+            { id: 'playlist', label: tr('New playlist'), icon: ListMusic, onSelect: () => { setSection('library'); setShelf('playlists'); setNewPlaylist(''); } },
+            ...(hasSamples ? [{ id: 'rm', label: tr('Remove the sample songs'), icon: Trash2, onSelect: () => removeSamples() }] : []),
           ]}
         />
       </div>
@@ -489,11 +490,11 @@ export default function MusicPhone() {
       {empty && (
         <section className="mx-5 flex flex-col items-center gap-4 rounded-[2rem] border border-dashed border-line-strong p-8 text-center">
           <Vinyl spinning={false} className="w-40" />
-          <h2 className="font-display text-h3 leading-tight text-bone">The turntable is <em className="serif-accent">quiet</em></h2>
-          <p className="text-fine text-bone-dim">Add songs from this phone, or drop files into <code className="font-mono text-[0.78rem]">src/assets/music</code> in the project. Tags and covers are read from the files, and everything stays on this device.</p>
+          <h2 className="font-display text-h3 leading-tight text-bone">{tr('The turntable is')} <em className="serif-accent">{tr('quiet')}</em></h2>
+          <p className="text-fine text-bone-dim">{tr('Add songs from this phone, or drop files into')} <code className="font-mono text-[0.78rem]">{tr('src/assets/music')}</code> {tr('in the project. Tags and covers are read from the files, and everything stays on this device.')}</p>
           <div className="flex flex-wrap justify-center gap-2">
             <Button size="sm" onClick={() => filePicker.current?.click()}>
-              Add songs
+              {tr('Add songs')}
             </Button>
           </div>
         </section>
@@ -504,11 +505,11 @@ export default function MusicPhone() {
           <div className="px-5">
             <span className="block font-mono text-[0.6rem] tracking-[0.24em] text-signal uppercase">{greetingFor(new Date().getHours())}</span>
             <h2 className="mt-2 font-display text-[2.1rem] leading-[1.02] text-bone">
-              What shall we <em className="serif-accent">spin</em>, {owner.name}?
+              {tr('What shall we')} <em className="serif-accent">{tr('spin')}</em>, {owner.name}?
             </h2>
           </div>
 
-          <ul className="grid grid-cols-2 gap-2 px-5" aria-label="Quick picks">
+          <ul className="grid grid-cols-2 gap-2 px-5" aria-label={tr('Quick picks')}>
             {[likedItem, ...playlistItems, ...albumItems].slice(0, 6).map((item) => (
               <li key={item.key}>
                 <button type="button" onClick={() => setPage(item.open)} className="flex h-14 w-full items-center gap-2.5 rounded-full border border-wash/10 bg-wash/[0.06] p-1 pr-3.5 text-left backdrop-blur active:scale-[0.97]">
@@ -519,15 +520,15 @@ export default function MusicPhone() {
             ))}
           </ul>
 
-          <section className="flex flex-col gap-4" aria-label={played ? 'Recently played' : 'Your songs'}>
-            <Heading eyebrow={played ? 'On rotation' : 'Your shelf'}>
+          <section className="flex flex-col gap-4" aria-label={played ? tr('Recently played') : tr('Your songs')}>
+            <Heading eyebrow={played ? tr('On rotation') : tr('Your shelf')}>
               {played ? (
                 <>
-                  Recently <em className="serif-accent">played</em>
+                  {tr('Recently')} <em className="serif-accent">{tr('played')}</em>
                 </>
               ) : (
                 <>
-                  Your <em className="serif-accent">songs</em>
+                  {tr('Your')} <em className="serif-accent">{tr('songs')}</em>
                 </>
               )}
             </Heading>
@@ -536,10 +537,10 @@ export default function MusicPhone() {
                 const isNow = nowId === t.id;
                 return (
                   <li key={t.id} data-track={t.title}>
-                    <button type="button" onClick={() => playTrack(t.id, allIds)} aria-label={`Play ${t.title}`} className="block w-full text-center active:scale-95">
+                    <button type="button" onClick={() => playTrack(t.id, allIds)} aria-label={tr('Play {0}', t.title)} className="block w-full text-center active:scale-95">
                       <Vinyl track={t} spinning={isNow && nowPlaying} className="w-full" tint={accent} />
                       <b className={clsx('mt-1.5 block truncate font-display text-[0.95rem] font-normal', isNow ? 'text-signal' : 'text-bone')}>{t.title}</b>
-                      <small className="block truncate font-mono text-[0.62rem] text-bone-faint">{t.artist || 'Unknown artist'}</small>
+                      <small className="block truncate font-mono text-[0.62rem] text-bone-faint">{t.artist || tr('Unknown artist')}</small>
                     </button>
                   </li>
                 );
@@ -547,38 +548,38 @@ export default function MusicPhone() {
             </ul>
           </section>
 
-          <section className="flex flex-col gap-4" aria-label="Made for you">
-            <Heading eyebrow="Hank DJ" action={dj.busy ? <span className="font-mono text-[0.66rem] text-signal">mixing…</span> : null}>
-              Made for <em className="serif-accent">you</em>
+          <section className="flex flex-col gap-4" aria-label={tr('Made for you')}>
+            <Heading eyebrow={tr('Hank DJ')} action={dj.busy ? <span className="font-mono text-[0.66rem] text-signal">{tr('mixing…')}</span> : null}>
+              {tr('Made for')} <em className="serif-accent">{tr('you')}</em>
             </Heading>
             <ul className="grid grid-cols-2 gap-3 px-5">
               {MOODS.map((m, i) => (
                 <li key={m} className={clsx(i % 2 === 1 && 'mt-5')}>
                   <button type="button" onClick={() => void askDj(m)} className="relative flex h-28 w-full flex-col justify-between overflow-hidden rounded-[1.5rem] border border-wash/10 p-3.5 text-left active:scale-[0.97]" style={{ background: auroraOf(m) }}>
-                    <span className="font-mono text-[0.56rem] tracking-[0.22em] text-white/70 uppercase">Mix</span>
+                    <span className="font-mono text-[0.56rem] tracking-[0.22em] text-white/70 uppercase">{tr('Mix')}</span>
                     <b className="font-display text-[1.45rem] leading-none font-normal text-white italic">{m}</b>
                   </button>
                 </li>
               ))}
             </ul>
             <form onSubmit={(e) => { e.preventDefault(); void askDj(); }} className="mx-5 mt-3 flex gap-2">
-              <input aria-label="Tell Hank DJ what to play" placeholder="or say it in your own words…" value={dj.text} onChange={(e) => setDj({ ...dj, text: e.target.value })} className="h-12 min-w-0 flex-1 rounded-full border border-wash/12 bg-wash/[0.06] px-5 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
+              <input aria-label={tr('Tell Hank DJ what to play')} placeholder={tr('or say it in your own words…')} value={dj.text} onChange={(e) => setDj({ ...dj, text: e.target.value })} className="h-12 min-w-0 flex-1 rounded-full border border-wash/12 bg-wash/[0.06] px-5 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
               <Button type="submit" size="sm" loading={dj.busy} disabled={!dj.text.trim()} className="h-12">
-                Play
+                {tr('Play')}
               </Button>
             </form>
             {(dj.note || dj.error) && <p className={clsx('px-5 font-mono text-fine', dj.error ? 'text-danger' : 'text-bone-dim')} role="status">{dj.error || dj.note}</p>}
           </section>
 
           {albumItems.length > 0 && (
-            <section className="flex flex-col gap-4" aria-label="Your albums">
-              <Heading eyebrow="Sleeves">
-                Your <em className="serif-accent">albums</em>
+            <section className="flex flex-col gap-4" aria-label={tr('Your albums')}>
+              <Heading eyebrow={tr('Sleeves')}>
+                {tr('Your')} <em className="serif-accent">{tr('albums')}</em>
               </Heading>
               <ul className="grid grid-cols-3 gap-3 px-5">
                 {albumItems.map((item) => (
                   <li key={item.key}>
-                    <button type="button" onClick={() => setPage(item.open)} aria-label={`Open ${item.title}`} className="block w-full text-left active:scale-95">
+                    <button type="button" onClick={() => setPage(item.open)} aria-label={tr('Open {0}', item.title)} className="block w-full text-left active:scale-95">
                       <Orbit tracks={item.tracks} className="w-full rounded-xl! shadow-[0_18px_34px_-16px_rgb(var(--shadow-rgb)/0.9)] ring-1 ring-wash/10" />
                       <b className="mt-2 block truncate font-display text-[0.95rem] font-normal text-bone">{item.title}</b>
                       <small className="block truncate font-mono text-[0.62rem] text-bone-faint">{item.sub}</small>
@@ -595,15 +596,15 @@ export default function MusicPhone() {
         <>
           <label className="relative mx-5 block">
             <Search size={18} className="pointer-events-none absolute top-1/2 left-5 -translate-y-1/2 text-signal" aria-hidden="true" />
-            <input type="search" aria-label="Search the library" data-own-clear placeholder="Songs, artists, albums…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-13 w-full rounded-full border border-wash/12 bg-wash/[0.07] pr-11 pl-13 text-body text-bone backdrop-blur placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
+            <input type="search" aria-label={tr('Search the library')} data-own-clear placeholder={tr('Songs, artists, albums…')} value={query} onChange={(e) => setQuery(e.target.value)} className="h-13 w-full rounded-full border border-wash/12 bg-wash/[0.07] pr-11 pl-13 text-body text-bone backdrop-blur placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
             {query && (
-              <button type="button" aria-label="Clear the search" onClick={() => setQuery('')} className="absolute top-1/2 right-4 -translate-y-1/2 text-bone-dim">
+              <button type="button" aria-label={tr('Clear the search')} onClick={() => setQuery('')} className="absolute top-1/2 right-4 -translate-y-1/2 text-bone-dim">
                 <X size={17} aria-hidden="true" />
               </button>
             )}
           </label>
           {query.trim() ? (
-            <section aria-label="Results">
+            <section aria-label={tr('Results')}>
               {results.length ? (
                 <ul>
                   {results.map((t) => (
@@ -611,13 +612,13 @@ export default function MusicPhone() {
                   ))}
                 </ul>
               ) : (
-                <p className="px-5 py-6 font-mono text-fine text-bone-faint">Nothing matches “{query.trim()}”.</p>
+                <p className="px-5 py-6 font-mono text-fine text-bone-faint">{tr('Nothing matches “')}{query.trim()}”.</p>
               )}
             </section>
           ) : (
             <section className="flex flex-col gap-4">
-              <Heading eyebrow="Browse">
-                Every <em className="serif-accent">mood</em>
+              <Heading eyebrow={tr('Browse')}>
+                {tr('Every')} <em className="serif-accent">{tr('mood')}</em>
               </Heading>
               <ul className="grid grid-cols-2 gap-3 px-5">
                 {[...genres, ...MOODS].map((name, i) => (
@@ -638,20 +639,20 @@ export default function MusicPhone() {
           <ShelfTitles shelf={shelf} onPick={setShelf} />
           {shelf === 'songs' && (
             <div className="-mb-3 flex items-center gap-3 px-5">
-              <button type="button" aria-label="Shuffle play" onClick={() => void playList(allIds, { shuffle: true })} className="grid size-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_10px_24px_-10px_var(--color-signal)] active:scale-95">
+              <button type="button" aria-label={tr('Shuffle play')} onClick={() => void playList(allIds, { shuffle: true })} className="grid size-12 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_10px_24px_-10px_var(--color-signal)] active:scale-95">
                 <Shuffle size={19} aria-hidden="true" />
               </button>
               <span className="leading-tight">
-                <b className="block font-display text-[1.1rem] font-normal text-bone">Shuffle play</b>
-                <small className="font-mono text-[0.68rem] text-bone-faint">{tracks.length} songs</small>
+                <b className="block font-display text-[1.1rem] font-normal text-bone">{tr('Shuffle play')}</b>
+                <small className="font-mono text-[0.68rem] text-bone-faint">{tracks.length} {tr('songs')}</small>
               </span>
             </div>
           )}
           {newPlaylist !== null && (
             <form onSubmit={createList} className="mx-5 flex gap-2">
-              <input autoFocus aria-label="New playlist name" placeholder="Name the playlist" value={newPlaylist} onChange={(e) => setNewPlaylist(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setNewPlaylist(null)} className="h-12 min-w-0 flex-1 rounded-full border border-wash/12 bg-wash/[0.06] px-5 text-fine text-bone focus-visible:border-signal focus-visible:outline-none" />
+              <input autoFocus aria-label={tr('New playlist name')} placeholder={tr('Name the playlist')} value={newPlaylist} onChange={(e) => setNewPlaylist(e.target.value)} onKeyDown={(e) => e.key === 'Escape' && setNewPlaylist(null)} className="h-12 min-w-0 flex-1 rounded-full border border-wash/12 bg-wash/[0.06] px-5 text-fine text-bone focus-visible:border-signal focus-visible:outline-none" />
               <Button type="submit" size="sm" disabled={!newPlaylist.trim()} className="h-12">
-                Create
+                {tr('Create')}
               </Button>
             </form>
           )}
@@ -662,7 +663,7 @@ export default function MusicPhone() {
                   <span className="grid size-[3.2rem] shrink-0 place-items-center rounded-xl border border-dashed border-signal/60 text-signal">
                     <Plus size={22} aria-hidden="true" />
                   </span>
-                  <b className="font-display text-[1.08rem] font-normal text-bone">New playlist</b>
+                  <b className="font-display text-[1.08rem] font-normal text-bone">{tr('New playlist')}</b>
                 </button>
               </li>
             )}

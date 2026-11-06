@@ -114,5 +114,6 @@ export default defineConfig({
     // the sync tests start an in-process Postgres, which is slow when the whole suite runs at once
     testTimeout: 30000,
     hookTimeout: 30000,
+    setupFiles: ['src/test/setup.js'],
   },
 })

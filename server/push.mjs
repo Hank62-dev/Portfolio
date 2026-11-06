@@ -1,5 +1,6 @@
 import webpush from 'web-push';
-import { reminders } from '../src/features/spacehank/notifications/rules.js';
+import { vi } from '../src/features/spacehank/locale/vi.js';
+import { plainT, reminders } from '../src/features/spacehank/notifications/rules.js';
 import { HttpError } from './http.mjs';
 
 // Web Push: reminders that reach a phone or a computer even when the app is closed. The browser gives the app a
@@ -18,6 +19,8 @@ const SCHEMA = [
      kinds      JSONB  NOT NULL DEFAULT '{}',
      created_at BIGINT NOT NULL
    )`,
+  // the language of the device, so what it is told is told in it (added later: older rows are English)
+  `ALTER TABLE push_subs ADD COLUMN IF NOT EXISTS lang TEXT NOT NULL DEFAULT 'en'`,
   `CREATE TABLE IF NOT EXISTS push_sent (
      key     TEXT   PRIMARY KEY,
      sent_at BIGINT NOT NULL
@@ -43,6 +46,9 @@ export const parseSubscription = (input) => {
 
 const day = (ms) => new Date(ms).toISOString().slice(0, 10);
 
+/** The translator for a language: the Vietnamese table, or the English text as written. */
+const translator = (lang) => (lang === 'vi' ? (text, ...args) => plainT(vi[text] ?? text, ...args) : plainT);
+
 export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh', send, now = Date.now }) => {
   const enabled = Boolean(db && sync && vapid?.publicKey && vapid?.privateKey && vapid?.subject);
   const deliver = send ?? ((subscription, payload) => webpush.sendNotification(subscription, payload, { TTL: 3600, urgency: 'normal', vapidDetails: { subject: vapid.subject, publicKey: vapid.publicKey, privateKey: vapid.privateKey } }));
@@ -62,7 +68,7 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
 
   // ---- subscriptions
 
-  const subscribe = async ({ subscription, kinds }) => {
+  const subscribe = async ({ subscription, kinds, lang }) => {
     need();
     await init();
     const { endpoint, p256dh, auth } = parseSubscription(subscription);
@@ -73,9 +79,9 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     }
     const wanted = kinds && typeof kinds === 'object' ? Object.fromEntries(Object.entries(kinds).filter(([, on]) => typeof on === 'boolean').slice(0, 20)) : {};
     await db.query(
-      `INSERT INTO push_subs (endpoint, p256dh, auth, kinds, created_at) VALUES ($1, $2, $3, $4, $5)
-       ON CONFLICT (endpoint) DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, kinds = EXCLUDED.kinds`,
-      [endpoint, p256dh, auth, JSON.stringify(wanted), now()]
+      `INSERT INTO push_subs (endpoint, p256dh, auth, kinds, created_at, lang) VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (endpoint) DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, kinds = EXCLUDED.kinds, lang = EXCLUDED.lang`,
+      [endpoint, p256dh, auth, JSON.stringify(wanted), now(), lang === 'vi' ? 'vi' : 'en']
     );
     return { subscribed: true };
   };
@@ -87,7 +93,7 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     return { subscribed: false };
   };
 
-  const subscriptions = async () => (await db.query(`SELECT endpoint, p256dh, auth, kinds FROM push_subs`)).rows;
+  const subscriptions = async () => (await db.query(`SELECT endpoint, p256dh, auth, kinds, lang FROM push_subs`)).rows;
 
   /** Sends one notification to every device that wants this kind. A device the push service says is gone is forgotten. */
   const sendTo = async (subs, notification) => {
@@ -109,7 +115,12 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
   const sendTest = async () => {
     need();
     await init();
-    const sent = await sendTo(await subscriptions(), { title: 'This is a test', body: 'Push is working, even with the app closed.', tab: 'hank', kind: 'system', tone: 'success', key: `test:${now()}` });
+    const subs = await subscriptions();
+    let sent = 0;
+    for (const lang of new Set(subs.map((s) => s.lang))) {
+      const t = translator(lang);
+      sent += await sendTo(subs.filter((s) => s.lang === lang), { title: t('This is a test'), body: t('Push is working, even with the app closed.'), tab: 'hank', kind: 'system', tone: 'success', key: `test:${now()}` });
+    }
     return { sent };
   };
 
@@ -159,14 +170,20 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
           /* the feed is down: the rest still goes out */
         }
       }
-      const due = reminders({ now: new Date(last), zone, events, ...(await facts(last)) });
+      const data = { now: new Date(last), zone, events, ...(await facts(last)) };
+      const due = reminders(data); // the occasions; each is then told in the language of the device it goes to
+      const langs = [...new Set(subs.map((s) => s.lang))];
+      const told = Object.fromEntries(langs.map((lang) => [lang, new Map(reminders({ ...data, t: translator(lang) }).map((item) => [item.key, item]))]));
 
       let sent = 0;
       for (const item of due) {
         // claim the occasion first, so two ticks at once (or a restart) can never send it twice
         const claim = await db.query(`INSERT INTO push_sent (key, sent_at) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING key`, [item.key, last]);
         if (!claim.rows.length) continue;
-        sent += await sendTo(subs, { title: item.title, body: item.body, tab: item.tab, kind: item.kind, tone: item.tone ?? 'info', key: item.key });
+        for (const lang of langs) {
+          const text = told[lang].get(item.key) ?? item;
+          sent += await sendTo(subs.filter((s) => s.lang === lang), { title: text.title, body: text.body, tab: item.tab, kind: item.kind, tone: item.tone ?? 'info', key: item.key });
+        }
       }
 
       if (last - cleaned > 3600 * 1000) {

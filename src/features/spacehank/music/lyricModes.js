@@ -1,13 +1,14 @@
 import { createStore } from '../store';
+import { tr } from '../lang';
 
 // How lyrics are shown. Timed lyrics have five looks; the choice and the text size are remembered on this device.
 
 export const MODES = [
-  { id: 'spotify', label: 'Scroll', hint: 'Big lines that slide up, the sung one bright' },
-  { id: 'karaoke', label: 'Karaoke', hint: 'The sung line fills with colour as it is sung' },
-  { id: 'focus', label: 'Focus', hint: 'One line at a time, in the middle' },
-  { id: 'ribbon', label: 'Soft', hint: 'A blurred ribbon around the sung line' },
-  { id: 'full', label: 'Full', hint: 'Every line, small, with the sung one marked' },
+  { id: 'spotify', label: tr('Scroll'), hint: tr('Big lines that slide up, the sung one bright') },
+  { id: 'karaoke', label: tr('Karaoke'), hint: tr('The sung line fills with colour as it is sung') },
+  { id: 'focus', label: tr('Focus'), hint: tr('One line at a time, in the middle') },
+  { id: 'ribbon', label: tr('Soft'), hint: tr('A blurred ribbon around the sung line') },
+  { id: 'full', label: tr('Full'), hint: tr('Every line, small, with the sung one marked') },
 ];
 export const SIZES = ['s', 'm', 'l'];
 

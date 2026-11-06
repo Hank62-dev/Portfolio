@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Popover from '@radix-ui/react-popover';
@@ -34,7 +35,7 @@ function Row({ item, onOpen }) {
           <time className="mt-1 block font-mono text-[0.64rem] text-bone-faint/80">{ago(item.at)}</time>
         </span>
       </button>
-      <button type="button" aria-label={`Dismiss: ${item.title}`} onClick={() => remove(item.id)} className="absolute top-2.5 right-2 grid size-7 place-items-center rounded-full text-bone-faint opacity-0 transition-opacity hover:bg-wash/10 hover:text-bone focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100">
+      <button type="button" aria-label={tr('Dismiss: {0}', item.title)} onClick={() => remove(item.id)} className="absolute top-2.5 right-2 grid size-7 place-items-center rounded-full text-bone-faint opacity-0 transition-opacity hover:bg-wash/10 hover:text-bone focus-visible:opacity-100 group-hover:opacity-100 max-md:opacity-100">
         <X size={14} aria-hidden="true" />
       </button>
     </li>
@@ -53,24 +54,24 @@ function Settings({ prefs }) {
   const toggle = (next) => (server.available ? (next ? void enablePush() : void disablePush()) : void setPush(next));
   const system =
     state === 'unsupported'
-      ? 'This browser cannot show notifications outside the app. On iPhone, add the app to the Home Screen first.'
+      ? tr('This browser cannot show notifications outside the app. On iPhone, add the app to the Home Screen first.')
       : state === 'denied'
-        ? 'Blocked for this site. Allow notifications in the browser’s site settings.'
+        ? tr('Blocked for this site. Allow notifications in the browser’s site settings.')
         : server.available
           ? on
-            ? 'Reminders reach this device even when the app is closed.'
-            : 'Turn on to get reminders even when the app is closed.'
-          : 'Reminders appear on this device while the app is open or in the background.';
+            ? tr('Reminders reach this device even when the app is closed.')
+            : tr('Turn on to get reminders even when the app is closed.')
+          : tr('Reminders appear on this device while the app is open or in the background.');
 
   return (
     <div className="flex flex-col gap-4 px-3.5 pb-4">
       <section className="rounded-2xl border border-line bg-ink-2/60 p-3.5">
         <div className="flex items-center gap-3">
           <span className="min-w-0 flex-1 leading-tight">
-            <b className="block text-fine font-medium text-bone">On this device</b>
+            <b className="block text-fine font-medium text-bone">{tr('On this device')}</b>
             <small className="mt-1 block font-mono text-[0.72rem] leading-snug text-bone-faint">{system}</small>
           </span>
-          {state !== 'unsupported' && state !== 'denied' && <Switch label="Notifications on this device" checked={on} onChange={toggle} />}
+          {state !== 'unsupported' && state !== 'denied' && <Switch label={tr('Notifications on this device')} checked={on} onChange={toggle} />}
         </div>
         {server.error && (
           <p className="mt-2 font-mono text-[0.72rem] leading-snug text-danger" role="alert">
@@ -79,12 +80,12 @@ function Settings({ prefs }) {
         )}
         {on && (
           <button type="button" disabled={server.busy} onClick={() => void testNotification()} className="mt-3 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone disabled:opacity-50">
-            Send a test
+            {tr('Send a test')}
           </button>
         )}
       </section>
       <section>
-        <h3 className="px-1 pb-1.5 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">Tell me about</h3>
+        <h3 className="px-1 pb-1.5 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Tell me about')}</h3>
         <ul className="flex flex-col">
           {KINDS.map(({ id, label, hint, icon: Icon }) => (
             <li key={id} className="flex items-center gap-3 rounded-xl px-1 py-2">
@@ -121,23 +122,23 @@ function Panel({ onClose, onOpenTab, scroll }) {
     <div className={clsx('flex min-h-0 flex-1 flex-col', !scroll && 'overflow-hidden')}>
       <header className="sticky top-0 z-10 flex items-center gap-2 bg-ink-1/95 px-4 pt-4 pb-3 backdrop-blur-xl">
         {view === 'settings' && (
-          <button type="button" aria-label="Back to notifications" onClick={() => setView('list')} className="-ml-1.5 grid size-8 place-items-center rounded-full text-bone-dim hover:bg-wash/8 hover:text-bone">
+          <button type="button" aria-label={tr('Back to notifications')} onClick={() => setView('list')} className="-ml-1.5 grid size-8 place-items-center rounded-full text-bone-dim hover:bg-wash/8 hover:text-bone">
             <ArrowLeft size={16} aria-hidden="true" />
           </button>
         )}
         <div className="min-w-0 flex-1 leading-tight">
-          <h2 className="font-display text-[1.35rem] text-bone">{view === 'settings' ? 'Settings' : 'Notifications'}</h2>
-          {view === 'list' && <small className="font-mono text-[0.68rem] text-bone-faint">{unread ? `${unread} unread` : items.length ? 'All read' : 'Nothing yet'}</small>}
+          <h2 className="font-display text-[1.35rem] text-bone">{view === 'settings' ? tr('Settings') : tr('Notifications')}</h2>
+          {view === 'list' && <small className="font-mono text-[0.68rem] text-bone-faint">{unread ? tr('{0} unread', unread) : items.length ? tr('All read') : tr('Nothing yet')}</small>}
         </div>
         {view === 'list' && (
           <>
-            <button type="button" aria-label="Mark all as read" title="Mark all as read" disabled={!unread} onClick={markAllRead} className="grid size-8 place-items-center rounded-full text-bone-dim transition-colors hover:bg-wash/8 hover:text-bone disabled:opacity-30 disabled:hover:bg-transparent">
+            <button type="button" aria-label={tr('Mark all as read')} title={tr('Mark all as read')} disabled={!unread} onClick={markAllRead} className="grid size-8 place-items-center rounded-full text-bone-dim transition-colors hover:bg-wash/8 hover:text-bone disabled:opacity-30 disabled:hover:bg-transparent">
               <CheckCheck size={16} aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Clear all" title="Clear all" disabled={!items.length} onClick={clearAll} className="grid size-8 place-items-center rounded-full text-bone-dim transition-colors hover:bg-wash/8 hover:text-danger disabled:opacity-30 disabled:hover:bg-transparent">
+            <button type="button" aria-label={tr('Clear all')} title={tr('Clear all')} disabled={!items.length} onClick={clearAll} className="grid size-8 place-items-center rounded-full text-bone-dim transition-colors hover:bg-wash/8 hover:text-danger disabled:opacity-30 disabled:hover:bg-transparent">
               <Trash2 size={15} aria-hidden="true" />
             </button>
-            <button type="button" aria-label="Notification settings" title="Settings" onClick={() => setView('settings')} className="grid size-8 place-items-center rounded-full text-bone-dim transition-colors hover:bg-wash/8 hover:text-bone">
+            <button type="button" aria-label={tr('Notification settings')} title={tr('Settings')} onClick={() => setView('settings')} className="grid size-8 place-items-center rounded-full text-bone-dim transition-colors hover:bg-wash/8 hover:text-bone">
               <SlidersHorizontal size={15} aria-hidden="true" />
             </button>
           </>
@@ -165,8 +166,8 @@ function Panel({ onClose, onOpenTab, scroll }) {
             <span className="grid size-14 place-items-center rounded-full bg-wash/6 text-bone-faint" aria-hidden="true">
               <BellOff size={24} strokeWidth={1.4} />
             </span>
-            <b className="font-display text-[1.2rem] font-normal text-bone">You’re all caught up</b>
-            <p className="max-w-[26ch] text-fine text-bone-dim">Events, flashcards, tasks, habits and budgets will tell you here when they need you.</p>
+            <b className="font-display text-[1.2rem] font-normal text-bone">{tr('You’re all caught up')}</b>
+            <p className="max-w-[26ch] text-fine text-bone-dim">{tr('Events, flashcards, tasks, habits and budgets will tell you here when they need you.')}</p>
           </div>
         )}
       </div>
@@ -205,7 +206,7 @@ export default function NotificationBell({ onOpenTab, phone = false }) {
   const button = (
     <button
       type="button"
-      aria-label={unread ? `Notifications, ${unread} unread` : 'Notifications'}
+      aria-label={unread ? tr('Notifications, {0} unread', unread) : tr('Notifications')}
       className={clsx('relative grid place-items-center transition-colors active:scale-90', phone ? 'size-10 rounded-full bg-wash/7 text-bone' : 'size-9 rounded-sm border border-line bg-ink-2 text-bone-dim hover:text-bone', open && !phone && 'border-line-strong text-bone')}
       data-notification-bell
     >
@@ -229,8 +230,8 @@ export default function NotificationBell({ onOpenTab, phone = false }) {
             style={drag.style}
             {...drag.bind}
           >
-            <Dialog.Title className="sr-only">Notifications</Dialog.Title>
-            <Dialog.Description className="sr-only">Reminders and updates, newest first.</Dialog.Description>
+            <Dialog.Title className="sr-only">{tr('Notifications')}</Dialog.Title>
+            <Dialog.Description className="sr-only">{tr('Reminders and updates, newest first.')}</Dialog.Description>
             <span className="mx-auto mt-2.5 -mb-1 h-1 w-10 shrink-0 rounded-full bg-line-strong" aria-hidden="true" />
             <Panel scroll onClose={() => setOpen(false)} onOpenTab={onOpenTab} />
           </Dialog.Content>
@@ -243,7 +244,7 @@ export default function NotificationBell({ onOpenTab, phone = false }) {
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger asChild>{button}</Popover.Trigger>
       <Popover.Portal>
-        <Popover.Content align="end" sideOffset={10} collisionPadding={12} aria-label="Notifications" className="z-[95] flex max-h-[min(34rem,calc(100dvh-6rem))] w-[min(26rem,calc(100vw-1.5rem))] origin-top-right animate-pop-in flex-col overflow-hidden rounded-2xl border border-line-strong bg-ink-1/95 shadow-pop backdrop-blur-2xl outline-none">
+        <Popover.Content align="end" sideOffset={10} collisionPadding={12} aria-label={tr('Notifications')} className="z-[95] flex max-h-[min(34rem,calc(100dvh-6rem))] w-[min(26rem,calc(100vw-1.5rem))] origin-top-right animate-pop-in flex-col overflow-hidden rounded-2xl border border-line-strong bg-ink-1/95 shadow-pop backdrop-blur-2xl outline-none">
           <Panel onClose={() => setOpen(false)} onOpenTab={onOpenTab} />
         </Popover.Content>
       </Popover.Portal>

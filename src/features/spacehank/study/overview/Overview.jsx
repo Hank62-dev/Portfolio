@@ -9,11 +9,12 @@ import { agenda, columnItems, courseProgress, saveItem, stepsProgress, weekSumma
 import { courses, flashcards, sampleStudy } from '../store';
 import { CourseSheet, ItemSheet } from './Sheets';
 import { isDemo } from '../../demo/mode';
+import { tr } from '../../lang';
 
 const TONE = { past: 'danger', soon: 'warn', later: 'default' };
 const VIEWS = [
-  { id: 'agenda', label: 'Agenda', icon: ListChecks },
-  { id: 'board', label: 'Board', icon: KanbanSquare },
+  { id: 'agenda', label: tr('Agenda'), icon: ListChecks },
+  { id: 'board', label: tr('Board'), icon: KanbanSquare },
 ];
 
 /** One of the four numbers across the top. */
@@ -37,20 +38,20 @@ function AgendaRow({ item, now, onOpen }) {
   return (
     <li className="flex items-center gap-3 rounded-2xl border border-line bg-ink-1 p-3" data-item={item.title}>
       {item.kind === 'deadline' ? (
-        <button type="button" role="checkbox" aria-checked={item.done} aria-label={`Mark ${item.title} done`} onClick={() => toggleDeadline(course, item.id)} className={clsx('grid size-7 shrink-0 place-items-center rounded-full border-2 transition-all active:scale-90', item.done ? 'border-ok bg-ok text-ink-0' : 'border-line-strong text-transparent hover:text-bone-faint')}>
+        <button type="button" role="checkbox" aria-checked={item.done} aria-label={tr('Mark {0} done', item.title)} onClick={() => toggleDeadline(course, item.id)} className={clsx('grid size-7 shrink-0 place-items-center rounded-full border-2 transition-all active:scale-90', item.done ? 'border-ok bg-ok text-ink-0' : 'border-line-strong text-transparent hover:text-bone-faint')}>
           <Check size={15} strokeWidth={3} aria-hidden="true" />
         </button>
       ) : (
-        <span className="grid size-7 shrink-0 place-items-center rounded-full bg-warn/15 text-warn" title="Exam">
+        <span className="grid size-7 shrink-0 place-items-center rounded-full bg-warn/15 text-warn" title={tr('Exam')}>
           <BookOpenCheck size={15} aria-hidden="true" />
         </span>
       )}
-      <button type="button" onClick={() => onOpen(item)} className="min-w-0 flex-1 text-left leading-tight" aria-label={`Open: ${item.title}`}>
+      <button type="button" onClick={() => onOpen(item)} className="min-w-0 flex-1 text-left leading-tight" aria-label={tr('Open: {0}', item.title)}>
         <b className={clsx('block truncate text-fine font-medium', item.done ? 'text-bone-faint line-through' : 'text-bone')}>{item.title}</b>
         <small className="mt-1 flex items-center gap-1.5 font-mono text-[0.68rem] text-bone-faint">
           <i className="size-2 shrink-0 rounded-full" style={{ background: `hsl(${course.hue} 80% 65%)` }} aria-hidden="true" />
           <span className="truncate">{course.code || course.name}</span>
-          {item.kind === 'exam' && <span>· Exam</span>}
+          {item.kind === 'exam' && <span>{tr('· Exam')}</span>}
           {steps.total > 0 && (
             <span>
               · {steps.done}/{steps.total}
@@ -58,7 +59,7 @@ function AgendaRow({ item, now, onOpen }) {
           )}
         </small>
       </button>
-      {item.priority === 'high' && !item.done && <Flag size={14} className="shrink-0 text-danger" aria-label="High priority" />}
+      {item.priority === 'high' && !item.done && <Flag size={14} className="shrink-0 text-danger" aria-label={tr('High priority')} />}
       {!item.done && <Badge tone={TONE[c.tone]}>{c.label}</Badge>}
     </li>
   );
@@ -70,12 +71,12 @@ function AgendaView({ list, now, onOpen }) {
   if (!groups.length && !done.length)
     return (
       <div className="rounded-[1.75rem] border border-dashed border-line-strong p-6 text-fine text-bone-dim" data-agenda-empty>
-        Nothing to do. Add a deadline or an exam to a course and it shows up here, grouped by when it is due.
+        {tr('Nothing to do. Add a deadline or an exam to a course and it shows up here, grouped by when it is due.')}
       </div>
     );
   return (
     <div className="flex flex-col gap-5" data-agenda>
-      {groups.length === 0 && <p className="px-1 text-fine text-bone-dim">Everything is done. Nice.</p>}
+      {groups.length === 0 && <p className="px-1 text-fine text-bone-dim">{tr('Everything is done. Nice.')}</p>}
       {groups.map((group) => (
         <section key={group.id} aria-label={group.label} data-group={group.id}>
           <h3 className={clsx('mb-2 flex items-center gap-2 px-1 font-mono text-[0.68rem] tracking-[0.12em] uppercase', group.id === 'overdue' ? 'text-danger' : 'text-bone-faint')}>
@@ -89,9 +90,9 @@ function AgendaView({ list, now, onOpen }) {
         </section>
       ))}
       {done.length > 0 && (
-        <section aria-label="Completed">
+        <section aria-label={tr('Completed')}>
           <button type="button" onClick={() => setShowDone((v) => !v)} aria-expanded={showDone} className="mb-2 flex items-center gap-2 px-1 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">
-            Completed <span className="rounded-full bg-wash/[0.07] px-1.5 tabular-nums">{done.length}</span>
+            {tr('Completed')} <span className="rounded-full bg-wash/[0.07] px-1.5 tabular-nums">{done.length}</span>
             <ChevronDown size={13} className={clsx('transition-transform', showDone && 'rotate-180')} aria-hidden="true" />
           </button>
           {showDone && (
@@ -114,15 +115,15 @@ function BoardCard({ item, now, onOpen, onDragStart }) {
   return (
     <li draggable onDragStart={(e) => onDragStart(e, item)} className="list-none" data-board-card={item.title}>
       <div className={clsx('relative rounded-2xl border bg-ink-2 p-3 transition-all hover:-translate-y-0.5 hover:border-line-strong', item.done ? 'border-line opacity-60' : 'border-line')}>
-        <button type="button" onClick={() => onOpen(item)} className="block w-full text-left" aria-label={`Open: ${item.title}`}>
+        <button type="button" onClick={() => onOpen(item)} className="block w-full text-left" aria-label={tr('Open: {0}', item.title)}>
           <span className="mb-2 flex flex-wrap gap-1">
-            {item.kind === 'exam' && <span className="rounded-full bg-warn/15 px-2 py-px font-mono text-[0.64rem] text-warn">Exam</span>}
-            {item.priority === 'high' && !item.done && <span className="rounded-full bg-danger/15 px-2 py-px font-mono text-[0.64rem] text-danger">High</span>}
-            {item.priority === 'low' && !item.done && <span className="rounded-full bg-wash/[0.07] px-2 py-px font-mono text-[0.64rem] text-bone-faint">Low</span>}
+            {item.kind === 'exam' && <span className="rounded-full bg-warn/15 px-2 py-px font-mono text-[0.64rem] text-warn">{tr('Exam')}</span>}
+            {item.priority === 'high' && !item.done && <span className="rounded-full bg-danger/15 px-2 py-px font-mono text-[0.64rem] text-danger">{tr('High')}</span>}
+            {item.priority === 'low' && !item.done && <span className="rounded-full bg-wash/[0.07] px-2 py-px font-mono text-[0.64rem] text-bone-faint">{tr('Low')}</span>}
           </span>
           <b className={clsx('block text-fine leading-snug font-medium', item.done ? 'text-bone-faint line-through' : 'text-bone')}>{item.title}</b>
           <span className="mt-2 flex items-center gap-2">
-            {item.done ? <Badge tone="ok">Done</Badge> : <Badge tone={TONE[c.tone]}>{c.label}</Badge>}
+            {item.done ? <Badge tone="ok">{tr('Done')}</Badge> : <Badge tone={TONE[c.tone]}>{c.label}</Badge>}
             {steps.total > 0 && (
               <span className="inline-flex items-center gap-1.5 font-mono text-[0.68rem] text-bone-faint">
                 <ListChecks size={12} aria-hidden="true" /> {steps.done}/{steps.total}
@@ -171,9 +172,9 @@ function BoardView({ list, now, onOpen, onAdd, onEditCourse, onNewCourse, onMove
               </span>
               <div className="min-w-0 flex-1 leading-tight">
                 <h3 className="truncate font-display text-lead text-bone">{course.name}</h3>
-                <p className="font-mono text-[0.66rem] text-bone-faint">{pct === null ? 'No deadlines yet' : `${pct}% done`}</p>
+                <p className="font-mono text-[0.66rem] text-bone-faint">{pct === null ? tr('No deadlines yet') : tr('{0}% done', pct)}</p>
               </div>
-              <button type="button" aria-label={`Edit ${course.name}`} onClick={() => onEditCourse(course)} className="grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/10 hover:text-bone">
+              <button type="button" aria-label={tr('Edit {0}', course.name)} onClick={() => onEditCourse(course)} className="grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/10 hover:text-bone">
                 <Pencil size={14} aria-hidden="true" />
               </button>
             </header>
@@ -188,14 +189,14 @@ function BoardView({ list, now, onOpen, onAdd, onEditCourse, onNewCourse, onMove
               ))}
             </ul>
             <button type="button" onClick={() => onAdd(course)} className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-left text-fine text-bone-faint transition-colors hover:bg-wash/[0.05] hover:text-bone">
-              <Plus size={15} aria-hidden="true" /> Add a card
+              <Plus size={15} aria-hidden="true" /> {tr('Add a card')}
             </button>
           </section>
         );
       })}
       <button type="button" onClick={onNewCourse} className="grid min-h-28 w-[17.5rem] shrink-0 snap-start place-items-center rounded-[1.75rem] border border-dashed border-line-strong p-4 text-fine text-bone-faint transition-colors hover:border-bone hover:text-bone max-md:w-[82vw]">
         <span className="flex items-center gap-2">
-          <Plus size={15} aria-hidden="true" /> Add a course
+          <Plus size={15} aria-hidden="true" /> {tr('Add a course')}
         </span>
       </button>
     </div>
@@ -214,7 +215,7 @@ export default function Overview({ list, cardList, onTab }) {
   const hasCourses = list.length > 0;
 
   const addItem = (course) => setSheet({ type: 'item', courseId: course?.id });
-  useFab({ label: hasCourses ? 'Add a deadline or exam' : 'Add a course', icon: Plus, onPress: () => (hasCourses ? addItem() : setSheet({ type: 'course' })) });
+  useFab({ label: hasCourses ? tr('Add a deadline or exam') : tr('Add a course'), icon: Plus, onPress: () => (hasCourses ? addItem() : setSheet({ type: 'course' })) });
 
   const openItem = (item) => setSheet({ type: 'item', item });
   const move = async (id, courseId) => {
@@ -236,16 +237,16 @@ export default function Overview({ list, cardList, onTab }) {
           <CalendarClock size={22} aria-hidden="true" />
         </span>
         <div>
-          <h2 className="font-display text-lead text-bone">Plan your courses</h2>
-          <p className="mt-1 max-w-[36ch] text-fine text-bone-dim">Add a course, then its deadlines and exams. See them as an agenda, or as a board with a column for each course.</p>
+          <h2 className="font-display text-lead text-bone">{tr('Plan your courses')}</h2>
+          <p className="mt-1 max-w-[36ch] text-fine text-bone-dim">{tr('Add a course, then its deadlines and exams. See them as an agenda, or as a board with a column for each course.')}</p>
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           <Button size="sm" onClick={() => setSheet({ type: 'course' })}>
-            <Plus size={14} aria-hidden="true" /> Add a course
+            <Plus size={14} aria-hidden="true" /> {tr('Add a course')}
           </Button>
           {isDemo() && (
             <Button variant="ghost" size="sm" onClick={addSample}>
-              <Sparkles size={14} aria-hidden="true" /> Try a sample course
+              <Sparkles size={14} aria-hidden="true" /> {tr('Try a sample course')}
             </Button>
           )}
         </div>
@@ -255,20 +256,20 @@ export default function Overview({ list, cardList, onTab }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-4 gap-2" data-overview-stats>
-        <Stat value={summary.overdue} label="Overdue" tone={summary.overdue ? 'text-danger' : 'text-bone'} />
-        <Stat value={summary.today} label="Today" tone={summary.today ? 'text-signal' : 'text-bone'} />
-        <Stat value={summary.week} label="This week" />
-        <Stat value={summary.cardsDue} label="Cards due" tone={summary.cardsDue ? 'text-signal' : 'text-bone'} onClick={() => onTab('cards')} />
+        <Stat value={summary.overdue} label={tr('Overdue')} tone={summary.overdue ? 'text-danger' : 'text-bone'} />
+        <Stat value={summary.today} label={tr('Today')} tone={summary.today ? 'text-signal' : 'text-bone'} />
+        <Stat value={summary.week} label={tr('This week')} />
+        <Stat value={summary.cardsDue} label={tr('Cards due')} tone={summary.cardsDue ? 'text-signal' : 'text-bone'} onClick={() => onTab('cards')} />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Segmented value={view} onChange={setView} options={VIEWS} label="View" />
+        <Segmented value={view} onChange={setView} options={VIEWS} label={tr('View')} />
         <div className="flex gap-2 max-md:hidden">
           <Button variant="ghost" size="sm" onClick={() => setSheet({ type: 'course' })}>
-            <Plus size={14} aria-hidden="true" /> Course
+            <Plus size={14} aria-hidden="true" /> {tr('Course')}
           </Button>
           <Button size="sm" onClick={() => addItem()} disabled={!hasCourses} data-add-item>
-            <Plus size={14} aria-hidden="true" /> Deadline or exam
+            <Plus size={14} aria-hidden="true" /> {tr('Deadline or exam')}
           </Button>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { aiUsage } from '../api/owner';
 import { Figure, PageHead, Tile } from '../components/Page';
 import { spacehankConfig } from '../config';
 import { healthTone, loadGithub, ping, runTone, timeAgo } from '../pulse/github';
+import { tr } from '../lang';
 
 const TONE_TEXT = { ok: 'text-ok', warn: 'text-warn', danger: 'text-danger', neutral: 'text-bone-faint' };
 const TONE_DOT = { ok: 'bg-ok', warn: 'bg-warn', danger: 'bg-danger', neutral: 'bg-bone-faint' };
@@ -78,17 +79,17 @@ export default function PulseView({ owner }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead keepOnPhone eyebrow="Build" title="Dev" accent="Pulse." description="Is everything up, and what has been happening in your repositories? Checked from your browser, nothing stored.">
+      <PageHead keepOnPhone eyebrow={tr('Build')} title={tr('Dev')} accent="Pulse." description={tr('Is everything up, and what has been happening in your repositories? Checked from your browser, nothing stored.')}>
         <Button variant="ghost" size="sm" loading={busy} onClick={refresh}>
-          <RefreshCw size={14} aria-hidden="true" /> Check now
+          <RefreshCw size={14} aria-hidden="true" /> {tr('Check now')}
         </Button>
       </PageHead>
 
       <div className={clsx('flex flex-wrap items-center gap-4 rounded-3xl border p-5', !at ? 'border-line bg-ink-1' : issues ? 'border-danger/40 bg-danger/8' : slow ? 'border-warn/40 bg-warn/8' : 'border-ok/35 bg-ok/8')} role="status" data-overall>
         <span className={clsx('size-3 shrink-0 rounded-full', !at ? 'animate-pulse bg-bone-faint' : issues ? 'bg-danger' : slow ? 'bg-warn' : 'bg-ok shadow-[0_0_14px_2px_rgb(127_214_162/0.6)]')} aria-hidden="true" />
         <div className="min-w-0 flex-1 leading-tight">
-          <h2 className="font-display text-h3 text-bone">{!at ? 'Checking…' : issues ? `${issues} thing${issues > 1 ? 's need' : ' needs'} attention` : slow ? 'Up, but something is slow' : 'All systems healthy'}</h2>
-          <p className="font-mono text-[0.72rem] text-bone-faint">{at ? `Checked ${timeAgo(new Date(at).toISOString())}. Refreshes every minute.` : 'Pinging the services…'}</p>
+          <h2 className="font-display text-h3 text-bone">{!at ? tr('Checking…') : issues ? tr('{0} thing{1} attention', issues, issues > 1 ? tr('s need') : tr(' needs')) : slow ? tr('Up, but something is slow') : tr('All systems healthy')}</h2>
+          <p className="font-mono text-[0.72rem] text-bone-faint">{at ? tr('Checked {0}. Refreshes every minute.', timeAgo(new Date(at).toISOString())) : tr('Pinging the services…')}</p>
         </div>
       </div>
 
@@ -118,10 +119,10 @@ export default function PulseView({ owner }) {
                 )}
               </div>
               <div className="mt-4 flex items-end justify-between gap-3">
-                <b className="font-display text-h3 leading-none text-bone tabular-nums">{check ? (check.ok ? `${check.ms}` : '—') : ' '}<small className="pl-1 font-mono text-[0.68rem] font-normal text-bone-faint">{check?.ok ? 'ms' : ''}</small></b>
+                <b className="font-display text-h3 leading-none text-bone tabular-nums">{check ? (check.ok ? `${check.ms}` : '—') : ' '}<small className="pl-1 font-mono text-[0.68rem] font-normal text-bone-faint">{check?.ok ? tr('ms') : ''}</small></b>
                 <Trace history={history.current[s.id] ?? []} />
               </div>
-              {check && !check.ok && s.id !== 'site' && <p className="mt-2 font-mono text-[0.68rem] text-bone-faint">Render's free plan sleeps when idle; the first request can take a minute.</p>}
+              {check && !check.ok && s.id !== 'site' && <p className="mt-2 font-mono text-[0.68rem] text-bone-faint">{tr('Render\'s free plan sleeps when idle; the first request can take a minute.')}</p>}
             </Tile>
           );
         })}
@@ -129,15 +130,15 @@ export default function PulseView({ owner }) {
 
       {owner && usage && (
         <div className="grid grid-cols-3 gap-3">
-          <Figure value={`${usage.used}/${usage.limit}`} label="AI calls today" tone={usage.used >= usage.limit ? 'text-danger' : 'text-bone'} />
-          <Figure value={usage.text ? 'On' : 'Off'} label="Text AI" tone={usage.text ? 'text-ok' : 'text-bone-faint'} />
-          <Figure value={usage.image ?? 'Off'} label="Image provider" />
+          <Figure value={`${usage.used}/${usage.limit}`} label={tr('AI calls today')} tone={usage.used >= usage.limit ? 'text-danger' : 'text-bone'} />
+          <Figure value={usage.text ? 'On' : 'Off'} label={tr('Text AI')} tone={usage.text ? 'text-ok' : 'text-bone-faint'} />
+          <Figure value={usage.image ?? 'Off'} label={tr('Image provider')} />
         </div>
       )}
 
-      <section aria-label="Repositories" className="flex flex-col gap-3">
+      <section aria-label={tr('Repositories')} className="flex flex-col gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="font-display text-lead text-bone">Repositories</h2>
+          <h2 className="font-display text-lead text-bone">{tr('Repositories')}</h2>
           <a href={`https://github.com/${GITHUB_USERNAME}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-mono text-[0.72rem] text-bone-faint hover:text-bone">
             @{GITHUB_USERNAME} <ExternalLink size={11} aria-hidden="true" />
           </a>
@@ -162,7 +163,7 @@ export default function PulseView({ owner }) {
                           {r.name}
                         </a>
                       </h3>
-                      <p className="mt-0.5 line-clamp-1 text-fine text-bone-dim">{r.description || 'No description'}</p>
+                      <p className="mt-0.5 line-clamp-1 text-fine text-bone-dim">{r.description || tr('No description')}</p>
                     </div>
                     <span className={clsx('inline-flex shrink-0 items-center gap-1.5 font-mono text-[0.72rem]', TONE_TEXT[run.tone])}>
                       <i className={clsx('size-2 rounded-full', TONE_DOT[run.tone])} aria-hidden="true" /> {run.label}
@@ -176,7 +177,7 @@ export default function PulseView({ owner }) {
                     <span className="inline-flex items-center gap-1">
                       <CircleDot size={11} aria-hidden="true" /> {r.issues}
                     </span>
-                    <span className="ml-auto">pushed {timeAgo(r.pushed)}</span>
+                    <span className="ml-auto">{tr('pushed')} {timeAgo(r.pushed)}</span>
                   </div>
                   {r.commits.length > 0 && (
                     <ul className="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">
@@ -194,7 +195,7 @@ export default function PulseView({ owner }) {
                 </Tile>
               );
             })}
-            {!repos.length && !problem && <p className="font-mono text-fine text-bone-faint">No public repositories found.</p>}
+            {!repos.length && !problem && <p className="font-mono text-fine text-bone-faint">{tr('No public repositories found.')}</p>}
           </div>
         )}
       </section>

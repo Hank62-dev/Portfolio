@@ -2,6 +2,7 @@ import { Check, Copy } from 'lucide-react';
 import { useId, useState } from 'react';
 import { Button, pushToast } from '../../../design-system';
 import { clsx } from '../../../lib/format';
+import { tr } from '../lang';
 
 /** Copies a text and says so. Falls back quietly when the browser will not allow it. */
 export const copyText = async (text, what = 'Copied') => {
@@ -10,7 +11,7 @@ export const copyText = async (text, what = 'Copied') => {
     pushToast(what, { tone: 'success' });
     return true;
   } catch {
-    pushToast('This browser would not let the page copy. Select the text and copy it by hand.', { tone: 'error' });
+    pushToast(tr('This browser would not let the page copy. Select the text and copy it by hand.'), { tone: 'error' });
     return false;
   }
 };
@@ -24,13 +25,13 @@ export function CopyButton({ text, label = 'Copy', what, size = 'sm', className 
       size={size}
       className={className}
       onClick={async () => {
-        if (await copyText(text, what ?? `${label} copied`)) {
+        if (await copyText(text, what ?? tr('{0} copied', label))) {
           setDone(true);
           window.setTimeout(() => setDone(false), 1600);
         }
       }}
     >
-      {done ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />} {done ? 'Copied' : label}
+      {done ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />} {done ? tr('Copied') : label}
     </Button>
   );
 }

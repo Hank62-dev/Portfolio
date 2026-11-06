@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useEffect, useRef, useState } from 'react';
 import { Heart, ListMusic, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { clsx } from '../../../lib/format';
@@ -77,7 +78,7 @@ export default function NowPlayingBar({ onOpen, lifted = false, rail = false }) 
     return (
       <div
         role="region"
-        aria-label="Now playing"
+        aria-label={tr('Now playing')}
         data-now-playing
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
@@ -87,7 +88,7 @@ export default function NowPlayingBar({ onOpen, lifted = false, rail = false }) 
         className="fixed inset-x-3 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] z-30 touch-pan-y"
       >
         <div className="flex items-center gap-2.5 rounded-full border border-wash/12 bg-ink-1/80 p-1.5 pr-2 shadow-[0_20px_44px_-16px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur-2xl">
-          <button type="button" onClick={onOpen} aria-label="Open Hank Music" className="flex min-w-0 flex-1 items-center gap-3 text-left">
+          <button type="button" onClick={onOpen} aria-label={tr('Open Hank Music')} className="flex min-w-0 flex-1 items-center gap-3 text-left">
             <span className="relative size-[3.1rem] shrink-0">
               <svg viewBox="0 0 100 100" className="absolute inset-0 size-full -rotate-90" aria-hidden="true">
                 <circle cx="50" cy="50" r="47" fill="none" stroke="rgb(255 255 255 / 0.12)" strokeWidth="3" />
@@ -100,13 +101,13 @@ export default function NowPlayingBar({ onOpen, lifted = false, rail = false }) 
               <b className="block truncate font-display text-[1.02rem] font-normal text-bone" data-now-title>
                 {track.title}
               </b>
-              <small className="block truncate font-mono text-[0.68rem] text-bone-faint">{error || track.artist || 'Unknown artist'}</small>
+              <small className="block truncate font-mono text-[0.68rem] text-bone-faint">{error || track.artist || tr('Unknown artist')}</small>
             </span>
           </button>
-          <button type="button" aria-label={playing ? 'Pause' : 'Play'} onClick={togglePlay} className={clsx('grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_10px_22px_-10px_var(--color-signal)] active:scale-90', loading && 'animate-pulse')}>
+          <button type="button" aria-label={playing ? tr('Pause') : tr('Play')} onClick={togglePlay} className={clsx('grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#b9791f] text-ink-0 shadow-[0_10px_22px_-10px_var(--color-signal)] active:scale-90', loading && 'animate-pulse')}>
             {playing ? <Pause size={18} fill="currentColor" aria-hidden="true" /> : <Play size={18} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
           </button>
-          <button type="button" aria-label="Next track" onClick={next} className="grid size-9 shrink-0 place-items-center rounded-full text-bone-dim active:scale-90">
+          <button type="button" aria-label={tr('Next track')} onClick={next} className="grid size-9 shrink-0 place-items-center rounded-full text-bone-dim active:scale-90">
             <SkipForward size={18} fill="currentColor" aria-hidden="true" />
           </button>
         </div>
@@ -117,7 +118,7 @@ export default function NowPlayingBar({ onOpen, lifted = false, rail = false }) 
   return (
     <div
       role="region"
-      aria-label="Now playing"
+      aria-label={tr('Now playing')}
       onTouchStart={lifted ? onTouchStart : undefined}
       onTouchMove={lifted ? onTouchMove : undefined}
       onTouchEnd={lifted ? onTouchEnd : undefined}
@@ -128,58 +129,58 @@ export default function NowPlayingBar({ onOpen, lifted = false, rail = false }) 
     >
       <div className="mx-auto grid max-w-[1400px] grid-cols-[1fr_auto] items-center gap-3 px-3 py-2 md:py-2.5 md:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] md:gap-6 md:px-5">
         <div className="flex min-w-0 items-center gap-3">
-          <button type="button" onClick={onOpen} aria-label="Open Hank Music" className="flex min-w-0 items-center gap-3 text-left">
+          <button type="button" onClick={onOpen} aria-label={tr('Open Hank Music')} className="flex min-w-0 items-center gap-3 text-left">
             <Cover track={track} className="size-11 shadow-lg md:size-12" rounded="rounded-md" />
             <span className="min-w-0 leading-tight">
               <b className="block truncate text-fine font-medium text-bone" data-now-title>
                 {track.title}
               </b>
-              <small className="block truncate font-mono text-[0.72rem] text-bone-faint">{error || track.artist || 'Unknown artist'}</small>
+              <small className="block truncate font-mono text-[0.72rem] text-bone-faint">{error || track.artist || tr('Unknown artist')}</small>
             </span>
           </button>
-          <Icon label={track.favorite ? 'Remove from favorites' : 'Add to favorites'} active={track.favorite} onClick={() => toggleFavorite(track.id)} className="max-sm:hidden">
+          <Icon label={track.favorite ? tr('Remove from favorites') : tr('Add to favorites')} active={track.favorite} onClick={() => toggleFavorite(track.id)} className="max-sm:hidden">
             <Heart size={16} fill={track.favorite ? 'currentColor' : 'none'} aria-hidden="true" />
           </Icon>
         </div>
 
         <div className="flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-1.5">
-            <Icon label="Shuffle" active={shuffle} onClick={toggleShuffle} className="max-sm:hidden">
+            <Icon label={tr('Shuffle')} active={shuffle} onClick={toggleShuffle} className="max-sm:hidden">
               <Shuffle size={15} aria-hidden="true" />
             </Icon>
-            <Icon label="Previous track" onClick={previous} className="max-sm:hidden">
+            <Icon label={tr('Previous track')} onClick={previous} className="max-sm:hidden">
               <SkipBack size={17} fill="currentColor" aria-hidden="true" />
             </Icon>
             <button
               type="button"
-              aria-label={playing ? 'Pause' : 'Play'}
+              aria-label={playing ? tr('Pause') : tr('Play')}
               onClick={togglePlay}
               className={clsx('grid size-10 place-items-center rounded-full bg-bone text-ink-0 transition-transform hover:scale-105 active:scale-95', loading && 'animate-pulse')}
             >
               {playing ? <Pause size={18} fill="currentColor" aria-hidden="true" /> : <Play size={18} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
             </button>
-            <Icon label="Next track" onClick={next}>
+            <Icon label={tr('Next track')} onClick={next}>
               <SkipForward size={17} fill="currentColor" aria-hidden="true" />
             </Icon>
-            <Icon label={`Repeat: ${repeat}`} active={repeat !== 'off'} onClick={cycleRepeat} className="max-sm:hidden">
+            <Icon label={tr('Repeat: {0}', repeat)} active={repeat !== 'off'} onClick={cycleRepeat} className="max-sm:hidden">
               <RepeatIcon size={15} aria-hidden="true" />
             </Icon>
           </div>
           <div className="flex w-full items-center gap-2.5 max-md:hidden">
             <span className="w-9 text-right font-mono text-[0.68rem] text-bone-faint tabular-nums">{formatTime(time)}</span>
-            <Slider label="Seek" value={Math.floor(time)} max={Math.max(1, Math.floor(duration))} onChange={seek} className="flex-1" />
+            <Slider label={tr('Seek')} value={Math.floor(time)} max={Math.max(1, Math.floor(duration))} onChange={seek} className="flex-1" />
             <span className="w-9 font-mono text-[0.68rem] text-bone-faint tabular-nums">{formatTime(duration)}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-end gap-1 max-md:hidden">
-          <Icon label="Open the queue" onClick={onOpen}>
+          <Icon label={tr('Open the queue')} onClick={onOpen}>
             <ListMusic size={16} aria-hidden="true" />
           </Icon>
-          <button type="button" aria-label={volume === 0 ? 'Unmute' : 'Mute'} onClick={() => setVolume(volume === 0 ? 0.8 : 0)} className="grid size-8 place-items-center text-bone-dim hover:text-bone">
+          <button type="button" aria-label={volume === 0 ? tr('Unmute') : tr('Mute')} onClick={() => setVolume(volume === 0 ? 0.8 : 0)} className="grid size-8 place-items-center text-bone-dim hover:text-bone">
             {volume === 0 ? <VolumeX size={16} aria-hidden="true" /> : <Volume2 size={16} aria-hidden="true" />}
           </button>
-          <Slider label="Volume" value={volume} max={1} step={0.02} onChange={setVolume} className="w-24" />
+          <Slider label={tr('Volume')} value={volume} max={1} step={0.02} onChange={setVolume} className="w-24" />
         </div>
       </div>
       {/* on a phone the progress runs along the top edge */}

@@ -1,10 +1,11 @@
+import { locale, tr } from '../lang';
 // The Mission Board as plain data: columns, moving a card between them, due dates and checklist progress.
 
 export const COLUMNS = [
-  { id: 'backlog', label: 'Backlog', hint: 'Ideas and things to do' },
-  { id: 'agent', label: 'With an agent', hint: 'Handed to an AI teammate' },
-  { id: 'doing', label: 'In progress', hint: 'Being worked on' },
-  { id: 'done', label: 'Done', hint: 'Finished' },
+  { id: 'backlog', label: tr('Backlog'), hint: tr('Ideas and things to do') },
+  { id: 'agent', label: tr('With an agent'), hint: tr('Handed to an AI teammate') },
+  { id: 'doing', label: tr('In progress'), hint: tr('Being worked on') },
+  { id: 'done', label: tr('Done'), hint: tr('Finished') },
 ];
 
 export const newCard = (title, column = 'backlog', order = 0) => ({
@@ -66,9 +67,9 @@ export const dueLabel = (due, now = new Date()) => {
   if (days === 0) return 'Today';
   if (days === 1) return 'Tomorrow';
   if (days === -1) return 'Yesterday';
-  if (days < 0) return `${-days} days ago`;
-  if (days < 7) return new Date(y, m - 1, d).toLocaleDateString(undefined, { weekday: 'long' });
-  return new Date(y, m - 1, d).toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+  if (days < 0) return tr('{0} days ago', -days);
+  if (days < 7) return new Date(y, m - 1, d).toLocaleDateString(locale(), { weekday: 'long' });
+  return new Date(y, m - 1, d).toLocaleDateString(locale(), { day: 'numeric', month: 'short' });
 };
 
 export const progress = (checklist = []) => {

@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // The Creator Lab as plain functions: hooks and how they score, the content pipeline, income and goals, deals, pricing, and
 // a Discord server blueprint. Nothing here talks to a network or a platform.
 
@@ -6,20 +7,20 @@ const DAY = 86400000;
 // ---------------------------------------------------------------- platforms and the pipeline
 
 export const PLATFORMS = [
-  { id: 'tiktok', label: 'TikTok' },
-  { id: 'shorts', label: 'YouTube Shorts' },
-  { id: 'reels', label: 'Reels' },
-  { id: 'discord', label: 'Discord' },
-  { id: 'x', label: 'X / Threads' },
-  { id: 'blog', label: 'Blog' },
+  { id: 'tiktok', label: tr('TikTok') },
+  { id: 'shorts', label: tr('YouTube Shorts') },
+  { id: 'reels', label: tr('Reels') },
+  { id: 'discord', label: tr('Discord') },
+  { id: 'x', label: tr('X / Threads') },
+  { id: 'blog', label: tr('Blog') },
 ];
 
 export const STAGES = [
-  { id: 'idea', label: 'Idea' },
-  { id: 'script', label: 'Scripted' },
-  { id: 'filmed', label: 'Filmed' },
-  { id: 'edited', label: 'Edited' },
-  { id: 'posted', label: 'Posted' },
+  { id: 'idea', label: tr('Idea') },
+  { id: 'script', label: tr('Scripted') },
+  { id: 'filmed', label: tr('Filmed') },
+  { id: 'edited', label: tr('Edited') },
+  { id: 'posted', label: tr('Posted') },
 ];
 
 /** A new piece of content. `pack` is what the content engine wrote (hooks, script, caption…), or null. */
@@ -79,19 +80,19 @@ export const scoreHook = (text) => {
     reasons.push({ ok, text: why });
   };
 
-  if (!words.length) return { score: 0, label: 'empty', reasons: [{ ok: false, text: 'Nothing to say yet.' }] };
+  if (!words.length) return { score: 0, label: 'empty', reasons: [{ ok: false, text: tr('Nothing to say yet.') }] };
 
-  if (words.length < 4) add(-15, false, 'Very short: it may not give the viewer a reason to stay.');
-  else if (words.length <= 14) add(15, true, 'Short enough to say in the first three seconds.');
-  else if (words.length <= 18) add(0, true, 'A little long: try to cut a few words.');
-  else add(-15, false, 'Too long to say in three seconds. Cut it down.');
+  if (words.length < 4) add(-15, false, tr('Very short: it may not give the viewer a reason to stay.'));
+  else if (words.length <= 14) add(15, true, tr('Short enough to say in the first three seconds.'));
+  else if (words.length <= 18) add(0, true, tr('A little long: try to cut a few words.'));
+  else add(-15, false, tr('Too long to say in three seconds. Cut it down.'));
 
-  if (/\d/.test(line)) add(10, true, 'A number makes it concrete.');
-  if (/\?\s*$/.test(line)) add(6, true, 'A question pulls the viewer into answering it.');
-  if (/\b(why|how|what if|secret|mistake|stop|never|nobody|truth|wrong)\b/i.test(line) || /(tại sao|vì sao|bí mật|sai lầm|đừng|không ai|sự thật|nhầm)/i.test(line)) add(12, true, 'It opens a gap the viewer wants closed (a "why", a mistake, a secret).');
-  if (/\b(you|your|you're)\b/i.test(line) || /(\bbạn\b|của bạn)/i.test(line)) add(8, true, 'It speaks to the viewer directly.');
-  if (/^\s*(hi|hello|hey|hey guys|welcome|xin chào|chào các bạn|chào mọi người|hôm nay mình|trong video này)/i.test(line)) add(-20, false, 'It starts with a greeting. People scroll past those: start with the point.');
-  if (/\[[^\]]+\]/.test(line)) add(-5, false, 'Fill in the [brackets] with the real detail before you film.');
+  if (/\d/.test(line)) add(10, true, tr('A number makes it concrete.'));
+  if (/\?\s*$/.test(line)) add(6, true, tr('A question pulls the viewer into answering it.'));
+  if (/\b(why|how|what if|secret|mistake|stop|never|nobody|truth|wrong)\b/i.test(line) || /(tại sao|vì sao|bí mật|sai lầm|đừng|không ai|sự thật|nhầm)/i.test(line)) add(12, true, tr('It opens a gap the viewer wants closed (a "why", a mistake, a secret).'));
+  if (/\b(you|your|you're)\b/i.test(line) || /(\bbạn\b|của bạn)/i.test(line)) add(8, true, tr('It speaks to the viewer directly.'));
+  if (/^\s*(hi|hello|hey|hey guys|welcome|xin chào|chào các bạn|chào mọi người|hôm nay mình|trong video này)/i.test(line)) add(-20, false, tr('It starts with a greeting. People scroll past those: start with the point.'));
+  if (/\[[^\]]+\]/.test(line)) add(-5, false, tr('Fill in the [brackets] with the real detail before you film.'));
 
   score = Math.max(0, Math.min(100, score));
   return { score, label: score >= 75 ? 'strong' : score >= 55 ? 'fair' : 'weak', reasons };
@@ -162,14 +163,14 @@ export const hashtagLine = (tags) => tags.map((t) => `#${String(t).replace(/^#+/
 // ---------------------------------------------------------------- income and goals
 
 export const SOURCES = [
-  { id: 'tiktok-shop', label: 'TikTok Shop' },
-  { id: 'creator-rewards', label: 'Creator rewards' },
-  { id: 'sponsor', label: 'Sponsorship' },
-  { id: 'freelance', label: 'Client work' },
-  { id: 'product', label: 'Digital product' },
-  { id: 'membership', label: 'Membership / donations' },
-  { id: 'discord', label: 'Discord community' },
-  { id: 'other', label: 'Other' },
+  { id: 'tiktok-shop', label: tr('TikTok Shop') },
+  { id: 'creator-rewards', label: tr('Creator rewards') },
+  { id: 'sponsor', label: tr('Sponsorship') },
+  { id: 'freelance', label: tr('Client work') },
+  { id: 'product', label: tr('Digital product') },
+  { id: 'membership', label: tr('Membership / donations') },
+  { id: 'discord', label: tr('Discord community') },
+  { id: 'other', label: tr('Other') },
 ];
 const SOURCE_LABEL = Object.fromEntries(SOURCES.map((s) => [s.id, s.label]));
 export const sourceLabel = (id) => SOURCE_LABEL[id] ?? 'Other';
@@ -238,16 +239,16 @@ export const insights = (entries, goal, now = Date.now()) => {
   const key = monthKeyOf(now);
   const total = monthTotal(entries, key);
   const previous = monthTotal(entries, shiftMonth(key, -1));
-  if (!entries.length) return [{ tone: 'info', text: 'Log your first income, even a small one. The picture builds from there.' }];
+  if (!entries.length) return [{ tone: 'info', text: tr('Log your first income, even a small one. The picture builds from there.') }];
 
   const rows = bySource(entries, key);
   if (rows[0] && rows[0].share >= 0.7 && total > 0) out.push({ tone: 'warn', text: `${Math.round(rows[0].share * 100)}% of this month comes from ${sourceLabel(rows[0].source)}. One change there empties the month: grow a second source.` });
 
   if (goal > 0) {
     const g = goalProgress({ total, goal, now });
-    if (g.reached) out.push({ tone: 'good', text: `You reached this month's goal (${vnd(goal)}).` });
-    else if (g.projected >= goal) out.push({ tone: 'good', text: `At this pace you finish the month around ${vnd(g.projected)}, above your goal.` });
-    else out.push({ tone: 'warn', text: `To reach ${vnd(goal)} you need about ${vnd(g.neededPerDay)} a day for the ${g.daysLeft} days left.` });
+    if (g.reached) out.push({ tone: 'good', text: tr('You reached this month\'s goal ({0}).', vnd(goal)) });
+    else if (g.projected >= goal) out.push({ tone: 'good', text: tr('At this pace you finish the month around {0}, above your goal.', vnd(g.projected)) });
+    else out.push({ tone: 'warn', text: tr('To reach {0} you need about {1} a day for the {2} days left.', vnd(goal), vnd(g.neededPerDay), g.daysLeft) });
   }
 
   if (previous > 0 && total > 0) {
@@ -258,10 +259,10 @@ export const insights = (entries, goal, now = Date.now()) => {
 
   const last = Math.max(...entries.map((e) => e.at));
   const quiet = Math.floor((now - last) / DAY);
-  if (quiet >= 14) out.push({ tone: 'warn', text: `No income logged for ${quiet} days. If money did come in, log it; if not, today is a good day to send one pitch.` });
+  if (quiet >= 14) out.push({ tone: 'warn', text: tr('No income logged for {0} days. If money did come in, log it; if not, today is a good day to send one pitch.', quiet) });
 
   const sources = new Set(entries.filter((e) => now - e.at < 90 * DAY).map((e) => e.source));
-  if (sources.size === 1 && out.length < 3) out.push({ tone: 'info', text: 'All your income in the last three months comes from one source.' });
+  if (sources.size === 1 && out.length < 3) out.push({ tone: 'info', text: tr('All your income in the last three months comes from one source.') });
   return out;
 };
 
@@ -275,16 +276,16 @@ export const earningsByPiece = (entries, pieces) => {
 // ---------------------------------------------------------------- deals
 
 export const DEAL_STAGES = [
-  { id: 'lead', label: 'Lead', chance: 0.1 },
-  { id: 'contacted', label: 'Contacted', chance: 0.2 },
-  { id: 'negotiating', label: 'Negotiating', chance: 0.5 },
-  { id: 'won', label: 'Won', chance: 1 },
-  { id: 'lost', label: 'Lost', chance: 0 },
+  { id: 'lead', label: tr('Lead'), chance: 0.1 },
+  { id: 'contacted', label: tr('Contacted'), chance: 0.2 },
+  { id: 'negotiating', label: tr('Negotiating'), chance: 0.5 },
+  { id: 'won', label: tr('Won'), chance: 1 },
+  { id: 'lost', label: tr('Lost'), chance: 0 },
 ];
 export const DEAL_KINDS = [
-  { id: 'sponsor', label: 'Sponsor' },
-  { id: 'client', label: 'Client' },
-  { id: 'collab', label: 'Collab' },
+  { id: 'sponsor', label: tr('Sponsor') },
+  { id: 'client', label: tr('Client') },
+  { id: 'collab', label: tr('Collab') },
 ];
 export const CHANNELS = ['Discord', 'TikTok DM', 'Email', 'Zalo', 'Facebook', 'Other'];
 
@@ -362,55 +363,55 @@ const CHANNEL = (name, topic, kind = 'text') => ({ name, topic, kind });
 
 const BLUEPRINTS = {
   dev: {
-    label: 'Developer community',
+    label: tr('Developer community'),
     categories: [
-      { name: 'START HERE', channels: [CHANNEL('welcome', 'Who this server is for and how to get help', 'announcement'), CHANNEL('rules', 'The few rules that keep it friendly'), CHANNEL('introduce-yourself', 'Say hi, what you build, what you want to learn')] },
-      { name: 'COMMUNITY', channels: [CHANNEL('general', 'Chat'), CHANNEL('show-your-work', 'Projects, demos, screenshots'), CHANNEL('help', 'Ask a question. One thread per problem', 'forum'), CHANNEL('resources', 'Useful links and tools')] },
-      { name: 'THE BUILD LOG', channels: [CHANNEL('announcements', 'New videos, releases, offers', 'announcement'), CHANNEL('dev-log', 'What the owner shipped this week')] },
-      { name: 'VOICE', channels: [CHANNEL('hangout', 'Voice', 'voice'), CHANNEL('co-working', 'Quiet voice room to work together', 'voice')] },
+      { name: 'START HERE', channels: [CHANNEL('welcome', tr('Who this server is for and how to get help'), 'announcement'), CHANNEL('rules', tr('The few rules that keep it friendly')), CHANNEL('introduce-yourself', tr('Say hi, what you build, what you want to learn'))] },
+      { name: 'COMMUNITY', channels: [CHANNEL('general', 'Chat'), CHANNEL('show-your-work', tr('Projects, demos, screenshots')), CHANNEL('help', tr('Ask a question. One thread per problem'), 'forum'), CHANNEL('resources', tr('Useful links and tools'))] },
+      { name: 'THE BUILD LOG', channels: [CHANNEL('announcements', tr('New videos, releases, offers'), 'announcement'), CHANNEL('dev-log', tr('What the owner shipped this week'))] },
+      { name: 'VOICE', channels: [CHANNEL('hangout', 'Voice', 'voice'), CHANNEL('co-working', tr('Quiet voice room to work together'), 'voice')] },
     ],
     roles: [
-      { name: 'Owner', why: 'You. Full control, kept for one person.' },
-      { name: 'Mod', why: 'A trusted few who can mute and delete, nothing else.' },
-      { name: 'Member', why: 'Everyone after reading the rules.' },
-      { name: 'Supporter', why: 'People who back you on an outside page (see the tiers). Give it by hand or with a bot you trust.' },
+      { name: 'Owner', why: tr('You. Full control, kept for one person.') },
+      { name: 'Mod', why: tr('A trusted few who can mute and delete, nothing else.') },
+      { name: 'Member', why: tr('Everyone after reading the rules.') },
+      { name: 'Supporter', why: tr('People who back you on an outside page (see the tiers). Give it by hand or with a bot you trust.') },
     ],
     tiers: [
-      { name: 'Free', price: '0', perks: ['All community channels', 'Weekly build log'] },
-      { name: 'Supporter', price: '[your price] / month, on an outside page', perks: ['A private channel for questions to you', 'Early access to templates and code', 'Your name in the credits'] },
+      { name: 'Free', price: '0', perks: [tr('All community channels'), tr('Weekly build log')] },
+      { name: 'Supporter', price: '[your price] / month, on an outside page', perks: [tr('A private channel for questions to you'), tr('Early access to templates and code'), tr('Your name in the credits')] },
     ],
   },
   creator: {
-    label: 'Creator / fans community',
+    label: tr('Creator / fans community'),
     categories: [
-      { name: 'START HERE', channels: [CHANNEL('welcome', 'What this community is', 'announcement'), CHANNEL('rules', 'House rules'), CHANNEL('introduce-yourself', 'Say hi')] },
-      { name: 'THE CHANNEL', channels: [CHANNEL('announcements', 'New videos and lives', 'announcement'), CHANNEL('new-videos', 'Discuss the latest video'), CHANNEL('ideas', 'Tell the creator what to make next', 'forum'), CHANNEL('clips', 'Fan clips and edits')] },
-      { name: 'CHAT', channels: [CHANNEL('general', 'Anything goes (within the rules)'), CHANNEL('memes', 'Memes'), CHANNEL('hangout', 'Voice', 'voice')] },
+      { name: 'START HERE', channels: [CHANNEL('welcome', tr('What this community is'), 'announcement'), CHANNEL('rules', tr('House rules')), CHANNEL('introduce-yourself', tr('Say hi'))] },
+      { name: 'THE CHANNEL', channels: [CHANNEL('announcements', tr('New videos and lives'), 'announcement'), CHANNEL('new-videos', tr('Discuss the latest video')), CHANNEL('ideas', tr('Tell the creator what to make next'), 'forum'), CHANNEL('clips', tr('Fan clips and edits'))] },
+      { name: 'CHAT', channels: [CHANNEL('general', tr('Anything goes (within the rules)')), CHANNEL('memes', 'Memes'), CHANNEL('hangout', 'Voice', 'voice')] },
     ],
     roles: [
       { name: 'Owner', why: 'You.' },
-      { name: 'Mod', why: 'A trusted few.' },
-      { name: 'Fan', why: 'Everyone after the rules.' },
-      { name: 'Supporter', why: 'People who back you outside Discord.' },
+      { name: 'Mod', why: tr('A trusted few.') },
+      { name: 'Fan', why: tr('Everyone after the rules.') },
+      { name: 'Supporter', why: tr('People who back you outside Discord.') },
     ],
     tiers: [
-      { name: 'Free', price: '0', perks: ['Chat and announcements'] },
-      { name: 'Supporter', price: '[your price] / month, on an outside page', perks: ['Behind-the-scenes posts', 'Vote on the next video', 'A supporter role and a private channel'] },
+      { name: 'Free', price: '0', perks: [tr('Chat and announcements')] },
+      { name: 'Supporter', price: '[your price] / month, on an outside page', perks: [tr('Behind-the-scenes posts'), tr('Vote on the next video'), tr('A supporter role and a private channel')] },
     ],
   },
   study: {
-    label: 'Study group',
+    label: tr('Study group'),
     categories: [
-      { name: 'START HERE', channels: [CHANNEL('welcome', 'The goal of the group', 'announcement'), CHANNEL('rules', 'Rules'), CHANNEL('introduce-yourself', 'What you study')] },
-      { name: 'STUDY', channels: [CHANNEL('announcements', 'Schedules and deadlines', 'announcement'), CHANNEL('questions', 'Ask and answer', 'forum'), CHANNEL('notes-and-resources', 'Notes, slides, links'), CHANNEL('accountability', 'Post your goal for today')] },
-      { name: 'VOICE', channels: [CHANNEL('focus-room', 'Silent co-study', 'voice'), CHANNEL('discussion', 'Talk it through', 'voice')] },
+      { name: 'START HERE', channels: [CHANNEL('welcome', tr('The goal of the group'), 'announcement'), CHANNEL('rules', 'Rules'), CHANNEL('introduce-yourself', tr('What you study'))] },
+      { name: 'STUDY', channels: [CHANNEL('announcements', tr('Schedules and deadlines'), 'announcement'), CHANNEL('questions', tr('Ask and answer'), 'forum'), CHANNEL('notes-and-resources', tr('Notes, slides, links')), CHANNEL('accountability', tr('Post your goal for today'))] },
+      { name: 'VOICE', channels: [CHANNEL('focus-room', tr('Silent co-study'), 'voice'), CHANNEL('discussion', tr('Talk it through'), 'voice')] },
     ],
     roles: [
       { name: 'Owner', why: 'You.' },
-      { name: 'Mod', why: 'Keeps the study rooms calm.' },
-      { name: 'Student', why: 'Everyone after the rules.' },
+      { name: 'Mod', why: tr('Keeps the study rooms calm.') },
+      { name: 'Student', why: tr('Everyone after the rules.') },
     ],
-    tiers: [{ name: 'Free', price: '0', perks: ['Everything above'] }],
+    tiers: [{ name: 'Free', price: '0', perks: [tr('Everything above')] }],
   },
 };
 export const BLUEPRINT_KINDS = Object.entries(BLUEPRINTS).map(([id, b]) => ({ id, label: b.label }));
@@ -420,9 +421,9 @@ export const blueprintFor = (kind, name = 'our community') => {
   const base = BLUEPRINTS[kind] ?? BLUEPRINTS.dev;
   return {
     ...base,
-    rules: ['Be kind. No harassment, hate or personal attacks.', 'No spam, no self-promotion outside the places made for it.', 'No scams, no illegal content, no sharing private information.', 'Keep it on topic in each channel.', 'Listen to the mods. Ask if something is unclear.'],
-    welcome: `Welcome to ${name}! Read #rules, say hi in #introduce-yourself, and ask anything in the help channels. New here? Tell us what you are working on.`,
-    onboarding: ['What brings you here?', 'What do you want to learn or build?', 'Which topics do you want to hear about?'],
+    rules: [tr('Be kind. No harassment, hate or personal attacks.'), tr('No spam, no self-promotion outside the places made for it.'), tr('No scams, no illegal content, no sharing private information.'), tr('Keep it on topic in each channel.'), tr('Listen to the mods. Ask if something is unclear.')],
+    welcome: tr('Welcome to {0}! Read #rules, say hi in #introduce-yourself, and ask anything in the help channels. New here? Tell us what you are working on.', name),
+    onboarding: [tr('What brings you here?'), tr('What do you want to learn or build?'), tr('Which topics do you want to hear about?')],
   };
 };
 

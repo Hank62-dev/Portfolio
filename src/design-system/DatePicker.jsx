@@ -1,10 +1,12 @@
 import { forwardRef, useState } from 'react';
 import * as Popover from '@radix-ui/react-popover';
 import { DayPicker } from 'react-day-picker';
+import { vi as viLocale } from 'react-day-picker/locale';
 import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react';
 import { clsx } from '../lib/format';
 import { control } from './Field';
 import { useSoft } from './soft';
+import { dateLocale, word } from './words';
 
 // The calendar and date picker follow shadcn/ui's Calendar + Popover recipe: react-day-picker for the grid, Radix for
 // the popover, and every part of the grid styled here with the workspace's tokens.
@@ -18,6 +20,7 @@ export function Calendar({ className, classNames, ...props }) {
     <DayPicker
       showOutsideDays
       weekStartsOn={1}
+      locale={dateLocale() ? viLocale : undefined}
       className={clsx('p-3', className)}
       classNames={{
         months: 'relative flex flex-col',
@@ -63,7 +66,7 @@ const format = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pa
  * A date field that opens a calendar. `value` and `onChange` use "YYYY-MM-DD" strings (an empty string for no date),
  * like a native date input, but onChange receives the string itself rather than an event.
  */
-export const DatePicker = forwardRef(function DatePicker({ value, onChange, placeholder = 'Pick a date', compact, className, clearable = true, disabled, ...rest }, ref) {
+export const DatePicker = forwardRef(function DatePicker({ value, onChange, placeholder = word('Pick a date'), compact, className, clearable = true, disabled, ...rest }, ref) {
   const soft = useSoft();
   const [open, setOpen] = useState(false);
   const selected = parse(value);
@@ -76,7 +79,7 @@ export const DatePicker = forwardRef(function DatePicker({ value, onChange, plac
       <Popover.Trigger asChild>
         <button ref={ref} type="button" disabled={disabled} className={control(soft, compact, clsx('flex items-center justify-between gap-2 pr-3.5 text-left', className))} {...rest}>
           <span className={clsx('min-w-0 flex-1 truncate tabular-nums', !selected && 'text-bone-faint')}>
-            {selected ? selected.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : placeholder}
+            {selected ? selected.toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short', year: 'numeric' }) : placeholder}
           </span>
           <CalendarDays size={16} aria-hidden="true" className="shrink-0 text-bone-faint" />
         </button>
@@ -91,11 +94,11 @@ export const DatePicker = forwardRef(function DatePicker({ value, onChange, plac
           <Calendar mode="single" selected={selected} defaultMonth={selected} onSelect={(date) => date && choose(format(date))} autoFocus />
           <div className="flex items-center justify-between border-t border-wash/8 px-3 py-2 font-mono text-[0.78rem]">
             <button type="button" onClick={() => choose(format(new Date()))} className="rounded-full px-3 py-1.5 text-bone-dim transition-colors hover:bg-wash/8 hover:text-bone">
-              Today
+              {word('Today')}
             </button>
             {clearable && (
               <button type="button" disabled={!selected} onClick={() => choose('')} className="rounded-full px-3 py-1.5 text-bone-faint transition-colors hover:bg-wash/8 hover:text-bone disabled:opacity-35 disabled:hover:bg-transparent">
-                Clear
+                {word('Clear')}
               </button>
             )}
           </div>

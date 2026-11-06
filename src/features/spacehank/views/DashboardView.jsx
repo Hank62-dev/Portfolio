@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useState } from 'react';
 import { Activity, ArrowUpRight, BrainCircuit, Boxes, ChevronDown, Database, Gauge, MessageCircle, Network, Users, Wifi } from 'lucide-react';
 import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, PageHeader, Stat } from '../../../design-system';
@@ -25,7 +26,7 @@ function Launcher({ onTab }) {
   const [more, setMore] = useState(false);
   const items = NAVIGATION.filter((item) => item.id !== 'hank');
   return (
-    <nav aria-label="All apps" className="md:hidden" data-launcher>
+    <nav aria-label={tr('All apps')} className="md:hidden" data-launcher>
       <ul className="grid grid-cols-4 gap-x-2 gap-y-4">
         {items.slice(0, FIRST_ROWS).map((item) => (
           <AppIcon key={item.id} item={item} onPick={onTab} />
@@ -41,7 +42,7 @@ function Launcher({ onTab }) {
       <button
         type="button"
         aria-expanded={more}
-        aria-label={more ? 'Show fewer apps' : 'Show all apps'}
+        aria-label={more ? tr('Show fewer apps') : tr('Show all apps')}
         onClick={() => setMore((open) => !open)}
         className="mx-auto mt-3 grid size-9 place-items-center rounded-full border border-line bg-ink-2/80 text-bone-dim shadow-[0_8px_18px_-8px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur transition-colors active:scale-90"
       >
@@ -56,16 +57,16 @@ export default function DashboardView({ agents, events, connected, onTab, owner:
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow="PERSONAL COMMAND CENTER"
+        eyebrow={tr('PERSONAL COMMAND CENTER')}
         title={
           <>
             {greetingFor(new Date().getHours())}, <em>{owner.name}.</em>
           </>
         }
-        description="Coordinate AI, knowledge and work from one command center."
+        description={tr('Coordinate AI, knowledge and work from one command center.')}
         actions={
           <Button variant="ghost" size="sm" onClick={() => onTab('space')}>
-            <Boxes size={15} aria-hidden="true" /> Open company floor <ArrowUpRight size={14} aria-hidden="true" />
+            <Boxes size={15} aria-hidden="true" /> {tr('Open company floor')} <ArrowUpRight size={14} aria-hidden="true" />
           </Button>
         }
       />
@@ -73,34 +74,34 @@ export default function DashboardView({ agents, events, connected, onTab, owner:
       <PetCard onTab={onTab} />
       <BriefingCard owner={isOwner} agents={agents} connected={connected} />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat icon={Users} label="AI WORKFORCE" value={active} note="agents active" />
-        <Stat icon={Activity} label="LIVE EVENTS" value={events.length} note="server events" />
-        <Stat icon={Gauge} label="WORKSPACE LOAD" value="-" note="telemetry unavailable" />
-        <Stat icon={Wifi} label="SYSTEM LINK" value={connected ? 'LIVE' : 'OFFLINE'} note="realtime channel" />
+        <Stat icon={Users} label={tr('AI WORKFORCE')} value={active} note="agents active" />
+        <Stat icon={Activity} label={tr('LIVE EVENTS')} value={events.length} note="server events" />
+        <Stat icon={Gauge} label={tr('WORKSPACE LOAD')} value="-" note="telemetry unavailable" />
+        <Stat icon={Wifi} label={tr('SYSTEM LINK')} value={connected ? 'LIVE' : 'OFFLINE'} note="realtime channel" />
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.2fr_1fr_1fr]">
         <Card className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
-            <Eyebrow>TODAY'S COMMAND</Eyebrow>
+            <Eyebrow>{tr('TODAY\'S COMMAND')}</Eyebrow>
             <Badge tone={connected ? 'ok' : 'danger'} dot>
-              {connected ? 'OPERATIONAL' : 'OFFLINE'}
+              {connected ? tr('OPERATIONAL') : tr('OFFLINE')}
             </Badge>
           </div>
           <h2 className="font-display text-h3 leading-tight [&_em]:serif-accent">
-            Everything important, <em>within reach.</em>
+            {tr('Everything important,')} <em>{tr('within reach.')}</em>
           </h2>
-          <p className="text-bone-dim">Hank62 coordinates your AI company. Open the floor or ask Hank RAG for context.</p>
+          <p className="text-bone-dim">{tr('Hank62 coordinates your AI company. Open the floor or ask Hank RAG for context.')}</p>
           <div className="mt-auto flex flex-wrap gap-2">
             <Button size="sm" onClick={() => onTab('space')}>
-              <Boxes size={15} aria-hidden="true" /> Launch floor
+              <Boxes size={15} aria-hidden="true" /> {tr('Launch floor')}
             </Button>
             <Button variant="ghost" size="sm" onClick={() => onTab('rag')}>
-              <MessageCircle size={15} aria-hidden="true" /> Ask Hank RAG
+              <MessageCircle size={15} aria-hidden="true" /> {tr('Ask Hank RAG')}
             </Button>
           </div>
         </Card>
         <Card>
-          <CardHeader eyebrow="COMPANY PULSE" title="Live activity" aside={<Activity size={17} aria-hidden="true" />} />
+          <CardHeader eyebrow={tr('COMPANY PULSE')} title={tr('Live activity')} aside={<Activity size={17} aria-hidden="true" />} />
           {events.length ? (
             <ul className="flex flex-col gap-3">
               {events.slice(0, 4).map((event, index) => (
@@ -118,14 +119,14 @@ export default function DashboardView({ agents, events, connected, onTab, owner:
               ))}
             </ul>
           ) : (
-            <EmptyState icon={Activity} title="No realtime events yet" description="Events appear here as agents start and finish work." />
+            <EmptyState icon={Activity} title={tr('No realtime events yet')} description={tr('Events appear here as agents start and finish work.')} />
           )}
         </Card>
         <Card>
-          <CardHeader eyebrow="SYSTEM MAP" title="Connected layers" aside={<Network size={17} aria-hidden="true" />} />
-          <LayerRow icon={Database} label="Realtime workers" value={`${connected ? agents.length : 0}/${agents.length}`} />
-          <LayerRow icon={BrainCircuit} label="Hank RAG API" value="EXTERNAL" />
-          <LayerRow icon={Wifi} label="Workspace sync" value={connected ? 'LIVE' : 'OFFLINE'} />
+          <CardHeader eyebrow={tr('SYSTEM MAP')} title={tr('Connected layers')} aside={<Network size={17} aria-hidden="true" />} />
+          <LayerRow icon={Database} label={tr('Realtime workers')} value={`${connected ? agents.length : 0}/${agents.length}`} />
+          <LayerRow icon={BrainCircuit} label={tr('Hank RAG API')} value="EXTERNAL" />
+          <LayerRow icon={Wifi} label={tr('Workspace sync')} value={connected ? 'LIVE' : 'OFFLINE'} />
         </Card>
       </div>
     </div>

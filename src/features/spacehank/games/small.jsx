@@ -4,6 +4,7 @@ import { clsx } from '../../../lib/format';
 import { BAU_CUA, HANDS, duel, rollDice, settle, shuffle } from './logic';
 import { Doodle, INK, InkBox, InkButton, Note, RED, Score } from './ink';
 import { useBest } from './shared';
+import { tr } from '../lang';
 
 const PEN = { filter: 'url(#pen)' };
 
@@ -52,11 +53,11 @@ export function FindNumbers() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="tìm số" value={done ? '-' : next} tone={RED} />
-        <Score label="giây" value={time.toFixed(1)} />
-        <Score label="kỷ lục" value={best === null ? '-' : best} />
+        <Score label={tr('tìm số')} value={done ? '-' : next} tone={RED} />
+        <Score label={tr('giây')} value={time.toFixed(1)} />
+        <Score label={tr('kỷ lục')} value={best === null ? '-' : best} />
       </div>
-      <ul className="grid grid-cols-5 gap-2" aria-label="Numbers">
+      <ul className="grid grid-cols-5 gap-2" aria-label={tr('Numbers')}>
         {grid.map((n) => {
           const found = n < next;
           return (
@@ -76,9 +77,9 @@ export function FindNumbers() {
         })}
       </ul>
       {done && (
-        <Note title={record ? 'Kỷ lục mới!' : 'Tìm đủ rồi!'} detail={`${time.toFixed(1)} giây`}>
+        <Note title={record ? tr('Kỷ lục mới!') : tr('Tìm đủ rồi!')} detail={tr('{0} giây', time.toFixed(1))}>
           <InkButton onClick={again}>
-            <RotateCcw size={15} aria-hidden="true" /> Chơi lại
+            <RotateCcw size={15} aria-hidden="true" /> {tr('Chơi lại')}
           </InkButton>
         </Note>
       )}
@@ -141,11 +142,11 @@ export function Memory() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="lượt" value={moves} />
-        <Score label="cặp" value={`${matched.size}/${FACES.length}`} tone={RED} />
-        <Score label="kỷ lục" value={best ?? '-'} />
+        <Score label={tr('lượt')} value={moves} />
+        <Score label={tr('cặp')} value={`${matched.size}/${FACES.length}`} tone={RED} />
+        <Score label={tr('kỷ lục')} value={best ?? '-'} />
       </div>
-      <ul className="grid grid-cols-4 gap-2.5" aria-label="Cards">
+      <ul className="grid grid-cols-4 gap-2.5" aria-label={tr('Cards')}>
         {cards.map((card, i) => {
           const up = open.includes(card.key) || matched.has(card.id);
           const Icon = card.icon;
@@ -153,7 +154,7 @@ export function Memory() {
             <li key={card.key} style={{ transform: `rotate(${((i * 37) % 5) - 2}deg)`, perspective: '700px' }}>
               {/* a button will not keep a ratio by itself, so a frame holds the shape and the button fills it */}
               <div className={clsx('relative aspect-[3/4] w-full', matched.has(card.id) && 'animate-[pop_0.45s_ease-out]')}>
-              <button type="button" onClick={() => flip(card)} aria-label={up ? card.id : 'Hidden card'} aria-pressed={up} className="absolute inset-0 block active:scale-95">
+              <button type="button" onClick={() => flip(card)} aria-label={up ? card.id : tr('Hidden card')} aria-pressed={up} className="absolute inset-0 block active:scale-95">
                 <span className="absolute inset-0 transition-transform duration-[550ms] ease-[cubic-bezier(0.4,0.1,0.2,1)] [transform-style:preserve-3d]" style={{ transform: up ? 'rotateY(180deg)' : 'rotateY(0deg)' }}>
                   <InkBox className="absolute inset-0 [-webkit-backface-visibility:hidden] [backface-visibility:hidden]" innerClassName="grid h-full place-items-center hatch rounded-md">
                     <span className="font-pen text-[2rem] font-bold" style={{ color: INK }}>?</span>
@@ -169,9 +170,9 @@ export function Memory() {
         })}
       </ul>
       {done && (
-        <Note title={record ? 'Kỷ lục mới!' : 'Lật hết rồi!'} detail={`${moves} lượt`}>
+        <Note title={record ? tr('Kỷ lục mới!') : tr('Lật hết rồi!')} detail={tr('{0} lượt', moves)}>
           <InkButton onClick={again}>
-            <RotateCcw size={15} aria-hidden="true" /> Chơi lại
+            <RotateCcw size={15} aria-hidden="true" /> {tr('Chơi lại')}
           </InkButton>
         </Note>
       )}
@@ -181,7 +182,7 @@ export function Memory() {
 
 // ---- Kéo búa bao: best of any number of rounds against the computer ---------------------------------------------------
 
-const HAND = { keo: { icon: Scissors, label: 'Kéo' }, bua: { icon: Hammer, label: 'Búa' }, bao: { icon: Hand, label: 'Bao' } };
+const HAND = { keo: { icon: Scissors, label: tr('Kéo') }, bua: { icon: Hammer, label: tr('Búa') }, bao: { icon: Hand, label: tr('Bao') } };
 
 export function Rps() {
   const [round, setRound] = useState(null);
@@ -218,20 +219,20 @@ export function Rps() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex gap-2">
-        <Score label="thắng" value={score.win} />
+        <Score label={tr('thắng')} value={score.win} />
         <Score label="thua" value={score.lose} tone={RED} />
-        <Score label="chuỗi" value={streak} />
-        <Score label="kỷ lục" value={best ?? '-'} />
+        <Score label={tr('chuỗi')} value={streak} />
+        <Score label={tr('kỷ lục')} value={best ?? '-'} />
       </div>
       <div className="flex items-center gap-3">
-        <Face hand={round?.mine} label="Bạn" tone={round?.result === 1 ? '#1f7a3a' : INK} />
+        <Face hand={round?.mine} label={tr('Bạn')} tone={round?.result === 1 ? '#1f7a3a' : INK} />
         <b className="font-pen text-[2rem]" style={{ color: RED }}>
-          vs
+          {tr('vs')}
         </b>
-        <Face hand={round?.theirs} label="Máy" tone={round?.result === -1 ? RED : INK} />
+        <Face hand={round?.theirs} label={tr('Máy')} tone={round?.result === -1 ? RED : INK} />
       </div>
       <p className="h-8 text-center font-pen text-[1.8rem] leading-none font-bold" style={{ color: round?.result === -1 ? RED : INK }} role="status">
-        {round ? (round.result === 1 ? 'Bạn thắng!' : round.result === -1 ? 'Bạn thua…' : 'Hòa nhau') : 'Ra tay đi!'}
+        {round ? (round.result === 1 ? tr('Bạn thắng!') : round.result === -1 ? tr('Bạn thua…') : tr('Hòa nhau')) : tr('Ra tay đi!')}
       </p>
       <div className="grid grid-cols-3 gap-3">
         {HANDS.map((hand) => {
@@ -303,10 +304,10 @@ export function BauCua() {
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
         <Score label="xu" value={coins} tone={RED} />
-        <Score label="đã cược" value={staked} />
-        <Score label="kỷ lục" value={best ?? '-'} />
+        <Score label={tr('đã cược')} value={staked} />
+        <Score label={tr('kỷ lục')} value={best ?? '-'} />
       </div>
-      <div className="flex items-center justify-center gap-3" role="img" aria-label="Dice">
+      <div className="flex items-center justify-center gap-3" role="img" aria-label={tr('Dice')}>
         {(dice ?? [null, null, null]).map((d, i) => (
           <InkBox key={i} className={clsx('grid size-[4.6rem] place-items-center', rolling && 'animate-[shake_0.18s_infinite]')} tone={RED} fill="#fffdf3">
             {d ? <Doodle name={d} size={44} tone={RED} /> : <span className="font-pen text-[2rem] font-bold" style={{ color: RED }}>?</span>}
@@ -314,9 +315,9 @@ export function BauCua() {
         ))}
       </div>
       <p className="h-8 text-center font-pen text-[1.7rem] leading-none font-bold" role="status">
-        {net === null ? <span style={{ color: INK }}>Đặt cược đi nào</span> : net > 0 ? <span style={{ color: '#1f7a3a' }}>Lời {net} xu!</span> : net < 0 ? <span style={{ color: RED }}>Lỗ {-net} xu…</span> : <span style={{ color: INK }}>Hòa vốn</span>}
+        {net === null ? <span style={{ color: INK }}>{tr('Đặt cược đi nào')}</span> : net > 0 ? <span style={{ color: '#1f7a3a' }}>{tr('Lời')} {net} {tr('xu!')}</span> : net < 0 ? <span style={{ color: RED }}>{tr('Lỗ')} {-net} {tr('xu…')}</span> : <span style={{ color: INK }}>{tr('Hòa vốn')}</span>}
       </p>
-      <ul className="grid grid-cols-3 gap-2.5" aria-label="Symbols">
+      <ul className="grid grid-cols-3 gap-2.5" aria-label={tr('Symbols')}>
         {BAU_CUA.map((symbol) => (
           <li key={symbol}>
             <InkBox as="button" type="button" onClick={() => bet(symbol)} className="block w-full transition-transform active:scale-95" tone={INK}>
@@ -336,7 +337,7 @@ export function BauCua() {
         ))}
       </ul>
       <div className="flex items-center gap-2">
-        <div className="flex gap-1.5" role="radiogroup" aria-label="Chip">
+        <div className="flex gap-1.5" role="radiogroup" aria-label={tr('Chip')}>
           {CHIPS.map((c) => (
             <button key={c} type="button" role="radio" aria-checked={chip === c} onClick={() => setChip(c)} className="grid size-11 place-items-center rounded-full font-pen text-[1.2rem] font-bold" style={{ border: `2.5px solid ${chip === c ? RED : INK}`, color: chip === c ? RED : INK, background: chip === c ? 'rgb(207 59 51 / 0.1)' : 'transparent' }}>
               {c}
@@ -344,15 +345,15 @@ export function BauCua() {
           ))}
         </div>
         <InkButton className="ml-auto" disabled={!staked || rolling} onClick={() => setBets({})}>
-          Xóa
+          {tr('Xóa')}
         </InkButton>
         {coins <= 0 && !staked ? (
           <InkButton solid tone={RED} onClick={restart}>
-            Ván mới
+            {tr('Ván mới')}
           </InkButton>
         ) : (
           <InkButton solid tone={RED} disabled={!staked || rolling} onClick={roll}>
-            Lắc!
+            {tr('Lắc!')}
           </InkButton>
         )}
       </div>

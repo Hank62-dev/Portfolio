@@ -3,6 +3,7 @@ import { RotateCcw } from 'lucide-react';
 import { isSolvedSlide, newSlide, slideTile } from './grid';
 import { INK, InkBox, InkButton, Note, RED, Score } from './ink';
 import { seconds, useBest } from './shared';
+import { tr } from '../lang';
 
 const SIZE = 4;
 
@@ -48,16 +49,16 @@ export default function SlidePuzzle() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="nước đi" value={moves} tone={RED} />
-        <Score label="thời gian" value={seconds(time)} />
-        <Score label="ít nhất" value={best ?? '-'} />
+        <Score label={tr('nước đi')} value={moves} tone={RED} />
+        <Score label={tr('thời gian')} value={seconds(time)} />
+        <Score label={tr('ít nhất')} value={best ?? '-'} />
       </div>
       <InkBox className="p-2" fill="#fdfaf0">
-        <ul className="grid grid-cols-4 gap-2" aria-label="Sliding puzzle">
+        <ul className="grid grid-cols-4 gap-2" aria-label={tr('Sliding puzzle')}>
           {board.map((value, i) => (
             <li key={value || 'blank'} className="aspect-square" style={{ order: i }}>
               {value ? (
-                <InkBox as="button" type="button" onClick={() => tap(i)} aria-label={`Tile ${value}`} className="size-full transition-transform active:scale-95" innerClassName="grid size-full place-items-center" tone={value % 2 ? INK : RED} fill="#fffdf3" round={6}>
+                <InkBox as="button" type="button" onClick={() => tap(i)} aria-label={tr('Tile {0}', value)} className="size-full transition-transform active:scale-95" innerClassName="grid size-full place-items-center" tone={value % 2 ? INK : RED} fill="#fffdf3" round={6}>
                   <b className="font-pen text-[2.1rem] leading-none font-bold" style={{ color: value % 2 ? INK : RED }}>
                     {value}
                   </b>
@@ -69,15 +70,15 @@ export default function SlidePuzzle() {
           ))}
         </ul>
       </InkBox>
-      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">Chạm một ô cạnh chỗ trống. Chạm ô xa hơn trong cùng hàng để đẩy cả hàng.</p>
+      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">{tr('Chạm một ô cạnh chỗ trống. Chạm ô xa hơn trong cùng hàng để đẩy cả hàng.')}</p>
       <div className="flex">
         <InkButton className="ml-auto" tone={RED} onClick={again}>
-          <RotateCcw size={15} aria-hidden="true" /> Xáo lại
+          <RotateCcw size={15} aria-hidden="true" /> {tr('Xáo lại')}
         </InkButton>
       </div>
       {done && (
-        <Note title="Xếp xong rồi!" detail={`${moves} nước đi trong ${seconds(time)}${record ? ' · kỷ lục mới!' : ''}`}>
-          <InkButton onClick={again}>Chơi lại</InkButton>
+        <Note title={tr('Xếp xong rồi!')} detail={tr('{0} nước đi trong {1}{2}', moves, seconds(time), record ? tr(' · kỷ lục mới!') : '')}>
+          <InkButton onClick={again}>{tr('Chơi lại')}</InkButton>
         </Note>
       )}
     </div>

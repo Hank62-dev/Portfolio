@@ -124,6 +124,17 @@ describe('what is due', () => {
   });
 });
 
+describe('language', () => {
+  it('tells each device in its own language', async () => {
+    await push.subscribe({ subscription: SUB, lang: 'vi' });
+    await push.subscribe({ subscription: { ...SUB, endpoint: 'https://push.example/en' }, lang: 'en' });
+    await sync.push([doc('cards', 'c1', { due: EVENING - 1000 }), doc('notes', 'n1', { text: 'x', day: '2026-11-06' })]);
+    await push.tick();
+    const byDevice = Object.fromEntries(sent.map((n) => [n.endpoint, n.title]));
+    expect(byDevice).toEqual({ [SUB.endpoint]: '1 thẻ ôn đến hạn', 'https://push.example/en': '1 flashcard due' });
+  });
+});
+
 describe('devices that went away', () => {
   it('forgets a subscription the push service says is gone', async () => {
     await push.subscribe({ subscription: SUB });

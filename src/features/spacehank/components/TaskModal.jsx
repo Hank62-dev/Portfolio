@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { Check, Send } from 'lucide-react';
 import { Avatar, Badge, Button, Dialog, DialogClose, Field, Select, Textarea } from '../../../design-system';
 import { DEFAULT_AGENT_ID } from '../model/agents';
+import { tr } from '../lang';
 
 const PRIORITIES = [
-  { value: 'normal', label: 'Normal' },
-  { value: 'high', label: 'High priority' },
-  { value: 'critical', label: 'Critical' },
+  { value: 'normal', label: tr('Normal') },
+  { value: 'high', label: tr('High priority') },
+  { value: 'critical', label: tr('Critical') },
 ];
 
 export default function TaskModal({ agents, onClose, onSubmit }) {
@@ -24,23 +25,23 @@ export default function TaskModal({ agents, onClose, onSubmit }) {
     <Dialog
       open
       onOpenChange={(open) => !open && onClose()}
-      eyebrow="TASK DISPATCH / HANK62"
-      title="Create a new task"
-      description="Send an instruction to the AI team."
+      eyebrow={tr('TASK DISPATCH / HANK62')}
+      title={tr('Create a new task')}
+      description={tr('Send an instruction to the AI team.')}
       footer={
         <>
           <DialogClose asChild>
             <Button variant="ghost" size="sm">
-              Cancel
+              {tr('Cancel')}
             </Button>
           </DialogClose>
           <Button size="sm" disabled={!title.trim()} onClick={submit}>
-            <Send size={14} aria-hidden="true" /> Dispatch task
+            <Send size={14} aria-hidden="true" /> {tr('Dispatch task')}
           </Button>
         </>
       }
     >
-      <Field label="Task instruction">
+      <Field label={tr('Task instruction')}>
         {(props) => (
           <Textarea
             {...props}
@@ -48,12 +49,12 @@ export default function TaskModal({ agents, onClose, onSubmit }) {
             rows={4}
             value={title}
             onChange={(event) => setTitle(event.target.value)}
-            placeholder="Describe what you want the AI team to do..."
+            placeholder={tr('Describe what you want the AI team to do...')}
           />
         )}
       </Field>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="Assign to">
+        <Field label={tr('Assign to')}>
           {(props) => (
             <Select {...props} value={agentId} onChange={(event) => setAgentId(event.target.value)}>
               {agents.map((agent) => (
@@ -64,7 +65,7 @@ export default function TaskModal({ agents, onClose, onSubmit }) {
             </Select>
           )}
         </Field>
-        <Field label="Priority">
+        <Field label={tr('Priority')}>
           {(props) => (
             <Select {...props} value={priority} onChange={(event) => setPriority(event.target.value)}>
               {PRIORITIES.map(({ value, label }) => (
@@ -79,13 +80,13 @@ export default function TaskModal({ agents, onClose, onSubmit }) {
       <div className="flex items-center gap-3 rounded-sm border border-line bg-ink-2 p-3">
         <Avatar color={selectedAgent?.color}>{selectedAgent?.name?.slice(0, 1) || '?'}</Avatar>
         <div className="min-w-0 flex-1 leading-tight">
-          <b className="block truncate text-fine font-medium">{selectedAgent?.name || 'AI agent'} is ready</b>
+          <b className="block truncate text-fine font-medium">{selectedAgent?.name || tr('AI agent')} {tr('is ready')}</b>
           <small className="font-mono text-[0.72rem] text-bone-faint">
-            {selectedAgent?.model || 'Worker'} - {priority} priority
+            {selectedAgent?.model || tr('Worker')} - {priority} {tr('priority')}
           </small>
         </div>
         <Badge tone="ok">
-          <Check size={12} aria-hidden="true" /> READY
+          <Check size={12} aria-hidden="true" /> {tr('READY')}
         </Badge>
       </div>
     </Dialog>

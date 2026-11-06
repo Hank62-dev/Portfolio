@@ -3,6 +3,7 @@ import { Play, RotateCcw } from 'lucide-react';
 import { nextHole } from './grid';
 import { INK, InkBox, InkButton, Note, RED, Score } from './ink';
 import { useBest } from './shared';
+import { tr } from '../lang';
 
 const ROUND = 30; // seconds
 const TICK = 80;
@@ -100,15 +101,15 @@ export default function WhackMole() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="điểm" value={score} tone={RED} />
-        <Score label="giây" value={left} />
-        <Score label="kỷ lục" value={best ?? '-'} />
+        <Score label={tr('điểm')} value={score} tone={RED} />
+        <Score label={tr('giây')} value={left} />
+        <Score label={tr('kỷ lục')} value={best ?? '-'} />
       </div>
       <InkBox className="p-3" fill="#fdfaf0">
-        <ul className="grid grid-cols-3 gap-3" aria-label="Holes">
+        <ul className="grid grid-cols-3 gap-3" aria-label={tr('Holes')}>
           {Array.from({ length: 9 }, (_, i) => (
             <li key={i} className="relative aspect-square select-none">
-              <button type="button" onPointerDown={() => whack(i)} aria-label={i === hole ? 'Mole! Tap it' : `Hole ${i + 1}`} className="absolute inset-0 touch-manipulation overflow-hidden rounded-md">
+              <button type="button" onPointerDown={() => whack(i)} aria-label={i === hole ? tr('Mole! Tap it') : tr('Hole {0}', i + 1)} className="absolute inset-0 touch-manipulation overflow-hidden rounded-md">
                 <span className={`absolute inset-x-[14%] bottom-[22%] transition-transform duration-100 ease-out ${i === hole || i === hit ? 'translate-y-0' : 'translate-y-[85%]'}`} style={{ height: '62%' }}>
                   {(i === hole || i === hit) && <Mole hit={i === hit} />}
                 </span>
@@ -128,13 +129,13 @@ export default function WhackMole() {
       </InkBox>
       <div className="flex">
         <InkButton solid className="ml-auto" onClick={start} disabled={running}>
-          {finished ? <RotateCcw size={15} aria-hidden="true" /> : <Play size={15} aria-hidden="true" />} {running ? 'Đang chơi…' : finished ? 'Chơi lại' : 'Bắt đầu'}
+          {finished ? <RotateCcw size={15} aria-hidden="true" /> : <Play size={15} aria-hidden="true" />} {running ? tr('Đang chơi…') : finished ? tr('Chơi lại') : tr('Bắt đầu')}
         </InkButton>
       </div>
-      {!running && !finished && <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">Chuột thò đầu lên là chạm ngay. Càng về sau chúng càng nhanh.</p>}
+      {!running && !finished && <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">{tr('Chuột thò đầu lên là chạm ngay. Càng về sau chúng càng nhanh.')}</p>}
       {finished && (
-        <Note title="Hết giờ!" detail={`Đập được ${score} con, để sổng ${missed}${record ? ' · kỷ lục mới!' : ''}`}>
-          <InkButton onClick={start}>Chơi lại</InkButton>
+        <Note title={tr('Hết giờ!')} detail={tr('Đập được {0} con, để sổng {1}{2}', score, missed, record ? tr(' · kỷ lục mới!') : '')}>
+          <InkButton onClick={start}>{tr('Chơi lại')}</InkButton>
         </Note>
       )}
     </div>

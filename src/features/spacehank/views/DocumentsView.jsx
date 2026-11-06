@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, ArrowUpRight, Check, FileJson, FileSpreadsheet, FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
 import { Button, Ring } from '../../../design-system';
@@ -11,14 +12,14 @@ const sizeLabel = (bytes) => (bytes >= 1024 * 1024 ? `${(bytes / 1024 / 1024).to
 
 // what kind of file it is: an icon, a short name and a colour, so a long list can be scanned at a glance
 const KINDS = {
-  pdf: { icon: FileText, label: 'PDF', hue: 8 },
-  docx: { icon: FileText, label: 'DOCX', hue: 215 },
-  txt: { icon: FileText, label: 'TXT', hue: 40 },
-  md: { icon: FileText, label: 'MD', hue: 160 },
-  csv: { icon: FileSpreadsheet, label: 'CSV', hue: 140 },
-  json: { icon: FileJson, label: 'JSON', hue: 280 },
+  pdf: { icon: FileText, label: tr('PDF'), hue: 8 },
+  docx: { icon: FileText, label: tr('DOCX'), hue: 215 },
+  txt: { icon: FileText, label: tr('TXT'), hue: 40 },
+  md: { icon: FileText, label: tr('MD'), hue: 160 },
+  csv: { icon: FileSpreadsheet, label: tr('CSV'), hue: 140 },
+  json: { icon: FileJson, label: tr('JSON'), hue: 280 },
 };
-const kindOf = (name) => KINDS[name.split('.').pop().toLowerCase()] ?? { icon: FileText, label: 'FILE', hue: 220 };
+const kindOf = (name) => KINDS[name.split('.').pop().toLowerCase()] ?? { icon: FileText, label: tr('FILE'), hue: 220 };
 
 const STATUS = {
   uploading: { icon: ({ size }) => <Ring size={size} thickness={2} />, text: 'Indexing…', tone: 'text-warn' },
@@ -96,15 +97,15 @@ export default function DocumentsView({ onTab }) {
   };
 
   const choose = () => inputRef.current?.click();
-  useFab({ label: 'Add documents', icon: Upload, onPress: choose });
+  useFab({ label: tr('Add documents'), icon: Upload, onPress: choose });
   const chunks = library.reduce((sum, doc) => sum + doc.chunks, 0);
   const pending = files.filter((f) => f.status === 'uploading');
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead eyebrow="Knowledge vault" title="Document" accent="Vault." description="Drop documents in and Hank answers from them in every chat, with sources. It still answers everything else too.">
+      <PageHead eyebrow={tr('Knowledge vault')} title={tr('Document')} accent="Vault." description={tr('Drop documents in and Hank answers from them in every chat, with sources. It still answers everything else too.')}>
         <Button variant="ghost" size="sm" onClick={() => onTab('rag')}>
-          Ask Hank RAG <ArrowUpRight size={14} aria-hidden="true" />
+          {tr('Ask Hank RAG')} <ArrowUpRight size={14} aria-hidden="true" />
         </Button>
       </PageHead>
 
@@ -135,9 +136,9 @@ export default function DocumentsView({ onTab }) {
             <i className="absolute inset-0 animate-ping rounded-full bg-signal/20 [animation-duration:2.6s]" aria-hidden="true" />
             {busy ? <Ring size={28} thickness={3} /> : <Upload size={26} aria-hidden="true" />}
           </span>
-          <h2 className="font-display text-h3 leading-tight text-bone">{busy ? 'Reading your documents…' : over ? 'Let go to add them' : "Drop documents into Hank's vault"}</h2>
-          <p className="text-bone-dim">PDF, DOCX, TXT, MD, CSV or JSON, up to {spacehankConfig.maxUploadBytes / 1024 / 1024} MB each</p>
-          <span className="rounded-full border border-line-strong px-4 py-1.5 font-mono text-fine text-bone transition-colors group-hover:border-signal group-hover:text-signal">Choose files</span>
+          <h2 className="font-display text-h3 leading-tight text-bone">{busy ? tr('Reading your documents…') : over ? tr('Let go to add them') : tr('Drop documents into Hank\'s vault')}</h2>
+          <p className="text-bone-dim">{tr('PDF, DOCX, TXT, MD, CSV or JSON, up to')} {spacehankConfig.maxUploadBytes / 1024 / 1024} {tr('MB each')}</p>
+          <span className="rounded-full border border-line-strong px-4 py-1.5 font-mono text-fine text-bone transition-colors group-hover:border-signal group-hover:text-signal">{tr('Choose files')}</span>
         </button>
       </div>
 
@@ -148,13 +149,13 @@ export default function DocumentsView({ onTab }) {
       )}
 
       <div className="grid grid-cols-3 gap-3">
-        <Stat value={library.length} label="Documents" />
-        <Stat value={chunks} label="Chunks indexed" />
-        <Stat value={pending.length} label="Indexing now" />
+        <Stat value={library.length} label={tr('Documents')} />
+        <Stat value={chunks} label={tr('Chunks indexed')} />
+        <Stat value={pending.length} label={tr('Indexing now')} />
       </div>
 
       {files.length + library.length ? (
-        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label="Documents">
+        <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3" aria-label={tr('Documents')}>
           {files.map((file, index) => {
             const kind = kindOf(file.name);
             const state = STATUS[file.status];
@@ -188,13 +189,13 @@ export default function DocumentsView({ onTab }) {
                 <div className="min-w-0 flex-1 leading-tight">
                   <b className="block truncate text-fine font-medium text-bone">{doc.name}</b>
                   <small className="font-mono text-[0.72rem] text-bone-faint">
-                    {kind.label} · {doc.chunks} chunks
+                    {kind.label} · {doc.chunks} {tr('chunks')}
                   </small>
                 </div>
                 <span className="flex items-center gap-1 font-mono text-[0.72rem] text-ok group-hover:hidden">
-                  <Check size={13} aria-hidden="true" /> Ready
+                  <Check size={13} aria-hidden="true" /> {tr('Ready')}
                 </span>
-                <button type="button" onClick={() => remove(doc)} aria-label={`Remove ${doc.name}`} className="hidden size-8 place-items-center rounded-full text-bone-faint transition-colors hover:bg-danger/15 hover:text-danger focus-visible:grid group-hover:grid">
+                <button type="button" onClick={() => remove(doc)} aria-label={tr('Remove {0}', doc.name)} className="hidden size-8 place-items-center rounded-full text-bone-faint transition-colors hover:bg-danger/15 hover:text-danger focus-visible:grid group-hover:grid">
                   <Trash2 size={15} aria-hidden="true" />
                 </button>
               </li>
@@ -204,8 +205,8 @@ export default function DocumentsView({ onTab }) {
       ) : (
         <div className="flex flex-col items-center gap-2 rounded-3xl border border-line bg-ink-1 px-6 py-10 text-center">
           {loading ? <Ring size={24} thickness={3} className="text-bone-faint" /> : <FolderOpen size={22} className="text-bone-faint" aria-hidden="true" />}
-          <h2 className="font-display text-lead text-bone">{loading ? 'Opening the vault…' : 'The vault is empty'}</h2>
-          <p className="max-w-sm text-fine text-bone-dim">What you add here is read, split into chunks and kept for good. Hank looks through it in every chat.</p>
+          <h2 className="font-display text-lead text-bone">{loading ? tr('Opening the vault…') : tr('The vault is empty')}</h2>
+          <p className="max-w-sm text-fine text-bone-dim">{tr('What you add here is read, split into chunks and kept for good. Hank looks through it in every chat.')}</p>
         </div>
       )}
     </div>

@@ -7,6 +7,7 @@ import { clearDraft, readDraft, writeDraft } from './draft';
 import { addPhoto, removePhoto } from './photos';
 import { removeEntry, saveEntry } from './store';
 import { PaperSheet, SheetClose, SoftButton, Thumb } from './ui';
+import { tr } from '../lang';
 
 const MAX_PHOTOS = 4;
 
@@ -53,7 +54,7 @@ export default function Writer({ day, entry, onClose, onNotify }) {
       }
       await Promise.all(added.filter((id) => !photos.includes(id)).map((id) => removePhoto(id).catch(() => {})));
     } catch {
-      onNotify?.('Không lưu được trang này trên máy.');
+      onNotify?.(tr('Không lưu được trang này trên máy.'));
     }
     clearDraft();
     setBusy(false);
@@ -80,7 +81,7 @@ export default function Writer({ day, entry, onClose, onNotify }) {
       setPhotos((current) => [...current, ...ids]);
       setAdded((current) => [...current, ...ids]);
     } catch {
-      onNotify?.('Không thêm được ảnh.');
+      onNotify?.(tr('Không thêm được ảnh.'));
     }
     setBusy(false);
   };
@@ -96,9 +97,9 @@ export default function Writer({ day, entry, onClose, onNotify }) {
     try {
       await removeEntry(entry);
       await Promise.all(added.map((id) => removePhoto(id).catch(() => {})));
-      onNotify?.('Đã xoá trang nhật ký.');
+      onNotify?.(tr('Đã xoá trang nhật ký.'));
     } catch {
-      onNotify?.('Không xoá được.');
+      onNotify?.(tr('Không xoá được.'));
     }
     clearDraft();
     setBusy(false);
@@ -106,17 +107,17 @@ export default function Writer({ day, entry, onClose, onNotify }) {
   };
 
   return (
-    <PaperSheet open onClose={() => keep()} title={`Viết nhật ký ${dayLabel(day)}`} description="Chọn tâm trạng, viết vài dòng và thêm ảnh nếu muốn.">
+    <PaperSheet open onClose={() => keep()} title={tr('Viết nhật ký {0}', dayLabel(day))} description={tr('Chọn tâm trạng, viết vài dòng và thêm ảnh nếu muốn.')}>
       <div className="flex flex-col gap-4 px-5 pt-2 pb-5" data-writer>
         <header className="flex items-start justify-between gap-3">
           <div>
             <p className="font-mono text-[0.68rem] tracking-[0.12em] text-[color:var(--dz-text-3)] uppercase">{dayLabel(day)}</p>
-            <h2 className="font-display text-[2rem] leading-tight text-[color:var(--dz-text)]">Hôm nay của bạn thế nào?</h2>
+            <h2 className="font-display text-[2rem] leading-tight text-[color:var(--dz-text)]">{tr('Hôm nay của bạn thế nào?')}</h2>
           </div>
-          <SheetClose label="Lưu và đóng" />
+          <SheetClose label={tr('Lưu và đóng')} />
         </header>
 
-        <div role="group" aria-label="Tâm trạng" className="flex justify-between gap-1">
+        <div role="group" aria-label={tr('Tâm trạng')} className="flex justify-between gap-1">
           {[1, 2, 3, 4, 5].map((value) => (
             <button key={value} type="button" aria-pressed={mood === value} aria-label={MOOD_WORDS[value - 1]} onClick={() => setMood(mood === value ? null : value)} className={clsx('flex flex-1 flex-col items-center gap-1 rounded-2xl py-1.5 transition-[transform,background-color] active:scale-90', mood === value ? 'scale-105 bg-[color:var(--dz-soft-2)]' : 'opacity-80 hover:opacity-100')}>
               <MoodFace mood={value} size={46} ring={mood === value} />
@@ -125,9 +126,9 @@ export default function Writer({ day, entry, onClose, onNotify }) {
           ))}
         </div>
 
-        <textarea ref={area} value={body} onChange={(event) => setBody(event.target.value)} placeholder="Viết gì cũng được. Một dòng thôi cũng là một dấu chân…" aria-label="Nội dung nhật ký" className="min-h-40 w-full resize-none rounded-3xl border border-[color:var(--dz-photo)] bg-[color:var(--dz-field)] p-4 font-display text-[1.3rem] leading-relaxed text-[color:var(--dz-text)] outline-none placeholder:text-[color:var(--dz-text-4)] focus:border-[#e0a458]" />
+        <textarea ref={area} value={body} onChange={(event) => setBody(event.target.value)} placeholder={tr('Viết gì cũng được. Một dòng thôi cũng là một dấu chân…')} aria-label={tr('Nội dung nhật ký')} className="min-h-40 w-full resize-none rounded-3xl border border-[color:var(--dz-photo)] bg-[color:var(--dz-field)] p-4 font-display text-[1.3rem] leading-relaxed text-[color:var(--dz-text)] outline-none placeholder:text-[color:var(--dz-text-4)] focus:border-[#e0a458]" />
 
-        <div className="flex flex-wrap gap-2" aria-label="Gợi ý để bắt đầu">
+        <div className="flex flex-wrap gap-2" aria-label={tr('Gợi ý để bắt đầu')}>
           {today.map((text) => (
             <button key={text} type="button" onClick={() => addPrompt(text)} className="rounded-full bg-[color:var(--dz-soft-2)] px-3.5 py-1.5 text-left font-body text-[0.85rem] leading-snug text-[color:var(--dz-text-2)] transition-transform active:scale-95">
               {text}
@@ -140,7 +141,7 @@ export default function Writer({ day, entry, onClose, onNotify }) {
             <Thumb key={id} id={id} onRemove={() => dropPhoto(id)} />
           ))}
           {photos.length < MAX_PHOTOS && (
-            <button type="button" onClick={() => file.current?.click()} disabled={busy} aria-label="Thêm ảnh" className="grid size-[72px] place-items-center rounded-2xl border-2 border-dashed border-[color:var(--dz-handle)] text-[color:var(--dz-text-4)] transition-colors hover:border-[#e0a458] hover:text-[color:var(--dz-amber)] disabled:opacity-50">
+            <button type="button" onClick={() => file.current?.click()} disabled={busy} aria-label={tr('Thêm ảnh')} className="grid size-[72px] place-items-center rounded-2xl border-2 border-dashed border-[color:var(--dz-handle)] text-[color:var(--dz-text-4)] transition-colors hover:border-[#e0a458] hover:text-[color:var(--dz-amber)] disabled:opacity-50">
               <ImagePlus size={22} aria-hidden="true" />
             </button>
           )}
@@ -149,12 +150,12 @@ export default function Writer({ day, entry, onClose, onNotify }) {
 
         <footer className="flex items-center gap-2 pt-1">
           {entry && (
-            <SoftButton tone="soft" onClick={discard} disabled={busy} aria-label={confirm ? 'Chắc chắn xoá trang này' : 'Xoá trang này'} className={clsx('px-4', confirm && '!bg-[color:var(--dz-danger-bg)] !text-[color:var(--dz-danger)]')}>
-              <Trash2 size={16} aria-hidden="true" /> {confirm ? 'Xoá thật nhé?' : 'Xoá'}
+            <SoftButton tone="soft" onClick={discard} disabled={busy} aria-label={confirm ? tr('Chắc chắn xoá trang này') : tr('Xoá trang này')} className={clsx('px-4', confirm && '!bg-[color:var(--dz-danger-bg)] !text-[color:var(--dz-danger)]')}>
+              <Trash2 size={16} aria-hidden="true" /> {confirm ? tr('Xoá thật nhé?') : tr('Xoá')}
             </SoftButton>
           )}
-          <SoftButton className="flex-1" onClick={() => keep('Đã thêm vào hành trình.')} disabled={busy || !hasContent} data-save>
-            Lưu vào hành trình
+          <SoftButton className="flex-1" onClick={() => keep(tr('Đã thêm vào hành trình.'))} disabled={busy || !hasContent} data-save>
+            {tr('Lưu vào hành trình')}
           </SoftButton>
         </footer>
       </div>

@@ -1,8 +1,10 @@
+import { tr } from '../lang';
 import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, Search, X } from 'lucide-react';
 import { clsx } from '../../../lib/format';
+import { LangPills } from './LangSwitch';
 import { ThemePills } from './ThemeMenu';
 import AppIcon from './AppIcon';
 import { NAVIGATION } from '../navigation';
@@ -79,7 +81,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
   return (
     <Dialog.Root open={open} onOpenChange={(next) => { setOpen(next); if (!next) setQuery(''); }}>
       <nav
-        aria-label="Workspace"
+        aria-label={tr('Workspace')}
         className="fixed inset-x-3 bottom-[calc(0.6rem+env(safe-area-inset-bottom))] z-30 h-[4.1rem] [transition:--notch_0.55s_cubic-bezier(0.16,1,0.3,1)]"
         style={{ '--notch': `${(at * 2 + 1) * 10}%` }}
         data-mobile-nav
@@ -102,9 +104,9 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             </button>
           ))}
           <Dialog.Trigger asChild>
-            <button type="button" aria-label="More" className={clsx(SLOT, slot === -1 ? 'font-medium text-bone' : 'text-bone-faint')}>
+            <button type="button" aria-label={tr('More')} className={clsx(SLOT, slot === -1 ? 'font-medium text-bone' : 'text-bone-faint')}>
               <MoreHorizontal size={20} strokeWidth={1.7} aria-hidden="true" className={clsx('transition-all duration-300', slot === -1 && 'scale-50 opacity-0')} />
-              <span>More</span>
+              <span>{tr('More')}</span>
             </button>
           </Dialog.Trigger>
         </div>
@@ -131,12 +133,12 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             <span className="mx-auto mt-2.5 block h-1 w-10 rounded-full bg-line-strong" aria-hidden="true" />
             <div className="relative flex items-end justify-between px-5 pt-3 pb-3">
               <div className="min-w-0">
-                <p className="mb-1.5 font-mono text-[0.6rem] tracking-[0.22em] text-bone-faint">INDEX · {String(NAVIGATION.length).padStart(2, '0')} PLACES</p>
+                <p className="mb-1.5 font-mono text-[0.6rem] tracking-[0.22em] text-bone-faint">{tr('INDEX ·')} {String(NAVIGATION.length).padStart(2, '0')} {tr('PLACES')}</p>
                 <Dialog.Title className="font-display text-[1.95rem] leading-none font-normal tracking-tight text-bone">
-                  Everything in <em className="text-signal">Hank62</em>
+                  {tr('Everything in')} <em className="text-signal">{tr('Hank62')}</em>
                 </Dialog.Title>
               </div>
-              <Dialog.Close aria-label="Close" className="mb-0.5 grid size-9 shrink-0 place-items-center rounded-full border border-line text-bone-dim hover:text-bone active:scale-90">
+              <Dialog.Close aria-label={tr('Close')} className="mb-0.5 grid size-9 shrink-0 place-items-center rounded-full border border-line text-bone-dim hover:text-bone active:scale-90">
                 <X size={16} aria-hidden="true" />
               </Dialog.Close>
             </div>
@@ -151,8 +153,8 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && found[0]) go(found[0].id);
               }}
-              placeholder="Find a place: music, notes, money"
-              aria-label="Find a place"
+              placeholder={tr('Find a place: music, notes, money')}
+              aria-label={tr('Find a place')}
               enterKeyHint="go"
               autoComplete="off"
               className="h-10 w-full border-b border-line-strong bg-transparent pl-6 font-mono text-fine text-bone transition-colors placeholder:text-bone-faint focus:border-signal focus:outline-none"
@@ -177,13 +179,14 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             )}
             {!found.length && (
               <p className="py-8 text-center font-mono text-fine text-bone-faint" role="status">
-                Nothing here called “{query.trim()}”. Try “notes”, “money” or “play”.
+                {tr('Nothing here called “')}{query.trim()}{tr('”. Try “notes”, “money” or “play”.')}
               </p>
             )}
 
             {!q && (
               <>
                 <ThemePills className="border-t border-line pt-4" />
+                <LangPills />
                 {!guest && <SyncStatus className="border-t border-line pt-3" />}
               </>
             )}
@@ -191,19 +194,19 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
               {(app?.canInstall || app?.ios) && (
                 <button
                   type="button"
-                  onClick={() => (app.canInstall ? app.install() : onNotify?.('On iPhone: tap Share, then Add to Home Screen'))}
+                  onClick={() => (app.canInstall ? app.install() : onNotify?.(tr('On iPhone: tap Share, then Add to Home Screen')))}
                   className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim"
                 >
-                  <Download size={15} aria-hidden="true" /> Install app
+                  <Download size={15} aria-hidden="true" /> {tr('Install app')}
                 </button>
               )}
               {guest && (
                 <button type="button" onClick={onResetDemo} className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim">
-                  <RotateCcw size={15} aria-hidden="true" /> Reset demo data
+                  <RotateCcw size={15} aria-hidden="true" /> {tr('Reset demo data')}
                 </button>
               )}
               <button type="button" onClick={onLogout} className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim">
-                {guest ? <LogOut size={15} aria-hidden="true" /> : <LockKeyhole size={15} aria-hidden="true" />} {guest ? 'Exit demo' : 'Lock workspace'}
+                {guest ? <LogOut size={15} aria-hidden="true" /> : <LockKeyhole size={15} aria-hidden="true" />} {guest ? tr('Exit demo') : tr('Lock workspace')}
               </button>
             </div>
           </div>
@@ -211,7 +214,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             type="button"
             tabIndex={more ? 0 : -1}
             aria-hidden={!more}
-            aria-label="Scroll down for more"
+            aria-label={tr('Scroll down for more')}
             onClick={() => scroller.current?.scrollBy({ top: 240, behavior: 'smooth' })}
             className={clsx('absolute bottom-2 left-1/2 grid size-9 -translate-x-1/2 place-items-center rounded-full border border-line bg-ink-2/90 text-bone-dim shadow-[0_8px_20px_-8px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur transition-all duration-300 active:scale-90', more ? 'opacity-100' : 'pointer-events-none translate-y-1 opacity-0')}
             data-sheet-scroll-hint

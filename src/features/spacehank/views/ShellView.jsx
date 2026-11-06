@@ -3,6 +3,7 @@ import { ChevronRight, CornerDownLeft } from 'lucide-react';
 import { Dots } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { complete, parseLine, runLine } from '../shell/commands';
+import { tr } from '../lang';
 
 const TONE = { ok: 'text-ok', err: 'text-danger', dim: 'text-bone-faint' };
 const QUICK = ['help', 'agents', 'tabs', 'habits', 'weather'];
@@ -74,16 +75,16 @@ export default function ShellView({ ctx }) {
       <section
         className="dark-island flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-wash/10 bg-[#08080b] bg-[radial-gradient(80%_60%_at_0%_0%,rgb(255_91_46/0.1),transparent_60%),radial-gradient(60%_60%_at_100%_100%,rgb(91_43_255/0.12),transparent_60%)] shadow-[0_30px_80px_-40px_rgb(var(--shadow-rgb)/0.9)]"
         onClick={() => window.getSelection()?.isCollapsed && field.current?.focus()}
-        aria-label="Shell"
+        aria-label={tr('Shell')}
       >
         <div className="flex flex-wrap items-center gap-x-1.5 gap-y-2 border-b border-wash/8 px-4 py-2.5">
           <span className="flex items-center gap-1.5" aria-hidden="true">
             <i className="size-2.5 rounded-full bg-[#ff5f57]" />
             <i className="size-2.5 rounded-full bg-[#febc2e]" />
             <i className="size-2.5 rounded-full bg-[#28c840]" />
-            <span className="ml-3 font-mono text-[0.72rem] text-bone-faint">hank@62: ~</span>
+            <span className="ml-3 font-mono text-[0.72rem] text-bone-faint">{tr('hank@62: ~')}</span>
           </span>
-          <div className="ml-auto flex flex-wrap gap-1.5" aria-label="Try one">
+          <div className="ml-auto flex flex-wrap gap-1.5" aria-label={tr('Try one')}>
             {QUICK.map((q) => (
               <button key={q} type="button" onClick={() => run(q)} className="rounded-full border border-wash/10 px-2.5 py-0.5 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/60 hover:text-bone">
                 {q}
@@ -107,7 +108,7 @@ export default function ShellView({ ctx }) {
           )}
           {busy && (
             <p className="mt-1 flex items-center gap-2 text-bone-faint">
-              <Dots size={5} /> working…
+              <Dots size={5} /> {tr('working…')}
             </p>
           )}
           <div ref={end} />
@@ -123,7 +124,7 @@ export default function ShellView({ ctx }) {
           <ChevronRight size={16} className="shrink-0 text-signal" aria-hidden="true" />
           <input
             ref={field}
-            aria-label="Command"
+            aria-label={tr('Command')}
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
@@ -133,10 +134,10 @@ export default function ShellView({ ctx }) {
             autoComplete="off"
             autoCapitalize="off"
             spellCheck={false}
-            placeholder="type a command…"
+            placeholder={tr('type a command…')}
             className="h-9 min-w-0 flex-1 bg-transparent font-mono text-[0.88rem] text-bone placeholder:text-bone-faint focus-visible:outline-none"
           />
-          <button type="submit" aria-label="Run" disabled={!input.trim() || busy} className="grid size-8 place-items-center rounded-full text-bone-dim hover:text-bone disabled:opacity-35">
+          <button type="submit" aria-label={tr('Run')} disabled={!input.trim() || busy} className="grid size-8 place-items-center rounded-full text-bone-dim hover:text-bone disabled:opacity-35">
             <CornerDownLeft size={15} aria-hidden="true" />
           </button>
         </form>

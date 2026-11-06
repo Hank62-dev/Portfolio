@@ -1,15 +1,16 @@
+import { tr } from '../lang';
 // The brand kit: the site's own tokens (mirrored from styles/index.css, and a test keeps them in step),
 // the WCAG contrast maths, and exports for other tools.
 
 export const COLORS = [
-  { group: 'Surface', name: 'ink-0', hex: '#0b0c0e', role: 'Page background' },
-  { group: 'Surface', name: 'ink-1', hex: '#101114', role: 'Sidebar, panels' },
-  { group: 'Surface', name: 'ink-2', hex: '#16181c', role: 'Cards, inputs' },
-  { group: 'Surface', name: 'ink-3', hex: '#1e2127', role: 'Raised, active' },
-  { group: 'Text', name: 'bone', hex: '#ece6da', role: 'Primary text' },
-  { group: 'Text', name: 'bone-dim', hex: '#a8a396', role: 'Secondary text' },
-  { group: 'Text', name: 'bone-faint', hex: '#8a8579', role: 'Hints, captions' },
-  { group: 'Accent', name: 'signal', hex: '#ff5b2e', role: 'The one accent' },
+  { group: 'Surface', name: 'ink-0', hex: '#0b0c0e', role: tr('Page background') },
+  { group: 'Surface', name: 'ink-1', hex: '#101114', role: tr('Sidebar, panels') },
+  { group: 'Surface', name: 'ink-2', hex: '#16181c', role: tr('Cards, inputs') },
+  { group: 'Surface', name: 'ink-3', hex: '#1e2127', role: tr('Raised, active') },
+  { group: 'Text', name: 'bone', hex: '#ece6da', role: tr('Primary text') },
+  { group: 'Text', name: 'bone-dim', hex: '#a8a396', role: tr('Secondary text') },
+  { group: 'Text', name: 'bone-faint', hex: '#8a8579', role: tr('Hints, captions') },
+  { group: 'Accent', name: 'signal', hex: '#ff5b2e', role: tr('The one accent') },
   { group: 'Status', name: 'ok', hex: '#7fd6a2', role: 'Success' },
   { group: 'Status', name: 'warn', hex: '#f0b45a', role: 'Caution' },
   { group: 'Status', name: 'danger', hex: '#ff7b72', role: 'Error' },
@@ -17,8 +18,8 @@ export const COLORS = [
 
 export const FONTS = [
   { name: 'display', family: 'Newsreader', fallback: 'serif', use: 'Headlines' },
-  { name: 'body', family: 'Geist', fallback: "system-ui, -apple-system, 'Segoe UI', sans-serif", use: 'Text and controls' },
-  { name: 'mono', family: 'Geist Mono', fallback: "ui-monospace, 'SFMono-Regular', Menlo, monospace", use: 'Labels, numbers, code' },
+  { name: 'body', family: 'Geist', fallback: "system-ui, -apple-system, 'Segoe UI', sans-serif", use: tr('Text and controls') },
+  { name: 'mono', family: tr('Geist Mono'), fallback: "ui-monospace, 'SFMono-Regular', Menlo, monospace", use: tr('Labels, numbers, code') },
 ];
 
 const channel = (value) => {

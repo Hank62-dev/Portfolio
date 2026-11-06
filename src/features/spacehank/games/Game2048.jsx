@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { RotateCcw, Undo2 } from 'lucide-react';
 import { addTile, canMove2048, move2048, new2048 } from './grid';
@@ -66,9 +67,9 @@ export default function Game2048() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="điểm" value={game.score} tone={RED} />
-        <Score label="ô lớn nhất" value={top} />
-        <Score label="kỷ lục" value={best ?? '-'} />
+        <Score label={tr('điểm')} value={game.score} tone={RED} />
+        <Score label={tr('ô lớn nhất')} value={top} />
+        <Score label={tr('kỷ lục')} value={best ?? '-'} />
       </div>
       <div
         className="touch-none select-none"
@@ -86,7 +87,7 @@ export default function Game2048() {
         }}
       >
         <InkBox className="p-2" fill="#fdfaf0">
-          <ul className="grid grid-cols-4 gap-2" aria-label="2048 board">
+          <ul className="grid grid-cols-4 gap-2" aria-label={tr('2048 board')}>
             {game.board.map((value, i) => (
               <li key={i} className="aspect-square">
                 {value ? (
@@ -103,23 +104,23 @@ export default function Game2048() {
           </ul>
         </InkBox>
       </div>
-      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">Vuốt trên bảng, hoặc dùng phím mũi tên.</p>
+      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">{tr('Vuốt trên bảng, hoặc dùng phím mũi tên.')}</p>
       <div className="flex gap-2">
         <InkButton onClick={undo} disabled={!before || game.over}>
-          <Undo2 size={15} aria-hidden="true" /> Đi lại
+          <Undo2 size={15} aria-hidden="true" /> {tr('Đi lại')}
         </InkButton>
         <InkButton className="ml-auto" tone={RED} onClick={again}>
-          <RotateCcw size={15} aria-hidden="true" /> Ván mới
+          <RotateCcw size={15} aria-hidden="true" /> {tr('Ván mới')}
         </InkButton>
       </div>
       {game.over && (
-        <Note title="Hết nước đi!" detail={`${game.score} điểm, ô lớn nhất là ${top}.`}>
-          <InkButton onClick={again}>Chơi lại</InkButton>
+        <Note title={tr('Hết nước đi!')} detail={tr('{0} điểm, ô lớn nhất là {1}.', game.score, top)}>
+          <InkButton onClick={again}>{tr('Chơi lại')}</InkButton>
         </Note>
       )}
       {!game.over && top >= 2048 && !reached && (
-        <Note title="Chạm 2048!" detail="Giỏi quá. Chơi tiếp cho cao hơn nhé.">
-          <InkButton onClick={() => setReached(true)}>Chơi tiếp</InkButton>
+        <Note title={tr('Chạm 2048!')} detail={tr('Giỏi quá. Chơi tiếp cho cao hơn nhé.')}>
+          <InkButton onClick={() => setReached(true)}>{tr('Chơi tiếp')}</InkButton>
         </Note>
       )}
     </div>

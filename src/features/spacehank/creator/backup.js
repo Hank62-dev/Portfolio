@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // A copy of the Creator Lab's data as one JSON file, so income records and deals are not trapped in one browser.
 
 export const BACKUP_VERSION = 1;
@@ -13,10 +14,10 @@ export const parseBackup = (text) => {
   try {
     data = JSON.parse(text);
   } catch {
-    return { error: 'That file is not a backup (it is not valid JSON).' };
+    return { error: tr('That file is not a backup (it is not valid JSON).') };
   }
-  if (!data || data.app !== 'hank62-creator') return { error: 'That file is not a Creator Lab backup.' };
-  if (!Number.isFinite(data.version) || data.version > BACKUP_VERSION) return { error: 'That backup was made by a newer version of the app.' };
+  if (!data || data.app !== 'hank62-creator') return { error: tr('That file is not a Creator Lab backup.') };
+  if (!Number.isFinite(data.version) || data.version > BACKUP_VERSION) return { error: tr('That backup was made by a newer version of the app.') };
   return {
     content: list(data.content),
     income: list(data.income).filter((e) => Number.isFinite(e.amount) && Number.isFinite(e.at)),

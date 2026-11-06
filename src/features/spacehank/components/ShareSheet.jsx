@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useEffect, useMemo, useState } from 'react';
 import { Check, NotebookPen, Palette, Trash2 } from 'lucide-react';
 import { Button, Dialog, Skeleton } from '../../../design-system';
@@ -34,7 +35,7 @@ export default function ShareSheet({ onDone, onNotify }) {
   useEffect(() => {
     if (share === null || (share && !hasContent(share, files.length))) {
       void clearShare();
-      onNotify?.('Nothing was waiting from that share');
+      onNotify?.(tr('Nothing was waiting from that share'));
       onDone();
     }
   }, [share, files.length, onDone, onNotify]);
@@ -56,7 +57,7 @@ export default function ShareSheet({ onDone, onNotify }) {
     try {
       await work();
     } catch {
-      onNotify?.('That could not be saved on this device');
+      onNotify?.(tr('That could not be saved on this device'));
       setBusy(false);
       return null;
     }
@@ -73,27 +74,27 @@ export default function ShareSheet({ onDone, onNotify }) {
     });
     if (!next) return;
     if (id) sendIntent('notes', { open: id });
-    if (!hasPictures || next.pictures) await finish('Saved to Second Brain', 'notes');
+    if (!hasPictures || next.pictures) await finish(tr('Saved to Second Brain'), 'notes');
   };
 
   const savePictures = async () => {
     const next = await mark('pictures', async () => {
-      for (const blob of files) await saveImage({ prompt: share.title.trim() || 'Shared picture', blob });
+      for (const blob of files) await saveImage({ prompt: share.title.trim() || tr('Shared picture'), blob });
     });
     if (!next) return;
-    if (!hasText || next.note) await finish(`Saved ${files.length === 1 ? 'the picture' : `${files.length} pictures`} to Image Studio`, 'studio');
+    if (!hasText || next.note) await finish(tr('Saved {0} to Image Studio', files.length === 1 ? tr('the picture') : tr('{0} pictures', files.length)), 'studio');
   };
 
   return (
     <Dialog
       open
       onOpenChange={(open) => !open && finish(saved.note || saved.pictures ? 'Saved' : 'Discarded', undefined)}
-      eyebrow="SHARED TO HANK62"
-      title="Where should this go?"
-      description={`You shared ${describeShare(share, files.length)}.`}
+      eyebrow={tr('SHARED TO HANK62')}
+      title={tr('Where should this go?')}
+      description={tr('You shared {0}.', describeShare(share, files.length))}
       footer={
         <Button variant="ghost" size="sm" onClick={() => finish('Discarded', undefined)}>
-          <Trash2 size={14} aria-hidden="true" /> Discard
+          <Trash2 size={14} aria-hidden="true" /> {tr('Discard')}
         </Button>
       }
     >
@@ -103,10 +104,10 @@ export default function ShareSheet({ onDone, onNotify }) {
         </p>
       )}
       {hasPictures && (
-        <ul className="flex flex-wrap gap-2" aria-label="Shared pictures">
+        <ul className="flex flex-wrap gap-2" aria-label={tr('Shared pictures')}>
           {previews.map((url, i) => (
             <li key={url} className="size-20 overflow-hidden rounded-sm border border-line bg-ink-2">
-              <img src={url} alt={`Shared picture ${i + 1}`} className="size-full object-cover" />
+              <img src={url} alt={tr('Shared picture {0}', i + 1)} className="size-full object-cover" />
             </li>
           ))}
         </ul>
@@ -115,13 +116,13 @@ export default function ShareSheet({ onDone, onNotify }) {
         {hasText && (
           <Button onClick={saveNote} disabled={busy || saved.note} data-share-note>
             {busy ? <Skeleton className="size-3.5 rounded-full bg-ink-0/30" /> : saved.note ? <Check size={15} aria-hidden="true" /> : <NotebookPen size={15} aria-hidden="true" />}
-            {saved.note ? 'Saved to Second Brain' : 'Save to Second Brain'}
+            {saved.note ? tr('Saved to Second Brain') : tr('Save to Second Brain')}
           </Button>
         )}
         {hasPictures && (
           <Button variant={hasText ? 'secondary' : 'primary'} onClick={savePictures} disabled={busy || saved.pictures} data-share-pictures>
             {saved.pictures ? <Check size={15} aria-hidden="true" /> : <Palette size={15} aria-hidden="true" />}
-            {saved.pictures ? 'Saved to Image Studio' : files.length === 1 ? 'Save the picture to Image Studio' : `Save ${files.length} pictures to Image Studio`}
+            {saved.pictures ? tr('Saved to Image Studio') : files.length === 1 ? tr('Save the picture to Image Studio') : tr('Save {0} pictures to Image Studio', files.length)}
           </Button>
         )}
       </div>

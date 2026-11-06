@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Blocks, Bomb, Brain, CircleDot, Disc, Grid3x3, Hammer, Hand, Hash, LayoutGrid, Lightbulb, Worm } from 'lucide-react';
 import { Desk, Doodle, INK, InkBox, InkButton, RED, Title } from '../games/ink';
 import { BauCua, FindNumbers, Memory, Rps } from '../games/small';
+import { tr } from '../lang';
 
 const Sudoku = lazy(() => import('../games/Sudoku'));
 const Caro = lazy(() => import('../games/Caro'));
@@ -19,27 +20,27 @@ const Tetris = lazy(() => import('../games/FallingBlocks'));
 
 const PEN = { filter: 'url(#pen)' };
 const GAMES = [
-  { id: 'boats', name: 'Bắn tàu giấy', hint: 'Sea battle for two, drawn in pen.', icon: () => <Doodle name="boat" size={46} />, tone: INK, play: Battleship },
-  { id: 'caro', name: 'Cờ caro', hint: 'Five in a row, X against O.', icon: () => <Doodle name="cross" size={44} />, tone: RED, play: Caro },
-  { id: 'sudoku', name: 'Sudoku', hint: 'Fill the grid, no digit twice.', icon: () => <Grid3x3 size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Sudoku },
-  { id: 'baucua', name: 'Bầu cua tôm cá', hint: 'The Tết dice game, pretend coins.', icon: () => <Doodle name="cua" size={46} tone={RED} />, tone: RED, play: BauCua },
-  { id: 'numbers', name: 'Tìm số', hint: 'Tap 1 to 25 in order, fast.', icon: () => <Hash size={42} strokeWidth={2.2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: FindNumbers },
-  { id: 'memory', name: 'Lật hình', hint: 'Find all the pairs.', icon: () => <Brain size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Memory },
-  { id: 'snake', name: 'Rắn săn mồi', hint: 'Eat, grow, do not crash.', icon: () => <Worm size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Snake },
-  { id: 'rps', name: 'Kéo búa bao', hint: 'The oldest duel of all.', icon: () => <Hand size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Rps },
-  { id: '2048', name: 'Gộp số', hint: 'Slide, join equal numbers, reach 2048.', icon: () => <b className="font-pen text-[2.1rem] leading-none" style={{ color: INK, ...PEN }}>2048</b>, tone: INK, play: Game2048 },
-  { id: 'tetris', name: 'Xếp hình', hint: 'Falling blocks. Fill a line, it vanishes.', icon: () => <Blocks size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Tetris },
-  { id: 'mines', name: 'Dò mìn', hint: 'Open the squares, avoid the mines.', icon: () => <Bomb size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Minesweeper },
-  { id: 'connect4', name: 'Bốn quân', hint: 'Drop discs, get four in a row.', icon: () => <CircleDot size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: ConnectFour },
-  { id: 'reversi', name: 'Cờ lật', hint: 'Trap discs between yours and flip them.', icon: () => <Disc size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Reversi },
-  { id: 'slide', name: 'Ghép số', hint: 'Slide the tiles until 1 to 15 are in order.', icon: () => <LayoutGrid size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: SlidePuzzle },
-  { id: 'lights', name: 'Tắt đèn', hint: 'Press a lamp, its neighbours flip too.', icon: () => <Lightbulb size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: LightsOut },
-  { id: 'whack', name: 'Đập chuột', hint: 'Tap the moles before they duck. 30 seconds.', icon: () => <Hammer size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: WhackMole },
+  { id: 'boats', name: tr('Bắn tàu giấy'), hint: tr('Sea battle for two, drawn in pen.'), icon: () => <Doodle name="boat" size={46} />, tone: INK, play: Battleship },
+  { id: 'caro', name: tr('Cờ caro'), hint: tr('Five in a row, X against O.'), icon: () => <Doodle name="cross" size={44} />, tone: RED, play: Caro },
+  { id: 'sudoku', name: 'Sudoku', hint: tr('Fill the grid, no digit twice.'), icon: () => <Grid3x3 size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Sudoku },
+  { id: 'baucua', name: tr('Bầu cua tôm cá'), hint: tr('The Tết dice game, pretend coins.'), icon: () => <Doodle name="cua" size={46} tone={RED} />, tone: RED, play: BauCua },
+  { id: 'numbers', name: tr('Tìm số'), hint: tr('Tap 1 to 25 in order, fast.'), icon: () => <Hash size={42} strokeWidth={2.2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: FindNumbers },
+  { id: 'memory', name: tr('Lật hình'), hint: tr('Find all the pairs.'), icon: () => <Brain size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Memory },
+  { id: 'snake', name: tr('Rắn săn mồi'), hint: tr('Eat, grow, do not crash.'), icon: () => <Worm size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Snake },
+  { id: 'rps', name: tr('Kéo búa bao'), hint: tr('The oldest duel of all.'), icon: () => <Hand size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Rps },
+  { id: '2048', name: tr('Gộp số'), hint: tr('Slide, join equal numbers, reach 2048.'), icon: () => <b className="font-pen text-[2.1rem] leading-none" style={{ color: INK, ...PEN }}>2048</b>, tone: INK, play: Game2048 },
+  { id: 'tetris', name: tr('Xếp hình'), hint: tr('Falling blocks. Fill a line, it vanishes.'), icon: () => <Blocks size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Tetris },
+  { id: 'mines', name: tr('Dò mìn'), hint: tr('Open the squares, avoid the mines.'), icon: () => <Bomb size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Minesweeper },
+  { id: 'connect4', name: tr('Bốn quân'), hint: tr('Drop discs, get four in a row.'), icon: () => <CircleDot size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: ConnectFour },
+  { id: 'reversi', name: tr('Cờ lật'), hint: tr('Trap discs between yours and flip them.'), icon: () => <Disc size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: Reversi },
+  { id: 'slide', name: tr('Ghép số'), hint: tr('Slide the tiles until 1 to 15 are in order.'), icon: () => <LayoutGrid size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: SlidePuzzle },
+  { id: 'lights', name: tr('Tắt đèn'), hint: tr('Press a lamp, its neighbours flip too.'), icon: () => <Lightbulb size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: LightsOut },
+  { id: 'whack', name: tr('Đập chuột'), hint: tr('Tap the moles before they duck. 30 seconds.'), icon: () => <Hammer size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: WhackMole },
 ];
 
 /** The page of a game while its code arrives: a few lines in pale ink, where the game will be drawn. */
 const GameLoading = () => (
-  <div role="status" aria-busy="true" aria-label="Opening the game" className="flex flex-col gap-3">
+  <div role="status" aria-busy="true" aria-label={tr('Opening the game')} className="flex flex-col gap-3">
     <i className="block h-5 w-2/3 skeleton rounded-full" style={{ background: `${INK}26` }} />
     <i className="block h-40 skeleton rounded-md" style={{ background: `${INK}14` }} />
     <i className="block h-12 skeleton rounded-md" style={{ background: `${INK}1f` }} />
@@ -69,7 +70,7 @@ export default function GamesView() {
       <Desk>
         <div data-game={current.id} className="flex flex-col gap-4">
           <div className="flex items-start gap-3">
-            <InkButton onClick={close} aria-label="Back to the games" className="shrink-0">
+            <InkButton onClick={close} aria-label={tr('Back to the games')} className="shrink-0">
               <ArrowLeft size={18} strokeWidth={2.6} aria-hidden="true" />
             </InkButton>
             <Title hint={current.hint}>{current.name}</Title>
@@ -85,8 +86,8 @@ export default function GamesView() {
   return (
     <Desk>
       <div className="flex flex-col gap-5">
-        <Title hint="Games for a break. Easy to learn, over in a minute. Your best scores stay on this device.">Ra chơi</Title>
-        <ul className="grid grid-cols-2 gap-x-4 gap-y-5" aria-label="Games">
+        <Title hint={tr('Games for a break. Easy to learn, over in a minute. Your best scores stay on this device.')}>{tr('Ra chơi')}</Title>
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-5" aria-label={tr('Games')}>
           {GAMES.map(({ id, name, hint, icon: Icon, tone }, i) => (
             <li key={id} style={{ transform: `rotate(${i % 2 ? 1.2 : -1.2}deg)` }}>
               <InkBox as="button" type="button" onClick={() => open(id)} tone={tone} fill="#fffdf3" className="block h-full w-full text-left transition-transform active:scale-95">

@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { useSheetDrag } from '../../../design-system/useSheetDrag';
 import { usePhoto } from './photos';
+import { tr } from '../lang';
 
 // The pieces the diary is made of: a dark sheet that rises from the bottom, round buttons, a photo thumbnail.
 
@@ -48,13 +49,13 @@ export const SheetClose = ({ label = 'Đóng' }) => (
 );
 
 /** A stored picture, square. With `onRemove` it has a small cross to take it off the page. */
-export function Thumb({ id, size = 72, onRemove, className, alt = 'Ảnh kỷ niệm' }) {
+export function Thumb({ id, size = 72, onRemove, className, alt = tr('Ảnh kỷ niệm') }) {
   const url = usePhoto(id);
   return (
     <span className={clsx('relative inline-block shrink-0 overflow-hidden rounded-2xl bg-[color:var(--dz-photo)]', className)} style={{ width: size, height: size }}>
       {url && <img src={url} alt={alt} className="size-full object-cover" />}
       {onRemove && (
-        <button type="button" onClick={onRemove} aria-label="Bỏ ảnh này" className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-[#08183a]/70 text-white">
+        <button type="button" onClick={onRemove} aria-label={tr('Bỏ ảnh này')} className="absolute top-1 right-1 grid size-6 place-items-center rounded-full bg-[#08183a]/70 text-white">
           <X size={13} aria-hidden="true" />
         </button>
       )}

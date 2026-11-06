@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookmarkPlus, Download, Heart, ImagePlus, LockKeyhole, Palette, RotateCcw, Shapes, Sparkles, Trash2, Wand2 } from 'lucide-react';
 import { Badge, Button, Loading, Skeleton } from '../../../design-system';
@@ -13,8 +14,8 @@ import { SHAPES, STYLES, composePrompt, listImages, listPrompts, removeImage, re
 const BrandKit = lazy(() => import('../studio/BrandKit'));
 
 const TABS = [
-  { id: 'images', label: 'Create', icon: Wand2 },
-  { id: 'brand', label: 'Brand Kit', icon: Palette },
+  { id: 'images', label: tr('Create'), icon: Wand2 },
+  { id: 'brand', label: tr('Brand Kit'), icon: Palette },
 ];
 
 // What each look is like, as a little gradient, so choosing one is visual rather than a word on a chip
@@ -29,11 +30,11 @@ const LOOK = {
 const FRAME = { square: 'aspect-square', wide: 'aspect-video', tall: 'aspect-[9/16]' };
 
 const IDEAS = [
-  'A lighthouse at dusk above a calm grid of lights',
-  'Four glass layers floating over a warm black desk',
-  'A tiny orange sun rising behind a stack of books',
-  'Hands building a wooden robot, soft studio light',
-  'A city map drawn as hairlines with one glowing route',
+  tr('A lighthouse at dusk above a calm grid of lights'),
+  tr('Four glass layers floating over a warm black desk'),
+  tr('A tiny orange sun rising behind a stack of books'),
+  tr('Hands building a wooden robot, soft studio light'),
+  tr('A city map drawn as hairlines with one glowing route'),
 ];
 
 function useObjectUrl(blob) {
@@ -79,7 +80,7 @@ function Thumb({ record, selected, onSelect }) {
       <button
         type="button"
         onClick={() => onSelect(record.id)}
-        aria-label={`Open picture: ${record.prompt}`}
+        aria-label={tr('Open picture: {0}', record.prompt)}
         aria-current={selected}
         className={clsx('group relative block aspect-square w-full overflow-hidden rounded-xl bg-ink-2 ring-2 transition-all hover:scale-[1.02]', selected ? 'ring-signal' : 'ring-transparent hover:ring-line-strong')}
       >
@@ -115,27 +116,27 @@ function Stage({ record, busy, shape, onFavorite, onReuse, onRemove }) {
           <>
             <img src={url} alt={record.prompt} className="max-h-[62vh] w-auto max-w-full object-contain" />
             <div className="absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10">
-              <Button variant="secondary" size="icon" aria-label="Favorite" aria-pressed={record.favorite} className={record.favorite ? 'text-signal' : ''} onClick={() => onFavorite(record)}>
+              <Button variant="secondary" size="icon" aria-label={tr('Favorite')} aria-pressed={record.favorite} className={record.favorite ? 'text-signal' : ''} onClick={() => onFavorite(record)}>
                 <Heart size={15} fill={record.favorite ? 'currentColor' : 'none'} aria-hidden="true" />
               </Button>
               <a
                 href={url}
                 download={`hank62-${record.id.slice(0, 8)}.${extensionOf(record.mime)}`}
-                aria-label="Download"
+                aria-label={tr('Download')}
                 className="inline-flex size-9 items-center justify-center rounded-sm border border-line bg-ink-3 text-bone hover:border-line-strong"
               >
                 <Download size={15} aria-hidden="true" />
               </a>
-              <Button variant="secondary" size="icon" aria-label="Use this prompt again" onClick={() => onReuse(record.prompt)}>
+              <Button variant="secondary" size="icon" aria-label={tr('Use this prompt again')} onClick={() => onReuse(record.prompt)}>
                 <RotateCcw size={15} aria-hidden="true" />
               </Button>
-              <Button variant="danger" size="icon" aria-label="Delete picture" className="ml-auto" onClick={() => onRemove(record)}>
+              <Button variant="danger" size="icon" aria-label={tr('Delete picture')} className="ml-auto" onClick={() => onRemove(record)}>
                 <Trash2 size={15} aria-hidden="true" />
               </Button>
             </div>
           </>
         ) : busy ? (
-          <Loading label={`Painting the picture, ${seconds} seconds so far`} className={clsx('relative w-[min(420px,86%)] overflow-hidden rounded-xl bg-ink-2', FRAME[shape])}>
+          <Loading label={tr('Painting the picture, {0} seconds so far', seconds)} className={clsx('relative w-[min(420px,86%)] overflow-hidden rounded-xl bg-ink-2', FRAME[shape])}>
             <Skeleton className="absolute inset-0 rounded-xl opacity-70" />
             <i className="absolute inset-0 -translate-x-full animate-[shimmer_1.6s_infinite] bg-gradient-to-r from-transparent via-wash/10 to-transparent" />
           </Loading>
@@ -144,8 +145,8 @@ function Stage({ record, busy, shape, onFavorite, onReuse, onRemove }) {
             <span className="grid size-16 place-items-center rounded-full bg-signal-soft text-signal">
               <ImagePlus size={28} aria-hidden="true" />
             </span>
-            <h2 className="font-display text-h3 leading-tight text-bone">Your picture appears here</h2>
-            <p className="text-fine text-bone-dim">Describe it on the left, choose a look and press Generate.</p>
+            <h2 className="font-display text-h3 leading-tight text-bone">{tr('Your picture appears here')}</h2>
+            <p className="text-fine text-bone-dim">{tr('Describe it on the left, choose a look and press Generate.')}</p>
           </div>
         )}
       </div>
@@ -257,20 +258,20 @@ function Create({ locked }) {
         <div>
           <div className="mb-2 flex items-center justify-between">
             <label htmlFor="studio-prompt" className="font-mono text-[0.72rem] tracking-[0.12em] text-bone-faint uppercase">
-              Describe the picture
+              {tr('Describe the picture')}
             </label>
             <span className="font-mono text-[0.68rem] text-bone-faint tabular-nums">{text.length}/600</span>
           </div>
           <textarea
             id="studio-prompt"
             ref={field}
-            aria-label="Describe the picture"
+            aria-label={tr('Describe the picture')}
             rows={3}
             maxLength={600}
             disabled={locked}
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder="A lighthouse at dusk above a calm grid of lights…"
+            placeholder={tr('A lighthouse at dusk above a calm grid of lights…')}
             className="w-full resize-none rounded-xl border border-line bg-ink-2 p-3.5 text-body leading-relaxed text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none disabled:opacity-50"
           />
           <div className="mt-2 flex flex-wrap gap-1.5">
@@ -283,7 +284,7 @@ function Create({ locked }) {
         </div>
 
         <fieldset disabled={locked} className="flex flex-col gap-2">
-          <legend className="mb-1 font-mono text-[0.72rem] tracking-[0.12em] text-bone-faint uppercase">Look</legend>
+          <legend className="mb-1 font-mono text-[0.72rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Look')}</legend>
           <div className="grid grid-cols-5 gap-2">
             {STYLES.map((s) => (
               <button key={s.id} type="button" aria-pressed={style === s.id} onClick={() => setStyle(s.id)} className="group flex flex-col items-center gap-1.5">
@@ -295,7 +296,7 @@ function Create({ locked }) {
         </fieldset>
 
         <fieldset disabled={locked} className="flex flex-col gap-2">
-          <legend className="mb-1 font-mono text-[0.72rem] tracking-[0.12em] text-bone-faint uppercase">Shape</legend>
+          <legend className="mb-1 font-mono text-[0.72rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Shape')}</legend>
           <div className="grid grid-cols-3 gap-2">
             {SHAPES.map((s) => (
               <button
@@ -313,12 +314,12 @@ function Create({ locked }) {
         </fieldset>
 
         <Switch checked={brand} onChange={setBrand} disabled={locked}>
-          <b className="block text-fine font-medium text-bone">On brand</b>
+          <b className="block text-fine font-medium text-bone">{tr('On brand')}</b>
           <span className="flex items-center gap-1 pt-1">
             {['ink-1', 'bone', 'signal', 'bone-dim'].map((name) => (
               <i key={name} className="size-3.5 rounded-full ring-1 ring-wash/15" style={{ background: COLORS.find((c) => c.name === name).hex }} />
             ))}
-            <small className="pl-1 font-mono text-[0.68rem] text-bone-faint">workspace palette and mood</small>
+            <small className="pl-1 font-mono text-[0.68rem] text-bone-faint">{tr('workspace palette and mood')}</small>
           </span>
         </Switch>
 
@@ -330,23 +331,23 @@ function Create({ locked }) {
               className="relative flex h-12 flex-1 items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-signal to-[#ff8a5c] font-mono text-fine font-semibold text-ink-0 shadow-[0_8px_30px_-8px_rgb(255_91_46/0.7)] transition-all hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none"
             >
               {busy ? <Skeleton className="h-3 w-24 rounded-full bg-ink-0/30" /> : <Sparkles size={16} aria-hidden="true" />}
-              {busy ? <span className="sr-only">Generating</span> : 'Generate'}
+              {busy ? <span className="sr-only">{tr('Generating')}</span> : tr('Generate')}
             </button>
-            <Button type="button" variant="ghost" aria-label="Save this prompt" className="h-12 w-12" disabled={locked || !text.trim()} onClick={keepPrompt}>
+            <Button type="button" variant="ghost" aria-label={tr('Save this prompt')} className="h-12 w-12" disabled={locked || !text.trim()} onClick={keepPrompt}>
               <BookmarkPlus size={17} aria-hidden="true" />
             </Button>
           </div>
           {locked ? (
             <p className="flex items-center gap-2 font-mono text-fine text-bone-faint">
-              <LockKeyhole size={13} aria-hidden="true" /> Generating is for the owner. The Brand Kit works for everyone.
+              <LockKeyhole size={13} aria-hidden="true" /> {tr('Generating is for the owner. The Brand Kit works for everyone.')}
             </p>
           ) : usage ? (
-            <div className="flex items-center gap-3" title="Pictures and AI answers share one daily budget">
+            <div className="flex items-center gap-3" title={tr('Pictures and AI answers share one daily budget')}>
               <div className="h-1 flex-1 overflow-hidden rounded-full bg-line">
                 <i className="block h-full rounded-full bg-signal transition-all" style={{ width: `${budget}%` }} />
               </div>
               <Badge tone={usage.image ? 'ok' : 'warn'} dot>
-                {usage.image ? `${usage.used}/${usage.limit} today` : 'NO PROVIDER'}
+                {usage.image ? tr('{0}/{1} today', usage.used, usage.limit) : tr('NO PROVIDER')}
               </Badge>
             </div>
           ) : null}
@@ -360,7 +361,7 @@ function Create({ locked }) {
         {prompts.length > 0 && (
           <details className="group rounded-xl border border-line bg-ink-2 p-3" open>
             <summary className="flex cursor-pointer list-none items-center justify-between font-mono text-[0.72rem] tracking-[0.12em] text-bone-faint uppercase">
-              Saved prompts <span className="text-bone-dim normal-case">{prompts.length}</span>
+              {tr('Saved prompts')} <span className="text-bone-dim normal-case">{prompts.length}</span>
             </summary>
             <ul className="mt-2 flex flex-col gap-1.5">
               {prompts.map((p) => (
@@ -370,7 +371,7 @@ function Create({ locked }) {
                   </button>
                   <button
                     type="button"
-                    aria-label="Delete saved prompt"
+                    aria-label={tr('Delete saved prompt')}
                     className="text-bone-faint hover:text-danger"
                     onClick={async () => {
                       await removePrompt(p.id);
@@ -390,10 +391,10 @@ function Create({ locked }) {
       <div className="flex min-w-0 flex-col gap-6">
         <Stage record={selected} busy={busy} shape={shape} onFavorite={toggleFavorite} onReuse={reuse} onRemove={remove} />
 
-        <section aria-label="History">
+        <section aria-label={tr('History')}>
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <h2 className="font-display text-h3 leading-none text-bone">History</h2>
-            <span className="font-mono text-[0.72rem] text-bone-faint">{images.length} on this device</span>
+            <h2 className="font-display text-h3 leading-none text-bone">{tr('History')}</h2>
+            <span className="font-mono text-[0.72rem] text-bone-faint">{images.length} {tr('on this device')}</span>
             <span className="ml-auto flex items-center gap-1.5">
               {['all', 'favorites'].map((id) => (
                 <button key={id} type="button" aria-pressed={only === id} onClick={() => setOnly(id)} className={clsx('rounded-full px-3 py-1 font-mono text-[0.72rem] capitalize transition-colors', only === id ? 'bg-bone text-ink-0' : 'bg-wash/8 text-bone-dim hover:text-bone')}>
@@ -402,7 +403,7 @@ function Create({ locked }) {
               ))}
               {hasSamples && (
                 <Button variant="ghost" size="sm" onClick={removeSamplePictures}>
-                  <Trash2 size={13} aria-hidden="true" /> Remove samples
+                  <Trash2 size={13} aria-hidden="true" /> {tr('Remove samples')}
                 </Button>
               )}
             </span>
@@ -415,12 +416,12 @@ function Create({ locked }) {
                 ))}
               </ul>
             ) : (
-              <p className="font-mono text-fine text-bone-faint">No favorites yet. Open a picture and tap the heart.</p>
+              <p className="font-mono text-fine text-bone-faint">{tr('No favorites yet. Open a picture and tap the heart.')}</p>
             )
           ) : (
             <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-line p-8 text-center">
               <Shapes size={22} className="text-bone-faint" aria-hidden="true" />
-              <p className="max-w-xs text-fine text-bone-dim">Pictures you make are kept in this browser only.</p>
+              <p className="max-w-xs text-fine text-bone-dim">{tr('Pictures you make are kept in this browser only.')}</p>
             </div>
           )}
         </section>
@@ -435,20 +436,20 @@ export default function StudioView({ locked = false }) {
     <div className="flex flex-col gap-6">
       <header className="flex flex-wrap items-end justify-between gap-4 max-md:justify-start">
         <div className="max-md:hidden">
-          <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">Design / Studio</span>
+          <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Design / Studio')}</span>
           <h1 className="mt-2 font-display text-h2 leading-[1.05] text-bone">
-            Image <em className="serif-accent">Studio.</em>
+            {tr('Image')} <em className="serif-accent">{tr('Studio.')}</em>
           </h1>
-          <p className="mt-2 max-w-[60ch] text-bone-dim">Make pictures that look like they belong, and keep the brand's tokens within reach.</p>
+          <p className="mt-2 max-w-[60ch] text-bone-dim">{tr('Make pictures that look like they belong, and keep the brand\'s tokens within reach.')}</p>
         </div>
-        <Segmented round large value={tab} onChange={setTab} options={TABS} label="Studio" />
+        <Segmented round large value={tab} onChange={setTab} options={TABS} label={tr('Studio')} />
       </header>
       {tab === 'images' ? (
         <Create locked={locked} />
       ) : (
         <Suspense
           fallback={
-            <Loading label="Loading the brand kit" className="grid gap-3 sm:grid-cols-2">
+            <Loading label={tr('Loading the brand kit')} className="grid gap-3 sm:grid-cols-2">
               <Skeleton className="h-40 rounded-3xl" />
               <Skeleton className="h-40 rounded-3xl" />
             </Loading>

@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useEffect, useRef, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { C4_COLS, C4_ROWS, c4Full, c4Move, c4Winner, dropDisc, emptyC4, landingRow } from './boards';
@@ -67,11 +68,11 @@ export default function ConnectFour() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="bạn (xanh)" value={score.you} />
-        <Score label="máy (đỏ)" value={score.phone} tone={RED} />
-        <Score label="kỷ lục" value={best ?? '-'} />
+        <Score label={tr('bạn (xanh)')} value={score.you} />
+        <Score label={tr('máy (đỏ)')} value={score.phone} tone={RED} />
+        <Score label={tr('kỷ lục')} value={best ?? '-'} />
       </div>
-      <svg viewBox={`-6 -6 ${width + 12} ${height + 12}`} className="block w-full touch-manipulation rounded-sm bg-[#fdfaf0]" role="grid" aria-label="Four in a row board">
+      <svg viewBox={`-6 -6 ${width + 12} ${height + 12}`} className="block w-full touch-manipulation rounded-sm bg-[#fdfaf0]" role="grid" aria-label={tr('Four in a row board')}>
         <g stroke={INK} strokeWidth="1" opacity="0.3">
           {Array.from({ length: C4_COLS + 1 }, (_, k) => (
             <path key={`v${k}`} d={`M${k * CELL} 0V${height}`} />
@@ -105,7 +106,7 @@ export default function ConnectFour() {
             fill="transparent"
             className={result || thinking || landingRow(board, col) < 0 ? '' : 'cursor-pointer'}
             role="gridcell"
-            aria-label={`Drop in column ${col + 1}`}
+            aria-label={tr('Drop in column {0}', col + 1)}
             tabIndex={0}
             onClick={() => play(col)}
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && play(col)}
@@ -113,16 +114,16 @@ export default function ConnectFour() {
         ))}
       </svg>
       <p className="h-7 text-center font-pen text-[1.4rem] leading-none font-semibold" style={{ color: INK }} role="status">
-        {thinking ? 'Máy đang nghĩ…' : result ? '' : 'Đến lượt bạn: chạm một cột'}
+        {thinking ? tr('Máy đang nghĩ…') : result ? '' : tr('Đến lượt bạn: chạm một cột')}
       </p>
       <div className="flex">
         <InkButton className="ml-auto" tone={RED} onClick={again}>
-          <RotateCcw size={15} aria-hidden="true" /> Ván mới
+          <RotateCcw size={15} aria-hidden="true" /> {tr('Ván mới')}
         </InkButton>
       </div>
       {result && (
-        <Note title={result.who === 1 ? 'Bạn thắng!' : result.who === 2 ? 'Máy thắng…' : 'Hòa nhau'} detail={result.who === 1 ? 'Bốn quân liền nhau.' : result.who === 2 ? 'Máy chặn khéo thật. Thử lại nhé.' : 'Kín bàn mà không ai đủ bốn.'}>
-          <InkButton onClick={again}>Chơi lại</InkButton>
+        <Note title={result.who === 1 ? tr('Bạn thắng!') : result.who === 2 ? tr('Máy thắng…') : tr('Hòa nhau')} detail={result.who === 1 ? tr('Bốn quân liền nhau.') : result.who === 2 ? tr('Máy chặn khéo thật. Thử lại nhé.') : tr('Kín bàn mà không ai đủ bốn.')}>
+          <InkButton onClick={again}>{tr('Chơi lại')}</InkButton>
         </Note>
       )}
     </div>

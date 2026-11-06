@@ -1,3 +1,4 @@
+import { locale, tr } from '../lang';
 import { useEffect, useMemo, useState } from 'react';
 import { Calculator, CalendarClock, Check, FileText, Plus, Sparkles, Trash2 } from 'lucide-react';
 import { Badge, Button, DatePicker, Dialog, Input, Select, Textarea, pushToast } from '../../../design-system';
@@ -17,7 +18,7 @@ const dayInput = (at) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
 const atOf = (value) => (value ? new Date(`${value}T09:00:00`).getTime() : null);
-const when = (at) => (at ? new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'no date');
+const when = (at) => (at ? new Date(at).toLocaleDateString(locale(), { day: 'numeric', month: 'short' }) : 'no date');
 const numeric = (text) => Math.round(Number(String(text).replace(/[^\d]/g, '')) || 0);
 
 /** One deal: who, how much, where it stands, when to follow up, and a message drafted for you. */
@@ -59,12 +60,12 @@ function DealSheet({ deal, onClose }) {
   };
 
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={editing ? 'DEAL' : 'NEW DEAL'} title={editing ? deal.name : 'Add someone to follow'} description="A sponsor, a client or a collaboration: who, how much, when to follow up.">
+    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={editing ? tr('DEAL') : tr('NEW DEAL')} title={editing ? deal.name : tr('Add someone to follow')} description={tr('A sponsor, a client or a collaboration: who, how much, when to follow up.')}>
       <form onSubmit={save} className="flex flex-col gap-4" data-deal-form>
-        <Input aria-label="Who" placeholder="Name or company" value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoFocus={!editing} />
+        <Input aria-label={tr('Who')} placeholder={tr('Name or company')} value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoFocus={!editing} />
         <div className="grid grid-cols-2 gap-3">
-          <Row label="Type">
-            <Select aria-label="Type" value={kind} onChange={(e) => setKind(e.target.value)} compact>
+          <Row label={tr('Type')}>
+            <Select aria-label={tr('Type')} value={kind} onChange={(e) => setKind(e.target.value)} compact>
               {DEAL_KINDS.map((k) => (
                 <option key={k.id} value={k.id}>
                   {k.label}
@@ -72,15 +73,15 @@ function DealSheet({ deal, onClose }) {
               ))}
             </Select>
           </Row>
-          <Row label="Talking on">
-            <Select aria-label="Channel" value={channel} onChange={(e) => setChannel(e.target.value)} compact>
+          <Row label={tr('Talking on')}>
+            <Select aria-label={tr('Channel')} value={channel} onChange={(e) => setChannel(e.target.value)} compact>
               {CHANNELS.map((c) => (
                 <option key={c}>{c}</option>
               ))}
             </Select>
           </Row>
-          <Row label="Stage">
-            <Select aria-label="Stage" value={stage} onChange={(e) => setStage(e.target.value)} compact>
+          <Row label={tr('Stage')}>
+            <Select aria-label={tr('Stage')} value={stage} onChange={(e) => setStage(e.target.value)} compact>
               {DEAL_STAGES.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.label}
@@ -88,19 +89,19 @@ function DealSheet({ deal, onClose }) {
               ))}
             </Select>
           </Row>
-          <Row label="Worth (₫)">
-            <Input aria-label="Value" inputMode="numeric" placeholder="0" value={value} onChange={(e) => setValue(e.target.value)} compact />
+          <Row label={tr('Worth (₫)')}>
+            <Input aria-label={tr('Value')} inputMode="numeric" placeholder="0" value={value} onChange={(e) => setValue(e.target.value)} compact />
           </Row>
         </div>
-        <Row label="Follow up on">
-          <DatePicker aria-label="Follow up on" value={date} onChange={setDate} compact className="w-full" />
+        <Row label={tr('Follow up on')}>
+          <DatePicker aria-label={tr('Follow up on')} value={date} onChange={setDate} compact className="w-full" />
         </Row>
-        <Textarea aria-label="Notes" rows={2} placeholder="Notes: what they need, what was said" value={note} onChange={(e) => setNote(e.target.value)} />
+        <Textarea aria-label={tr('Notes')} rows={2} placeholder={tr('Notes: what they need, what was said')} value={note} onChange={(e) => setNote(e.target.value)} />
 
         {editing && (
           <div className="rounded-2xl border border-line p-3" data-pitch>
-            <Label className="mb-2">Draft a message</Label>
-            <Input aria-label="What you offer" placeholder="What are you offering them? (one sentence)" value={offer} onChange={(e) => setOffer(e.target.value)} compact />
+            <Label className="mb-2">{tr('Draft a message')}</Label>
+            <Input aria-label={tr('What you offer')} placeholder={tr('What are you offering them? (one sentence)')} value={offer} onChange={(e) => setOffer(e.target.value)} compact />
             <div className="mt-2 flex flex-wrap gap-2">
               {[['sponsor', 'First pitch (brand)'], ['client', 'First pitch (client)'], ['followup', 'Follow-up'], ['proposal', 'Proposal']].map(([type, label]) => (
                 <Button key={type} type="button" variant="ghost" size="sm" loading={busy} disabled={!(offer || note).trim()} onClick={() => write(type)}>
@@ -108,7 +109,7 @@ function DealSheet({ deal, onClose }) {
                 </Button>
               ))}
             </div>
-            {!(offer || note).trim() && <p className="mt-2 text-[0.74rem] text-bone-faint">Say what you are offering, in a sentence, and the buttons turn on.</p>}
+            {!(offer || note).trim() && <p className="mt-2 text-[0.74rem] text-bone-faint">{tr('Say what you are offering, in a sentence, and the buttons turn on.')}</p>}
             {error && (
               <p className="mt-2 text-fine text-danger" role="alert">
                 {error}
@@ -117,16 +118,16 @@ function DealSheet({ deal, onClose }) {
             {draft && (
               <div className="mt-3 flex flex-col gap-2">
                 {draft.subject && <p className="text-fine font-medium text-bone">{draft.subject}</p>}
-                <Textarea aria-label="Draft" rows={8} value={draft.message} onChange={(e) => setDraft({ ...draft, message: e.target.value })} />
-                <CopyButton text={[draft.subject, draft.message].filter(Boolean).join('\n\n')} label="Copy message" />
-                <p className="text-[0.74rem] text-bone-faint">Read it, fill the [brackets] and make it yours before you send. It never sends by itself.</p>
+                <Textarea aria-label={tr('Draft')} rows={8} value={draft.message} onChange={(e) => setDraft({ ...draft, message: e.target.value })} />
+                <CopyButton text={[draft.subject, draft.message].filter(Boolean).join('\n\n')} label={tr('Copy message')} />
+                <p className="text-[0.74rem] text-bone-faint">{tr('Read it, fill the [brackets] and make it yours before you send. It never sends by itself.')}</p>
               </div>
             )}
           </div>
         )}
 
         <Button type="submit" disabled={!name.trim()} className="w-full justify-center">
-          <Check size={15} aria-hidden="true" /> {editing ? 'Save' : 'Add'}
+          <Check size={15} aria-hidden="true" /> {editing ? tr('Save') : tr('Add')}
         </Button>
         {editing &&
           (sure ? (
@@ -141,11 +142,11 @@ function DealSheet({ deal, onClose }) {
               onBlur={() => setSure(false)}
               autoFocus
             >
-              <Trash2 size={15} aria-hidden="true" /> Tap again to delete
+              <Trash2 size={15} aria-hidden="true" /> {tr('Tap again to delete')}
             </Button>
           ) : (
             <Button type="button" variant="ghost" className="w-full justify-center" onClick={() => setSure(true)}>
-              <Trash2 size={15} aria-hidden="true" /> Delete
+              <Trash2 size={15} aria-hidden="true" /> {tr('Delete')}
             </Button>
           ))}
       </form>
@@ -172,7 +173,7 @@ function QuoteSheet({ onClose }) {
     const html = quoteHtml({ from, to, title, items: parsed, discountPct: Number(discountPct) || 0, vatPct: Number(vatPct) || 0, terms });
     const win = window.open('', '_blank');
     if (!win) {
-      pushToast('The browser blocked the new window. Allow pop-ups for this site and try again.', { tone: 'error' });
+      pushToast(tr('The browser blocked the new window. Allow pop-ups for this site and try again.'), { tone: 'error' });
       return;
     }
     win.document.open();
@@ -183,45 +184,45 @@ function QuoteSheet({ onClose }) {
   };
 
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow="QUOTE" title="Write a quote" description="Fill it in, then print it or save it as a PDF from the print window.">
+    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={tr('QUOTE')} title={tr('Write a quote')} description={tr('Fill it in, then print it or save it as a PDF from the print window.')}>
       <div className="flex flex-col gap-4" data-quote>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Input aria-label="From (your name or business)" placeholder="From: you" value={from} onChange={(e) => setFrom(e.target.value)} compact />
-          <Input aria-label="To (the client)" placeholder="To: the client" value={to} onChange={(e) => setTo(e.target.value)} compact />
+          <Input aria-label={tr('From (your name or business)')} placeholder={tr('From: you')} value={from} onChange={(e) => setFrom(e.target.value)} compact />
+          <Input aria-label={tr('To (the client)')} placeholder={tr('To: the client')} value={to} onChange={(e) => setTo(e.target.value)} compact />
         </div>
-        <Input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} compact />
+        <Input aria-label={tr('Title')} value={title} onChange={(e) => setTitle(e.target.value)} compact />
         <ul className="flex flex-col gap-2">
           {items.map((it, i) => (
             <li key={i} className="grid grid-cols-[1fr_3.5rem_6.5rem_auto] items-center gap-2">
-              <Input aria-label={`Item ${i + 1}`} placeholder="What" value={it.desc} onChange={(e) => set(i, { desc: e.target.value })} compact />
-              <Input aria-label={`Quantity ${i + 1}`} inputMode="numeric" value={it.qty} onChange={(e) => set(i, { qty: e.target.value })} compact />
-              <Input aria-label={`Price ${i + 1}`} inputMode="numeric" placeholder="₫" value={it.unit} onChange={(e) => set(i, { unit: e.target.value })} compact />
-              <button type="button" aria-label={`Remove item ${i + 1}`} onClick={() => setItems((l) => (l.length > 1 ? l.filter((_, j) => j !== i) : l))} className="p-1.5 text-bone-faint hover:text-danger">
+              <Input aria-label={tr('Item {0}', i + 1)} placeholder={tr('What')} value={it.desc} onChange={(e) => set(i, { desc: e.target.value })} compact />
+              <Input aria-label={tr('Quantity {0}', i + 1)} inputMode="numeric" value={it.qty} onChange={(e) => set(i, { qty: e.target.value })} compact />
+              <Input aria-label={tr('Price {0}', i + 1)} inputMode="numeric" placeholder="₫" value={it.unit} onChange={(e) => set(i, { unit: e.target.value })} compact />
+              <button type="button" aria-label={tr('Remove item {0}', i + 1)} onClick={() => setItems((l) => (l.length > 1 ? l.filter((_, j) => j !== i) : l))} className="p-1.5 text-bone-faint hover:text-danger">
                 <Trash2 size={14} aria-hidden="true" />
               </button>
             </li>
           ))}
         </ul>
         <Button type="button" variant="ghost" size="sm" onClick={() => setItems((l) => [...l, { desc: '', qty: '1', unit: '' }])} className="self-start">
-          <Plus size={14} aria-hidden="true" /> Add a line
+          <Plus size={14} aria-hidden="true" /> {tr('Add a line')}
         </Button>
         <div className="grid grid-cols-2 gap-3">
-          <Row label="Discount %">
-            <Input aria-label="Discount percent" inputMode="decimal" value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} compact />
+          <Row label={tr('Discount %')}>
+            <Input aria-label={tr('Discount percent')} inputMode="decimal" value={discountPct} onChange={(e) => setDiscountPct(e.target.value)} compact />
           </Row>
-          <Row label="VAT %">
-            <Input aria-label="VAT percent" inputMode="decimal" value={vatPct} onChange={(e) => setVatPct(e.target.value)} compact />
+          <Row label={tr('VAT %')}>
+            <Input aria-label={tr('VAT percent')} inputMode="decimal" value={vatPct} onChange={(e) => setVatPct(e.target.value)} compact />
           </Row>
         </div>
-        <Textarea aria-label="Terms" rows={3} value={terms} onChange={(e) => setTerms(e.target.value)} />
+        <Textarea aria-label={tr('Terms')} rows={3} value={terms} onChange={(e) => setTerms(e.target.value)} />
         <p className="flex justify-between rounded-2xl bg-wash/[0.05] px-4 py-3 text-fine text-bone">
-          <span>Total</span>
+          <span>{tr('Total')}</span>
           <b className="font-mono tabular-nums" data-quote-total>
             {vnd(totals.total)}
           </b>
         </p>
         <Button onClick={open} disabled={!totals.total} className="w-full justify-center" data-print-quote>
-          <FileText size={15} aria-hidden="true" /> Open to print or save as PDF
+          <FileText size={15} aria-hidden="true" /> {tr('Open to print or save as PDF')}
         </Button>
       </div>
     </Dialog>
@@ -238,41 +239,41 @@ function Calculators() {
   const rate = sponsorRate({ avgViews: numeric(views), cpm: settings.cpm });
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2" data-calculators>
-      <Panel title="Price a piece of work" aside={<Calculator size={16} className="text-bone-faint" aria-hidden="true" />}>
+      <Panel title={tr('Price a piece of work')} aside={<Calculator size={16} className="text-bone-faint" aria-hidden="true" />}>
         <div className="grid grid-cols-3 gap-2">
-          <Row label="₫ / hour">
-            <Input aria-label="Hourly target" inputMode="numeric" value={settings.hourly || ''} onChange={(e) => setSetting({ hourly: numeric(e.target.value) })} compact />
+          <Row label={tr('₫ / hour')}>
+            <Input aria-label={tr('Hourly target')} inputMode="numeric" value={settings.hourly || ''} onChange={(e) => setSetting({ hourly: numeric(e.target.value) })} compact />
           </Row>
-          <Row label="Hours">
-            <Input aria-label="Hours" inputMode="decimal" value={hours} onChange={(e) => setHours(e.target.value)} compact />
+          <Row label={tr('Hours')}>
+            <Input aria-label={tr('Hours')} inputMode="decimal" value={hours} onChange={(e) => setHours(e.target.value)} compact />
           </Row>
-          <Row label="Buffer %">
-            <Input aria-label="Buffer percent" inputMode="decimal" value={buffer} onChange={(e) => setBuffer(e.target.value)} compact />
+          <Row label={tr('Buffer %')}>
+            <Input aria-label={tr('Buffer percent')} inputMode="decimal" value={buffer} onChange={(e) => setBuffer(e.target.value)} compact />
           </Row>
         </div>
         <p className="mt-3 flex items-baseline justify-between">
-          <span className="text-fine text-bone-dim">Ask for</span>
+          <span className="text-fine text-bone-dim">{tr('Ask for')}</span>
           <b className="font-display text-[1.5rem] tabular-nums text-bone" data-job-price>
             {vnd(job.total)}
           </b>
         </p>
-        <p className="mt-1 text-[0.76rem] leading-relaxed text-bone-faint">{vnd(job.base)} of work plus {vnd(job.buffer)} for what always goes wrong. Quote the whole job, not the hours.</p>
+        <p className="mt-1 text-[0.76rem] leading-relaxed text-bone-faint">{vnd(job.base)} {tr('of work plus')} {vnd(job.buffer)} {tr('for what always goes wrong. Quote the whole job, not the hours.')}</p>
       </Panel>
-      <Panel title="Rate for a sponsored video">
+      <Panel title={tr('Rate for a sponsored video')}>
         <div className="grid grid-cols-2 gap-2">
-          <Row label="Average views">
-            <Input aria-label="Average views" inputMode="numeric" placeholder="e.g. 20000" value={views} onChange={(e) => setViews(e.target.value)} compact />
+          <Row label={tr('Average views')}>
+            <Input aria-label={tr('Average views')} inputMode="numeric" placeholder={tr('e.g. 20000')} value={views} onChange={(e) => setViews(e.target.value)} compact />
           </Row>
-          <Row label="CPM (₫ per 1000 views)">
-            <Input aria-label="CPM" inputMode="numeric" value={settings.cpm || ''} onChange={(e) => setSetting({ cpm: numeric(e.target.value) })} compact />
+          <Row label={tr('CPM (₫ per 1000 views)')}>
+            <Input aria-label={tr('CPM')} inputMode="numeric" value={settings.cpm || ''} onChange={(e) => setSetting({ cpm: numeric(e.target.value) })} compact />
           </Row>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2">
-          <Stat value={vndShort(rate.low)} label="Low" />
-          <Stat value={vndShort(rate.mid)} label="Middle" tone="text-signal" />
-          <Stat value={vndShort(rate.high)} label="High" />
+          <Stat value={vndShort(rate.low)} label={tr('Low')} />
+          <Stat value={vndShort(rate.mid)} label={tr('Middle')} tone="text-signal" />
+          <Stat value={vndShort(rate.high)} label={tr('High')} />
         </div>
-        <p className="mt-2 text-[0.76rem] leading-relaxed text-bone-faint">The CPM is your own assumption. Ask a few creators or brands in your niche what they pay, and use that: it changes a lot between niches and countries.</p>
+        <p className="mt-2 text-[0.76rem] leading-relaxed text-bone-faint">{tr('The CPM is your own assumption. Ask a few creators or brands in your niche what they pay, and use that: it changes a lot between niches and countries.')}</p>
       </Panel>
     </div>
   );
@@ -284,7 +285,7 @@ export default function DealsPanel() {
   const [sheet, setSheet] = useState(null); // { deal? }
   const [quote, setQuote] = useState(false);
   const [view, setView] = useState('board');
-  useFab({ label: 'Add a deal', icon: Plus, onPress: () => setSheet({}) });
+  useFab({ label: tr('Add a deal'), icon: Plus, onPress: () => setSheet({}) });
   useEffect(() => {
     void deals.load();
   }, []);
@@ -297,16 +298,16 @@ export default function DealsPanel() {
   return (
     <div className="flex flex-col gap-4" data-deals>
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-        <Stat value={vndShort(value.open)} label="Open deals" />
-        <Stat value={vndShort(value.weighted)} label="Likely (weighted)" tone="text-signal" />
-        <Stat value={vndShort(value.won)} label="Won" tone="text-ok" />
-        <Stat value={rate === null ? '–' : `${rate}%`} label="Win rate" />
+        <Stat value={vndShort(value.open)} label={tr('Open deals')} />
+        <Stat value={vndShort(value.weighted)} label={tr('Likely (weighted)')} tone="text-signal" />
+        <Stat value={vndShort(value.won)} label={tr('Won')} tone="text-ok" />
+        <Stat value={rate === null ? '–' : `${rate}%`} label={tr('Win rate')} />
       </div>
 
       {due.length > 0 && (
-        <section className="cl-rise rounded-[1.75rem] border border-warn/35 bg-[linear-gradient(135deg,rgb(240_180_90/0.16),transparent_70%)] p-4 md:p-5" aria-label="Follow up today" data-follow-ups>
+        <section className="cl-rise rounded-[1.75rem] border border-warn/35 bg-[linear-gradient(135deg,rgb(240_180_90/0.16),transparent_70%)] p-4 md:p-5" aria-label={tr('Follow up today')} data-follow-ups>
           <Label className="mb-2 flex items-center gap-1.5 text-warn">
-            <CalendarClock size={13} aria-hidden="true" /> Follow up
+            <CalendarClock size={13} aria-hidden="true" /> {tr('Follow up')}
           </Label>
           <ul className="flex flex-col gap-1.5">
             {due.map((d) => (
@@ -320,16 +321,16 @@ export default function DealsPanel() {
           </ul>
         </section>
       )}
-      {lost.length > 0 && <p className="px-1 text-[0.8rem] text-bone-faint">{lost.length} open {lost.length === 1 ? 'deal has' : 'deals have'} no follow-up date, so {lost.length === 1 ? 'it' : 'they'} will be forgotten: {lost.slice(0, 3).map((d) => d.name).join(', ')}.</p>}
+      {lost.length > 0 && <p className="px-1 text-[0.8rem] text-bone-faint">{lost.length} {tr('open')} {lost.length === 1 ? tr('deal has') : tr('deals have')} {tr('no follow-up date, so')} {lost.length === 1 ? tr('it') : tr('they')} {tr('will be forgotten:')} {lost.slice(0, 3).map((d) => d.name).join(', ')}.</p>}
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Segmented label="Deals view" value={view} onChange={setView} options={[{ id: 'board', label: 'Board' }, { id: 'tools', label: 'Pricing & quotes' }]} />
+        <Segmented label={tr('Deals view')} value={view} onChange={setView} options={[{ id: 'board', label: tr('Board') }, { id: 'tools', label: tr('Pricing & quotes') }]} />
         <div className="flex gap-2 max-md:hidden">
           <Button variant="ghost" size="sm" onClick={() => setQuote(true)}>
-            <FileText size={14} aria-hidden="true" /> Quote
+            <FileText size={14} aria-hidden="true" /> {tr('Quote')}
           </Button>
           <Button size="sm" onClick={() => setSheet({})} data-add-deal>
-            <Plus size={14} aria-hidden="true" /> Add a deal
+            <Plus size={14} aria-hidden="true" /> {tr('Add a deal')}
           </Button>
         </div>
       </div>
@@ -338,7 +339,7 @@ export default function DealsPanel() {
         <>
           <Calculators />
           <Button variant="ghost" onClick={() => setQuote(true)} className="self-start" data-open-quote>
-            <FileText size={15} aria-hidden="true" /> Write a quote
+            <FileText size={15} aria-hidden="true" /> {tr('Write a quote')}
           </Button>
         </>
       ) : (
@@ -356,7 +357,7 @@ export default function DealsPanel() {
                   <span className="rounded-full bg-wash/[0.07] px-2 font-mono text-[0.68rem] tabular-nums text-bone-dim">{list.length}</span>
                 </header>
                 {list.length === 0 ? (
-                  <p className="rounded-2xl border border-dashed border-line px-3 py-6 text-center font-mono text-[0.7rem] text-bone-faint">Nothing here yet</p>
+                  <p className="rounded-2xl border border-dashed border-line px-3 py-6 text-center font-mono text-[0.7rem] text-bone-faint">{tr('Nothing here yet')}</p>
                 ) : (
                   <ul className="flex flex-col gap-2">
                     {list.map((d) => (

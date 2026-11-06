@@ -1,25 +1,26 @@
+import { tr } from '../lang';
 import { Lock } from 'lucide-react';
 import { Button } from '../../../design-system';
 import { NAVIGATION } from '../navigation';
 
 // One line on what is behind each private tab: enough to know it exists, not enough to see how it looks.
 const BLURB = {
-  hank: 'Your daily briefing, your agents and your pet.',
-  space: 'A 3D floor where the AI agents work.',
-  rag: 'Ask Hank anything, with answers drawn from your own documents.',
-  pulse: 'Projects, commits and uptime at a glance.',
-  shell: 'A terminal for quick commands.',
-  docs: 'Your documents, kept so Hank can read them.',
-  notes: 'Notes that link to each other.',
-  constellation: 'Your notes drawn as a map of stars.',
-  memos: 'Voice memos with their transcripts.',
-  memory: 'A timeline of what happened.',
-  studio: 'Make pictures and keep them.',
-  music: 'A music library and player.',
-  missions: 'A board for plans and tasks.',
-  wallet: 'Spending and budgets.',
-  diary: 'A private diary.',
-  creator: 'A cockpit for content, deals and income.',
+  hank: tr('Your daily briefing, your agents and your pet.'),
+  space: tr('A 3D floor where the AI agents work.'),
+  rag: tr('Ask Hank anything, with answers drawn from your own documents.'),
+  pulse: tr('Projects, commits and uptime at a glance.'),
+  shell: tr('A terminal for quick commands.'),
+  docs: tr('Your documents, kept so Hank can read them.'),
+  notes: tr('Notes that link to each other.'),
+  constellation: tr('Your notes drawn as a map of stars.'),
+  memos: tr('Voice memos with their transcripts.'),
+  memory: tr('A timeline of what happened.'),
+  studio: tr('Make pictures and keep them.'),
+  music: tr('A music library and player.'),
+  missions: tr('A board for plans and tasks.'),
+  wallet: tr('Spending and budgets.'),
+  diary: tr('A private diary.'),
+  creator: tr('A cockpit for content, deals and income.'),
 };
 
 /** What a guest sees on a tab that belongs to the owner. */
@@ -35,16 +36,16 @@ export default function PrivateTab({ tab, onHome, onSignIn }) {
         </span>
       </span>
       <div>
-        <h2 className="font-display text-h3 text-bone">{item?.label ?? 'Private'}</h2>
-        <p className="mt-1.5 text-fine text-bone-dim">{BLURB[tab] ?? 'This part of the workspace is private.'}</p>
-        <p className="mt-3 font-mono text-[0.72rem] tracking-[0.12em] text-bone-faint uppercase">Private · owner only</p>
+        <h2 className="font-display text-h3 text-bone">{item?.label ?? tr('Private')}</h2>
+        <p className="mt-1.5 text-fine text-bone-dim">{BLURB[tab] ?? tr('This part of the workspace is private.')}</p>
+        <p className="mt-3 font-mono text-[0.72rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Private · owner only')}</p>
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         <Button variant="ghost" size="sm" onClick={onHome}>
-          Try Ra chơi
+          {tr('Try Ra chơi')}
         </Button>
         <Button size="sm" onClick={onSignIn}>
-          Sign in
+          {tr('Sign in')}
         </Button>
       </div>
     </div>

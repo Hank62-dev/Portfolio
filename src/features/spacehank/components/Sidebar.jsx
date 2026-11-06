@@ -6,6 +6,7 @@ import { clsx } from '../../../lib/format';
 import Logo from '../../../components/ui/Logo';
 import { owner } from '../config';
 import { NAVIGATION, NAV_SECTIONS } from '../navigation';
+import { tr } from '../lang';
 
 const ITEM =
   'relative flex w-full items-center gap-3 rounded-sm px-3 py-2.5 font-mono text-fine transition-colors duration-200';
@@ -48,7 +49,7 @@ function useMoreBelow(ref) {
 }
 
 export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCollapse, onCollapse, onLogout, onResetDemo }) {
-  const toggleLabel = rail ? 'Expand sidebar' : 'Collapse sidebar';
+  const toggleLabel = rail ? tr('Expand sidebar') : tr('Collapse sidebar');
   const list = useRef(null);
   const more = useMoreBelow(list);
   return (
@@ -63,19 +64,19 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
         {!rail && (
           <span className="leading-tight">
             <b className="font-display text-lead font-normal">
-              Hank<span className="text-signal">62</span>
+              {tr('Hank')}<span className="text-signal">62</span>
             </b>
-            <small className="block font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">PRIVATE OS</small>
+            <small className="block font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">{tr('PRIVATE OS')}</small>
           </span>
         )}
       </div>
 
       <div className="relative min-h-0 flex-1">
-        <nav ref={list} aria-label="Workspace" className="no-scrollbar flex h-full flex-col gap-5 overflow-y-auto">
+        <nav ref={list} aria-label={tr('Workspace')} className="no-scrollbar flex h-full flex-col gap-5 overflow-y-auto">
           {NAV_SECTIONS.map((section) => (
             <div className="flex flex-col gap-1" key={section}>
               {!rail && (
-                <span className="px-3 pb-1 font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">{section}</span>
+                <span className="px-3 pb-1 font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">{tr(section)}</span>
               )}
               {NAVIGATION.filter((item) => item.section === section).map((item) => (
                 <NavButton key={item.id} rail={rail} active={tab === item.id} onClick={() => onTab(item.id)} {...item} />
@@ -88,7 +89,7 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
           type="button"
           tabIndex={more ? 0 : -1}
           aria-hidden={!more}
-          aria-label="Scroll down for more"
+          aria-label={tr('Scroll down for more')}
           onClick={() => list.current?.scrollBy({ top: 200, behavior: 'smooth' })}
           className={clsx(
             'absolute bottom-1 left-1/2 grid size-8 -translate-x-1/2 place-items-center rounded-full border border-line bg-ink-2/85 text-bone-dim shadow-[0_8px_20px_-8px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur transition-all duration-300 hover:text-bone',
@@ -104,14 +105,14 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
         {(app?.canInstall || app?.ios) && (
           <NavButton
             rail={rail}
-            label="Install app"
+            label={tr('Install app')}
             icon={Download}
-            onClick={() => (app.canInstall ? app.install() : onNotify?.('On iPhone: tap Share, then Add to Home Screen'))}
+            onClick={() => (app.canInstall ? app.install() : onNotify?.(tr('On iPhone: tap Share, then Add to Home Screen')))}
           />
         )}
         {!guest && !rail && <SyncStatus />}
-        {guest && <NavButton rail={rail} label="Reset demo data" icon={RotateCcw} onClick={onResetDemo} />}
-        <NavButton rail={rail} label={guest ? 'Exit demo' : 'Lock workspace'} icon={guest ? LogOut : LockKeyhole} onClick={onLogout} />
+        {guest && <NavButton rail={rail} label={tr('Reset demo data')} icon={RotateCcw} onClick={onResetDemo} />}
+        <NavButton rail={rail} label={guest ? tr('Exit demo') : tr('Lock workspace')} icon={guest ? LogOut : LockKeyhole} onClick={onLogout} />
         {canCollapse && (
           <NavButton
             rail={rail}
@@ -121,11 +122,11 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
           />
         )}
         <div className={clsx('mt-2 flex items-center gap-3 px-2', rail && 'justify-center px-0')}>
-          <Avatar>{guest ? 'G' : owner.initials}</Avatar>
+          <Avatar>{guest ? tr('G') : owner.initials}</Avatar>
           {!rail && (
             <span className="leading-tight">
-              <b className="block text-fine font-medium">{guest ? 'Guest' : owner.name}</b>
-              <small className="font-mono text-[0.7rem] text-bone-faint">{guest ? 'Sample data' : 'Owner online'}</small>
+              <b className="block text-fine font-medium">{guest ? tr('Guest') : owner.name}</b>
+              <small className="font-mono text-[0.7rem] text-bone-faint">{guest ? tr('Sample data') : tr('Owner online')}</small>
             </span>
           )}
         </div>

@@ -9,13 +9,14 @@ import { createNote } from '../notes/library';
 import { textToHtml } from '../notes/notes';
 import { useFab } from '../fab';
 import { useStore } from '../store';
+import { locale, tr } from '../lang';
 
 const PEAKS = 64;
 
 /** The bars of a memo, filled up to how far playback has got. Clicking one seeks. */
 function Wave({ peaks, progress, onSeek, live }) {
   return (
-    <div className="flex h-12 min-w-0 flex-1 items-center gap-[3px] max-sm:order-1 max-sm:basis-full" role={onSeek ? 'slider' : 'img'} aria-label="Waveform" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} onClick={(e) => onSeek?.((e.clientX - e.currentTarget.getBoundingClientRect().left) / e.currentTarget.clientWidth)}>
+    <div className="flex h-12 min-w-0 flex-1 items-center gap-[3px] max-sm:order-1 max-sm:basis-full" role={onSeek ? 'slider' : 'img'} aria-label={tr('Waveform')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(progress * 100)} onClick={(e) => onSeek?.((e.clientX - e.currentTarget.getBoundingClientRect().left) / e.currentTarget.clientWidth)}>
       {peaks.map((p, i) => (
         <i key={i} className={clsx('block flex-1 rounded-full transition-colors', live ? 'bg-signal' : i / peaks.length <= progress ? 'bg-signal' : 'bg-wash/20')} style={{ height: `${Math.max(8, p * 100)}%` }} />
       ))}
@@ -28,7 +29,7 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify }) {
   const [title, setTitle] = useState(memo.title);
   const send = async () => {
     await createNote(asNote({ ...memo, title }), { html: textToHtml(asNote({ ...memo, title })) });
-    onNotify?.('Saved to Second Brain');
+    onNotify?.(tr('Saved to Second Brain'));
   };
   const download = () => {
     const url = URL.createObjectURL(memo.blob);
@@ -41,37 +42,37 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify }) {
   return (
     <li className="rounded-3xl border border-line bg-ink-1 p-4" data-memo={memo.title}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2.5">
-        <button type="button" onClick={() => onPlay(memo)} aria-label={`${playing ? 'Pause' : 'Play'} ${memo.title}`} className="grid size-11 shrink-0 place-items-center rounded-full bg-bone text-ink-0 transition-transform hover:scale-105 active:scale-95">
+        <button type="button" onClick={() => onPlay(memo)} aria-label={`${playing ? tr('Pause') : tr('Play')} ${memo.title}`} className="grid size-11 shrink-0 place-items-center rounded-full bg-bone text-ink-0 transition-transform hover:scale-105 active:scale-95">
           {playing ? <Pause size={17} fill="currentColor" aria-hidden="true" /> : <Play size={17} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
         </button>
         <div className="min-w-0 flex-1">
-          <input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} onBlur={() => title.trim() && title !== memo.title && memos.update(memo.id, { title: title.trim() })} className="w-full truncate bg-transparent text-fine font-medium text-bone focus-visible:outline-none" />
+          <input aria-label={tr('Title')} value={title} onChange={(e) => setTitle(e.target.value)} onBlur={() => title.trim() && title !== memo.title && memos.update(memo.id, { title: title.trim() })} className="w-full truncate bg-transparent text-fine font-medium text-bone focus-visible:outline-none" />
           <small className="font-mono text-[0.68rem] text-bone-faint">
-            {new Date(memo.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · {formatDuration(memo.duration)}
+            {new Date(memo.at).toLocaleString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })} · {formatDuration(memo.duration)}
           </small>
         </div>
         <Wave peaks={memo.peaks} progress={progress} onSeek={(f) => onSeek(memo, f)} />
         <span className="flex shrink-0 items-center gap-0.5 max-sm:order-2 max-sm:basis-full max-sm:justify-end max-sm:gap-1.5">
-          <Button variant="secondary" size="icon" aria-label="Show the transcript" aria-pressed={open} onClick={() => setOpen(!open)}>
+          <Button variant="secondary" size="icon" aria-label={tr('Show the transcript')} aria-pressed={open} onClick={() => setOpen(!open)}>
             <FileText size={14} aria-hidden="true" />
           </Button>
-          <Button variant="secondary" size="icon" aria-label="Save to Second Brain" onClick={send}>
+          <Button variant="secondary" size="icon" aria-label={tr('Save to Second Brain')} onClick={send}>
             <FileText size={14} className="text-signal" aria-hidden="true" />
           </Button>
-          <Button variant="secondary" size="icon" aria-label="Download" onClick={download}>
+          <Button variant="secondary" size="icon" aria-label={tr('Download')} onClick={download}>
             <Download size={14} aria-hidden="true" />
           </Button>
-          <Button variant="danger" size="icon" aria-label={`Delete ${memo.title}`} onClick={() => memos.remove(memo.id)}>
+          <Button variant="danger" size="icon" aria-label={tr('Delete {0}', memo.title)} onClick={() => memos.remove(memo.id)}>
             <Trash2 size={14} aria-hidden="true" />
           </Button>
         </span>
       </div>
       {open && (
         <textarea
-          aria-label="Transcript"
+          aria-label={tr('Transcript')}
           rows={4}
           defaultValue={memo.transcript}
-          placeholder="No transcript. Type one if you like."
+          placeholder={tr('No transcript. Type one if you like.')}
           onBlur={(e) => e.target.value !== memo.transcript && memos.update(memo.id, { transcript: e.target.value })}
           className="mt-3 w-full resize-y rounded-2xl border border-line bg-ink-2 p-3 text-fine leading-relaxed text-bone focus-visible:border-signal focus-visible:outline-none"
         />
@@ -108,14 +109,14 @@ export default function MemosView({ onNotify }) {
   const start = async () => {
     setProblem('');
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
-      setProblem('This browser cannot record audio.');
+      setProblem(tr('This browser cannot record audio.'));
       return;
     }
     let stream;
     try {
       stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
-      setProblem('The microphone is blocked. Allow it in the address bar, then try again.');
+      setProblem(tr('The microphone is blocked. Allow it in the address bar, then try again.'));
       return;
     }
     const r = rec.current;
@@ -171,7 +172,7 @@ export default function MemosView({ onNotify }) {
     }
     setHeard('');
     setSeconds(0);
-    setStatus('recording');
+    setStatus(tr('recording'));
   };
 
   const stop = useCallback(async () => {
@@ -192,7 +193,7 @@ export default function MemosView({ onNotify }) {
     const blob = new Blob(r.chunks, { type: r.mime });
     const transcript = r.final.trim() || heardRef.current;
     r.recorder = null;
-    setStatus('idle');
+    setStatus(tr('idle'));
     setLive([]);
     if (blob.size && duration >= 0.5) {
       await memos.create({ title: titleFrom(transcript), transcript, duration, blob, mime: r.mime, peaks: bars(r.peaks, PEAKS), at: Date.now() });
@@ -226,20 +227,20 @@ export default function MemosView({ onNotify }) {
   };
 
   const recording = status === 'recording';
-  useFab({ label: recording ? 'Stop recording' : 'Record', icon: recording ? Square : Mic, onPress: recording ? stop : start });
+  useFab({ label: recording ? tr('Stop recording') : tr('Record'), icon: recording ? Square : Mic, onPress: recording ? stop : start });
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead eyebrow="Capture" title="Voice" accent="Memos." description="Press the button and say it. It keeps the recording, turns your words into text when the browser can, and can send it to Second Brain." />
+      <PageHead eyebrow={tr('Capture')} title={tr('Voice')} accent="Memos." description={tr('Press the button and say it. It keeps the recording, turns your words into text when the browser can, and can send it to Second Brain.')} />
 
-      <section className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(70%_100%_at_50%_0%,rgb(255_91_46/0.16),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" aria-label="Recorder">
+      <section className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(70%_100%_at_50%_0%,rgb(255_91_46/0.16),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" aria-label={tr('Recorder')}>
         <div className="mx-auto flex max-w-xl flex-col items-center gap-5">
           <div className="relative grid size-28 place-items-center">
             {recording && <i className="absolute inset-0 animate-ping rounded-full bg-danger/25 [animation-duration:1.8s]" aria-hidden="true" />}
             <button
               type="button"
               onClick={recording ? stop : start}
-              aria-label={recording ? 'Stop recording' : 'Start recording'}
+              aria-label={recording ? tr('Stop recording') : tr('Start recording')}
               className={clsx('relative grid size-24 place-items-center rounded-full text-ink-0 max-md:size-20 shadow-[0_14px_40px_-10px_rgb(255_91_46/0.7)] transition-transform hover:scale-105 active:scale-95', recording ? 'bg-danger' : 'bg-gradient-to-br from-signal to-[#ff8a5c]')}
             >
               {recording ? <Square size={26} fill="currentColor" aria-hidden="true" /> : <Mic size={30} aria-hidden="true" />}
@@ -249,7 +250,7 @@ export default function MemosView({ onNotify }) {
             <b className="font-display text-h2 leading-none text-bone tabular-nums" data-timer>
               {formatDuration(seconds)}
             </b>
-            <small className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{recording ? 'Recording, tap to stop' : 'Tap to record'}</small>
+            <small className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{recording ? tr('Recording, tap to stop') : tr('Tap to record')}</small>
           </div>
           {recording && (
             <div className="flex h-14 w-full items-center gap-[3px]" aria-hidden="true">
@@ -266,12 +267,12 @@ export default function MemosView({ onNotify }) {
               {transcribes ? (
                 <div className="flex items-center gap-2.5">
                   <span className="inline-flex items-center gap-1.5 font-mono text-[0.78rem]">
-                    <Languages size={14} aria-hidden="true" /> Speaking
+                    <Languages size={14} aria-hidden="true" /> {tr('Speaking')}
                   </span>
-                  <Segmented label="Language" value={lang} onChange={setLang} options={LANGUAGES.map((l) => ({ id: l.id, label: l.label }))} />
+                  <Segmented label={tr('Language')} value={lang} onChange={setLang} options={LANGUAGES.map((l) => ({ id: l.id, label: l.label }))} />
                 </div>
               ) : (
-                <Badge tone="warn">No speech-to-text in this browser, recording only</Badge>
+                <Badge tone="warn">{tr('No speech-to-text in this browser, recording only')}</Badge>
               )}
             </div>
           )}
@@ -288,11 +289,11 @@ export default function MemosView({ onNotify }) {
           <span className="grid size-12 place-items-center rounded-full bg-signal-soft text-signal">
             <AudioLines size={22} aria-hidden="true" />
           </span>
-          <h2 className="font-display text-lead text-bone">No memos yet</h2>
-          <p className="max-w-sm text-fine text-bone-dim">The first one you record shows up here, with its waveform and the words you said.</p>
+          <h2 className="font-display text-lead text-bone">{tr('No memos yet')}</h2>
+          <p className="max-w-sm text-fine text-bone-dim">{tr('The first one you record shows up here, with its waveform and the words you said.')}</p>
         </div>
       ) : (
-        <ul className="flex flex-col gap-3" aria-label="Memos">
+        <ul className="flex flex-col gap-3" aria-label={tr('Memos')}>
           {items.map((m) => (
             <Memo key={m.id} memo={m} playing={playing.id === m.id} progress={playing.id === m.id ? playing.progress : 0} onPlay={play} onSeek={seek} onNotify={onNotify} />
           ))}

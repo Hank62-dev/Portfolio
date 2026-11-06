@@ -1,3 +1,4 @@
+import { tr } from './lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Copy, Download, Pause, Play, Plus, SkipBack, SkipForward, Users } from 'lucide-react';
@@ -57,7 +58,7 @@ const GamesView = lazy(() => import('./views/GamesView'));
 const DiaryView = lazy(() => import('./views/DiaryView'));
 
 const PageLoading = () => (
-  <Loading label="Loading" className="flex flex-col gap-4 py-4">
+  <Loading label={tr('Loading')} className="flex flex-col gap-4 py-4">
     <Skeleton className="h-8 w-48" />
     <Skeleton className="h-4 w-72 max-w-full" />
     <div className="grid gap-3 md:grid-cols-3">
@@ -135,35 +136,35 @@ export default function Workspace({
 
   const commands = useMemo(() => {
     const list = [
-      ...NAVIGATION.map((item) => ({ id: `go-${item.id}`, label: `Go to ${item.label}`, hint: 'Navigate', icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
-      { id: 'new-task', label: 'New task for an agent', hint: 'Action', icon: Plus, keywords: 'dispatch assign', run: () => setTaskOpen(true) },
-      ...THEME_CHOICES.filter(({ id }) => id !== mode).map(({ id, label, short, icon }) => ({ id: `theme-${id}`, label: id === 'auto' ? 'Theme: follow the time of day' : `Theme: ${label.toLowerCase()}`, hint: short ?? 'Appearance', icon, keywords: 'dark light mode appearance night day auto time sunrise sunset', run: () => setMode(id) })),
-      { id: 'pause', label: paused ? 'Resume the floor' : 'Pause the floor', hint: 'Action', icon: paused ? Play : Pause, keywords: 'stop animation', run: onPause },
+      ...NAVIGATION.map((item) => ({ id: `go-${item.id}`, label: tr('Go to {0}', item.label), hint: tr('Navigate'), icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
+      { id: 'new-task', label: tr('New task for an agent'), hint: tr('Action'), icon: Plus, keywords: 'dispatch assign', run: () => setTaskOpen(true) },
+      ...THEME_CHOICES.filter(({ id }) => id !== mode).map(({ id, label, short, icon }) => ({ id: `theme-${id}`, label: id === 'auto' ? tr('Theme: follow the time of day') : tr('Theme: {0}', label.toLowerCase()), hint: short ?? tr('Appearance'), icon, keywords: 'dark light mode appearance night day auto time sunrise sunset', run: () => setMode(id) })),
+      { id: 'pause', label: paused ? tr('Resume the floor') : tr('Pause the floor'), hint: tr('Action'), icon: paused ? Play : Pause, keywords: 'stop animation', run: onPause },
       {
         id: 'brand-css',
-        label: 'Copy the brand CSS variables',
-        hint: 'Studio',
+        label: tr('Copy the brand CSS variables'),
+        hint: tr('Studio'),
         icon: Copy,
         keywords: 'tokens colours palette',
-        run: () => navigator.clipboard?.writeText(toCss()).then(() => onNotify?.('Brand variables copied'), () => onNotify?.('The browser would not let me copy')),
+        run: () => navigator.clipboard?.writeText(toCss()).then(() => onNotify?.(tr('Brand variables copied')), () => onNotify?.(tr('The browser would not let me copy'))),
       },
-      ...agents.map((agent) => ({ id: `agent-${agent.id}`, label: `Focus ${agent.name}`, hint: agent.role, icon: Users, keywords: `${agent.model} ${agent.room} agent`, run: () => { onSelect(agent.id); onTab('space'); } })),
+      ...agents.map((agent) => ({ id: `agent-${agent.id}`, label: tr('Focus {0}', agent.name), hint: agent.role, icon: Users, keywords: `${agent.model} ${agent.room} agent`, run: () => { onSelect(agent.id); onTab('space'); } })),
     ];
     if (app.canInstall || app.ios) {
       list.push({
         id: 'install',
-        label: 'Install Hank62 as an app',
-        hint: 'App',
+        label: tr('Install Hank62 as an app'),
+        hint: tr('App'),
         icon: Download,
         keywords: 'pwa home screen phone',
-        run: () => (app.canInstall ? app.install() : onNotify?.('On iPhone: tap Share, then Add to Home Screen')),
+        run: () => (app.canInstall ? app.install() : onNotify?.(tr('On iPhone: tap Share, then Add to Home Screen'))),
       });
     }
     if (music && hasTrack) {
       list.push(
-        { id: 'music-toggle', label: playing ? 'Pause the music' : 'Resume the music', hint: 'Music', icon: playing ? Pause : Play, keywords: 'play song', run: togglePlay },
-        { id: 'music-next', label: 'Next song', hint: 'Music', icon: SkipForward, run: next },
-        { id: 'music-prev', label: 'Previous song', hint: 'Music', icon: SkipBack, run: previous }
+        { id: 'music-toggle', label: playing ? tr('Pause the music') : tr('Resume the music'), hint: tr('Music'), icon: playing ? Pause : Play, keywords: 'play song', run: togglePlay },
+        { id: 'music-next', label: tr('Next song'), hint: tr('Music'), icon: SkipForward, run: next },
+        { id: 'music-prev', label: tr('Previous song'), hint: tr('Music'), icon: SkipBack, run: previous }
       );
     }
     return list;
@@ -196,7 +197,7 @@ export default function Workspace({
         const { playing: isPlaying, trackId } = player.get();
         if (params.do === 'next') return next();
         if (params.do === 'previous') return previous();
-        if (!trackId) return onNotify?.('Nothing is playing yet');
+        if (!trackId) return onNotify?.(tr('Nothing is playing yet'));
         if ((params.do === 'pause') === isPlaying || (params.do === 'resume') === !isPlaying) return togglePlay();
         return undefined;
       }
@@ -208,7 +209,7 @@ export default function Workspace({
         }
       case 'sleep_timer':
         setSleepTimer(params.minutes);
-        return onNotify?.(`Music will stop in ${params.minutes} minutes`);
+        return onNotify?.(tr('Music will stop in {0} minutes', params.minutes));
       case 'new_note':
         sendIntent('notes', { text: params.text });
         return onTab('notes');
@@ -225,14 +226,14 @@ export default function Workspace({
         await missions.load();
         const cards = missions.store.get().items;
         await missions.create(newCard(params.title, 'backlog', cards.filter((c) => c.column === 'backlog').length));
-        onNotify?.('Added to the Mission Board');
+        onNotify?.(tr('Added to the Mission Board'));
         return onTab('missions');
       }
       case 'log_money': {
         const entry = parseEntry(params.text);
-        if (entry.amount <= 0) return onNotify?.('I could not find an amount in that');
+        if (entry.amount <= 0) return onNotify?.(tr('I could not find an amount in that'));
         await entries.create({ ...entry, at: Date.now() });
-        onNotify?.('Logged in the Wallet');
+        onNotify?.(tr('Logged in the Wallet'));
         return onTab('wallet');
       }
       case 'floor':
@@ -301,8 +302,8 @@ export default function Workspace({
               </div>
             </main>
             <footer className="flex flex-wrap max-md:hidden justify-between gap-2 border-t border-line px-gutter py-4 font-mono text-fine text-bone-faint">
-              <span>HANK62 PRIVATE OS</span>
-              <span>{activeAgent ? `Focused: ${activeAgent.name}` : 'All systems nominal'}</span>
+              <span>{tr('HANK62 PRIVATE OS')}</span>
+              <span>{activeAgent ? tr('Focused: {0}', activeAgent.name) : tr('All systems nominal')}</span>
             </footer>
           </div>
           {sharing && <ShareSheet onDone={doneSharing} onNotify={onNotify} />}

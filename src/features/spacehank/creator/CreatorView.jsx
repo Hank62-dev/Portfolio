@@ -12,17 +12,18 @@ import PipelinePanel from './PipelinePanel';
 import Playbook from './Playbook';
 import { content, creatorSettings, deals, income, loadSettings } from './store';
 import { IconBubble, Label, Ring, Spark } from './ui';
+import { locale, tr } from '../lang';
 
 const SECTIONS = [
-  { id: 'ideas', label: 'Ideas', icon: Lightbulb },
-  { id: 'pipeline', label: 'Pipeline', icon: KanbanSquare },
-  { id: 'money', label: 'Money', icon: CircleDollarSign },
-  { id: 'deals', label: 'Deals', icon: Handshake },
-  { id: 'discord', label: 'Discord', icon: MessageCircle },
-  { id: 'playbook', label: 'Playbook', icon: BookOpenText },
+  { id: 'ideas', label: tr('Ideas'), icon: Lightbulb },
+  { id: 'pipeline', label: tr('Pipeline'), icon: KanbanSquare },
+  { id: 'money', label: tr('Money'), icon: CircleDollarSign },
+  { id: 'deals', label: tr('Deals'), icon: Handshake },
+  { id: 'discord', label: tr('Discord'), icon: MessageCircle },
+  { id: 'playbook', label: tr('Playbook'), icon: BookOpenText },
 ];
 
-const monthName = (key) => new Date(`${key}-01T00:00:00`).toLocaleDateString('en-GB', { month: 'short' });
+const monthName = (key) => new Date(`${key}-01T00:00:00`).toLocaleDateString(locale(), { month: 'short' });
 
 /** One thing waiting for you at the top of the Creator Lab, that takes you where it points. */
 function Today({ icon, hue, value, label, hint, urgent, onClick, delay = 0 }) {
@@ -30,7 +31,7 @@ function Today({ icon, hue, value, label, hint, urgent, onClick, delay = 0 }) {
     <button type="button" onClick={onClick} style={{ animationDelay: `${delay}ms` }} className="cl-card cl-rise group relative flex min-w-0 flex-col gap-3 rounded-[1.4rem] border border-line p-3.5 text-left md:p-4">
       <span className="flex items-center justify-between">
         <IconBubble icon={icon} hue={hue} />
-        {urgent && <i className="size-2 animate-pulse rounded-full bg-warn shadow-[0_0_0_4px_rgb(240_180_90/0.18)]" aria-label="Needs you today" />}
+        {urgent && <i className="size-2 animate-pulse rounded-full bg-warn shadow-[0_0_0_4px_rgb(240_180_90/0.18)]" aria-label={tr('Needs you today')} />}
       </span>
       <span className="min-w-0 leading-tight">
         <b className={clsx('block truncate font-display text-[1.9rem] leading-none tabular-nums', urgent ? 'text-warn' : 'text-bone')}>{value}</b>
@@ -46,12 +47,12 @@ function Hero({ total, previous, goal, g, months, weighted, onGoal }) {
   const change = previous ? Math.round(((total - previous) / previous) * 100) : null;
   const Arrow = change !== null && change < 0 ? ArrowDownRight : ArrowUpRight;
   return (
-    <section className="cl-hero cl-rise rounded-[2rem] border border-line p-5 md:p-8" aria-label="This month">
+    <section className="cl-hero cl-rise rounded-[2rem] border border-line p-5 md:p-8" aria-label={tr('This month')}>
       <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-10">
         <div className="min-w-0">
           <Label className="flex items-center gap-2">
             <span className="inline-block h-px w-6 bg-signal" aria-hidden="true" />
-            {new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })} · earned
+            {new Date().toLocaleDateString(locale(), { month: 'long', year: 'numeric' })} {tr('· earned')}
           </Label>
           <p className="cl-gleam mt-3 font-display text-[clamp(2.7rem,9vw,4.8rem)] leading-[0.95] tracking-tight tabular-nums" data-month-total>
             {vnd(total)}
@@ -59,28 +60,28 @@ function Hero({ total, previous, goal, g, months, weighted, onGoal }) {
           <p className="mt-3 max-w-[46ch] text-fine leading-snug text-bone-dim">
             {goal > 0
               ? g.reached
-                ? `Goal of ${vnd(goal)} reached. Everything from here is a bonus.`
-                : `${g.pct}% of your ${vnd(goal)} goal. ${vnd(g.remaining)} to go with ${g.daysLeft} ${g.daysLeft === 1 ? 'day' : 'days'} left.`
-              : 'Set a goal for the month and watch the ring fill.'}
+                ? tr('Goal of {0} reached. Everything from here is a bonus.', vnd(goal))
+                : tr('{0}% of your {1} goal. {2} to go with {3} {4} left.', g.pct, vnd(goal), vnd(g.remaining), g.daysLeft, g.daysLeft === 1 ? tr('day') : tr('days'))
+              : tr('Set a goal for the month and watch the ring fill.')}
           </p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {change !== null && (
               <span className={clsx('inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[0.72rem] tabular-nums', change >= 0 ? 'border-ok/35 bg-ok/10 text-ok' : 'border-danger/35 bg-danger/10 text-danger')}>
-                <Arrow size={12} aria-hidden="true" /> {Math.abs(change)}% vs last month
+                <Arrow size={12} aria-hidden="true" /> {Math.abs(change)}{tr('% vs last month')}
               </span>
             )}
-            {total > 0 && <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-wash/[0.05] px-2.5 py-1 font-mono text-[0.72rem] text-bone-dim tabular-nums">At this pace {vndShort(g.projected)}</span>}
+            {total > 0 && <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-wash/[0.05] px-2.5 py-1 font-mono text-[0.72rem] text-bone-dim tabular-nums">{tr('At this pace')} {vndShort(g.projected)}</span>}
             {weighted > 0 && (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-wash/[0.05] px-2.5 py-1 font-mono text-[0.72rem] text-bone-dim tabular-nums">
-                <Coins size={12} aria-hidden="true" /> {vndShort(weighted)} likely from deals
+                <Coins size={12} aria-hidden="true" /> {vndShort(weighted)} {tr('likely from deals')}
               </span>
             )}
           </div>
 
           <div className="mt-6 max-w-lg">
             <Spark values={months.map((m) => m.total)} className="h-14 w-full" />
-            <ol className="mt-1.5 flex justify-between font-mono text-[0.62rem] text-bone-faint" aria-label="Last six months">
+            <ol className="mt-1.5 flex justify-between font-mono text-[0.62rem] text-bone-faint" aria-label={tr('Last six months')}>
               {months.map((m, i) => (
                 <li key={m.month} className={clsx(i === months.length - 1 && 'text-signal')}>
                   {monthName(m.month)}
@@ -95,14 +96,14 @@ function Hero({ total, previous, goal, g, months, weighted, onGoal }) {
             {goal > 0 ? (
               <span className="leading-none">
                 <b className="block font-display text-[2.4rem] tabular-nums text-bone">{g.pct}%</b>
-                <small className="mt-1 block font-mono text-[0.64rem] tracking-[0.14em] text-bone-faint uppercase">{g.reached ? 'reached' : 'of goal'}</small>
+                <small className="mt-1 block font-mono text-[0.64rem] tracking-[0.14em] text-bone-faint uppercase">{g.reached ? tr('reached') : tr('of goal')}</small>
               </span>
             ) : (
               <Target size={30} strokeWidth={1.4} className="text-bone-faint" aria-hidden="true" />
             )}
           </Ring>
           <button type="button" onClick={onGoal} className="rounded-full border border-line-strong px-3.5 py-1.5 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-bone hover:text-bone">
-            {goal > 0 ? 'Adjust the goal' : 'Set a goal'}
+            {goal > 0 ? tr('Adjust the goal') : tr('Set a goal')}
           </button>
         </div>
       </div>
@@ -140,17 +141,17 @@ export default function CreatorView() {
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHead eyebrow="Create" title="Creator" accent="Lab." description="Turn what you know into content, deals and income on the platforms where people already are. Everything here stays on your device." />
+      <PageHead eyebrow={tr('Create')} title={tr('Creator')} accent="Lab." description={tr('Turn what you know into content, deals and income on the platforms where people already are. Everything here stays on your device.')} />
 
       <Hero total={total} previous={months.at(-2)?.total ?? 0} goal={settings.goal} g={g} months={months} weighted={weighted} onGoal={() => setSection('money')} />
 
       <div className="grid grid-cols-3 gap-2.5 md:gap-3.5" data-today-strip>
-        <Today icon={Clapperboard} hue={22} value={post} label="To post today" hint="Open the pipeline" urgent={post > 0} onClick={() => setSection('pipeline')} delay={80} />
-        <Today icon={Handshake} hue={208} value={follow} label="To follow up" hint="Open your deals" urgent={follow > 0} onClick={() => setSection('deals')} delay={140} />
-        <Today icon={Coins} hue={150} value={vndShort(weighted)} label="Likely from deals" hint="See the pipeline value" onClick={() => setSection('deals')} delay={200} />
+        <Today icon={Clapperboard} hue={22} value={post} label={tr('To post today')} hint={tr('Open the pipeline')} urgent={post > 0} onClick={() => setSection('pipeline')} delay={80} />
+        <Today icon={Handshake} hue={208} value={follow} label={tr('To follow up')} hint={tr('Open your deals')} urgent={follow > 0} onClick={() => setSection('deals')} delay={140} />
+        <Today icon={Coins} hue={150} value={vndShort(weighted)} label={tr('Likely from deals')} hint={tr('See the pipeline value')} onClick={() => setSection('deals')} delay={200} />
       </div>
 
-      <Segmented scroll large round value={section} onChange={setSection} options={SECTIONS} label="Creator Lab" />
+      <Segmented scroll large round value={section} onChange={setSection} options={SECTIONS} label={tr('Creator Lab')} />
 
       <div key={section} className="cl-rise">
         {section === 'ideas' && <IdeasPanel onSaved={() => setSection('pipeline')} />}

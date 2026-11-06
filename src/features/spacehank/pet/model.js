@@ -1,6 +1,7 @@
 import { dayKey } from '../notes/notes';
 import { daysBetween, diaryStreak, journeyStats, writtenDays } from '../diary/model';
 import { summarize } from '../focus/stats';
+import { tr } from '../lang';
 
 // Niú, the little panda who walks the journey with you. How it feels and how far it has grown come from what you did:
 // pages written in the diary and focus sessions finished. As plain functions, so all of it is tested.
@@ -8,11 +9,11 @@ import { summarize } from '../focus/stats';
 export const PET_NAME = 'Niú';
 
 export const STAGES = [
-  { id: 'baby', name: 'Mầm non', min: 0 },
-  { id: 'kid', name: 'Anh chàng học IT', min: 6 },
-  { id: 'traveler', name: 'Lữ khách', min: 24 },
-  { id: 'explorer', name: 'Nhà thám hiểm', min: 75 },
-  { id: 'legend', name: 'Huyền thoại', min: 200 },
+  { id: 'baby', name: tr('Mầm non'), min: 0 },
+  { id: 'kid', name: tr('Anh chàng học IT'), min: 6 },
+  { id: 'traveler', name: tr('Lữ khách'), min: 24 },
+  { id: 'explorer', name: tr('Nhà thám hiểm'), min: 75 },
+  { id: 'legend', name: tr('Huyền thoại'), min: 200 },
 ];
 
 /** A page in the diary is worth three, a finished focus session one. */
@@ -41,15 +42,15 @@ export const petMood = ({ hour, wroteToday, focusToday, streak, daysAway, entrie
 };
 
 const LINES = {
-  sleepy: ['Zzz… mình buồn ngủ rồi. Mai đi tiếp nhé.', 'Khuya rồi, nghỉ thôi bạn ơi.', 'Mình ngủ trước đây… chúc bạn mơ đẹp.'],
-  excited: ['Hôm nay tuyệt quá! Mình nhảy cẫng lên luôn!', 'Một ngày đầy ắp. Mình tự hào về bạn lắm!', 'Ôi, bạn làm được hết rồi. Ăn mừng thôi!'],
-  happy: ['Mình vui lắm. Cảm ơn bạn đã ghé qua.', 'Hôm nay tốt rồi đó. Cứ nhẹ nhàng đi tiếp nhé.', 'Có bạn đi cùng, mình thấy ấm áp ghê.'],
-  lonely: ['Mấy hôm nay mình nhớ bạn… kể mình nghe nhé?', 'Đường vắng quá. Mình chờ bạn nãy giờ đó.', 'Quay lại với mình nha, mình giữ chỗ cho bạn rồi.'],
-  worried: ['Tối rồi mà trang hôm nay vẫn trống… viết vài dòng nhé?', 'Giữ chuỗi ngày nào bạn ơi, chỉ cần một dòng thôi.', 'Mình hơi lo cho chuỗi ngày của bạn đó nha.'],
-  calm: ['Chào bạn. Hôm nay mình đi đâu đây?', 'Mình đang đợi bạn kể chuyện hôm nay.', 'Một ngày mới. Mình sẵn sàng lên đường rồi.'],
+  sleepy: [tr('Zzz… mình buồn ngủ rồi. Mai đi tiếp nhé.'), tr('Khuya rồi, nghỉ thôi bạn ơi.'), tr('Mình ngủ trước đây… chúc bạn mơ đẹp.')],
+  excited: [tr('Hôm nay tuyệt quá! Mình nhảy cẫng lên luôn!'), tr('Một ngày đầy ắp. Mình tự hào về bạn lắm!'), tr('Ôi, bạn làm được hết rồi. Ăn mừng thôi!')],
+  happy: [tr('Mình vui lắm. Cảm ơn bạn đã ghé qua.'), tr('Hôm nay tốt rồi đó. Cứ nhẹ nhàng đi tiếp nhé.'), tr('Có bạn đi cùng, mình thấy ấm áp ghê.')],
+  lonely: [tr('Mấy hôm nay mình nhớ bạn… kể mình nghe nhé?'), tr('Đường vắng quá. Mình chờ bạn nãy giờ đó.'), tr('Quay lại với mình nha, mình giữ chỗ cho bạn rồi.')],
+  worried: [tr('Tối rồi mà trang hôm nay vẫn trống… viết vài dòng nhé?'), tr('Giữ chuỗi ngày nào bạn ơi, chỉ cần một dòng thôi.'), tr('Mình hơi lo cho chuỗi ngày của bạn đó nha.')],
+  calm: [tr('Chào bạn. Hôm nay mình đi đâu đây?'), tr('Mình đang đợi bạn kể chuyện hôm nay.'), tr('Một ngày mới. Mình sẵn sàng lên đường rồi.')],
 };
 
-export const TAP_LINES = ['Hihi, nhột quá!', 'Mình ở đây nè.', 'Ôm cái nào!', 'Đi tiếp thôi bạn ơi.', 'Bạn làm mình vui ghê.'];
+export const TAP_LINES = [tr('Hihi, nhột quá!'), tr('Mình ở đây nè.'), tr('Ôm cái nào!'), tr('Đi tiếp thôi bạn ơi.'), tr('Bạn làm mình vui ghê.')];
 
 /** One of her lines for this mood; the same `seed` always gives the same line. */
 export const lineFor = (mood, seed = 0) => {

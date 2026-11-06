@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // What another app hands over when someone taps Share and picks Hank62: a title, some text and/or a link, and maybe pictures.
 // Phones are not consistent about it (Chrome on Android usually puts the link inside the text and leaves `url` empty), so
 // this sorts it out and builds the note that will be saved. Plain functions, no browser needed.
@@ -51,6 +52,6 @@ export const describeShare = (share, files = 0) => {
   const parts = [];
   if (url) parts.push(hostOf(url) || 'a link');
   else if (title || text) parts.push('some text');
-  if (files > 0) parts.push(files === 1 ? 'a picture' : `${files} pictures`);
+  if (files > 0) parts.push(files === 1 ? 'a picture' : tr('{0} pictures', files));
   return parts.join(' and ') || 'nothing';
 };

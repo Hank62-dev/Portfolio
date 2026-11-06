@@ -1,3 +1,4 @@
+import { locale, tr } from '../lang';
 // Voice Memos as plain functions: how long, what to call it, and which way it was said.
 
 export const formatDuration = (seconds) => {
@@ -9,12 +10,12 @@ export const formatDuration = (seconds) => {
 export const titleFrom = (transcript, at = Date.now()) => {
   const words = String(transcript ?? '').trim().split(/\s+/).filter(Boolean);
   if (words.length) return words.slice(0, 7).join(' ') + (words.length > 7 ? '…' : '');
-  return `Memo ${new Date(at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
+  return `Memo ${new Date(at).toLocaleString(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
 };
 
 export const LANGUAGES = [
-  { id: 'vi-VN', label: 'Tiếng Việt' },
-  { id: 'en-US', label: 'English' },
+  { id: 'vi-VN', label: tr('Tiếng Việt') },
+  { id: 'en-US', label: tr('English') },
 ];
 
 /** Whether this browser can turn speech into text while recording. */

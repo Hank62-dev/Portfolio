@@ -1,4 +1,5 @@
 import { profile } from '../../data/profile';
+import { tr } from './lang';
 
 // Everything deployment-specific or tunable about /spacehank lives here.
 const env = import.meta.env;
@@ -16,7 +17,7 @@ export const spacehankConfig = {
   maxEvents: 40,
   toastMs: 2400,
   // Where the morning briefing looks up the weather (Open-Meteo needs coordinates, not an address).
-  home: { name: 'Ho Chi Minh City', latitude: 10.8231, longitude: 106.6297 },
+  home: { name: tr('Ho Chi Minh City'), latitude: 10.8231, longitude: 106.6297 },
 };
 
 /** "Võ Gia Huy" -> "VH": first and last initial. */
@@ -28,7 +29,7 @@ export const initialsOf = (fullName) => {
 export const owner = { name: profile.handle, initials: initialsOf(profile.name) };
 
 export const greetingFor = (hour) => {
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return tr('Good morning');
+  if (hour < 18) return tr('Good afternoon');
+  return tr('Good evening');
 };

@@ -1,3 +1,4 @@
+import { locale, tr } from '../lang';
 import { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, CalendarClock, Check, Plus, Trash2 } from 'lucide-react';
 import { Badge, Button, DatePicker, Dialog, Input, Textarea } from '../../../design-system';
@@ -15,7 +16,7 @@ const dayInput = (at) => {
   const d = new Date(at);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
-const when = (at) => (at ? new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '');
+const when = (at) => (at ? new Date(at).toLocaleDateString(locale(), { day: 'numeric', month: 'short' }) : '');
 
 /** One piece of content: edit it, move it along, copy what is ready, post to Discord, record how it did. */
 function PieceSheet({ piece, onClose }) {
@@ -40,19 +41,19 @@ function PieceSheet({ piece, onClose }) {
   const num = (field) => (e) => setResults({ ...results, [field]: Math.max(0, Number(e.target.value) || 0) });
 
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={STAGES.find((s) => s.id === piece.stage)?.label.toUpperCase()} title={piece.title} description="Edit this piece, move it along the pipeline, and copy or post what is ready.">
+    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={STAGES.find((s) => s.id === piece.stage)?.label.toUpperCase()} title={piece.title} description={tr('Edit this piece, move it along the pipeline, and copy or post what is ready.')}>
       <div className="flex flex-col gap-4" data-piece-sheet>
-        <Input aria-label="Title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
-        <Textarea aria-label="Opening line" rows={2} placeholder="The first line you say" value={hook} onChange={(e) => setHook(e.target.value)} />
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Platforms">
+        <Input aria-label={tr('Title')} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
+        <Textarea aria-label={tr('Opening line')} rows={2} placeholder={tr('The first line you say')} value={hook} onChange={(e) => setHook(e.target.value)} />
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label={tr('Platforms')}>
           {PLATFORMS.map((p) => (
             <Chip key={p.id} on={platforms.includes(p.id)} onClick={() => setPlatforms((l) => (l.includes(p.id) ? l.filter((x) => x !== p.id) : [...l, p.id]))}>
               {p.label}
             </Chip>
           ))}
         </div>
-        <Row label="Post on">
-          <DatePicker aria-label="Post on" value={date} onChange={setDate} compact className="w-full" />
+        <Row label={tr('Post on')}>
+          <DatePicker aria-label={tr('Post on')} value={date} onChange={setDate} compact className="w-full" />
         </Row>
 
         {piece.stage === 'posted' && (
@@ -67,9 +68,9 @@ function PieceSheet({ piece, onClose }) {
 
         {pack && (
           <div className="flex flex-wrap gap-2">
-            {pack.caption && <CopyButton text={[pack.caption, hashtagLine(pack.hashtags ?? [])].filter(Boolean).join('\n')} label="Caption" />}
-            {pack.discord && <CopyButton text={pack.discord} label="Discord text" />}
-            {pack.thread?.length > 0 && <CopyButton text={pack.thread.map((t, i) => `${i + 1}/ ${t}`).join('\n\n')} label="Thread" />}
+            {pack.caption && <CopyButton text={[pack.caption, hashtagLine(pack.hashtags ?? [])].filter(Boolean).join('\n')} label={tr('Caption')} />}
+            {pack.discord && <CopyButton text={pack.discord} label={tr('Discord text')} />}
+            {pack.thread?.length > 0 && <CopyButton text={pack.thread.map((t, i) => `${i + 1}/ ${t}`).join('\n\n')} label={tr('Thread')} />}
           </div>
         )}
 
@@ -77,20 +78,20 @@ function PieceSheet({ piece, onClose }) {
           <div className="rounded-2xl border border-line p-3">
             {discord ? <DiscordComposer initial={pack?.discord ?? ''} onSent={() => setDiscord(false)} /> : (
               <Button variant="ghost" size="sm" onClick={() => setDiscord(true)} data-open-discord>
-                Post to my Discord server
+                {tr('Post to my Discord server')}
               </Button>
             )}
           </div>
         )}
 
-        <Textarea aria-label="Notes" rows={2} placeholder="Notes: what worked, what to change next time" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <Textarea aria-label={tr('Notes')} rows={2} placeholder={tr('Notes: what worked, what to change next time')} value={notes} onChange={(e) => setNotes(e.target.value)} />
 
         <div className="flex flex-wrap gap-2">
           <Button variant="ghost" size="sm" onClick={() => move(-1)} disabled={piece.stage === 'idea'}>
-            <ArrowLeft size={14} aria-hidden="true" /> Back
+            <ArrowLeft size={14} aria-hidden="true" /> {tr('Back')}
           </Button>
           <Button variant="ghost" size="sm" onClick={() => move(1)} disabled={piece.stage === 'posted'} data-move-forward>
-            Forward <ArrowRight size={14} aria-hidden="true" />
+            {tr('Forward')} <ArrowRight size={14} aria-hidden="true" />
           </Button>
         </div>
         <Button
@@ -101,7 +102,7 @@ function PieceSheet({ piece, onClose }) {
           className="w-full justify-center"
           data-save-piece-sheet
         >
-          <Check size={15} aria-hidden="true" /> Save
+          <Check size={15} aria-hidden="true" /> {tr('Save')}
         </Button>
         {sure ? (
           <Button
@@ -114,11 +115,11 @@ function PieceSheet({ piece, onClose }) {
             onBlur={() => setSure(false)}
             autoFocus
           >
-            <Trash2 size={15} aria-hidden="true" /> Tap again to delete
+            <Trash2 size={15} aria-hidden="true" /> {tr('Tap again to delete')}
           </Button>
         ) : (
           <Button variant="ghost" className="w-full justify-center" onClick={() => setSure(true)}>
-            <Trash2 size={15} aria-hidden="true" /> Delete
+            <Trash2 size={15} aria-hidden="true" /> {tr('Delete')}
           </Button>
         )}
       </div>
@@ -138,19 +139,19 @@ function NewIdea({ onClose }) {
     onClose();
   };
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow="NEW IDEA" title="Catch an idea" description="Write it down now, write the script later.">
+    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={tr('NEW IDEA')} title={tr('Catch an idea')} description={tr('Write it down now, write the script later.')}>
       <form onSubmit={add} className="flex flex-col gap-4" data-new-idea>
-        <Input aria-label="Idea" placeholder="e.g. Build a Discord bot in 60 seconds" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} autoFocus />
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Platforms">
+        <Input aria-label={tr('Idea')} placeholder={tr('e.g. Build a Discord bot in 60 seconds')} value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} autoFocus />
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label={tr('Platforms')}>
           {PLATFORMS.map((p) => (
             <Chip key={p.id} on={platforms.includes(p.id)} onClick={() => setPlatforms((l) => (l.includes(p.id) ? l.filter((x) => x !== p.id) : [...l, p.id]))}>
               {p.label}
             </Chip>
           ))}
         </div>
-        <DatePicker aria-label="Post on" value={date} onChange={setDate} placeholder="Post on… (optional)" compact className="w-full" />
+        <DatePicker aria-label={tr('Post on')} value={date} onChange={setDate} placeholder={tr('Post on… (optional)')} compact className="w-full" />
         <Button type="submit" disabled={!title.trim()} className="w-full justify-center">
-          <Plus size={15} aria-hidden="true" /> Add
+          <Plus size={15} aria-hidden="true" /> {tr('Add')}
         </Button>
       </form>
     </Dialog>
@@ -165,14 +166,14 @@ export default function PipelinePanel() {
   const groups = useMemo(() => byStage(items), [items]);
   const due = useMemo(() => dueToPost(items), [items]);
   const piece = items.find((p) => p.id === open);
-  useFab({ label: 'Catch an idea', icon: Plus, onPress: () => setAdding(true) });
+  useFab({ label: tr('Catch an idea'), icon: Plus, onPress: () => setAdding(true) });
 
   return (
     <div className="flex flex-col gap-4" data-pipeline>
       {due.length > 0 && (
-        <section className="cl-rise rounded-[1.75rem] border border-warn/35 bg-[linear-gradient(135deg,rgb(240_180_90/0.16),transparent_70%)] p-4 md:p-5" aria-label="Due today" data-due-today>
+        <section className="cl-rise rounded-[1.75rem] border border-warn/35 bg-[linear-gradient(135deg,rgb(240_180_90/0.16),transparent_70%)] p-4 md:p-5" aria-label={tr('Due today')} data-due-today>
           <Label className="mb-2 flex items-center gap-1.5 text-warn">
-            <CalendarClock size={13} aria-hidden="true" /> To post today
+            <CalendarClock size={13} aria-hidden="true" /> {tr('To post today')}
           </Label>
           <ul className="flex flex-col gap-1.5">
             {due.map((p) => (
@@ -188,9 +189,9 @@ export default function PipelinePanel() {
       )}
 
       <div className="flex items-center justify-between gap-2 max-md:hidden">
-        <p className="text-fine text-bone-dim">{items.length ? `${items.length} pieces. ${groups.posted.length} posted.` : 'Nothing here yet. Catch an idea, or write a pack in Ideas and save it.'}</p>
+        <p className="text-fine text-bone-dim">{items.length ? tr('{0} pieces. {1} posted.', items.length, groups.posted.length) : tr('Nothing here yet. Catch an idea, or write a pack in Ideas and save it.')}</p>
         <Button size="sm" onClick={() => setAdding(true)} data-add-idea>
-          <Plus size={14} aria-hidden="true" /> Catch an idea
+          <Plus size={14} aria-hidden="true" /> {tr('Catch an idea')}
         </Button>
       </div>
 
@@ -206,7 +207,7 @@ export default function PipelinePanel() {
               <span className="rounded-full bg-wash/[0.07] px-2 font-mono text-[0.68rem] tabular-nums text-bone-dim">{groups[stage.id].length}</span>
             </header>
             {groups[stage.id].length === 0 ? (
-              <p className="rounded-2xl border border-dashed border-line px-3 py-6 text-center font-mono text-[0.7rem] text-bone-faint">Nothing here yet</p>
+              <p className="rounded-2xl border border-dashed border-line px-3 py-6 text-center font-mono text-[0.7rem] text-bone-faint">{tr('Nothing here yet')}</p>
             ) : (
               <ul className="flex flex-col gap-2">
                 {groups[stage.id].map((p) => (
@@ -219,7 +220,7 @@ export default function PipelinePanel() {
                           <PlatformTag key={id} id={id} label={platformLabel(id)} />
                         ))}
                         {p.scheduledAt && <span className={clsx('font-mono text-[0.66rem]', p.stage !== 'posted' && p.scheduledAt < Date.now() - 86400000 ? 'text-danger' : 'text-bone-faint')}>{when(p.scheduledAt)}</span>}
-                        {p.stage === 'posted' && p.results?.views > 0 && <span className="font-mono text-[0.66rem] text-ok">{p.results.views.toLocaleString('en-GB')} views</span>}
+                        {p.stage === 'posted' && p.results?.views > 0 && <span className="font-mono text-[0.66rem] text-ok">{p.results.views.toLocaleString('en-GB')} {tr('views')}</span>}
                       </span>
                     </button>
                   </li>

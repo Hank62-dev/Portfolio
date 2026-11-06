@@ -5,6 +5,7 @@ import { focusLog } from '../focus/log';
 import { hoursMinutes, summarize } from '../focus/stats';
 import { useStore } from '../store';
 import { Figure, Tile } from './Page';
+import { tr } from '../lang';
 
 const WEEKDAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 const BAR = 88; // the tallest bar, in px
@@ -14,12 +15,12 @@ export default function FocusStats() {
   const { log } = useStore(focusLog);
   const stats = useMemo(() => summarize(log), [log]);
   const top = Math.max(60, ...stats.week.map((d) => d.minutes)); // a short week still looks like a short week
-  const summary = `Last seven days: ${hoursMinutes(stats.weekMinutes)} of focus. Today ${hoursMinutes(stats.today.minutes)}. ${stats.streak} day streak.`;
+  const summary = tr('Last seven days: {0} of focus. Today {1}. {2} day streak.', hoursMinutes(stats.weekMinutes), hoursMinutes(stats.today.minutes), stats.streak);
 
   return (
-    <Tile title="Your focus" aside={<span className="font-mono text-[0.68rem] text-bone-faint">{hoursMinutes(stats.totalMinutes)} in all</span>} data-focus-stats>
+    <Tile title={tr('Your focus')} aside={<span className="font-mono text-[0.68rem] text-bone-faint">{hoursMinutes(stats.totalMinutes)} {tr('in all')}</span>} data-focus-stats>
       <div className="grid grid-cols-3 gap-2">
-        <Figure value={hoursMinutes(stats.today.minutes)} label="Today" tone="text-signal" />
+        <Figure value={hoursMinutes(stats.today.minutes)} label={tr('Today')} tone="text-signal" />
         <Figure
           value={
             <span className="inline-flex items-center gap-1.5">
@@ -27,9 +28,9 @@ export default function FocusStats() {
               {stats.streak}
             </span>
           }
-          label="Streak"
+          label={tr('Streak')}
         />
-        <Figure value={stats.best} label="Best" />
+        <Figure value={stats.best} label={tr('Best')} />
       </div>
       <figure className="mt-4" aria-label={summary}>
         <ol className="flex h-[7.5rem] items-end justify-between gap-2" aria-hidden="true">
@@ -48,7 +49,7 @@ export default function FocusStats() {
           })}
         </ol>
         <figcaption className="mt-2 font-mono text-[0.68rem] text-bone-faint">
-          Last 7 days · {hoursMinutes(stats.weekMinutes)} · only sessions that ran to the end count
+          {tr('Last 7 days ·')} {hoursMinutes(stats.weekMinutes)} {tr('· only sessions that ran to the end count')}
         </figcaption>
       </figure>
     </Tile>

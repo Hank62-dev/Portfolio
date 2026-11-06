@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import alarmUrl from '../../../assets/sounds/focus-alarm.mp3';
 import { player, bindSystemKeys } from '../music/player';
 import { clock } from '../study/model';
@@ -11,9 +12,9 @@ import { createStore } from '../store';
 // up an alarm rings until it is put away.
 
 export const MODES = [
-  { id: 'focus', label: 'Focus', minutes: 25 },
-  { id: 'short', label: 'Short break', minutes: 5 },
-  { id: 'long', label: 'Long break', minutes: 15 },
+  { id: 'focus', label: tr('Focus'), minutes: 25 },
+  { id: 'short', label: tr('Short break'), minutes: 5 },
+  { id: 'long', label: tr('Long break'), minutes: 15 },
 ];
 
 const SESSIONS = 'hank62.study.sessions';
@@ -100,7 +101,7 @@ const clearNotification = async () => {
 const publishCard = () => {
   if (!hasSession() || musicIsPlaying()) return; // while a song plays, the card belongs to the song
   const { mode, left, total, status } = focus.get();
-  navigator.mediaSession.metadata = new MediaMetadata({ title: `${label(mode)} · ${clock(left)}`, artist: status === 'running' ? 'Hank62 · keep going' : 'Hank62 · paused', album: 'Focus timer', artwork: [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }] });
+  navigator.mediaSession.metadata = new MediaMetadata({ title: `${label(mode)} · ${clock(left)}`, artist: status === 'running' ? tr('Hank62 · keep going') : tr('Hank62 · paused'), album: tr('Focus timer'), artwork: [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }] });
   navigator.mediaSession.playbackState = status === 'running' ? 'playing' : 'paused';
   try {
     navigator.mediaSession.setPositionState?.({ duration: total, position: Math.max(0, Math.min(total, total - left)), playbackRate: 1 });
@@ -173,7 +174,7 @@ const silenceAlarm = () => {
 // ---- the clock ------------------------------------------------------------------------------------------------------
 
 const setTitle = (text) => {
-  document.title = text ? `${text} · Hank62` : document.title.replace(/^\d\d:\d\d · /, '');
+  document.title = text ? tr('{0} · Hank62', text) : document.title.replace(/^\d\d:\d\d · /, '');
 };
 
 const finish = () => {
@@ -188,11 +189,11 @@ const finish = () => {
   focus.set({ status: 'done', left: 0, sessions: next });
   setTitle('');
   ring();
-  void notify(mode === 'focus' ? 'Focus session done' : 'Break over', mode === 'focus' ? 'Time for a short break.' : 'Ready for the next round?', true);
+  void notify(mode === 'focus' ? tr('Focus session done') : tr('Break over'), mode === 'focus' ? tr('Time for a short break.') : tr('Ready for the next round?'), true);
   // the phone already got its own notification above; this is for the list in the bell
-  inbox({ key: `focus:${Date.now()}`, kind: 'focus', title: mode === 'focus' ? 'Focus session done' : 'Break over', body: mode === 'focus' ? 'Time for a short break.' : 'Ready for the next round?', tab: 'study', tone: 'success', announce: false });
+  inbox({ key: `focus:${Date.now()}`, kind: 'focus', title: mode === 'focus' ? tr('Focus session done') : tr('Break over'), body: mode === 'focus' ? tr('Time for a short break.') : tr('Ready for the next round?'), tab: 'study', tone: 'success', announce: false });
   if (hasSession() && !musicIsPlaying()) {
-    navigator.mediaSession.metadata = new MediaMetadata({ title: mode === 'focus' ? 'Focus done' : 'Break over', artist: 'Hank62', album: 'Focus timer', artwork: [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }] });
+    navigator.mediaSession.metadata = new MediaMetadata({ title: mode === 'focus' ? tr('Focus done') : tr('Break over'), artist: 'Hank62', album: tr('Focus timer'), artwork: [{ src: '/icons/logo-512.png', sizes: '512x512', type: 'image/png' }] });
     navigator.mediaSession.playbackState = 'playing';
   }
 };
@@ -211,7 +212,7 @@ const tick = () => {
   if (minute !== lastMinute) {
     lastMinute = minute;
     publishCard();
-    void notify(`${label(focus.get().mode)} · ${minute} min left`, 'Stay with one thing.');
+    void notify(tr('{0} · {1} min left', label(focus.get().mode), minute), tr('Stay with one thing.'));
   }
 };
 
@@ -239,7 +240,7 @@ export const pause = () => {
   setTitle('');
   stopKeepAlive();
   publishCard();
-  void notify(`${label(focus.get().mode)} paused`, `${clock(focus.get().left)} left.`);
+  void notify(tr('{0} paused', label(focus.get().mode)), tr('{0} left.', clock(focus.get().left)));
 };
 
 export const reset = () => {

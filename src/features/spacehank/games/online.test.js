@@ -1,3 +1,10 @@
+import { vi as vitest } from 'vitest';
+
+// these tests check the Vietnamese text, so the workspace is put in Vietnamese before anything is imported
+vitest.hoisted(() => {
+  globalThis.__HANK_LANG__ = 'vi';
+});
+
 import { describe, expect, it } from 'vitest';
 import { battleUrl, describeShot, inviteLink, normalizeCode, statusOf } from './online';
 

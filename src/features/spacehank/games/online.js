@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { spacehankConfig } from '../config';
 
@@ -28,9 +29,9 @@ const SQUARE = (cell) => `${'ABCDEFGHIJ'[Math.floor(cell / 10)]}${(cell % 10) + 
 /** One line about the last shot, from the point of view of seat `me`: "Bạn bắn B4: trúng!". */
 export const describeShot = (last, me, names) => {
   if (!last) return '';
-  const who = last.by === me ? 'Bạn' : names[last.by] || 'Đối thủ';
+  const who = last.by === me ? 'Bạn' : names[last.by] || tr('Đối thủ');
   const result = { miss: 'trượt', hit: 'trúng!', sunk: 'chìm một chiếc!' }[last.outcome] ?? '';
-  return `${who} bắn ${SQUARE(last.cell)}: ${result}`;
+  return tr('{0} bắn {1}: {2}', who, SQUARE(last.cell), result);
 };
 
 /** What the status line says, given the room and my seat. */
@@ -38,11 +39,11 @@ export const statusOf = (room) => {
   if (!room) return '';
   const { seat, phase, turn, names, present } = room;
   const foe = 1 - seat;
-  if (phase === 'wait') return 'Đang đợi bạn của bạn vào phòng…';
-  if (phase === 'place') return room.ready[seat] ? `Đợi ${names[foe]} xếp tàu…` : 'Xếp hạm đội của bạn, rồi ra khơi.';
-  if (phase === 'over') return room.winner === seat ? 'Bạn thắng rồi!' : `${names[foe]} thắng`;
-  if (!present[foe]) return `${names[foe]} mất kết nối. Đợi một chút…`;
-  return turn === seat ? 'Đến lượt bạn: chạm một ô để bắn.' : `${names[foe]} đang ngắm…`;
+  if (phase === 'wait') return tr('Đang đợi bạn của bạn vào phòng…');
+  if (phase === 'place') return room.ready[seat] ? tr('Đợi {0} xếp tàu…', names[foe]) : tr('Xếp hạm đội của bạn, rồi ra khơi.');
+  if (phase === 'over') return room.winner === seat ? tr('Bạn thắng rồi!') : tr('{0} thắng', names[foe]);
+  if (!present[foe]) return tr('{0} mất kết nối. Đợi một chút…', names[foe]);
+  return turn === seat ? tr('Đến lượt bạn: chạm một ô để bắn.') : tr('{0} đang ngắm…', names[foe]);
 };
 
 // ---- what is remembered on this device ---------------------------------------------------------------------------
@@ -153,7 +154,7 @@ export function useBattle() {
         session.current = null;
         writeSession(null);
         setRoom(null);
-        setError('Phòng đó đã đóng.');
+        setError(tr('Phòng đó đã đóng.'));
       }
     };
 

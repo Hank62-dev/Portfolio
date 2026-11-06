@@ -9,17 +9,18 @@ import { loadNotes, notesStore } from '../notes/library';
 import { useFab } from '../fab';
 import { useStore } from '../store';
 import { isDemo } from '../demo/mode';
+import { tr } from '../lang';
 
 // each habit picks one of these; they are drawn with the icon library, never as emoji
 const ICONS = { sprout: Sprout, book: BookOpen, run: Dumbbell, water: Droplets, mind: Brain, write: PenLine, music: Music2, sleep: Moon, walk: Footprints, eat: Apple, ride: Bike, coffee: Coffee };
 const ICON_LABEL = { sprout: 'Grow', book: 'Read', run: 'Move', water: 'Drink', mind: 'Think', write: 'Write', music: 'Play', sleep: 'Rest', walk: 'Walk', eat: 'Eat well', ride: 'Ride', coffee: 'Pause' };
 const COLOURS = [
-  { hue: 140, label: 'Green' },
-  { hue: 175, label: 'Teal' },
-  { hue: 210, label: 'Blue' },
-  { hue: 265, label: 'Violet' },
-  { hue: 330, label: 'Pink' },
-  { hue: 30, label: 'Orange' },
+  { hue: 140, label: tr('Green') },
+  { hue: 175, label: tr('Teal') },
+  { hue: 210, label: tr('Blue') },
+  { hue: 265, label: tr('Violet') },
+  { hue: 330, label: tr('Pink') },
+  { hue: 30, label: tr('Orange') },
 ];
 const SAVED_HUE = (habit) => COLOURS.find((c) => c.hue === habit?.hue)?.hue ?? COLOURS[0].hue;
 
@@ -29,7 +30,7 @@ function Plant({ stage, wilting, hue, className }) {
   const dark = `hsl(${hue} 60% 38%)`;
   const lean = wilting ? 14 : 0;
   return (
-    <svg viewBox="0 0 100 110" className={clsx('origin-bottom', className, !wilting && 'animate-[sway_5s_ease-in-out_infinite]')} role="img" aria-label={`A ${['seed', 'sprout', 'seedling', 'plant', 'plant in bloom', 'tree'][stage]}${wilting ? ', wilting' : ''}`} style={{ filter: wilting ? 'saturate(0.35)' : undefined }}>
+    <svg viewBox="0 0 100 110" className={clsx('origin-bottom', className, !wilting && 'animate-[sway_5s_ease-in-out_infinite]')} role="img" aria-label={tr('A {0}{1}', ['seed', 'sprout', 'seedling', 'plant', 'plant in bloom', 'tree'][stage], wilting ? tr(', wilting') : '')} style={{ filter: wilting ? 'saturate(0.35)' : undefined }}>
       <ellipse cx="50" cy="104" rx="26" ry="5" fill="rgb(0 0 0 / 0.35)" />
       <path d="M22 98 Q50 108 78 98 L72 86 Q50 92 28 86 Z" fill="#3a2a22" />
       <g transform={`rotate(${lean} 50 88)`}>
@@ -72,7 +73,7 @@ function Ring({ done, total }) {
   const share = total ? done / total : 0;
   const finished = total > 0 && done === total;
   return (
-    <div className="relative size-24 shrink-0" role="img" aria-label={`${done} of ${total} habits done today`}>
+    <div className="relative size-24 shrink-0" role="img" aria-label={tr('{0} of {1} habits done today', done, total)}>
       <svg viewBox="0 0 100 100" className="-rotate-90">
         <circle cx="50" cy="50" r={r} fill="none" stroke="var(--color-line)" strokeWidth="9" />
         <circle cx="50" cy="50" r={r} fill="none" stroke={finished ? 'var(--color-ok)' : 'var(--color-signal)'} strokeWidth="9" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - share)} className="transition-[stroke-dashoffset] duration-500" />
@@ -94,30 +95,30 @@ function Today({ items }) {
   const week = useMemo(() => gardenWeek(items), [items]);
   const best = Math.max(0, ...items.map((h) => streak(h.days)));
   return (
-    <section className="rounded-[1.75rem] border border-line bg-[radial-gradient(80%_120%_at_0%_0%,rgb(61_220_151/0.10),transparent_60%),var(--color-ink-1)] p-5 max-md:p-4" aria-label="Today" data-garden-today>
+    <section className="rounded-[1.75rem] border border-line bg-[radial-gradient(80%_120%_at_0%_0%,rgb(61_220_151/0.10),transparent_60%),var(--color-ink-1)] p-5 max-md:p-4" aria-label={tr('Today')} data-garden-today>
       <div className="flex items-center gap-4">
         <Ring done={done} total={items.length} />
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Today</p>
+          <p className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Today')}</p>
           <p className="mt-1 font-display text-lead leading-snug text-bone">{gardenLine(done, items.length)}</p>
           {items.length > 0 && (
             <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[0.8rem] text-bone-dim">
               <span className="inline-flex items-center gap-1">
-                <Flame size={13} className={best ? 'text-signal' : 'text-bone-faint'} aria-hidden="true" /> Best streak <b className="text-bone">{best}</b>
+                <Flame size={13} className={best ? 'text-signal' : 'text-bone-faint'} aria-hidden="true" /> {tr('Best streak')} <b className="text-bone">{best}</b>
               </span>
               <span>
-                Plants <b className="text-bone">{items.length}</b>
+                {tr('Plants')} <b className="text-bone">{items.length}</b>
               </span>
             </p>
           )}
         </div>
       </div>
       {items.length > 0 && (
-        <ol className="mt-4 grid grid-cols-7 gap-1.5 border-t border-line pt-4" aria-label="The last seven days">
+        <ol className="mt-4 grid grid-cols-7 gap-1.5 border-t border-line pt-4" aria-label={tr('The last seven days')}>
           {week.map((d) => {
             const share = d.total ? d.done / d.total : 0;
             return (
-              <li key={d.day} className="flex flex-col items-center gap-1.5" title={`${d.day}: ${d.done} of ${d.total}`}>
+              <li key={d.day} className="flex flex-col items-center gap-1.5" title={tr('{0}: {1} of {2}', d.day, d.done, d.total)}>
                 <span className="relative h-10 w-full max-w-9 overflow-hidden rounded-xl bg-wash/[0.06]">
                   <i className={clsx('absolute inset-x-0 bottom-0 block transition-[height] duration-500', share === 1 ? 'bg-ok' : 'bg-signal/80')} style={{ height: `${Math.round(share * 100)}%` }} />
                 </span>
@@ -134,7 +135,7 @@ function Today({ items }) {
 function Heat({ days, hue }) {
   const weeks = useMemo(() => heatmap(days, 20), [days]);
   return (
-    <div className="flex gap-[3px] overflow-hidden" role="img" aria-label="The last 20 weeks">
+    <div className="flex gap-[3px] overflow-hidden" role="img" aria-label={tr('The last 20 weeks')}>
       {weeks.map((week, i) => (
         <div key={i} className={clsx('flex flex-col gap-[3px]', i < weeks.length - 13 && 'max-md:hidden')}>
           {week.map((cell) => (
@@ -165,7 +166,7 @@ function HabitRow({ habit, mood, onEdit }) {
           type="button"
           role="checkbox"
           aria-checked={done}
-          aria-label={`${habit.name}: ${done ? 'done today' : 'mark done today'}`}
+          aria-label={`${habit.name}: ${done ? tr('done today') : tr('mark done today')}`}
           onClick={() => {
             navigator.vibrate?.(done ? 4 : 10);
             set(today);
@@ -176,7 +177,7 @@ function HabitRow({ habit, mood, onEdit }) {
           <Check size={22} strokeWidth={3} aria-hidden="true" />
         </button>
 
-        <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label={`${habit.name}: ${open ? 'hide' : 'show'} details`} className="flex min-w-0 flex-1 items-center gap-3 text-left">
+        <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label={tr('{0}: {1} details', habit.name, open ? tr('hide') : tr('show'))} className="flex min-w-0 flex-1 items-center gap-3 text-left">
           <span className="min-w-0 flex-1 leading-tight">
             <span className="flex items-center gap-2">
               <span className="grid size-6 shrink-0 place-items-center rounded-full" style={{ background: `hsl(${habit.hue} 60% 50% / 0.2)`, color: `hsl(${habit.hue} 85% 76%)` }}>
@@ -185,7 +186,7 @@ function HabitRow({ habit, mood, onEdit }) {
               <b className={clsx('truncate font-display text-lead', done ? 'text-bone-dim' : 'text-bone')}>{habit.name}</b>
             </span>
             <small className="mt-1 block truncate font-mono text-[0.7rem] text-bone-faint">
-              {wilting ? 'Needs water' : run ? `${run}-day streak` : 'Not started'}
+              {wilting ? tr('Needs water') : run ? tr('{0}-day streak', run) : tr('Not started')}
             </small>
           </span>
           <Plant stage={stage} wilting={wilting} hue={habit.hue} className="h-14 w-12 shrink-0" />
@@ -193,14 +194,14 @@ function HabitRow({ habit, mood, onEdit }) {
         </button>
       </div>
 
-      <div className="flex items-center justify-between gap-1 px-3.5 pb-3.5 max-md:px-3 max-md:pb-3" role="group" aria-label={`${habit.name}: the last seven days`}>
+      <div className="flex items-center justify-between gap-1 px-3.5 pb-3.5 max-md:px-3 max-md:pb-3" role="group" aria-label={tr('{0}: the last seven days', habit.name)}>
         {week.map((d) => (
           <button
             key={d.day}
             type="button"
             role="checkbox"
             aria-checked={d.done}
-            aria-label={`${habit.name} on ${d.day}${d.isToday ? ' (today)' : ''}`}
+            aria-label={tr('{0} on {1}{2}', habit.name, d.day, d.isToday ? tr(' (today)') : '')}
             onClick={() => set(d.day)}
             className="flex flex-1 flex-col items-center gap-1 py-1 active:scale-90"
           >
@@ -219,39 +220,39 @@ function HabitRow({ habit, mood, onEdit }) {
               <div className="mb-1.5 flex justify-between font-mono text-[0.68rem] text-bone-faint">
                 <span className="capitalize">{name}</span>
                 <span>
-                  {next.left} more {next.left === 1 ? 'day' : 'days'} to {next.name}
+                  {next.left} {tr('more')} {next.left === 1 ? tr('day') : tr('days')} {tr('to')} {next.name}
                 </span>
               </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-wash/10" role="progressbar" aria-label="Growth to the next stage" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(stageProgress(run) * 100)}>
+              <div className="h-1.5 overflow-hidden rounded-full bg-wash/10" role="progressbar" aria-label={tr('Growth to the next stage')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(stageProgress(run) * 100)}>
                 <i className="block h-full rounded-full transition-[width] duration-500" style={{ width: `${Math.round(stageProgress(run) * 100)}%`, background: tint }} />
               </div>
             </div>
           )}
           <Heat days={habit.days} hue={habit.hue} />
           <div className="flex flex-wrap gap-1.5">
-            <Badge>{rate(habit.days)}% of 30 days</Badge>
+            <Badge>{rate(habit.days)}{tr('% of 30 days')}</Badge>
             <Badge>
-              <Flame size={11} aria-hidden="true" /> best {longestStreak(habit.days)}
+              <Flame size={11} aria-hidden="true" /> {tr('best')} {longestStreak(habit.days)}
             </Badge>
-            <Badge>{habit.days.length} in all</Badge>
+            <Badge>{habit.days.length} {tr('in all')}</Badge>
             {lift !== null && (
               <Badge tone={lift >= 0 ? 'ok' : 'warn'}>
-                mood {lift >= 0 ? '+' : ''}
-                {lift} on these days
+                {tr('mood')} {lift >= 0 ? '+' : ''}
+                {lift} {tr('on these days')}
               </Badge>
             )}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="ghost" size="sm" onClick={() => onEdit(habit)}>
-              <Pencil size={14} aria-hidden="true" /> Edit
+              <Pencil size={14} aria-hidden="true" /> {tr('Edit')}
             </Button>
             {sure ? (
               <Button variant="danger" size="sm" onClick={() => habits.remove(habit.id)} onBlur={() => setSure(false)} autoFocus>
-                <Trash2 size={14} aria-hidden="true" /> Tap again to delete
+                <Trash2 size={14} aria-hidden="true" /> {tr('Tap again to delete')}
               </Button>
             ) : (
-              <Button variant="ghost" size="sm" aria-label={`Delete ${habit.name}`} onClick={() => setSure(true)}>
-                <Trash2 size={14} aria-hidden="true" /> Delete
+              <Button variant="ghost" size="sm" aria-label={tr('Delete {0}', habit.name)} onClick={() => setSure(true)}>
+                <Trash2 size={14} aria-hidden="true" /> {tr('Delete')}
               </Button>
             )}
           </div>
@@ -280,25 +281,25 @@ function HabitDialog({ habit, onClose, count }) {
     <Dialog
       open
       onOpenChange={(next) => !next && onClose()}
-      eyebrow={editing ? 'EDIT HABIT' : 'NEW HABIT'}
-      title={editing ? 'Change this habit' : 'Plant a habit'}
-      description="Choose a name, an icon and a colour for the plant."
+      eyebrow={editing ? tr('EDIT HABIT') : tr('NEW HABIT')}
+      title={editing ? tr('Change this habit') : tr('Plant a habit')}
+      description={tr('Choose a name, an icon and a colour for the plant.')}
     >
       <form onSubmit={save} className="flex flex-col gap-5" data-habit-form>
-        <Input aria-label="Habit name" placeholder="e.g. Read 20 minutes" value={name} onChange={(e) => setName(e.target.value)} maxLength={40} autoFocus />
+        <Input aria-label={tr('Habit name')} placeholder={tr('e.g. Read 20 minutes')} value={name} onChange={(e) => setName(e.target.value)} maxLength={40} autoFocus />
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Icon</legend>
-          <div className="grid grid-cols-6 gap-1.5" role="radiogroup" aria-label="Icon">
+          <legend className="mb-1 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Icon')}</legend>
+          <div className="grid grid-cols-6 gap-1.5" role="radiogroup" aria-label={tr('Icon')}>
             {HABIT_ICONS.map((id) => (
-              <button key={id} type="button" role="radio" aria-checked={icon === id} aria-label={`Icon: ${ICON_LABEL[id]}`} title={ICON_LABEL[id]} onClick={() => setIcon(id)} className={clsx('grid aspect-square place-items-center rounded-2xl transition-all active:scale-90', icon === id ? 'bg-signal text-ink-0' : 'bg-wash/[0.05] text-bone-dim hover:bg-wash/10 hover:text-bone')}>
+              <button key={id} type="button" role="radio" aria-checked={icon === id} aria-label={tr('Icon: {0}', ICON_LABEL[id])} title={ICON_LABEL[id]} onClick={() => setIcon(id)} className={clsx('grid aspect-square place-items-center rounded-2xl transition-all active:scale-90', icon === id ? 'bg-signal text-ink-0' : 'bg-wash/[0.05] text-bone-dim hover:bg-wash/10 hover:text-bone')}>
                 <HabitIcon id={id} size={18} />
               </button>
             ))}
           </div>
         </fieldset>
         <fieldset className="flex flex-col gap-2">
-          <legend className="mb-1 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Colour</legend>
-          <div className="flex gap-2.5" role="radiogroup" aria-label="Colour">
+          <legend className="mb-1 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Colour')}</legend>
+          <div className="flex gap-2.5" role="radiogroup" aria-label={tr('Colour')}>
             {COLOURS.map((c) => (
               <button key={c.hue} type="button" role="radio" aria-checked={hue === c.hue} aria-label={c.label} title={c.label} onClick={() => setHue(c.hue)} className={clsx('grid size-9 place-items-center rounded-full ring-offset-2 ring-offset-ink-1 transition-all active:scale-90', hue === c.hue && 'ring-2 ring-bone')} style={{ background: `hsl(${c.hue} 70% 55%)` }}>
                 {hue === c.hue && <Check size={15} strokeWidth={3} className="text-ink-0" aria-hidden="true" />}
@@ -309,11 +310,11 @@ function HabitDialog({ habit, onClose, count }) {
         <Button type="submit" disabled={!name.trim()} className="w-full justify-center">
           {editing ? (
             <>
-              <Check size={15} aria-hidden="true" /> Save
+              <Check size={15} aria-hidden="true" /> {tr('Save')}
             </>
           ) : (
             <>
-              <Sprout size={15} aria-hidden="true" /> Plant it
+              <Sprout size={15} aria-hidden="true" /> {tr('Plant it')}
             </>
           )}
         </Button>
@@ -326,7 +327,7 @@ export default function HabitsView() {
   const { loaded, items } = useStore(habits.store);
   const { notes } = useStore(notesStore);
   const [editing, setEditing] = useState(null); // null: closed, {}: a new habit, or the habit being changed
-  useFab({ label: 'Plant a habit', icon: Plus, onPress: () => setEditing({}) });
+  useFab({ label: tr('Plant a habit'), icon: Plus, onPress: () => setEditing({}) });
 
   useEffect(() => {
     void habits.load();
@@ -338,30 +339,30 @@ export default function HabitsView() {
 
   return (
     <div className="flex flex-col gap-4 md:gap-6">
-      <PageHead eyebrow="Life" title="Habit" accent="Garden." description="Every habit is a plant. Water it on the days you do it and it grows; leave it too long and it droops.">
+      <PageHead eyebrow={tr('Life')} title={tr('Habit')} accent="Garden." description={tr('Every habit is a plant. Water it on the days you do it and it grows; leave it too long and it droops.')}>
         {items.some((h) => h.sample) && (
           <Button variant="ghost" size="sm" onClick={() => Promise.all(items.filter((h) => h.sample).map((h) => habits.remove(h.id)))}>
-            Remove samples
+            {tr('Remove samples')}
           </Button>
         )}
         <Button size="sm" onClick={() => setEditing({})} className="max-md:hidden">
-          <Plus size={15} aria-hidden="true" /> Plant a habit
+          <Plus size={15} aria-hidden="true" /> {tr('Plant a habit')}
         </Button>
       </PageHead>
 
       {loaded && items.length === 0 ? (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
           <div className="min-w-[min(100%,15rem)] flex-1">
-            <h2 className="font-display text-lead text-bone">The garden is empty</h2>
-            <p className="text-fine text-bone-dim">Plant your first habit.</p>
+            <h2 className="font-display text-lead text-bone">{tr('The garden is empty')}</h2>
+            <p className="text-fine text-bone-dim">{tr('Plant your first habit.')}</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button size="sm" onClick={() => setEditing({})}>
-              <Plus size={14} aria-hidden="true" /> Plant a habit
+              <Plus size={14} aria-hidden="true" /> {tr('Plant a habit')}
             </Button>
             {isDemo() && (
               <Button variant="ghost" size="sm" onClick={() => habits.putMany(sampleHabits())}>
-                <Sparkles size={14} aria-hidden="true" /> Try a sample garden
+                <Sparkles size={14} aria-hidden="true" /> {tr('Try a sample garden')}
               </Button>
             )}
           </div>
@@ -369,7 +370,7 @@ export default function HabitsView() {
       ) : (
         <>
           <Today items={items} />
-          <ul className="grid grid-cols-1 gap-3 xl:grid-cols-2" aria-label="Habits">
+          <ul className="grid grid-cols-1 gap-3 xl:grid-cols-2" aria-label={tr('Habits')}>
             {ordered.map((h) => (
               <HabitRow key={h.id} habit={h} mood={mood} onEdit={setEditing} />
             ))}
@@ -377,7 +378,7 @@ export default function HabitsView() {
         </>
       )}
 
-      <p className="px-1 text-[0.8rem] leading-relaxed text-bone-faint">Plants grow at 1, 3, 7, 14 and 30 days in a row. Tap any of the last seven days to fill one in or take it out. Mood comes from your journal: once a habit has a few days with and without it, you will see what it does for you.</p>
+      <p className="px-1 text-[0.8rem] leading-relaxed text-bone-faint">{tr('Plants grow at 1, 3, 7, 14 and 30 days in a row. Tap any of the last seven days to fill one in or take it out. Mood comes from your journal: once a habit has a few days with and without it, you will see what it does for you.')}</p>
 
       {editing && <HabitDialog key={editing.id ?? 'new'} habit={editing} count={items.length} onClose={() => setEditing(null)} />}
     </div>

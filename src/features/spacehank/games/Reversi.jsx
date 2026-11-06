@@ -3,6 +3,7 @@ import { RotateCcw } from 'lucide-react';
 import { R_SIZE, countDiscs, legalMoves, newReversi, playReversi, reversiMove, whoNext } from './boards';
 import { INK, InkButton, Note, RED, Score } from './ink';
 import { useBest } from './shared';
+import { tr } from '../lang';
 
 const CELL = 36;
 
@@ -27,7 +28,7 @@ export default function Reversi() {
       setBoard(next);
       setLast(move);
       const after = whoNext(next, 2);
-      setPassed(after === 2 ? 'Bạn hết nước đi, máy đi tiếp.' : '');
+      setPassed(after === 2 ? tr('Bạn hết nước đi, máy đi tiếp.') : '');
       setTurn(after);
     }, 650);
     return () => window.clearTimeout(timer);
@@ -45,7 +46,7 @@ export default function Reversi() {
     setBoard(next);
     setLast(i);
     const after = whoNext(next, 1);
-    setPassed(after === 1 ? 'Máy hết nước đi, bạn đi tiếp.' : '');
+    setPassed(after === 1 ? tr('Máy hết nước đi, bạn đi tiếp.') : '');
     setTurn(after);
   };
   const again = () => {
@@ -64,11 +65,11 @@ export default function Reversi() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="bạn (xanh)" value={count[1]} />
-        <Score label="máy (đỏ)" value={count[2]} tone={RED} />
-        <Score label="hơn nhiều nhất" value={best ?? '-'} />
+        <Score label={tr('bạn (xanh)')} value={count[1]} />
+        <Score label={tr('máy (đỏ)')} value={count[2]} tone={RED} />
+        <Score label={tr('hơn nhiều nhất')} value={best ?? '-'} />
       </div>
-      <svg viewBox={`-4 -4 ${side + 8} ${side + 8}`} className="block w-full touch-manipulation rounded-sm bg-[#fdfaf0]" role="grid" aria-label="Reversi board">
+      <svg viewBox={`-4 -4 ${side + 8} ${side + 8}`} className="block w-full touch-manipulation rounded-sm bg-[#fdfaf0]" role="grid" aria-label={tr('Reversi board')}>
         <g stroke={INK} strokeWidth="1" opacity="0.35">
           {Array.from({ length: R_SIZE + 1 }, (_, k) => (
             <path key={k} d={`M${k * CELL} 0V${side}M0 ${k * CELL}H${side}`} />
@@ -88,21 +89,21 @@ export default function Reversi() {
         })}
         {board.map((who, i) =>
           who || !playable.has(i) ? null : (
-            <rect key={i} x={(i % R_SIZE) * CELL} y={Math.floor(i / R_SIZE) * CELL} width={CELL} height={CELL} fill="transparent" className="cursor-pointer" role="gridcell" aria-label={`Row ${Math.floor(i / R_SIZE) + 1}, column ${(i % R_SIZE) + 1}`} tabIndex={0} onClick={() => play(i)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && play(i)} />
+            <rect key={i} x={(i % R_SIZE) * CELL} y={Math.floor(i / R_SIZE) * CELL} width={CELL} height={CELL} fill="transparent" className="cursor-pointer" role="gridcell" aria-label={tr('Row {0}, column {1}', Math.floor(i / R_SIZE) + 1, (i % R_SIZE) + 1)} tabIndex={0} onClick={() => play(i)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && play(i)} />
           )
         )}
       </svg>
       <p className="min-h-7 text-center font-pen text-[1.4rem] leading-none font-semibold" style={{ color: INK }} role="status">
-        {turn === 2 ? 'Máy đang nghĩ…' : turn === 1 ? passed || 'Đến lượt bạn: chạm chấm nhỏ' : ''}
+        {turn === 2 ? tr('Máy đang nghĩ…') : turn === 1 ? passed || tr('Đến lượt bạn: chạm chấm nhỏ') : ''}
       </p>
       <div className="flex">
         <InkButton className="ml-auto" tone={RED} onClick={again}>
-          <RotateCcw size={15} aria-hidden="true" /> Ván mới
+          <RotateCcw size={15} aria-hidden="true" /> {tr('Ván mới')}
         </InkButton>
       </div>
       {turn === 0 && (
-        <Note title={won === 1 ? 'Bạn thắng!' : won === 2 ? 'Máy thắng…' : 'Hòa nhau'} detail={`${count[1]} quân xanh, ${count[2]} quân đỏ${record ? ' · kỷ lục mới!' : ''}`}>
-          <InkButton onClick={again}>Chơi lại</InkButton>
+        <Note title={won === 1 ? tr('Bạn thắng!') : won === 2 ? tr('Máy thắng…') : tr('Hòa nhau')} detail={tr('{0} quân xanh, {1} quân đỏ{2}', count[1], count[2], record ? tr(' · kỷ lục mới!') : '')}>
+          <InkButton onClick={again}>{tr('Chơi lại')}</InkButton>
         </Note>
       )}
     </div>

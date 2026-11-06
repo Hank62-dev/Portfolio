@@ -2,6 +2,7 @@ import * as RadixDialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import { Eyebrow } from './Card';
 import { useSheetDrag } from './useSheetDrag';
+import { word } from './words';
 
 /**
  * A modal dialog. Focus is trapped and returned, Escape closes it, and the title/description are
@@ -23,7 +24,7 @@ export const Dialog = ({ open, onOpenChange, eyebrow, title, description, childr
               <RadixDialog.Description className="mt-1 text-bone-dim">{description}</RadixDialog.Description>
             </div>
             <RadixDialog.Close
-              aria-label="Close"
+              aria-label={word('Close')}
               className="grid size-9 shrink-0 place-items-center rounded-sm text-bone-dim transition-colors hover:text-bone"
             >
               <X size={18} aria-hidden="true" />

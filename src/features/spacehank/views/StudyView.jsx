@@ -10,11 +10,12 @@ import Overview from '../study/overview/Overview';
 import { clock } from '../study/model';
 import { courses, flashcards } from '../study/store';
 import { useStore } from '../store';
+import { tr } from '../lang';
 
 const TABS = [
-  { id: 'overview', label: 'Overview', icon: CalendarClock },
-  { id: 'cards', label: 'Flashcards', icon: Layers },
-  { id: 'focus', label: 'Focus', icon: Timer },
+  { id: 'overview', label: tr('Overview'), icon: CalendarClock },
+  { id: 'cards', label: tr('Flashcards'), icon: Layers },
+  { id: 'focus', label: tr('Focus'), icon: Timer },
 ];
 
 function Focus({ onFocusMusic }) {
@@ -27,8 +28,8 @@ function Focus({ onFocusMusic }) {
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
       <section className="flex flex-col items-center gap-6 rounded-3xl border border-line bg-[radial-gradient(70%_100%_at_50%_0%,rgb(255_91_46/0.14),transparent_60%),var(--color-ink-1)] p-8">
-        <Segmented value={mode} onChange={setMode} options={MODES.map((m) => ({ id: m.id, label: m.label }))} label="Timer mode" />
-        <div className="relative size-60" role="timer" aria-live="off" aria-label={`${clock(left)} left`}>
+        <Segmented value={mode} onChange={setMode} options={MODES.map((m) => ({ id: m.id, label: m.label }))} label={tr('Timer mode')} />
+        <div className="relative size-60" role="timer" aria-live="off" aria-label={tr('{0} left', clock(left))}>
           <svg viewBox="0 0 220 220" className="-rotate-90">
             <circle cx="110" cy="110" r={r} fill="none" stroke="var(--color-line)" strokeWidth="10" />
             <circle cx="110" cy="110" r={r} fill="none" stroke="url(#pomo)" strokeWidth="10" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - left / total)} className="transition-[stroke-dashoffset] duration-300" />
@@ -47,30 +48,30 @@ function Focus({ onFocusMusic }) {
         </div>
         {ringing ? (
           <Button onClick={dismiss}>
-            <BellOff size={16} aria-hidden="true" /> Stop the alarm
+            <BellOff size={16} aria-hidden="true" /> {tr('Stop the alarm')}
           </Button>
         ) : (
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" aria-label="Reset the timer" onClick={reset}>
+            <Button variant="ghost" size="icon" aria-label={tr('Reset the timer')} onClick={reset}>
               <RotateCcw size={15} aria-hidden="true" />
             </Button>
-            <button type="button" onClick={running ? pause : start} aria-label={running ? 'Pause the timer' : 'Start the timer'} className="grid size-16 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-[0_10px_30px_-8px_rgb(255_91_46/0.8)] transition-transform hover:scale-105 active:scale-95">
+            <button type="button" onClick={running ? pause : start} aria-label={running ? tr('Pause the timer') : tr('Start the timer')} className="grid size-16 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-[0_10px_30px_-8px_rgb(255_91_46/0.8)] transition-transform hover:scale-105 active:scale-95">
               {running ? <Pause size={24} fill="currentColor" aria-hidden="true" /> : <Play size={24} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
             </button>
             <Button variant="ghost" size="sm" onClick={onFocusMusic}>
-              <Sparkles size={14} aria-hidden="true" /> Focus music
+              <Sparkles size={14} aria-hidden="true" /> {tr('Focus music')}
             </Button>
           </div>
         )}
       </section>
       <div className="flex flex-col gap-3">
-        <Figure value={sessions} label="Focus sessions today" tone="text-signal" />
+        <Figure value={sessions} label={tr('Focus sessions today')} tone="text-signal" />
         <FocusStats />
-        <Tile title="How it works">
+        <Tile title={tr('How it works')}>
           <ol className="flex list-decimal flex-col gap-1.5 pl-5 text-fine text-bone-dim">
-            <li>Focus for 25 minutes on one thing.</li>
-            <li>Take a 5 minute break. After four sessions, a longer one.</li>
-            <li>The timer floats above every screen while it runs, shows on your lock screen, and rings when the time is up.</li>
+            <li>{tr('Focus for 25 minutes on one thing.')}</li>
+            <li>{tr('Take a 5 minute break. After four sessions, a longer one.')}</li>
+            <li>{tr('The timer floats above every screen while it runs, shows on your lock screen, and rings when the time is up.')}</li>
           </ol>
         </Tile>
       </div>
@@ -92,13 +93,13 @@ export default function StudyView({ onFocusMusic }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead keepOnPhone eyebrow="Learn" title="Study" accent="Hub." description="Courses and deadlines, flashcards that come back just before you forget, and a focus timer.">
+      <PageHead keepOnPhone eyebrow={tr('Learn')} title={tr('Study')} accent="Hub." description={tr('Courses and deadlines, flashcards that come back just before you forget, and a focus timer.')}>
         {hasSample && (
           <Button variant="ghost" size="sm" className="max-md:hidden" onClick={async () => { await Promise.all(courseList.filter((c) => c.sample).map((c) => courses.remove(c.id))); await Promise.all(cardList.filter((c) => c.sample).map((c) => flashcards.remove(c.id))); }}>
-            Remove samples
+            {tr('Remove samples')}
           </Button>
         )}
-        <Segmented value={tab} onChange={setTab} options={TABS} label="Study" />
+        <Segmented value={tab} onChange={setTab} options={TABS} label={tr('Study')} />
       </PageHead>
 
       {tab === 'overview' && <Overview list={courseList} cardList={cardList} onTab={setTab} />}

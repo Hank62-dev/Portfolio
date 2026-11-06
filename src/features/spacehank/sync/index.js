@@ -6,6 +6,7 @@ import { createStore } from '../store';
 import { outboxOver, tablesOver } from './adapters';
 import { createEngine } from './engine';
 import { SYNCED_EVENT } from './events';
+import { tr } from '../lang';
 
 // Keeps the owner's personal data in step across devices (see ./engine.js). This file is the browser half: IndexedDB, fetch,
 // localStorage, and when to sync (after a change, when the app comes back, when the network returns, every few minutes, and
@@ -27,13 +28,13 @@ const send = async (path, init = {}) => {
     response = await go();
     if (response.status === 401 && (await refreshSession())) response = await go();
   } catch {
-    throw offline('No connection to the server.');
+    throw offline(tr('No connection to the server.'));
   }
   // a free server that is still waking up answers 502 or 503 from the proxy, not JSON
-  if ([502, 504].includes(response.status)) throw offline('The server is waking up.');
+  if ([502, 504].includes(response.status)) throw offline(tr('The server is waking up.'));
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw Object.assign(new Error(data.error || `Sync failed (${response.status})`), { status: response.status });
+    throw Object.assign(new Error(data.error || tr('Sync failed ({0})', response.status)), { status: response.status });
   }
   return response;
 };

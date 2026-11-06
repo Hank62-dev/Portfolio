@@ -1,3 +1,4 @@
+import { tr } from '../../lang';
 // Flashcards as plain functions: what state a card is in, how a deck is doing, what is coming, and blanks (cloze).
 
 const DAY = 86400000;
@@ -97,7 +98,7 @@ export const duration = (ms) => {
   const seconds = Math.max(0, Math.round(ms / 1000));
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.round(seconds / 60);
-  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 60) return tr('{0} min', minutes);
   return `${Math.floor(minutes / 60)} h ${String(minutes % 60).padStart(2, '0')}`;
 };
 
@@ -105,12 +106,12 @@ export const duration = (ms) => {
 export const dueIn = (due, now = Date.now()) => {
   if (due <= now) return 'now';
   const minutes = Math.round((due - now) / 60000);
-  if (minutes < 60) return `in ${minutes} min`;
+  if (minutes < 60) return tr('in {0} min', minutes);
   const hours = Math.round(minutes / 60);
-  if (hours < 24) return `in ${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  if (hours < 24) return tr('in {0} {1}', hours, hours === 1 ? tr('hour') : tr('hours'));
   const days = Math.round((dayStart(due) - dayStart(now)) / DAY);
   if (days <= 1) return 'tomorrow';
-  if (days < 14) return `in ${days} days`;
-  if (days < 60) return `in ${Math.round(days / 7)} weeks`;
-  return `in ${Math.round(days / 30)} months`;
+  if (days < 14) return tr('in {0} days', days);
+  if (days < 60) return tr('in {0} weeks', Math.round(days / 7));
+  return tr('in {0} months', Math.round(days / 30));
 };

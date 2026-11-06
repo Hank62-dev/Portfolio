@@ -5,6 +5,7 @@ import { generateCards } from '../../api/owner';
 import { titleOf } from '../../notes/notes';
 import { newFlashcard } from '../model';
 import { flashcards } from '../store';
+import { tr } from '../../lang';
 
 /** Cards written by the AI from a note or pasted text. They are listed first, and only the ticked ones are kept. */
 export default function MakeCards({ notes, deck, onClose, onAdded }) {
@@ -34,19 +35,19 @@ export default function MakeCards({ notes, deck, onClose, onAdded }) {
   };
 
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow="FROM YOUR TEXT" title="Make cards" description="Pick a note or paste what you are studying, and the AI drafts cards. You look them over before any are kept.">
+    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={tr('FROM YOUR TEXT')} title={tr('Make cards')} description={tr('Pick a note or paste what you are studying, and the AI drafts cards. You look them over before any are kept.')}>
       {made ? (
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between gap-2">
-            <Badge tone="signal">{made.length} drafted</Badge>
+            <Badge tone="signal">{made.length} {tr('drafted')}</Badge>
             <Button size="sm" onClick={keep} disabled={!made.some((c) => c.keep)}>
-              Add the ticked ones
+              {tr('Add the ticked ones')}
             </Button>
           </div>
           <ul className="flex flex-col gap-2" data-made>
             {made.map((c, i) => (
               <li key={i} className="flex items-start gap-3 rounded-2xl border border-line bg-ink-2 p-3">
-                <input type="checkbox" aria-label={`Keep: ${c.front}`} checked={c.keep} onChange={() => setMade(made.map((x, j) => (j === i ? { ...x, keep: !x.keep } : x)))} className="mt-1 size-4 accent-[var(--color-signal)]" />
+                <input type="checkbox" aria-label={tr('Keep: {0}', c.front)} checked={c.keep} onChange={() => setMade(made.map((x, j) => (j === i ? { ...x, keep: !x.keep } : x)))} className="mt-1 size-4 accent-[var(--color-signal)]" />
                 <span className="leading-snug">
                   <b className="block text-fine font-medium text-bone">{c.front}</b>
                   <small className="text-fine text-bone-dim">{c.back}</small>
@@ -55,13 +56,13 @@ export default function MakeCards({ notes, deck, onClose, onAdded }) {
             ))}
           </ul>
           <Button variant="ghost" size="sm" onClick={() => setMade(null)} className="self-start">
-            Back to the text
+            {tr('Back to the text')}
           </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           <Select
-            aria-label="Use a note"
+            aria-label={tr('Use a note')}
             value=""
             onChange={(e) => {
               const note = notes.find((x) => x.id === e.target.value);
@@ -69,16 +70,16 @@ export default function MakeCards({ notes, deck, onClose, onAdded }) {
             }}
             compact
           >
-            <option value="">Use a note…</option>
+            <option value="">{tr('Use a note…')}</option>
             {notes.map((n) => (
               <option key={n.id} value={n.id}>
                 {titleOf(n.text)}
               </option>
             ))}
           </Select>
-          <Textarea aria-label="Text to learn from" rows={6} placeholder="…or paste what you are studying" value={source} onChange={(e) => setSource(e.target.value)} />
+          <Textarea aria-label={tr('Text to learn from')} rows={6} placeholder={tr('…or paste what you are studying')} value={source} onChange={(e) => setSource(e.target.value)} />
           <Button loading={busy} disabled={source.trim().length < 40} onClick={generate} className="w-full justify-center">
-            <Sparkles size={15} aria-hidden="true" /> Make cards
+            <Sparkles size={15} aria-hidden="true" /> {tr('Make cards')}
           </Button>
           {problem && (
             <p className="font-mono text-fine text-danger" role="alert">

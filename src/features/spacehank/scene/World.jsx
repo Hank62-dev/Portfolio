@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, RoundedBox } from '@react-three/drei';
@@ -15,7 +16,7 @@ export default function World({ agents, selected, onSelect, paused }) {
     {lost && (
       <div className="absolute inset-0 z-10 grid place-items-center bg-ink-0/90 p-6 text-center" role="alert">
         <div className="flex max-w-xs flex-col items-center gap-3">
-          <p className="text-fine text-bone-dim">The phone stopped the 3D view to free memory.</p>
+          <p className="text-fine text-bone-dim">{tr('The phone stopped the 3D view to free memory.')}</p>
           <button
             type="button"
             className="rounded-full bg-bone px-5 py-2.5 font-mono text-fine font-medium text-ink-0"
@@ -24,7 +25,7 @@ export default function World({ agents, selected, onSelect, paused }) {
               setAttempt((n) => n + 1);
             }}
           >
-            Load the floor again
+            {tr('Load the floor again')}
           </button>
         </div>
       </div>
@@ -61,7 +62,7 @@ export default function World({ agents, selected, onSelect, paused }) {
           <meshStandardMaterial color="#3a3229" emissive="#ff5b2e" emissiveIntensity={0.15} />
         </RoundedBox>
         <Label position={[-1, 0.3, 14.6]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.18} color="#ece6da">
-          AGENT SYNC / MEETING ROOM
+          {tr('AGENT SYNC / MEETING ROOM')}
         </Label>
         {agents.map((agent) => (
           <Character key={agent.id} agent={agent} selected={selected === agent.id} onSelect={onSelect} paused={paused} />

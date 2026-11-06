@@ -3,6 +3,7 @@ import { ArrowDown, ArrowLeft, ArrowRight, ChevronsDown, Pause, Play, RotateCcw,
 import { T_COLS, T_ROWS, cellsOf, fall, hardDrop, landing, newTetris, shift, speedOf, spawn, turn, upNext } from './tetris';
 import { INK, InkBox, InkButton, Note, RED, Score } from './ink';
 import { useBest } from './shared';
+import { tr } from '../lang';
 
 const CELL = 24;
 // each kind of block gets its own pen colour
@@ -67,13 +68,13 @@ export default function FallingBlocks() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="điểm" value={game.score} tone={RED} />
-        <Score label="dòng" value={game.lines} />
-        <Score label="màn" value={game.level} />
-        <Score label="kỷ lục" value={best ?? '-'} />
+        <Score label={tr('điểm')} value={game.score} tone={RED} />
+        <Score label={tr('dòng')} value={game.lines} />
+        <Score label={tr('màn')} value={game.level} />
+        <Score label={tr('kỷ lục')} value={best ?? '-'} />
       </div>
       <div className="flex items-start gap-3">
-        <svg viewBox={`-3 -3 ${T_COLS * CELL + 6} ${T_ROWS * CELL + 6}`} className="block min-w-0 flex-1 touch-none rounded-sm bg-[#fdfaf0]" role="img" aria-label={`Falling blocks, score ${game.score}`}>
+        <svg viewBox={`-3 -3 ${T_COLS * CELL + 6} ${T_ROWS * CELL + 6}`} className="block min-w-0 flex-1 touch-none rounded-sm bg-[#fdfaf0]" role="img" aria-label={tr('Falling blocks, score {0}', game.score)}>
           <g stroke={INK} strokeWidth="1" opacity="0.18">
             {Array.from({ length: T_COLS + 1 }, (_, k) => (
               <path key={`v${k}`} d={`M${k * CELL} 0V${T_ROWS * CELL}`} />
@@ -90,30 +91,30 @@ export default function FallingBlocks() {
         </svg>
         <div className="flex w-[5.2rem] shrink-0 flex-col gap-3">
           <InkBox className="p-2 text-center" fill="#fdfaf0">
-            <small className="font-hand text-[0.78rem] text-[#20296a]/70">tiếp theo</small>
+            <small className="font-hand text-[0.78rem] text-[#20296a]/70">{tr('tiếp theo')}</small>
             <svg viewBox="0 0 96 72" className="mt-1 block w-full" aria-hidden="true">
               <g filter="url(#pen)" transform={`translate(${48 - (next.shape[0].length * 18) / 2} ${36 - (next.shape.filter((row) => row.some(Boolean)).length * 18) / 2 - next.shape.findIndex((row) => row.some(Boolean)) * 18})`}>
                 {next.shape.flatMap((row, r) => row.map((on, c) => (on ? <rect key={`${r}${c}`} x={c * 18 + 1.5} y={r * 18 + 1.5} width="15" height="15" rx="3" fill={`${PEN[next.kind]}33`} stroke={PEN[next.kind]} strokeWidth="2" /> : null)))}
               </g>
             </svg>
           </InkBox>
-          <InkButton onClick={() => setRunning((r) => !r)} disabled={game.over} aria-label={running ? 'Pause' : 'Play'} className="w-full">
+          <InkButton onClick={() => setRunning((r) => !r)} disabled={game.over} aria-label={running ? tr('Pause') : tr('Play')} className="w-full">
             {running ? <Pause size={17} aria-hidden="true" /> : <Play size={17} aria-hidden="true" />}
           </InkButton>
         </div>
       </div>
       <div className="grid grid-cols-5 gap-1.5">
-        <Hold onTick={left} label="Left" icon={ArrowLeft} />
-        <Hold onTick={rotate} label="Rotate" icon={RotateCw} once />
-        <Hold onTick={right} label="Right" icon={ArrowRight} />
-        <Hold onTick={down} label="Down" icon={ArrowDown} />
-        <Hold onTick={drop} label="Drop" icon={ChevronsDown} once />
+        <Hold onTick={left} label={tr('Left')} icon={ArrowLeft} />
+        <Hold onTick={rotate} label={tr('Rotate')} icon={RotateCw} once />
+        <Hold onTick={right} label={tr('Right')} icon={ArrowRight} />
+        <Hold onTick={down} label={tr('Down')} icon={ArrowDown} />
+        <Hold onTick={drop} label={tr('Drop')} icon={ChevronsDown} once />
       </div>
-      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">Giữ nút ◀ ▶ ▼ để lặp. Bàn phím: mũi tên, cách để thả nhanh, P để tạm dừng.</p>
+      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">{tr('Giữ nút ◀ ▶ ▼ để lặp. Bàn phím: mũi tên, cách để thả nhanh, P để tạm dừng.')}</p>
       {game.over && (
-        <Note title="Đầy bảng rồi!" detail={`${game.score} điểm, ${game.lines} dòng.`}>
+        <Note title={tr('Đầy bảng rồi!')} detail={tr('{0} điểm, {1} dòng.', game.score, game.lines)}>
           <InkButton onClick={again}>
-            <RotateCcw size={15} aria-hidden="true" /> Chơi lại
+            <RotateCcw size={15} aria-hidden="true" /> {tr('Chơi lại')}
           </InkButton>
         </Note>
       )}

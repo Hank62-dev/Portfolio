@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { pushToast } from '../../../design-system';
 import { isDemo } from '../demo/mode';
 import { createStore } from '../store';
@@ -85,7 +86,7 @@ export const notify = ({ key, kind = 'system', title, body = '', tab, tone = 'in
 
 /** A notification that proves the whole path works: it lands in the list, shows as a toast, and goes to the phone's own screen too. */
 export const sendTest = () => {
-  const item = notify({ kind: 'system', title: 'This is a test', body: 'Notifications are working.', tone: 'success' });
+  const item = notify({ kind: 'system', title: tr('This is a test'), body: tr('Notifications are working.'), tone: 'success' });
   if (item && document.visibilityState === 'visible') void showSystem(item);
   return item;
 };
@@ -118,9 +119,9 @@ const startOfDay = (time) => {
 export const groupByDay = (items, now = Date.now()) => {
   const today = startOfDay(now);
   const sections = [
-    { label: 'Today', items: [] },
-    { label: 'Yesterday', items: [] },
-    { label: 'Earlier', items: [] },
+    { label: tr('Today'), items: [] },
+    { label: tr('Yesterday'), items: [] },
+    { label: tr('Earlier'), items: [] },
   ];
   for (const item of items) {
     const day = startOfDay(item.at);
@@ -132,9 +133,9 @@ export const groupByDay = (items, now = Date.now()) => {
 /** "Just now", "5 min ago", "3 h ago", "2 d ago". Pure. */
 export const ago = (at, now = Date.now()) => {
   const minutes = Math.floor((now - at) / 60000);
-  if (minutes < 1) return 'Just now';
-  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 1) return tr('Just now');
+  if (minutes < 60) return tr('{0} min ago', minutes);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} h ago`;
-  return `${Math.floor(hours / 24)} d ago`;
+  if (hours < 24) return tr('{0} h ago', hours);
+  return tr('{0} d ago', Math.floor(hours / 24));
 };

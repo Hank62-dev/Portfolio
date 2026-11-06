@@ -3,11 +3,12 @@ import MoodFace from './MoodFace';
 import { bodyOf, dayLabel, moodWord } from './model';
 import { PaperSheet, SheetClose, SoftButton, Thumb } from './ui';
 import { usePhoto } from './photos';
+import { tr } from '../lang';
 
 /** A big picture inside a page being read. */
 function Photo({ id }) {
   const url = usePhoto(id);
-  return <div className="overflow-hidden rounded-3xl bg-[color:var(--dz-photo)]">{url && <img src={url} alt="Ảnh kỷ niệm" className="max-h-80 w-full object-cover" />}</div>;
+  return <div className="overflow-hidden rounded-3xl bg-[color:var(--dz-photo)]">{url && <img src={url} alt={tr('Ảnh kỷ niệm')} className="max-h-80 w-full object-cover" />}</div>;
 }
 
 /** Reading one day's page again. `label` is a line above the date ("Một tuần trước"), for pages brought back as memories. */
@@ -15,7 +16,7 @@ export default function EntrySheet({ entry, label, onClose, onEdit }) {
   const body = bodyOf(entry.text);
   const photos = entry.photos ?? [];
   return (
-    <PaperSheet open onClose={onClose} title={`Nhật ký ${dayLabel(entry.day)}`} description="Đọc lại trang nhật ký.">
+    <PaperSheet open onClose={onClose} title={tr('Nhật ký {0}', dayLabel(entry.day))} description={tr('Đọc lại trang nhật ký.')}>
       <article className="flex flex-col gap-4 px-5 pt-2 pb-5" data-entry>
         <header className="flex items-start justify-between gap-3">
           <div>
@@ -37,10 +38,10 @@ export default function EntrySheet({ entry, label, onClose, onEdit }) {
             ))}
           </div>
         )}
-        {body ? <p className="font-display text-[1.3rem] leading-relaxed whitespace-pre-wrap text-[color:var(--dz-text)]">{body}</p> : <p className="font-body text-[0.98rem] text-[color:var(--dz-text-3)]">Trang này chưa có chữ nào, chỉ có một dấu chân.</p>}
+        {body ? <p className="font-display text-[1.3rem] leading-relaxed whitespace-pre-wrap text-[color:var(--dz-text)]">{body}</p> : <p className="font-body text-[0.98rem] text-[color:var(--dz-text-3)]">{tr('Trang này chưa có chữ nào, chỉ có một dấu chân.')}</p>}
         <footer className="flex gap-2 pt-1">
           <SoftButton tone="soft" className="flex-1" onClick={onEdit}>
-            <PenLine size={16} aria-hidden="true" /> Sửa trang này
+            <PenLine size={16} aria-hidden="true" /> {tr('Sửa trang này')}
           </SoftButton>
         </footer>
       </article>

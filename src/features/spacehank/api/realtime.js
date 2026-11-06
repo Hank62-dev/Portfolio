@@ -1,4 +1,5 @@
 import { spacehankConfig } from '../config';
+import { tr } from '../lang';
 
 const { realtimeApiUrl, realtimeWsUrl } = spacehankConfig;
 
@@ -12,9 +13,9 @@ const request = (path, init) => fetch(`${realtimeApiUrl}${path}`, { credentials:
  */
 export const fetchSession = async () => {
   const response = await request('/api/auth/session');
-  if (!response.ok) throw new Error(`Server not ready (${response.status})`);
+  if (!response.ok) throw new Error(tr('Server not ready ({0})', response.status));
   const data = await response.json().catch(() => null);
-  if (!data) throw new Error('Server not ready');
+  if (!data) throw new Error(tr('Server not ready'));
   return Boolean(data.authenticated);
 };
 
@@ -33,8 +34,8 @@ export const login = async (password) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password }),
   });
-  if (response.status === 429) throw new Error('Too many attempts. Try again later.');
-  if (!response.ok) throw new Error('Wrong access key.');
+  if (response.status === 429) throw new Error(tr('Too many attempts. Try again later.'));
+  if (!response.ok) throw new Error(tr('Wrong access key.'));
 };
 
 export const logout = () => request('/api/auth/logout', { method: 'POST' }).catch(() => {});

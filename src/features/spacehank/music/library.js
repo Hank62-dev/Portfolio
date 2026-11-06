@@ -1,6 +1,7 @@
 import { cropBars } from './coverCrop';
 import { createStore } from '../store';
 import { requestPersistence, storage } from '../storage';
+import { tr } from '../lang';
 
 const AUDIO_EXT = /\.(mp3|m4a|aac|flac|ogg|oga|opus|wav|webm)$/i;
 
@@ -60,7 +61,7 @@ export const loadLibrary = async () => {
     const [tracks, playlists] = await Promise.all([storage.tracks.all(), storage.playlists.all()]);
     library.set({ loaded: true, tracks: tracks.sort(byAdded), playlists: playlists.sort((a, b) => a.createdAt - b.createdAt), error: '' });
   } catch {
-    library.set({ loaded: true, error: 'This browser would not open its private storage, so the library cannot be kept.' });
+    library.set({ loaded: true, error: tr('This browser would not open its private storage, so the library cannot be kept.') });
   }
 };
 

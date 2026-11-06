@@ -6,6 +6,7 @@ import { isLocalServer } from '../model/realtime';
 import { DEFAULT_AGENT_ID, createInitialAgents } from '../model/agents';
 import { applyRealtimeMessage } from '../model/realtime';
 import { requestSync } from '../sync';
+import { tr } from '../lang';
 
 const { maxEvents } = spacehankConfig;
 
@@ -128,7 +129,7 @@ export function useRealtime() {
             if (mine !== generation) return;
             attempt = 0;
             setLink('online');
-            if (!everOpened) notify('Connected to the realtime server', { tone: 'success' });
+            if (!everOpened) notify(tr('Connected to the realtime server'), { tone: 'success' });
             everOpened = true;
           },
           onClose: () => {
@@ -199,11 +200,11 @@ export function useRealtime() {
       const task = String(text || '').trim();
       if (!task) return false;
       if (socketRef.current?.readyState !== WebSocket.OPEN) {
-        notify('Realtime server is offline; task was not dispatched', { tone: 'error' });
+        notify(tr('Realtime server is offline; task was not dispatched'), { tone: 'error' });
         return false;
       }
       sendTask(socketRef.current, { title: task, prompt: task, agentId });
-      notify('Task sent to the realtime worker', { tone: 'success' });
+      notify(tr('Task sent to the realtime worker'), { tone: 'success' });
       return true;
     },
     [notify]

@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { spacehankConfig } from '../config';
 import { refreshSession } from './realtime';
 import { isDemo } from '../demo/mode';
@@ -21,13 +22,13 @@ const call = async (path, { method = 'GET', body } = {}) => {
     // the short access token ran out: renew it from the refresh cookie and try once more
     if (response.status === 401 && (await refreshSession())) response = await send(path, method, body);
   } catch {
-    throw new Error('The realtime server is unreachable. Check that it is running.');
+    throw new Error(tr('The realtime server is unreachable. Check that it is running.'));
   }
   const data = await response.json().catch(() => ({}));
   // An older deploy of the server has no such route: say what to do rather than a bare "Not found".
-  if (response.status === 404) throw new Error('The server does not have this helper yet. Redeploy the realtime service on Render.');
-  if (response.status === 401) throw new Error('Your session has ended. Sign in again.');
-  if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+  if (response.status === 404) throw new Error(tr('The server does not have this helper yet. Redeploy the realtime service on Render.'));
+  if (response.status === 401) throw new Error(tr('Your session has ended. Sign in again.'));
+  if (!response.ok) throw new Error(data.error || tr('Request failed ({0})', response.status));
   return data;
 };
 
@@ -49,7 +50,7 @@ export const base64ToBlob = (data, mime) => {
 
 // ---- Creator Lab: the AI content engine, pitches, and posting to the owner's own Discord server (the webhook stays on the server)
 const owner = () => {
-  if (isDemo()) throw new Error('The Creator Lab is private. Sign in to use it.');
+  if (isDemo()) throw new Error(tr('The Creator Lab is private. Sign in to use it.'));
 };
 export const generateContent = (input) => (owner(), call('/api/ai/content', { method: 'POST', body: input }));
 export const generatePitch = (input) => (owner(), call('/api/ai/pitch', { method: 'POST', body: input }));
@@ -58,6 +59,6 @@ export const postToDiscord = ({ channel, content }) => (owner(), call('/api/disc
 
 // Web Push (see server/push.mjs): the key to subscribe with, this device's subscription, and a test
 export const pushKey = () => (isDemo() ? Promise.resolve({ enabled: false, publicKey: '' }) : call('/api/push/key'));
-export const pushSubscribe = ({ subscription, kinds }) => call('/api/push/subscribe', { method: 'POST', body: { subscription, kinds } });
+export const pushSubscribe = ({ subscription, kinds, lang }) => call('/api/push/subscribe', { method: 'POST', body: { subscription, kinds, lang } });
 export const pushUnsubscribe = (endpoint) => call('/api/push/unsubscribe', { method: 'POST', body: { endpoint } });
 export const pushTest = () => call('/api/push/test', { method: 'POST', body: {} });

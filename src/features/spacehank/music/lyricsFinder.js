@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // Finds lyrics for a song on LRCLIB (https://lrclib.net/docs): a free, open lyrics service that needs no key and allows calls
 // straight from the browser. Only the title, the artist and the length of the song are sent, never the audio.
 //
@@ -95,20 +96,20 @@ export const findLyrics = async (track, { fetchImpl = fetch, sleep = wait, signa
         response = await fetchImpl(`${LRCLIB}${path}?${new URLSearchParams(params)}`, { headers, signal });
       } catch (error) {
         if (error?.name === 'AbortError') throw error;
-        throw new LyricsError('offline', 'The lyrics service cannot be reached.');
+        throw new LyricsError('offline', tr('The lyrics service cannot be reached.'));
       }
       if (response.status === 404) return null;
       if (response.status === 429 && attempt === 0) {
         const seconds = Number(response.headers?.get?.('Retry-After')) || 2;
-        if (seconds * 1000 > MAX_WAIT_MS) throw new LyricsError('busy', 'The lyrics service is busy right now.');
+        if (seconds * 1000 > MAX_WAIT_MS) throw new LyricsError('busy', tr('The lyrics service is busy right now.'));
         await sleep(seconds * 1000 + Math.random() * seconds * 300); // a little jitter, as the service asks
         continue;
       }
-      if (!response.ok) throw new LyricsError('busy', 'The lyrics service is busy right now.');
+      if (!response.ok) throw new LyricsError('busy', tr('The lyrics service is busy right now.'));
       try {
         return await response.json();
       } catch {
-        throw new LyricsError('busy', 'The lyrics service sent something unreadable.');
+        throw new LyricsError('busy', tr('The lyrics service sent something unreadable.'));
       }
     }
   };

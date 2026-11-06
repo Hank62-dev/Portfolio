@@ -1,6 +1,7 @@
 import { createStore } from './store';
 import { storage } from './storage';
 import { onSynced } from './sync/events';
+import { tr } from './lang';
 
 /**
  * A small collection of records kept on this device (one IndexedDB store), with a reactive in-memory copy. Each
@@ -16,7 +17,7 @@ export const createCollection = (name, { order = (a, b) => b.updatedAt - a.updat
     try {
       store.set({ loaded: true, items: (await table.all()).sort(order), error: '' });
     } catch {
-      store.set({ loaded: true, error: 'This browser would not open its private storage, so this cannot be kept.' });
+      store.set({ loaded: true, error: tr('This browser would not open its private storage, so this cannot be kept.') });
     }
   };
 

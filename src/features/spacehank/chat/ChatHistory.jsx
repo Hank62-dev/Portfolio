@@ -6,6 +6,7 @@ import { clsx } from '../../../lib/format';
 import { useStore } from '../store';
 import { groupChats, summaryOf } from './model';
 import { chatMsgs, chats, deleteChat, openChat, renameChat, view } from './store';
+import { tr } from '../lang';
 import '../i18n';
 
 const small = 'grid size-8 shrink-0 place-items-center rounded-full text-bone-faint transition-colors hover:bg-wash/8 hover:text-bone';
@@ -89,7 +90,7 @@ export default function ChatHistory({ open, onOpenChange }) {
   const summaries = useMemo(() => new Map(items.map((chat) => [chat.id, summaryOf(messages, chat.id)])), [items, messages]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} eyebrow="HANK" title={t('rag.historyTitle')} description={t('rag.historyText')}>
+    <Dialog open={open} onOpenChange={onOpenChange} eyebrow={tr('HANK')} title={t('rag.historyTitle')} description={t('rag.historyText')}>
       {groups.length === 0 ? (
         <p className="rounded-2xl border border-dashed border-line-strong px-4 py-8 text-center text-fine text-bone-dim" data-history-empty>
           {t('rag.historyEmpty')}

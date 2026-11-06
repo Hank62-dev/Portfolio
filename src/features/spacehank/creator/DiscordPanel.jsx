@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useMemo, useState } from 'react';
 import { Hash, Megaphone, ShieldCheck } from 'lucide-react';
 import { Input } from '../../../design-system';
@@ -22,17 +23,17 @@ export default function DiscordPanel() {
 
   return (
     <div className="flex flex-col gap-4" data-discord>
-      <Panel title="Plan your server" icon={Hash} hue={235} aside={<CopyButton text={text} label="Copy checklist" what="Checklist copied" />}>
+      <Panel title={tr('Plan your server')} icon={Hash} hue={235} aside={<CopyButton text={text} label={tr('Copy checklist')} what={tr('Checklist copied')} />}>
         <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Kind of community">
+          <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={tr('Kind of community')}>
             {BLUEPRINT_KINDS.map((k) => (
               <Chip key={k.id} on={kind === k.id} onClick={() => setKind(k.id)}>
                 {k.label}
               </Chip>
             ))}
           </div>
-          <Row label="Community name">
-            <Input aria-label="Community name" placeholder="e.g. Hank Devs" value={settings.community} onChange={(e) => setSetting({ community: e.target.value })} compact />
+          <Row label={tr('Community name')}>
+            <Input aria-label={tr('Community name')} placeholder={tr('e.g. Hank Devs')} value={settings.community} onChange={(e) => setSetting({ community: e.target.value })} compact />
           </Row>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             {plan.categories.map((c) => (
@@ -52,7 +53,7 @@ export default function DiscordPanel() {
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div className="cl-card rounded-2xl border border-line p-3.5">
-              <Label className="mb-2">Roles</Label>
+              <Label className="mb-2">{tr('Roles')}</Label>
               <ul className="flex flex-col gap-1.5 text-[0.84rem] leading-snug">
                 {plan.roles.map((r) => (
                   <li key={r.name}>
@@ -62,7 +63,7 @@ export default function DiscordPanel() {
               </ul>
             </div>
             <div className="cl-card rounded-2xl border border-line p-3.5">
-              <Label className="mb-2">Tiers</Label>
+              <Label className="mb-2">{tr('Tiers')}</Label>
               <ul className="flex flex-col gap-2 text-[0.84rem] leading-snug">
                 {plan.tiers.map((t) => (
                   <li key={t.name}>
@@ -72,34 +73,34 @@ export default function DiscordPanel() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-2 text-[0.76rem] leading-relaxed text-bone-faint">Discord's own paid subscriptions are available only to creators in the US (per Discord's support pages when this was written; check them again). A paid tier here means an outside page for payment and a role you give by hand.</p>
+              <p className="mt-2 text-[0.76rem] leading-relaxed text-bone-faint">{tr('Discord\'s own paid subscriptions are available only to creators in the US (per Discord\'s support pages when this was written; check them again). A paid tier here means an outside page for payment and a role you give by hand.')}</p>
             </div>
           </div>
           <div className="cl-card rounded-2xl border border-line p-3.5">
-            <Label className="mb-2">Welcome message</Label>
+            <Label className="mb-2">{tr('Welcome message')}</Label>
             <p className="text-fine leading-snug text-bone-dim">{plan.welcome}</p>
-            <CopyButton className="mt-2" text={plan.welcome} label="Copy welcome" />
+            <CopyButton className="mt-2" text={plan.welcome} label={tr('Copy welcome')} />
           </div>
         </div>
       </Panel>
 
-      <Panel title="Post to your server" icon={Megaphone} hue={22}>
+      <Panel title={tr('Post to your server')} icon={Megaphone} hue={22}>
         <DiscordComposer />
       </Panel>
 
-      <Panel title="Lines not to cross" icon={ShieldCheck} hue={150} aside={<ShieldCheck size={16} className="text-ok" aria-hidden="true" />}>
+      <Panel title={tr('Lines not to cross')} icon={ShieldCheck} hue={150} aside={<ShieldCheck size={16} className="text-ok" aria-hidden="true" />}>
         <ul className="flex flex-col gap-2 text-fine leading-snug text-bone-dim" data-guardrails>
           <li>
-            <b className="text-bone">No self-bots, no mass DMs.</b> Discord forbids automating a user account and unsolicited messages. This app only posts to your own server through a webhook.
+            <b className="text-bone">{tr('No self-bots, no mass DMs.')}</b> {tr('Discord forbids automating a user account and unsolicited messages. This app only posts to your own server through a webhook.')}
           </li>
           <li>
-            <b className="text-bone">No fake growth.</b> No bought members, no engagement swaps, no invite-spam in other servers.
+            <b className="text-bone">{tr('No fake growth.')}</b> {tr('No bought members, no engagement swaps, no invite-spam in other servers.')}
           </li>
           <li>
-            <b className="text-bone">Read each server's rules before you share a link.</b> Promote only where it is allowed.
+            <b className="text-bone">{tr('Read each server\'s rules before you share a link.')}</b> {tr('Promote only where it is allowed.')}
           </li>
           <li>
-            <b className="text-bone">Keep the webhook secret.</b> Anyone who has the URL can post as it. If it leaks, delete it in Discord and make a new one.
+            <b className="text-bone">{tr('Keep the webhook secret.')}</b> {tr('Anyone who has the URL can post as it. If it leaks, delete it in Discord and make a new one.')}
           </li>
         </ul>
       </Panel>

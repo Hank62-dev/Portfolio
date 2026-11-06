@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useState } from 'react';
 import { RotateCcw, Shuffle } from 'lucide-react';
 import { LIGHTS, allOff, newLights, pressLamp, pressesForLevel } from './grid';
@@ -33,13 +34,13 @@ export default function LightsOut() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="màn" value={level} tone={RED} />
-        <Score label="lần bấm" value={moves} />
-        <Score label="màn cao nhất" value={best ?? '-'} />
+        <Score label={tr('màn')} value={level} tone={RED} />
+        <Score label={tr('lần bấm')} value={moves} />
+        <Score label={tr('màn cao nhất')} value={best ?? '-'} />
       </div>
-      <div className="mx-auto grid w-full max-w-[22rem] grid-cols-5 gap-2.5 rounded-sm bg-[#fdfaf0] p-3" role="grid" aria-label="Lamps">
+      <div className="mx-auto grid w-full max-w-[22rem] grid-cols-5 gap-2.5 rounded-sm bg-[#fdfaf0] p-3" role="grid" aria-label={tr('Lamps')}>
         {state.board.map((on, i) => (
-          <button key={i} type="button" role="gridcell" aria-pressed={Boolean(on)} aria-label={`Lamp ${Math.floor(i / LIGHTS) + 1}, ${(i % LIGHTS) + 1}, ${on ? 'on' : 'off'}`} onClick={() => press(i)} className="aspect-square transition-transform active:scale-90">
+          <button key={i} type="button" role="gridcell" aria-pressed={Boolean(on)} aria-label={tr('Lamp {0}, {1}, {2}', Math.floor(i / LIGHTS) + 1, (i % LIGHTS) + 1, on ? tr('on') : tr('off'))} onClick={() => press(i)} className="aspect-square transition-transform active:scale-90">
             <svg viewBox="0 0 48 48" className="size-full" aria-hidden="true">
               <g filter="url(#pen)" strokeLinecap="round" strokeLinejoin="round">
                 {on ? (
@@ -55,18 +56,18 @@ export default function LightsOut() {
           </button>
         ))}
       </div>
-      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">Bấm một đèn: nó và bốn đèn kề bên đổi sáng tối.</p>
+      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">{tr('Bấm một đèn: nó và bốn đèn kề bên đổi sáng tối.')}</p>
       <div className="flex gap-2">
         <InkButton onClick={() => { setState((s) => ({ ...s, board: s.start })); setMoves(0); }}>
-          <RotateCcw size={15} aria-hidden="true" /> Làm lại màn
+          <RotateCcw size={15} aria-hidden="true" /> {tr('Làm lại màn')}
         </InkButton>
         <InkButton className="ml-auto" tone={RED} onClick={() => go(level)}>
-          <Shuffle size={15} aria-hidden="true" /> Màn khác
+          <Shuffle size={15} aria-hidden="true" /> {tr('Màn khác')}
         </InkButton>
       </div>
       {solved && (
-        <Note title="Tắt hết rồi!" detail={`Màn ${level} xong sau ${moves} lần bấm.`}>
-          <InkButton onClick={() => go(level + 1)}>Màn {level + 1}</InkButton>
+        <Note title={tr('Tắt hết rồi!')} detail={`Màn ${level} xong sau ${moves} lần bấm.`}>
+          <InkButton onClick={() => go(level + 1)}>{tr('Màn')} {level + 1}</InkButton>
         </Note>
       )}
     </div>

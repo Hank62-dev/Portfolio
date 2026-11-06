@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // Habit Garden as plain functions: streaks, how big a plant has grown, the heatmap, and what a habit does to your mood.
 // A habit keeps `days`: the 'YYYY-MM-DD' strings on which it was done.
 
@@ -135,11 +136,11 @@ export const stageProgress = (run) => {
 
 /** One line about how the garden is doing today. */
 export const gardenLine = (done, total) => {
-  if (total === 0) return 'Plant your first habit to start the garden.';
-  if (done === total) return 'Every plant is watered. The garden is happy.';
-  if (done === 0) return total === 1 ? 'One plant is waiting for water.' : 'Your plants are waiting for water.';
+  if (total === 0) return tr('Plant your first habit to start the garden.');
+  if (done === total) return tr('Every plant is watered. The garden is happy.');
+  if (done === 0) return total === 1 ? tr('One plant is waiting for water.') : tr('Your plants are waiting for water.');
   const left = total - done;
-  return `${left} more ${left === 1 ? 'plant needs' : 'plants need'} water today.`;
+  return tr('{0} more {1} water today.', left, left === 1 ? tr('plant needs') : tr('plants need'));
 };
 
 /** Habits in the order the list shows them: the ones still to do today first, then the done ones; each group keeps its own order. */

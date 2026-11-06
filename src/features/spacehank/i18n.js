@@ -1,5 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { getLang } from './lang';
 
 const vi = {
   'rag.channel': 'HANK / KÊNH RIÊNG',
@@ -84,7 +85,7 @@ const en = {
 if (!i18n.isInitialized) {
   i18n.use(initReactI18next).init({
     resources: { en: { translation: en }, vi: { translation: vi } },
-    lng: 'vi',
+    lng: getLang(),
     fallbackLng: 'en',
     interpolation: { escapeValue: false },
   });

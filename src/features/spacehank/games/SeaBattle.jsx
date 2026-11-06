@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RotateCcw, Shuffle, Wifi } from 'lucide-react';
@@ -12,8 +13,8 @@ import { useBest } from './shared';
 // turns to name a square. A hit lets you shoot again. Play against the captain in the notebook, or pass the phone around.
 
 const PLAYERS = {
-  ai: ['Bạn', 'Thuyền trưởng Sóng'],
-  duo: ['Người 1', 'Người 2'],
+  ai: ['Bạn', tr('Thuyền trưởng Sóng')],
+  duo: [tr('Người 1'), tr('Người 2')],
 };
 
 const fresh = (mode) => ({
@@ -57,9 +58,9 @@ const reducer = (state, action) => {
 // ---- the game -------------------------------------------------------------------------------------------------------------
 
 const WORDS = {
-  hit: 'Trúng rồi! Bắn tiếp nào.',
-  sunk: 'Chìm một chiếc! Bắn tiếp nào.',
-  miss: 'Trượt… đổi lượt.',
+  hit: tr('Trúng rồi! Bắn tiếp nào.'),
+  sunk: tr('Chìm một chiếc! Bắn tiếp nào.'),
+  miss: tr('Trượt… đổi lượt.'),
 };
 
 export default function SeaBattle() {
@@ -108,21 +109,21 @@ export default function SeaBattle() {
     return (
       <div className="flex flex-col gap-5">
         <p className="font-hand text-[1.1rem] leading-snug">
-          The game kids play in the back row: hide ten paper boats on your page, then guess where the other fleet is. A hit means shoot again. Boats may not touch.
+          {tr('The game kids play in the back row: hide ten paper boats on your page, then guess where the other fleet is. A hit means shoot again. Boats may not touch.')}
         </p>
         <div className="flex items-center gap-3">
           <Captain kind="captain" />
-          <span className="font-pen text-[1.6rem] font-bold" style={{ color: RED }}>vs</span>
+          <span className="font-pen text-[1.6rem] font-bold" style={{ color: RED }}>{tr('vs')}</span>
           <Captain kind="sailor" tone={RED} />
         </div>
-        <InkButton onClick={() => dispatch({ type: 'start', mode: 'ai' })}>Chơi với thuyền trưởng Sóng</InkButton>
+        <InkButton onClick={() => dispatch({ type: 'start', mode: 'ai' })}>{tr('Chơi với thuyền trưởng Sóng')}</InkButton>
         <InkButton tone={RED} onClick={() => dispatch({ type: 'start', mode: 'duo' })}>
-          2 người, đưa máy qua lại
+          {tr('2 người, đưa máy qua lại')}
         </InkButton>
         <InkButton solid onClick={() => setOnline(true)}>
-          <Wifi size={17} aria-hidden="true" /> Chơi online với bạn
+          <Wifi size={17} aria-hidden="true" /> {tr('Chơi online với bạn')}
         </InkButton>
-        <p className="font-hand text-[0.9rem] text-[#20296a]/65">Games won against the captain: {wins ?? 0}</p>
+        <p className="font-hand text-[0.9rem] text-[#20296a]/65">{tr('Games won against the captain:')} {wins ?? 0}</p>
       </div>
     );
   }
@@ -138,10 +139,10 @@ export default function SeaBattle() {
       <div className="flex flex-col items-center gap-5 py-10 text-center">
         <Captain kind={game.cover.to === 0 ? 'captain' : 'sailor'} tone={game.cover.to === 0 ? INK : RED} size={72} />
         <p className="font-pen text-[2rem] leading-none font-bold" style={{ color: INK }}>
-          Đưa máy cho {game.players[game.cover.to].name}
+          {tr('Đưa máy cho')} {game.players[game.cover.to].name}
         </p>
-        <p className="max-w-[16rem] font-hand text-[1.05rem]">{game.cover.then === 'place' ? 'Đến lúc xếp tàu của bạn. Người kia đừng nhìn nhé.' : 'Đến lượt bạn bắn. Người kia đừng nhìn màn hình.'}</p>
-        <InkButton onClick={() => dispatch({ type: 'uncover' })}>Tôi là {game.players[game.cover.to].name}</InkButton>
+        <p className="max-w-[16rem] font-hand text-[1.05rem]">{game.cover.then === 'place' ? tr('Đến lúc xếp tàu của bạn. Người kia đừng nhìn nhé.') : tr('Đến lượt bạn bắn. Người kia đừng nhìn màn hình.')}</p>
+        <InkButton onClick={() => dispatch({ type: 'uncover' })}>{tr('Tôi là')} {game.players[game.cover.to].name}</InkButton>
       </div>
     );
   }
@@ -150,18 +151,18 @@ export default function SeaBattle() {
     return (
       <div className="flex flex-col gap-4">
         <p className="font-hand text-[1.1rem]">
-          {you.name}, đây là hạm đội của bạn. Không vừa ý thì xếp lại.
+          {you.name}{tr(', đây là hạm đội của bạn. Không vừa ý thì xếp lại.')}
         </p>
-        <Board fleet={you.fleet} shots={blankShots()} reveal label="Your fleet" />
+        <Board fleet={you.fleet} shots={blankShots()} reveal label={tr('Your fleet')} />
         <div className="flex gap-2">
           <InkButton className="flex-1" onClick={() => dispatch({ type: 'reroll' })}>
-            <Shuffle size={16} aria-hidden="true" /> Xếp lại
+            <Shuffle size={16} aria-hidden="true" /> {tr('Xếp lại')}
           </InkButton>
           <InkButton className="flex-1" solid onClick={() => dispatch({ type: 'ready' })}>
-            Xong, ra khơi
+            {tr('Xong, ra khơi')}
           </InkButton>
         </div>
-        <p className="font-hand text-[0.9rem] text-[#20296a]/65">{FLEET.length} boats: 1 of four squares, 2 of three, 3 of two, 4 of one.</p>
+        <p className="font-hand text-[0.9rem] text-[#20296a]/65">{FLEET.length} {tr('boats: 1 of four squares, 2 of three, 3 of two, 4 of one.')}</p>
       </div>
     );
   }
@@ -170,10 +171,10 @@ export default function SeaBattle() {
     game.phase === 'over'
       ? ''
       : game.mode === 'ai' && game.who === 1
-        ? 'Thuyền trưởng Sóng đang ngắm…'
+        ? tr('Thuyền trưởng Sóng đang ngắm…')
         : game.last && WORDS[game.last]
           ? WORDS[game.last]
-          : `${you.name}: chạm một ô để bắn.`;
+          : tr('{0}: chạm một ô để bắn.', you.name);
 
   return (
     <div className="flex flex-col gap-3">
@@ -182,14 +183,14 @@ export default function SeaBattle() {
           <Captain kind="captain" size={38} />
           <span className="font-pen text-[1.2rem] leading-none font-bold">
             {game.players[0].name}
-            <small className="block font-hand text-[0.8rem] font-normal text-[#20296a]/70">chìm {sunk(game.players[1])}/10</small>
+            <small className="block font-hand text-[0.8rem] font-normal text-[#20296a]/70">{tr('chìm')} {sunk(game.players[1])}/10</small>
           </span>
         </div>
         <div className="flex flex-row-reverse items-center gap-2">
           <Captain kind="sailor" tone={RED} size={38} />
           <span className="text-right font-pen text-[1.2rem] leading-none font-bold" style={{ color: RED }}>
             {game.players[1].name}
-            <small className="block font-hand text-[0.8rem] font-normal text-[#20296a]/70">chìm {sunk(game.players[0])}/10</small>
+            <small className="block font-hand text-[0.8rem] font-normal text-[#20296a]/70">{tr('chìm')} {sunk(game.players[0])}/10</small>
           </span>
         </div>
       </div>
@@ -199,21 +200,21 @@ export default function SeaBattle() {
       </p>
 
       <div className="relative">
-        <Board fleet={foe.fleet} shots={foe.shots} label={`${foe.name}'s waters`} onShoot={humanTurn ? (cell) => dispatch({ type: 'fire', cell }) : undefined} />
+        <Board fleet={foe.fleet} shots={foe.shots} label={tr('{0}\'s waters', foe.name)} onShoot={humanTurn ? (cell) => dispatch({ type: 'fire', cell }) : undefined} />
         {!humanTurn && game.phase === 'play' && <div className="absolute inset-0 rounded-md bg-[#f8f3e5]/25" aria-hidden="true" />}
       </div>
 
       <div>
-        <p className="font-pen text-[1.1rem] font-semibold">Hạm đội của {you.name}</p>
+        <p className="font-pen text-[1.1rem] font-semibold">{tr('Hạm đội của')} {you.name}</p>
         <div className="w-[58%]">
-          <Board fleet={you.fleet} shots={you.shots} reveal label="Your fleet" />
+          <Board fleet={you.fleet} shots={you.shots} reveal label={tr('Your fleet')} />
         </div>
       </div>
 
       {game.phase === 'over' && (
-        <Note title={game.mode === 'ai' ? (game.winner === 0 ? 'Bạn thắng rồi!' : 'Thuyền trưởng Sóng thắng') : `${game.players[game.winner].name} thắng!`} detail="Chìm hết hạm đội đối phương.">
+        <Note title={game.mode === 'ai' ? (game.winner === 0 ? tr('Bạn thắng rồi!') : tr('Thuyền trưởng Sóng thắng')) : tr('{0} thắng!', game.players[game.winner].name)} detail={tr('Chìm hết hạm đội đối phương.')}>
           <InkButton onClick={() => dispatch({ type: 'start', mode: game.mode })}>
-            <RotateCcw size={15} aria-hidden="true" /> Ván mới
+            <RotateCcw size={15} aria-hidden="true" /> {tr('Ván mới')}
           </InkButton>
         </Note>
       )}

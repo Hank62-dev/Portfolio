@@ -8,6 +8,7 @@ import { messagesOf } from '../chat/model';
 import { askHank, chatMsgs, chats, loadChats, startNewChat, view } from '../chat/store';
 import Markdown from '../components/Markdown';
 import { useStore } from '../store';
+import { tr } from '../lang';
 import '../i18n';
 
 const MAX_COMPOSER_HEIGHT = 200;
@@ -71,7 +72,7 @@ function Message({ message, onCopy }) {
           )}
           {message.verified && (
             <Badge tone="ok">
-              <Check size={12} aria-hidden="true" /> Sources verified
+              <Check size={12} aria-hidden="true" /> {tr('Sources verified')}
             </Badge>
           )}
           {sources.slice(0, 5).map((source) =>
@@ -85,7 +86,7 @@ function Message({ message, onCopy }) {
               </span>
             )
           )}
-          <button type="button" onClick={() => onCopy(message.text)} aria-label="Copy the answer" className="ml-auto grid size-7 place-items-center rounded-full text-bone-faint transition-colors hover:bg-wash/8 hover:text-bone">
+          <button type="button" onClick={() => onCopy(message.text)} aria-label={tr('Copy the answer')} className="ml-auto grid size-7 place-items-center rounded-full text-bone-faint transition-colors hover:bg-wash/8 hover:text-bone">
             <Copy size={13} aria-hidden="true" />
           </button>
         </div>
@@ -190,7 +191,7 @@ export default function RagView() {
               </button>
             ))}
           </div>
-        <div className="flex shrink-0 rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur sm:flex-none" role="radiogroup" aria-label="Retrieval mode">
+        <div className="flex shrink-0 rounded-full border border-line bg-ink-1/80 p-1 backdrop-blur sm:flex-none" role="radiogroup" aria-label={tr('Retrieval mode')}>
           {[
             ['fast', t('rag.fast'), Gauge],
             ['reasoning', t('rag.deep'), BrainCircuit],
@@ -205,7 +206,7 @@ export default function RagView() {
 
       <div className="relative flex flex-1 flex-col gap-5 pb-4" aria-live="polite">
         {!ready ? (
-          <Loading label="Loading" className="flex flex-col gap-4 py-6">
+          <Loading label={tr('Loading')} className="flex flex-col gap-4 py-6">
             <Skeleton className="h-10 w-2/3 rounded-3xl" />
             <Skeleton className="h-24 w-full rounded-3xl" />
           </Loading>
@@ -266,7 +267,7 @@ export default function RagView() {
         />
         <button
           type="submit"
-          aria-label="Send question"
+          aria-label={tr('Send question')}
           disabled={busy || !query.trim()}
           className="grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-lg transition-all hover:brightness-110 active:scale-95 disabled:opacity-35"
         >

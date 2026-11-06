@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { Component, Suspense, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { RoundedBox, Text, useGLTF } from '@react-three/drei';
@@ -58,7 +59,7 @@ export function Room({ position, size, title, color, number }) {
         {number}
       </Label>
       <Label position={[0, 0.58, depth / 2 + 0.05]} rotation={[0, Math.PI, 0]} fontSize={0.08} color="#a8a396" anchorX="center">
-        DOOR / OPEN
+        {tr('DOOR / OPEN')}
       </Label>
     </group>
   );
@@ -238,10 +239,10 @@ export function ServerRoom() {
         </group>
       ))}
       <Label position={[-3.95, 2.05, -3.52]} fontSize={0.18} color="#ece6da" anchorX="left">
-        CONTROL / SERVER ROOM
+        {tr('CONTROL / SERVER ROOM')}
       </Label>
       <Label position={[-3.95, 1.78, -3.52]} fontSize={0.1} color="#a8a396" anchorX="left">
-        24 NODES · LIVE INFERENCE · 24/7
+        {tr('24 NODES · LIVE INFERENCE · 24/7')}
       </Label>
       <pointLight position={[0, 2, 0]} color="#62e7d3" intensity={2.5} distance={7} />
     </group>

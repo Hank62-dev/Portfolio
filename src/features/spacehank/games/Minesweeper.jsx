@@ -3,6 +3,7 @@ import { Bomb, Flag, Pickaxe, RotateCcw } from 'lucide-react';
 import { flagsLeft, newMines, openCell, toggleFlag } from './grid';
 import { INK, InkBox, InkButton, Note, RED, Score } from './ink';
 import { seconds, useBest } from './shared';
+import { tr } from '../lang';
 
 const NUMBER = ['', INK, '#1f7a3a', RED, '#5b2c91', '#8a2a2a', '#1f7a7a', '#222222', '#666666'];
 
@@ -52,12 +53,12 @@ export default function Minesweeper() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
-        <Score label="mìn còn" value={flagsLeft(game)} tone={RED} />
-        <Score label="thời gian" value={seconds(time)} />
-        <Score label="kỷ lục" value={best === null ? '-' : seconds(best)} />
+        <Score label={tr('mìn còn')} value={flagsLeft(game)} tone={RED} />
+        <Score label={tr('thời gian')} value={seconds(time)} />
+        <Score label={tr('kỷ lục')} value={best === null ? '-' : seconds(best)} />
       </div>
       <InkBox className="p-1.5" fill="#fdfaf0">
-        <div className="grid select-none grid-cols-9 gap-[3px]" role="grid" aria-label="Minefield">
+        <div className="grid select-none grid-cols-9 gap-[3px]" role="grid" aria-label={tr('Minefield')}>
           {game.opened.map((open, i) => {
             const mine = game.mines?.[i];
             const flagged = game.flags[i];
@@ -68,7 +69,7 @@ export default function Minesweeper() {
                 key={i}
                 type="button"
                 role="gridcell"
-                aria-label={shown ? (mine ? 'Mine' : `${count} mines nearby`) : flagged ? 'Flag' : 'Closed'}
+                aria-label={shown ? (mine ? tr('Mine') : tr('{0} mines nearby', count)) : flagged ? tr('Flag') : tr('Closed')}
                 disabled={over && !shown}
                 onPointerDown={() => !over && !open && press(i)}
                 onPointerUp={release}
@@ -100,24 +101,24 @@ export default function Minesweeper() {
       </InkBox>
       <div className="flex gap-2">
         <InkButton solid={!flagMode} onClick={() => setFlagMode(false)} aria-pressed={!flagMode} className="flex-1">
-          <Pickaxe size={15} aria-hidden="true" /> Mở ô
+          <Pickaxe size={15} aria-hidden="true" /> {tr('Mở ô')}
         </InkButton>
         <InkButton solid={flagMode} tone={RED} onClick={() => setFlagMode(true)} aria-pressed={flagMode} className="flex-1">
-          <Flag size={15} aria-hidden="true" /> Cắm cờ
+          <Flag size={15} aria-hidden="true" /> {tr('Cắm cờ')}
         </InkButton>
-        <InkButton onClick={again} aria-label="New game">
+        <InkButton onClick={again} aria-label={tr('New game')}>
           <RotateCcw size={15} aria-hidden="true" />
         </InkButton>
       </div>
-      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">Giữ một ô để cắm cờ nhanh. Lần chạm đầu luôn an toàn.</p>
+      <p className="text-center font-hand text-[0.95rem] text-[#20296a]/70">{tr('Giữ một ô để cắm cờ nhanh. Lần chạm đầu luôn an toàn.')}</p>
       {game.status === 'won' && (
-        <Note title="Dọn sạch rồi!" detail={`${seconds(time)}${record ? ' · kỷ lục mới!' : ''}`}>
-          <InkButton onClick={again}>Chơi lại</InkButton>
+        <Note title={tr('Dọn sạch rồi!')} detail={`${seconds(time)}${record ? ' · kỷ lục mới!' : ''}`}>
+          <InkButton onClick={again}>{tr('Chơi lại')}</InkButton>
         </Note>
       )}
       {game.status === 'lost' && (
-        <Note title="Bùm!" detail="Chạm trúng mìn rồi. Thử lại nhé.">
-          <InkButton onClick={again}>Chơi lại</InkButton>
+        <Note title={tr('Bùm!')} detail={tr('Chạm trúng mìn rồi. Thử lại nhé.')}>
+          <InkButton onClick={again}>{tr('Chơi lại')}</InkButton>
         </Note>
       )}
     </div>

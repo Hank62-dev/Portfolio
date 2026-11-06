@@ -4,6 +4,7 @@ import { Button, Dialog, Select, Textarea } from '../../../../design-system';
 import { newFlashcard } from '../model';
 import { flashcards } from '../store';
 import { clozeFront, hasCloze, wrapBlank } from './states';
+import { tr } from '../../lang';
 
 /**
  * Adding a card, or changing one. On a phone it is a sheet that can be pulled down. A part of the question can be turned
@@ -45,7 +46,7 @@ export default function CardEditor({ card, decks, deck: initialDeck = '', onClos
   };
 
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={editing ? 'EDIT CARD' : 'NEW CARD'} title={editing ? 'Change this card' : 'Add a card'} description="One fact on each card works best. Turn a word into a blank to make it a fill-in card.">
+    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={editing ? tr('EDIT CARD') : tr('NEW CARD')} title={editing ? tr('Change this card') : tr('Add a card')} description={tr('One fact on each card works best. Turn a word into a blank to make it a fill-in card.')}>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -55,22 +56,22 @@ export default function CardEditor({ card, decks, deck: initialDeck = '', onClos
         data-card-form
       >
         <div className="flex flex-col gap-2">
-          <Textarea ref={frontField} aria-label="Front" rows={3} placeholder="Question, term, or a sentence with a blank" value={front} onChange={(e) => setFront(e.target.value)} autoFocus />
+          <Textarea ref={frontField} aria-label={tr('Front')} rows={3} placeholder={tr('Question, term, or a sentence with a blank')} value={front} onChange={(e) => setFront(e.target.value)} autoFocus />
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={blank} data-make-blank>
-              Make selection a blank
+              {tr('Make selection a blank')}
             </Button>
-            <span className="text-[0.74rem] text-bone-faint">Select a word in the front, then tap.</span>
+            <span className="text-[0.74rem] text-bone-faint">{tr('Select a word in the front, then tap.')}</span>
           </div>
           {cloze && (
             <p className="rounded-2xl border border-line bg-shade/20 px-3.5 py-2.5 text-fine text-bone-dim" data-preview>
-              <span className="mr-1.5 font-mono text-[0.62rem] tracking-[0.12em] text-bone-faint uppercase">Shows as</span>
+              <span className="mr-1.5 font-mono text-[0.62rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Shows as')}</span>
               {clozeFront(front)}
             </p>
           )}
         </div>
-        <Textarea aria-label="Back" rows={3} placeholder={cloze ? 'Extra note (optional)' : 'Answer'} value={back} onChange={(e) => setBack(e.target.value)} />
-        <Select aria-label="Deck" value={deck} onChange={(e) => setDeck(e.target.value)} compact>
+        <Textarea aria-label={tr('Back')} rows={3} placeholder={cloze ? tr('Extra note (optional)') : tr('Answer')} value={back} onChange={(e) => setBack(e.target.value)} />
+        <Select aria-label={tr('Deck')} value={deck} onChange={(e) => setDeck(e.target.value)} compact>
           {decks.map((d) => (
             <option key={d.id} value={d.id}>
               {d.name}
@@ -80,11 +81,11 @@ export default function CardEditor({ card, decks, deck: initialDeck = '', onClos
 
         <div className="flex flex-col gap-2">
           <Button type="submit" disabled={!ready} className="w-full justify-center">
-            <Check size={15} aria-hidden="true" /> {editing ? 'Save' : 'Add card'}
+            <Check size={15} aria-hidden="true" /> {editing ? tr('Save') : tr('Add card')}
           </Button>
           {!editing && (
             <Button type="button" variant="ghost" disabled={!ready} onClick={() => save(true)} className="w-full justify-center" data-add-another>
-              <Plus size={15} aria-hidden="true" /> Add and write another{added ? ` (${added} added)` : ''}
+              <Plus size={15} aria-hidden="true" /> {tr('Add and write another')}{added ? tr(' ({0} added)', added) : ''}
             </Button>
           )}
           {editing &&
@@ -100,11 +101,11 @@ export default function CardEditor({ card, decks, deck: initialDeck = '', onClos
                 onBlur={() => setSure(false)}
                 autoFocus
               >
-                <Trash2 size={15} aria-hidden="true" /> Tap again to delete
+                <Trash2 size={15} aria-hidden="true" /> {tr('Tap again to delete')}
               </Button>
             ) : (
               <Button type="button" variant="ghost" className="w-full justify-center" onClick={() => setSure(true)} data-delete-card>
-                <Trash2 size={15} aria-hidden="true" /> Delete card
+                <Trash2 size={15} aria-hidden="true" /> {tr('Delete card')}
               </Button>
             ))}
         </div>

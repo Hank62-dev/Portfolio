@@ -1,28 +1,29 @@
 import { Activity, BookHeart, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet, Rocket } from 'lucide-react';
+import { tr } from './lang';
 
 export const NAV_SECTIONS = ['WORKSPACE', 'KNOWLEDGE', 'CREATE', 'LIFE'];
 
 // `blurb` is the line under the name in the "everything" sheet; `keywords` only feed the search
 export const NAVIGATION = [
-  { id: 'hank', label: 'Hank 62', icon: LayoutDashboard, section: 'WORKSPACE', blurb: 'Today, at a glance', keywords: 'dashboard home briefing today weather' },
-  { id: 'space', label: 'SpaceWorkAI', icon: Boxes, section: 'WORKSPACE', blurb: 'The agent office in 3D', keywords: 'floor company agents office 3d' },
-  { id: 'rag', label: 'Hank RAG', icon: BrainCircuit, section: 'WORKSPACE', badge: 'AI', blurb: 'Ask your own notes', keywords: 'chat ask question search knowledge' },
-  { id: 'pulse', label: 'Dev Pulse', icon: HeartPulse, section: 'WORKSPACE', blurb: 'Repos, builds, uptime', keywords: 'github repos commits status uptime health deploy actions' },
-  { id: 'shell', label: 'Git Bash', icon: Terminal, section: 'WORKSPACE', blurb: 'A terminal in the page', keywords: 'terminal command line console cli type' },
-  { id: 'docs', label: 'Document Vault', icon: FolderOpen, section: 'KNOWLEDGE', blurb: 'Files and PDFs', keywords: 'files upload pdf documents' },
-  { id: 'notes', label: 'Second Brain', icon: NotebookPen, section: 'KNOWLEDGE', blurb: 'Writing and ideas', keywords: 'notes journal diary write ideas memory' },
-  { id: 'constellation', label: 'Constellation', icon: Orbit, section: 'KNOWLEDGE', blurb: 'Notes as a night sky', keywords: 'graph map stars notes links sky connections' },
-  { id: 'memos', label: 'Voice Memos', icon: Mic, section: 'KNOWLEDGE', blurb: 'Say it, keep it', keywords: 'record audio voice speech transcript dictate' },
-  { id: 'memory', label: 'Memory Stream', icon: Activity, section: 'KNOWLEDGE', blurb: 'What happened, in order', keywords: 'timeline events log history' },
-  { id: 'studio', label: 'Image Studio', icon: Palette, section: 'CREATE', blurb: 'Pictures and brand', keywords: 'image picture generate brand colours palette tokens design' },
-  { id: 'creator', label: 'Creator Lab', icon: Rocket, section: 'CREATE', badge: 'NEW', blurb: 'Content and income', keywords: 'creator content tiktok discord money income sponsor clients freelance hooks script teleprompter deals quote pricing' },
-  { id: 'music', label: 'Hank Music', icon: Music2, section: 'CREATE', blurb: 'Your songs, offline', keywords: 'songs player library playlist audio listen' },
-  { id: 'missions', label: 'Mission Board', icon: Kanban, section: 'LIFE', blurb: 'Tasks on a board', keywords: 'kanban tasks cards todo board plan agents' },
-  { id: 'study', label: 'Study Hub', icon: GraduationCap, section: 'LIFE', blurb: 'Courses and focus', keywords: 'courses exams deadlines flashcards pomodoro focus learn school' },
-  { id: 'habits', label: 'Habit Garden', icon: Sprout, section: 'LIFE', blurb: 'Streaks that grow', keywords: 'habits streak plants routine daily' },
-  { id: 'wallet', label: 'Wallet', icon: Wallet, section: 'LIFE', blurb: 'Where the money went', keywords: 'money spending expenses budget finance income' },
-  { id: 'play', label: 'Ra chơi', icon: Gamepad2, section: 'LIFE', blurb: 'Games for a break', keywords: 'games play fun break puzzle sudoku caro snake boats tim so bau cua chơi' },
-  { id: 'diary', label: 'Nhật ký', icon: BookHeart, section: 'LIFE', blurb: 'A page for today', keywords: 'diary journal nhat ky hanh trinh memories kỷ niệm viết mood pet mơ journey' },
+  { id: 'hank', label: tr('Hank 62'), icon: LayoutDashboard, section: 'WORKSPACE', blurb: tr('Today, at a glance'), keywords: 'dashboard home briefing today weather' },
+  { id: 'space', label: tr('SpaceWorkAI'), icon: Boxes, section: 'WORKSPACE', blurb: tr('The agent office in 3D'), keywords: 'floor company agents office 3d' },
+  { id: 'rag', label: tr('Hank RAG'), icon: BrainCircuit, section: 'WORKSPACE', badge: 'AI', blurb: tr('Ask your own notes'), keywords: 'chat ask question search knowledge' },
+  { id: 'pulse', label: tr('Dev Pulse'), icon: HeartPulse, section: 'WORKSPACE', blurb: tr('Repos, builds, uptime'), keywords: 'github repos commits status uptime health deploy actions' },
+  { id: 'shell', label: tr('Git Bash'), icon: Terminal, section: 'WORKSPACE', blurb: tr('A terminal in the page'), keywords: 'terminal command line console cli type' },
+  { id: 'docs', label: tr('Document Vault'), icon: FolderOpen, section: 'KNOWLEDGE', blurb: tr('Files and PDFs'), keywords: 'files upload pdf documents' },
+  { id: 'notes', label: tr('Second Brain'), icon: NotebookPen, section: 'KNOWLEDGE', blurb: tr('Writing and ideas'), keywords: 'notes journal diary write ideas memory' },
+  { id: 'constellation', label: tr('Constellation'), icon: Orbit, section: 'KNOWLEDGE', blurb: tr('Notes as a night sky'), keywords: 'graph map stars notes links sky connections' },
+  { id: 'memos', label: tr('Voice Memos'), icon: Mic, section: 'KNOWLEDGE', blurb: tr('Say it, keep it'), keywords: 'record audio voice speech transcript dictate' },
+  { id: 'memory', label: tr('Memory Stream'), icon: Activity, section: 'KNOWLEDGE', blurb: tr('What happened, in order'), keywords: 'timeline events log history' },
+  { id: 'studio', label: tr('Image Studio'), icon: Palette, section: 'CREATE', blurb: tr('Pictures and brand'), keywords: 'image picture generate brand colours palette tokens design' },
+  { id: 'creator', label: tr('Creator Lab'), icon: Rocket, section: 'CREATE', badge: 'NEW', blurb: tr('Content and income'), keywords: 'creator content tiktok discord money income sponsor clients freelance hooks script teleprompter deals quote pricing' },
+  { id: 'music', label: tr('Hank Music'), icon: Music2, section: 'CREATE', blurb: tr('Your songs, offline'), keywords: 'songs player library playlist audio listen' },
+  { id: 'missions', label: tr('Mission Board'), icon: Kanban, section: 'LIFE', blurb: tr('Tasks on a board'), keywords: 'kanban tasks cards todo board plan agents' },
+  { id: 'study', label: tr('Study Hub'), icon: GraduationCap, section: 'LIFE', blurb: tr('Courses and focus'), keywords: 'courses exams deadlines flashcards pomodoro focus learn school' },
+  { id: 'habits', label: tr('Habit Garden'), icon: Sprout, section: 'LIFE', blurb: tr('Streaks that grow'), keywords: 'habits streak plants routine daily' },
+  { id: 'wallet', label: tr('Wallet'), icon: Wallet, section: 'LIFE', blurb: tr('Where the money went'), keywords: 'money spending expenses budget finance income' },
+  { id: 'play', label: tr('Ra chơi'), icon: Gamepad2, section: 'LIFE', blurb: tr('Games for a break'), keywords: 'games play fun break puzzle sudoku caro snake boats tim so bau cua chơi' },
+  { id: 'diary', label: tr('Nhật ký'), icon: BookHeart, section: 'LIFE', blurb: tr('A page for today'), keywords: 'diary journal nhat ky hanh trinh memories kỷ niệm viết mood pet mơ journey' },
 ];
 
 export const DEFAULT_TAB = 'hank';

@@ -18,6 +18,7 @@ const tabOf = (params, fallback) => {
   return NAVIGATION.some((item) => item.id === wanted) ? wanted : fallback;
 };
 import Workspace from './Workspace';
+import { tr } from './lang';
 
 export default function SpaceHank() {
   useAppViewport(); // the workspace is an app: the page cannot be pinched to zoom
@@ -49,9 +50,9 @@ export default function SpaceHank() {
   // the owner's data is kept in step with the database while signed in (a guest has nothing to sync)
   useEffect(() => (!guest && authenticated ? startSync() : undefined), [guest, authenticated]);
 
-  if (guest && !ready) return <AuthLoading label="Setting up the demo" />;
+  if (guest && !ready) return <AuthLoading label={tr('Setting up the demo')} />;
   if (!guest && authenticated === null && live.unreachable) return <ServerUnreachable apiUrl={spacehankConfig.realtimeApiUrl} />;
-  if (!guest && authenticated === null) return <AuthLoading label={live.waking ? 'Waking the server (a free server can take up to a minute)' : undefined} />;
+  if (!guest && authenticated === null) return <AuthLoading label={live.waking ? tr('Waking the server (a free server can take up to a minute)') : undefined} />;
   // a full page load, so the demo's storage and the real one are never open at the same time
   if (!guest && !authenticated) return <LoginScreen onLogin={live.login} onGuest={() => window.location.assign(DEMO_URL)} />;
 

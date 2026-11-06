@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // Study Hub as plain functions: when a flashcard comes back (spaced repetition) and how far away a date is.
 
 const DAY = 86400000;
@@ -16,10 +17,10 @@ export const newFlashcard = (front, back, deck = '', now = Date.now()) => ({
 });
 
 export const GRADES = [
-  { id: 0, label: 'Again', hint: 'I did not know it' },
-  { id: 1, label: 'Hard', hint: 'I got it, but it was hard' },
-  { id: 2, label: 'Good', hint: 'I knew it' },
-  { id: 3, label: 'Easy', hint: 'No effort' },
+  { id: 0, label: tr('Again'), hint: tr('I did not know it') },
+  { id: 1, label: tr('Hard'), hint: tr('I got it, but it was hard') },
+  { id: 2, label: tr('Good'), hint: tr('I knew it') },
+  { id: 3, label: tr('Easy'), hint: tr('No effort') },
 ];
 
 /**
@@ -52,7 +53,7 @@ export const nextLabels = (card, now = Date.now()) =>
   GRADES.map(({ id }) => {
     const next = review(card, id, now);
     const minutes = Math.round((next.due - now) / MINUTE);
-    return minutes < 60 ? `${minutes} min` : `${next.interval} day${next.interval > 1 ? 's' : ''}`;
+    return minutes < 60 ? tr('{0} min', minutes) : tr('{0} day{1}', next.interval, next.interval > 1 ? tr('s') : '');
   });
 
 const dayStart = (t) => {
@@ -63,7 +64,7 @@ const dayStart = (t) => {
 /** Days from today to a moment, with a phrase for it. */
 export const countdown = (at, now = Date.now()) => {
   const days = Math.round((dayStart(at) - dayStart(now)) / DAY);
-  const label = days === 0 ? 'today' : days === 1 ? 'tomorrow' : days === -1 ? 'yesterday' : days > 0 ? `in ${days} days` : `${-days} days ago`;
+  const label = days === 0 ? 'today' : days === 1 ? 'tomorrow' : days === -1 ? 'yesterday' : days > 0 ? tr('in {0} days', days) : tr('{0} days ago', -days);
   return { days, label, tone: days < 0 ? 'past' : days <= 2 ? 'soon' : 'later' };
 };
 

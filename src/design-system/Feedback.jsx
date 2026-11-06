@@ -1,5 +1,6 @@
 import { AlertTriangle } from 'lucide-react';
 import { clsx } from '../lib/format';
+import { word } from './words';
 
 /** Placeholder block shown while content of a known shape loads, with a soft band of light sweeping across it. Pass a `rounded-*` class to change the corners. */
 export const Skeleton = ({ className }) => (
@@ -44,7 +45,7 @@ export const EmptyState = ({ icon: Icon, title, description, action, className }
 );
 
 /** Something failed. Always say what happened, and offer a retry when one makes sense. */
-export const ErrorState = ({ title = 'Something went wrong', message, action, className }) => (
+export const ErrorState = ({ title = word('Something went wrong'), message, action, className }) => (
   <div
     role="alert"
     className={clsx('flex items-start gap-3 rounded-sm border border-danger/40 bg-danger/5 px-4 py-3', className)}

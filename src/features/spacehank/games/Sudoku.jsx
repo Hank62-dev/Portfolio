@@ -3,11 +3,12 @@ import { Eraser, Lightbulb, RotateCcw } from 'lucide-react';
 import { clashes, makeSudoku } from './logic';
 import { INK, InkBox, InkButton, Note, PENCIL, RED, Score } from './ink';
 import { seconds, useBest } from './shared';
+import { tr } from '../lang';
 
 const LEVELS = [
-  { id: 'easy', label: 'Dễ', blanks: 34 },
-  { id: 'medium', label: 'Vừa', blanks: 44 },
-  { id: 'hard', label: 'Khó', blanks: 52 },
+  { id: 'easy', label: tr('Dễ'), blanks: 34 },
+  { id: 'medium', label: tr('Vừa'), blanks: 44 },
+  { id: 'hard', label: tr('Khó'), blanks: 52 },
 ];
 const CELL = 40;
 
@@ -68,7 +69,7 @@ export default function Sudoku() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-1.5" role="radiogroup" aria-label="Level">
+      <div className="flex gap-1.5" role="radiogroup" aria-label={tr('Level')}>
         {LEVELS.map((l) => (
           <InkButton key={l.id} role="radio" aria-checked={level === l.id} solid={level === l.id} onClick={() => setLevel(l.id)} className="flex-1" tone={level === l.id ? RED : INK}>
             {l.label}
@@ -76,17 +77,17 @@ export default function Sudoku() {
         ))}
       </div>
       <div className="flex gap-2">
-        <Score label="thời gian" value={seconds(time)} />
-        <Score label="gợi ý" value={hints} tone={RED} />
-        <Score label="kỷ lục" value={best === null ? '-' : seconds(best)} />
+        <Score label={tr('thời gian')} value={seconds(time)} />
+        <Score label={tr('gợi ý')} value={hints} tone={RED} />
+        <Score label={tr('kỷ lục')} value={best === null ? '-' : seconds(best)} />
       </div>
 
       {!game ? (
         <p className="grid aspect-square place-items-center font-pen text-[1.6rem]" style={{ color: INK }} role="status">
-          Đang kẻ đề…
+          {tr('Đang kẻ đề…')}
         </p>
       ) : (
-        <svg viewBox={`-4 -4 ${side + 8} ${side + 8}`} className="block w-full" role="grid" aria-label="Sudoku board">
+        <svg viewBox={`-4 -4 ${side + 8} ${side + 8}`} className="block w-full" role="grid" aria-label={tr('Sudoku board')}>
           {chosen !== null &&
             Array.from({ length: 81 }, (_, i) => {
               const inLine = Math.floor(i / 9) === Math.floor(chosen / 9) || i % 9 === chosen % 9;
@@ -115,14 +116,14 @@ export default function Sudoku() {
                     {digit}
                   </text>
                 ) : null}
-                <rect x={c * CELL} y={r * CELL} width={CELL} height={CELL} fill="transparent" role="gridcell" aria-label={`Row ${r + 1}, column ${c + 1}${digit ? `, ${digit}` : ', empty'}`} tabIndex={0} className="cursor-pointer" onClick={() => setChosen(i)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setChosen(i)} />
+                <rect x={c * CELL} y={r * CELL} width={CELL} height={CELL} fill="transparent" role="gridcell" aria-label={tr('Row {0}, column {1}{2}', r + 1, c + 1, digit ? `, ${digit}` : tr(', empty'))} tabIndex={0} className="cursor-pointer" onClick={() => setChosen(i)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setChosen(i)} />
               </g>
             );
           })}
         </svg>
       )}
 
-      <div className="grid grid-cols-9 gap-1.5" role="group" aria-label="Digits">
+      <div className="grid grid-cols-9 gap-1.5" role="group" aria-label={tr('Digits')}>
         {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((d) => (
           <InkBox key={d} as="button" type="button" onClick={() => put(d)} className="aspect-[3/4] transition-transform active:scale-90">
             <span className="grid aspect-[3/4] place-items-center font-pen text-[1.7rem] font-bold" style={{ color: INK }}>
@@ -133,18 +134,18 @@ export default function Sudoku() {
       </div>
       <div className="flex items-center gap-2">
         <InkButton onClick={() => put(0)}>
-          <Eraser size={15} aria-hidden="true" /> Tẩy
+          <Eraser size={15} aria-hidden="true" /> {tr('Tẩy')}
         </InkButton>
         <InkButton onClick={hint}>
-          <Lightbulb size={15} aria-hidden="true" /> Gợi ý
+          <Lightbulb size={15} aria-hidden="true" /> {tr('Gợi ý')}
         </InkButton>
         <InkButton className="ml-auto" tone={RED} onClick={() => deal()}>
-          <RotateCcw size={15} aria-hidden="true" /> Đề mới
+          <RotateCcw size={15} aria-hidden="true" /> {tr('Đề mới')}
         </InkButton>
       </div>
       {solved && (
-        <Note title={record ? 'Kỷ lục mới!' : 'Giải xong rồi!'} detail={`${seconds(time)} · ${hints} gợi ý`}>
-          <InkButton onClick={() => deal()}>Đề khác</InkButton>
+        <Note title={record ? tr('Kỷ lục mới!') : tr('Giải xong rồi!')} detail={tr('{0} · {1} gợi ý', seconds(time), hints)}>
+          <InkButton onClick={() => deal()}>{tr('Đề khác')}</InkButton>
         </Note>
       )}
     </div>

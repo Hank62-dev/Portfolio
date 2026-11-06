@@ -1,6 +1,7 @@
 import { spacehankConfig } from '../config';
 import { isDemo } from '../demo/mode';
 import * as demo from '../demo/mock';
+import { tr } from '../lang';
 
 const { ragApiUrl, ragUserId, maxUploadBytes } = spacehankConfig;
 
@@ -10,7 +11,7 @@ const post = async (path, init) => {
   try {
     response = await fetch(`${ragApiUrl}${path}`, { method: 'POST', ...init });
   } catch {
-    throw new Error('Hank RAG offline.');
+    throw new Error(tr('Hank RAG offline.'));
   }
   const data = (await response.json().catch(() => null)) ?? {};
   return { response, data };
@@ -46,7 +47,7 @@ export const askRag = async ({ sessionId, message, mode, history, web = 'auto' }
     }),
   });
   if (!response.ok) {
-    throw new Error(data.detail || data.error?.message || `Hank RAG request failed (${response.status})`);
+    throw new Error(data.detail || data.error?.message || tr('Hank RAG request failed ({0})', response.status));
   }
   if (data.status === 'error' || !data.response?.message) throw new Error(data.error?.message || '');
   return {
@@ -64,10 +65,10 @@ export const listDocuments = async (scope = spacehankConfig.libraryScope) => {
   try {
     response = await fetch(`${ragApiUrl}/api/docs/${encodeURIComponent(scope)}`);
   } catch {
-    throw new Error('Hank RAG offline.');
+    throw new Error(tr('Hank RAG offline.'));
   }
   const data = (await response.json().catch(() => null)) ?? {};
-  if (!response.ok) throw new Error(data.detail || `Could not load documents (${response.status})`);
+  if (!response.ok) throw new Error(data.detail || tr('Could not load documents ({0})', response.status));
   return data.documents ?? [];
 };
 
@@ -78,19 +79,19 @@ export const deleteDocument = async (docId, scope = spacehankConfig.libraryScope
   try {
     response = await fetch(`${ragApiUrl}/api/docs/${encodeURIComponent(scope)}/${encodeURIComponent(docId)}`, { method: 'DELETE' });
   } catch {
-    throw new Error('Hank RAG offline.');
+    throw new Error(tr('Hank RAG offline.'));
   }
-  if (!response.ok) throw new Error(`Could not delete the document (${response.status})`);
+  if (!response.ok) throw new Error(tr('Could not delete the document ({0})', response.status));
 };
 
 /** Uploads one document into the RAG index. Resolves to the number of chunks created. */
 export const uploadDocument = async ({ file, conversationId }) => {
-  if (file.size > maxUploadBytes) throw new Error(`${file.name} is larger than ${maxUploadBytes / 1024 / 1024} MB.`);
+  if (file.size > maxUploadBytes) throw new Error(tr('{0} is larger than {1} MB.', file.name, maxUploadBytes / 1024 / 1024));
   if (isDemo()) return demo.uploadDocument({ file });
   const form = new FormData();
   form.append('file', file);
   form.append('conversation_id', conversationId);
   const { response, data } = await post('/api/test/upload', { body: form });
-  if (!response.ok) throw new Error(data.detail || `Upload failed (${response.status})`);
+  if (!response.ok) throw new Error(data.detail || tr('Upload failed ({0})', response.status));
   return data.chunks_created ?? data.chunks ?? 0;
 };

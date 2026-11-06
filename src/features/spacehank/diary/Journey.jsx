@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { PenLine } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import Pet from '../pet/Pet';
@@ -76,7 +77,7 @@ function Stone({ row, mood, onPress, today }) {
     <button
       type="button"
       onClick={onPress}
-      aria-label={written ? `${shortLabel(row.d.day)}, ${moodWord(mood) || 'đã viết'}. Đọc lại trang này` : `${shortLabel(row.d.day)}, chưa viết. Viết trang này`}
+      aria-label={written ? tr('{0}, {1}. Đọc lại trang này', shortLabel(row.d.day), moodWord(mood) || tr('đã viết')) : tr('{0}, chưa viết. Viết trang này', shortLabel(row.d.day))}
       className="absolute grid place-items-center rounded-full transition-transform active:scale-90"
       style={{ left: pc(row.x - R, W), top: pc(row.cy - R, row.height), width: pc(R * 2, W), aspectRatio: '1' }}
       data-day={row.d.day}
@@ -145,17 +146,17 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
                 <button type="button" onClick={press} className="paper flex max-h-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl p-2.5 text-left transition-transform active:scale-[0.97]" data-card>
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-x-1.5 font-mono text-[0.62rem] tracking-[0.06em] text-[color:var(--dz-text-3)] uppercase">
-                      {d.isToday ? 'Hôm nay' : shortLabel(d.day)}
+                      {d.isToday ? tr('Hôm nay') : shortLabel(d.day)}
                       {d.mood && <b className="font-body text-[0.72rem] tracking-normal whitespace-nowrap text-[color:var(--dz-amber)] normal-case">{moodWord(d.mood)}</b>}
                     </span>
                     {mark && <span className="block font-display text-[0.98rem] leading-tight text-[color:var(--dz-amber)]">{mark.title}</span>}
-                    <span className="mt-0.5 line-clamp-2 font-body text-[0.82rem] leading-snug text-[color:var(--dz-text)]">{excerptOf(body, 80) || 'Một dấu chân không lời.'}</span>
+                    <span className="mt-0.5 line-clamp-2 font-body text-[0.82rem] leading-snug text-[color:var(--dz-text)]">{excerptOf(body, 80) || tr('Một dấu chân không lời.')}</span>
                   </span>
                   {photo && <Thumb id={photo} size={38} className="!rounded-xl" />}
                 </button>
               ) : (
                 <button type="button" onClick={press} className={clsx('self-start rounded-full px-3 py-1.5 text-left font-body text-[0.85rem] leading-tight transition-transform active:scale-95', d.isToday ? 'bg-[#e0a458] font-semibold text-[#1b1407] shadow-lg' : 'bg-[color:var(--dz-text)]/10 text-[color:var(--dz-text)]/80')}>
-                  {d.isToday ? 'Hôm nay · viết gì đó nhé' : `${shortLabel(d.day)} · chưa ghi`}
+                  {d.isToday ? tr('Hôm nay · viết gì đó nhé') : tr('{0} · chưa ghi', shortLabel(d.day))}
                 </button>
               )}
             </div>

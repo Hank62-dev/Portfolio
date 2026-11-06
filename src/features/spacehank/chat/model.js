@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 // Hank RAG conversations as plain data. A conversation is one small record (`chats`: title, the session the RAG server remembers it by)
 // and every message is a record of its own (`chatMsgs`): a message is written once and never changed, so two devices that both
 // chat in the same conversation simply add to it, and a long conversation never outgrows the size limit of a record.
@@ -16,7 +17,7 @@ export const titleFrom = (text) => {
 /** The record of a new conversation. `sessionId` is what the RAG server keeps its memory of the conversation under. */
 export const newChat = ({ text, sessionPrefix, id = crypto.randomUUID(), now = Date.now() }) => ({
   id,
-  title: titleFrom(text) || 'New chat',
+  title: titleFrom(text) || tr('New chat'),
   sessionId: `${sessionPrefix}-${crypto.randomUUID()}`,
   createdAt: now,
   updatedAt: now,

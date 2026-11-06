@@ -1,3 +1,4 @@
+import { locale } from '../lang';
 // Notes as plain data and plain functions: what a note's title and tags are, how a search ranks them, and the
 // numbers behind the journal's mood chart. Nothing here touches the browser, so all of it is tested.
 
@@ -160,7 +161,7 @@ export const textToHtml = (text) => {
 
 /** The text a new journal entry starts with. */
 export const journalTemplate = (date = new Date()) =>
-  `# ${date.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+  `# ${date.toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
 
 #journal
 

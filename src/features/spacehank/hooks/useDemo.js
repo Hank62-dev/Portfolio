@@ -3,6 +3,7 @@ import { spacehankConfig } from '../config';
 import { DEFAULT_AGENT_ID, createInitialAgents } from '../model/agents';
 import { demoMessage, demoOpening } from '../model/demo';
 import { applyRealtimeMessage } from '../model/realtime';
+import { tr } from '../lang';
 
 const { maxEvents } = spacehankConfig;
 const TICK_MS = 2600;
@@ -40,7 +41,7 @@ export function useDemo(active, notify) {
       agents: [{ id: agentId, status: 'working', task: task.slice(0, 80) }],
       event: { agent: agentId, action: 'started', text: task.slice(0, 120), at: Date.now() },
     });
-    notify?.('Demo mode: this task is simulated and goes nowhere');
+    notify?.(tr('Demo mode: this task is simulated and goes nowhere'));
     return true;
   };
 

@@ -1,3 +1,4 @@
+import { locale, tr } from '../lang';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ChartColumn, ChartPie, Check, CheckCircle2, Info, Plus, Receipt, Sparkles, Target, Trash2, Trophy } from 'lucide-react';
 import { Button, Dialog, Input, Select } from '../../../design-system';
@@ -10,7 +11,7 @@ import { EmptyNote, IconBubble, Label, Panel, Row, Stat } from './ui';
 
 const TONE = { good: 'border-ok/30 bg-ok/[0.07] text-bone', warn: 'border-warn/30 bg-warn/[0.07] text-bone', info: 'border-line bg-wash/[0.03] text-bone-dim' };
 const TONE_ICON = { good: [CheckCircle2, 'text-ok'], warn: [AlertTriangle, 'text-warn'], info: [Info, 'text-bone-faint'] };
-const monthName = (key) => new Date(`${key}-01T00:00:00`).toLocaleDateString('en-GB', { month: 'short' });
+const monthName = (key) => new Date(`${key}-01T00:00:00`).toLocaleDateString(locale(), { month: 'short' });
 const SOURCE_HUES = [22, 150, 46, 215, 270, 330, 180, 90];
 
 function AddIncome({ pieces, onClose }) {
@@ -28,14 +29,14 @@ function AddIncome({ pieces, onClose }) {
   };
 
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow="INCOME" title="Log money that came in" description="Amounts are in Vietnamese dong. Log it when it reaches you, not when it is promised.">
+    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={tr('INCOME')} title={tr('Log money that came in')} description={tr('Amounts are in Vietnamese dong. Log it when it reaches you, not when it is promised.')}>
       <form onSubmit={save} className="flex flex-col gap-4" data-income-form>
-        <Row label="Amount (₫)">
-          <Input aria-label="Amount" inputMode="numeric" placeholder="e.g. 1500000" value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
+        <Row label={tr('Amount (₫)')}>
+          <Input aria-label={tr('Amount')} inputMode="numeric" placeholder={tr('e.g. 1500000')} value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
           {value > 0 && <span className="font-mono text-[0.72rem] text-bone-faint">{vnd(value)}</span>}
         </Row>
-        <Row label="Where from">
-          <Select aria-label="Source" value={source} onChange={(e) => setSource(e.target.value)} compact>
+        <Row label={tr('Where from')}>
+          <Select aria-label={tr('Source')} value={source} onChange={(e) => setSource(e.target.value)} compact>
             {SOURCES.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.label}
@@ -43,11 +44,11 @@ function AddIncome({ pieces, onClose }) {
             ))}
           </Select>
         </Row>
-        <Input aria-label="Note" placeholder="Note (optional), e.g. client name" value={note} onChange={(e) => setNote(e.target.value)} maxLength={120} compact />
+        <Input aria-label={tr('Note')} placeholder={tr('Note (optional), e.g. client name')} value={note} onChange={(e) => setNote(e.target.value)} maxLength={120} compact />
         {pieces.length > 0 && (
-          <Row label="Which video earned it? (optional)">
-            <Select aria-label="Content" value={piece} onChange={(e) => setPiece(e.target.value)} compact>
-              <option value="">None</option>
+          <Row label={tr('Which video earned it? (optional)')}>
+            <Select aria-label={tr('Content')} value={piece} onChange={(e) => setPiece(e.target.value)} compact>
+              <option value="">{tr('None')}</option>
               {pieces.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.title}
@@ -57,7 +58,7 @@ function AddIncome({ pieces, onClose }) {
           </Row>
         )}
         <Button type="submit" disabled={!value} className="w-full justify-center">
-          <Check size={15} aria-hidden="true" /> Log it
+          <Check size={15} aria-hidden="true" /> {tr('Log it')}
         </Button>
       </form>
     </Dialog>
@@ -71,7 +72,7 @@ export default function MoneyPanel() {
   const settings = useStore(creatorSettings);
   const [adding, setAdding] = useState(false);
   const [goalText, setGoalText] = useState(settings.goal ? String(settings.goal) : '');
-  useFab({ label: 'Log income', icon: Plus, onPress: () => setAdding(true) });
+  useFab({ label: tr('Log income'), icon: Plus, onPress: () => setAdding(true) });
   useEffect(() => {
     void income.load();
     void content.load();
@@ -94,18 +95,18 @@ export default function MoneyPanel() {
   return (
     <div className="flex flex-col gap-4" data-money>
       <Panel
-        title="Pace and goal"
+        title={tr('Pace and goal')}
         icon={Target}
         hue={22}
         aside={
           <Button size="sm" onClick={() => setAdding(true)} className="max-md:hidden" data-add-income>
-            <Plus size={14} aria-hidden="true" /> Log income
+            <Plus size={14} aria-hidden="true" /> {tr('Log income')}
           </Button>
         }
       >
         {goal > 0 ? (
           <div className="mb-5">
-            <div className="relative h-3 overflow-hidden rounded-full bg-wash/10" role="progressbar" aria-label="Progress to the goal" aria-valuemin={0} aria-valuemax={100} aria-valuenow={g.pct}>
+            <div className="relative h-3 overflow-hidden rounded-full bg-wash/10" role="progressbar" aria-label={tr('Progress to the goal')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={g.pct}>
               <i
                 className={clsx('cl-fill block h-full rounded-full', g.reached ? 'bg-gradient-to-r from-ok to-[#b6f0cf]' : 'bg-gradient-to-r from-[hsl(var(--app-hue)_95%_58%)] to-[hsl(calc(var(--app-hue)+34)_95%_70%)]')}
                 style={{ width: `${g.pct}%`, boxShadow: '0 0 18px hsl(var(--app-hue) 95% 60% / 0.5)' }}
@@ -115,27 +116,27 @@ export default function MoneyPanel() {
               <span>
                 {vnd(total)} · {g.pct}%
               </span>
-              <span>{g.reached ? 'Goal reached' : `${vnd(g.remaining)} to go`}</span>
+              <span>{g.reached ? tr('Goal reached') : tr('{0} to go', vnd(g.remaining))}</span>
             </p>
           </div>
         ) : (
-          <p className="mb-4 text-fine text-bone-dim">Set a goal for the month to see how far you are and what each remaining day has to bring.</p>
+          <p className="mb-4 text-fine text-bone-dim">{tr('Set a goal for the month to see how far you are and what each remaining day has to bring.')}</p>
         )}
         <div className="grid grid-cols-3 gap-2.5">
-          <Stat value={vndShort(g.projected)} label="At this pace" tone={goal > 0 && g.projected >= goal ? 'text-ok' : 'text-bone'} />
-          <Stat value={goal > 0 && !g.reached ? vndShort(g.neededPerDay) : '–'} label="Needed per day" />
-          <Stat value={previous ? `${Math.round(((total - previous) / previous) * 100)}%` : '–'} label="vs last month" tone={previous && total >= previous ? 'text-ok' : 'text-bone'} />
+          <Stat value={vndShort(g.projected)} label={tr('At this pace')} tone={goal > 0 && g.projected >= goal ? 'text-ok' : 'text-bone'} />
+          <Stat value={goal > 0 && !g.reached ? vndShort(g.neededPerDay) : '–'} label={tr('Needed per day')} />
+          <Stat value={previous ? `${Math.round(((total - previous) / previous) * 100)}%` : '–'} label={tr('vs last month')} tone={previous && total >= previous ? 'text-ok' : 'text-bone'} />
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-4">
-          <Label className="mr-1">Monthly goal</Label>
-          <Input aria-label="Monthly goal in dong" inputMode="numeric" placeholder="e.g. 10000000" value={goalText} onChange={(e) => setGoalText(e.target.value)} compact className="min-w-0 flex-1" />
+          <Label className="mr-1">{tr('Monthly goal')}</Label>
+          <Input aria-label={tr('Monthly goal in dong')} inputMode="numeric" placeholder={tr('e.g. 10000000')} value={goalText} onChange={(e) => setGoalText(e.target.value)} compact className="min-w-0 flex-1" />
           <Button variant="ghost" size="sm" onClick={saveGoal} data-save-goal>
-            Set goal
+            {tr('Set goal')}
           </Button>
         </div>
       </Panel>
 
-      <Panel title="What the numbers say" icon={Sparkles} hue={46}>
+      <Panel title={tr('What the numbers say')} icon={Sparkles} hue={46}>
         <ul className="flex flex-col gap-2" data-insights>
           {notes.map((n, i) => {
             const [Icon, color] = TONE_ICON[n.tone] ?? TONE_ICON.info;
@@ -150,10 +151,10 @@ export default function MoneyPanel() {
       </Panel>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Panel title="By source" icon={ChartPie} hue={150}>
+        <Panel title={tr('By source')} icon={ChartPie} hue={150}>
           {sources.length === 0 ? (
-            <EmptyNote icon={ChartPie} title="Nothing logged this month">
-              Log the first payment and the sources will fill in here.
+            <EmptyNote icon={ChartPie} title={tr('Nothing logged this month')}>
+              {tr('Log the first payment and the sources will fill in here.')}
             </EmptyNote>
           ) : (
             <ul className="flex flex-col gap-3.5" data-sources>
@@ -179,8 +180,8 @@ export default function MoneyPanel() {
             </ul>
           )}
         </Panel>
-        <Panel title="Last six months" icon={ChartColumn} hue={215}>
-          <ol className="grid grid-cols-6 gap-2.5" aria-label="Income by month" data-trend>
+        <Panel title={tr('Last six months')} icon={ChartColumn} hue={215}>
+          <ol className="grid grid-cols-6 gap-2.5" aria-label={tr('Income by month')} data-trend>
             {months.map((m, i) => {
               const last = i === months.length - 1;
               return (
@@ -205,7 +206,7 @@ export default function MoneyPanel() {
       </div>
 
       {earners.length > 0 && (
-        <Panel title="Content that earned" icon={Trophy} hue={46}>
+        <Panel title={tr('Content that earned')} icon={Trophy} hue={46}>
           <ul className="flex flex-col gap-1">
             {earners.map((e, i) => (
               <li key={e.piece.id} className="flex items-center gap-3 rounded-2xl px-2 py-2 text-fine transition-colors hover:bg-wash/[0.04]">
@@ -219,18 +220,18 @@ export default function MoneyPanel() {
       )}
 
       <Panel
-        title="Recent"
+        title={tr('Recent')}
         icon={Receipt}
         hue={22}
         aside={
-          <Button size="sm" onClick={() => setAdding(true)} className="md:hidden" aria-label="Log income">
-            <Plus size={14} aria-hidden="true" /> Log
+          <Button size="sm" onClick={() => setAdding(true)} className="md:hidden" aria-label={tr('Log income')}>
+            <Plus size={14} aria-hidden="true" /> {tr('Log')}
           </Button>
         }
       >
         {items.length === 0 ? (
-          <EmptyNote icon={Receipt} title="No income logged yet">
-            Log money when it reaches you, not when it is promised. The goal, the charts and the insights all start from here.
+          <EmptyNote icon={Receipt} title={tr('No income logged yet')}>
+            {tr('Log money when it reaches you, not when it is promised. The goal, the charts and the insights all start from here.')}
           </EmptyNote>
         ) : (
           <ul className="flex flex-col" data-income-list>
@@ -242,12 +243,12 @@ export default function MoneyPanel() {
                   <span className="min-w-0 flex-1 leading-tight">
                     <b className="block truncate text-fine font-medium text-bone">{sourceLabel(e.source)}</b>
                     <small className="block truncate text-[0.74rem] text-bone-faint">
-                      {new Date(e.at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                      {new Date(e.at).toLocaleDateString(locale(), { day: 'numeric', month: 'short' })}
                       {e.note ? ` · ${e.note}` : ''}
                     </small>
                   </span>
                   <b className="font-mono text-[0.86rem] text-bone tabular-nums">+{vnd(e.amount)}</b>
-                  <button type="button" aria-label={`Delete ${sourceLabel(e.source)} ${vnd(e.amount)}`} onClick={() => income.remove(e.id)} className="p-1.5 text-bone-faint transition-opacity hover:text-danger md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100">
+                  <button type="button" aria-label={tr('Delete {0} {1}', sourceLabel(e.source), vnd(e.amount))} onClick={() => income.remove(e.id)} className="p-1.5 text-bone-faint transition-opacity hover:text-danger md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100">
                     <Trash2 size={14} aria-hidden="true" />
                   </button>
                 </li>

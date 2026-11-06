@@ -8,6 +8,7 @@ import { looksLikeRequest } from '../model/nlcommands';
 import { library } from '../music/library';
 import { playTrack } from '../music/player';
 import { useStore } from '../store';
+import { tr } from '../lang';
 
 const MAX_TRACKS = 6;
 const ASK_ID = 'ask-hank';
@@ -41,12 +42,12 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
     let all = found;
     if (music && query.trim().length >= 2) {
       const songs = filterCommands(
-        tracks.map((t) => ({ id: `track-${t.id}`, label: t.title, hint: t.artist || 'Song', keywords: `${t.album} ${t.genre}`, track: t })),
+        tracks.map((t) => ({ id: `track-${t.id}`, label: t.title, hint: t.artist || tr('Song'), keywords: `${t.album} ${t.genre}`, track: t })),
         query,
         MAX_TRACKS
       ).map((song) => ({
         id: song.id,
-        label: `Play ${song.label}`,
+        label: tr('Play {0}', song.label),
         hint: song.hint,
         icon: Music2,
         run: () => playTrack(song.track.id, tracks.map((t) => t.id)),
@@ -55,7 +56,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
     }
     if (onInterpret && looksLikeRequest(query)) {
       // a whole sentence is most likely a request, so offer Hank first
-      return [{ id: ASK_ID, label: `Ask Hank: ${query.trim()}`, hint: 'AI', icon: Sparkles }, ...all];
+      return [{ id: ASK_ID, label: tr('Ask Hank: {0}', query.trim()), hint: tr('AI'), icon: Sparkles }, ...all];
     }
     return all;
   }, [commands, query, music, tracks, onInterpret]);
@@ -127,7 +128,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
           }}
           data-palette
         >
-          <Dialog.Title className="sr-only">Command palette</Dialog.Title>
+          <Dialog.Title className="sr-only">{tr('Command palette')}</Dialog.Title>
           <div className="flex items-center gap-3 border-b border-line px-4">
             <Search size={16} className="text-bone-faint" aria-hidden="true" />
             <input
@@ -136,8 +137,8 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
               aria-expanded="true"
               aria-controls="palette-list"
               aria-activedescendant={ask.status === 'idle' && results[active] ? `palette-${results[active].id}` : undefined}
-              aria-label="Search commands, tabs and songs"
-              placeholder={onInterpret ? 'Type a command, or tell Hank what to do…' : 'Type a command, a tab or a song…'}
+              aria-label={tr('Search commands, tabs and songs')}
+              placeholder={onInterpret ? tr('Type a command, or tell Hank what to do…') : tr('Type a command, a tab or a song…')}
               className="h-14 flex-1 bg-transparent text-body text-bone placeholder:text-bone-faint focus:outline-none"
               value={query}
               onChange={(e) => {
@@ -146,12 +147,12 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
               }}
               onKeyDown={onKeyDown}
             />
-            <kbd className="rounded-sm border border-line px-1.5 py-0.5 font-mono text-[0.68rem] text-bone-faint">ESC</kbd>
+            <kbd className="rounded-sm border border-line px-1.5 py-0.5 font-mono text-[0.68rem] text-bone-faint">{tr('ESC')}</kbd>
           </div>
 
           {ask.status === 'idle' ? (
-            <ul ref={list} id="palette-list" role="listbox" aria-label="Results" className="max-h-[50vh] overflow-y-auto p-2">
-              {results.length === 0 && <li className="px-3 py-6 text-center font-mono text-fine text-bone-faint">Nothing matches "{query}".</li>}
+            <ul ref={list} id="palette-list" role="listbox" aria-label={tr('Results')} className="max-h-[50vh] overflow-y-auto p-2">
+              {results.length === 0 && <li className="px-3 py-6 text-center font-mono text-fine text-bone-faint">{tr('Nothing matches "')}{query}".</li>}
               {results.map((command, index) => {
                 const Icon = command.icon;
                 return (
@@ -175,24 +176,24 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
           ) : (
             <div className="flex flex-col gap-4 p-5" role="status" aria-live="polite" data-ask={ask.status}>
               {ask.status === 'thinking' && (
-                <Loading label="Hank is working out what you mean">
+                <Loading label={tr('Hank is working out what you mean')}>
                   <SkeletonLines lines={2} />
                 </Loading>
               )}
               {ask.status === 'confirm' && (
                 <>
                   <div>
-                    <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">Hank understood</span>
+                    <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Hank understood')}</span>
                     <p className="mt-1 font-display text-h3 leading-tight text-bone" data-understood>
                       {ask.parsed.describe}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button size="sm" onClick={confirm}>
-                      Do it <CornerDownLeft size={13} aria-hidden="true" />
+                      {tr('Do it')} <CornerDownLeft size={13} aria-hidden="true" />
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => setAsk(IDLE)}>
-                      Not that
+                      {tr('Not that')}
                     </Button>
                   </div>
                 </>
@@ -204,7 +205,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
                   </p>
                   <div>
                     <Button variant="ghost" size="sm" onClick={() => setAsk(IDLE)}>
-                      Back to search
+                      {tr('Back to search')}
                     </Button>
                   </div>
                 </>
@@ -215,14 +216,14 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
           <div className="flex gap-4 border-t border-line px-4 py-2 font-mono text-[0.68rem] text-bone-faint">
             {ask.status === 'confirm' ? (
               <>
-                <span>↵ do it</span>
-                <span>esc back</span>
+                <span>{tr('↵ do it')}</span>
+                <span>{tr('esc back')}</span>
               </>
             ) : (
               <>
-                <span>↑↓ move</span>
-                <span>↵ run</span>
-                <span>esc close</span>
+                <span>{tr('↑↓ move')}</span>
+                <span>{tr('↵ run')}</span>
+                <span>{tr('esc close')}</span>
               </>
             )}
           </div>

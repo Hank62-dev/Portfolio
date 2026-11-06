@@ -1,5 +1,6 @@
 import { isDemo } from '../demo/mode';
 import { createStore } from '../store';
+import { tr } from '../lang';
 
 // The diary lock. The browser's own sign-in (WebAuthn) asks the phone for a fingerprint, a face, or the screen lock when the
 // phone has none of those, and tells the page it passed. The page then shows the diary.
@@ -47,15 +48,15 @@ export const readable = (notes) => hideLocked(notes, isLocked());
 export const describeLockError = (error) => {
   switch (error?.name) {
     case 'NotAllowedError':
-      return 'Chưa xác thực được. Có thể bạn đã huỷ hoặc quá thời gian, thử lại nhé.';
+      return tr('Chưa xác thực được. Có thể bạn đã huỷ hoặc quá thời gian, thử lại nhé.');
     case 'InvalidStateError':
-      return 'Khoá này đã được tạo trên máy này rồi.';
+      return tr('Khoá này đã được tạo trên máy này rồi.');
     case 'NotSupportedError':
-      return 'Máy này chưa hỗ trợ khoá bằng vân tay hay khuôn mặt.';
+      return tr('Máy này chưa hỗ trợ khoá bằng vân tay hay khuôn mặt.');
     case 'SecurityError':
-      return 'Trình duyệt chỉ cho dùng vân tay trên trang https hoặc localhost.';
+      return tr('Trình duyệt chỉ cho dùng vân tay trên trang https hoặc localhost.');
     default:
-      return 'Không dùng được vân tay lúc này. Thử lại sau nhé.';
+      return tr('Không dùng được vân tay lúc này. Thử lại sau nhé.');
   }
 };
 
@@ -84,7 +85,7 @@ export const enableLock = () =>
     const credential = await navigator.credentials.create({
       publicKey: {
         rp: { name: 'Hank62', id: window.location.hostname },
-        user: { id: bytes(16), name: 'nhat-ky', displayName: 'Nhật ký' },
+        user: { id: bytes(16), name: 'nhat-ky', displayName: tr('Nhật ký') },
         challenge: bytes(32),
         pubKeyCredParams: [
           { type: 'public-key', alg: -7 },
@@ -95,7 +96,7 @@ export const enableLock = () =>
         timeout: 60000,
       },
     });
-    if (!credential) throw new DOMException('No credential', 'NotAllowedError');
+    if (!credential) throw new DOMException(tr('No credential'), 'NotAllowedError');
     write({ id: encode(credential.rawId), at: Date.now() });
     diaryLock.set({ enabled: true, unlocked: true });
   });
@@ -117,7 +118,7 @@ export const unlockDiary = () =>
         timeout: 60000,
       },
     });
-    if (!proof) throw new DOMException('No proof', 'NotAllowedError');
+    if (!proof) throw new DOMException(tr('No proof'), 'NotAllowedError');
     diaryLock.set({ unlocked: true, quiet: false });
   });
 

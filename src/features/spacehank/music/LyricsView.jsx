@@ -8,6 +8,7 @@ import { useCoverTint } from './Cover';
 import { MODES, focusWindow, followRatio, lineProgress, lyricPalette, lyricPrefs, setLyricPrefs, stepSize } from './lyricModes';
 import { activeLine } from './lrc';
 import { Ribbon } from './parts';
+import { tr } from '../lang';
 
 // Text sizes of the small view beside the player. (The full-screen stage is sized by the screen: see STAGE_SCALE.)
 const TEXT = { s: 'text-[1.05rem] md:text-[1.35rem]', m: 'text-[1.3rem] md:text-[1.8rem]', l: 'text-[1.65rem] md:text-[2.3rem]' };
@@ -33,7 +34,7 @@ function useAutoScroll(active, anchor = 0.36) {
 }
 
 const Rest = ({ active }) => (
-  <span className={clsx('inline-flex items-center gap-[0.3em] align-middle', active ? 'opacity-90' : 'opacity-25')} aria-label="Instrumental">
+  <span className={clsx('inline-flex items-center gap-[0.3em] align-middle', active ? 'opacity-90' : 'opacity-25')} aria-label={tr('Instrumental')}>
     {[0, 1, 2].map((i) => (
       <i key={i} className={clsx('size-[0.35em] rounded-full bg-current', active && 'animate-pulse')} style={{ animationDelay: `${i * 180}ms` }} />
     ))}
@@ -54,7 +55,7 @@ function ScrollingLines({ lines, active, time, mode, size, onSeek, stage }) {
   const style = stage && mode !== 'full' ? { fontSize: 'calc(clamp(1.9rem, 5.2vw, 4.6rem) * var(--ly-scale, 1))' } : undefined;
   const heavy = 'text-[1em] leading-[1.08] font-bold tracking-[-0.045em]';
   return (
-    <div ref={box} {...bind} style={style} className={clsx('relative overflow-y-auto overscroll-contain', stage ? 'h-full' : BOX, '[mask-image:linear-gradient(transparent,#000_14%,#000_80%,transparent)]')} aria-label="Lyrics" tabIndex={0} data-lyrics-mode={mode}>
+    <div ref={box} {...bind} style={style} className={clsx('relative overflow-y-auto overscroll-contain', stage ? 'h-full' : BOX, '[mask-image:linear-gradient(transparent,#000_14%,#000_80%,transparent)]')} aria-label={tr('Lyrics')} tabIndex={0} data-lyrics-mode={mode}>
       <div className={pad}>
         {lines.map((entry, i) => {
           const sung = i === active;
@@ -105,7 +106,7 @@ function ScrollingLines({ lines, active, time, mode, size, onSeek, stage }) {
 function FocusLines({ lines, active, size, stage }) {
   const shown = focusWindow(lines, active);
   return (
-    <div className={clsx('flex flex-col items-center justify-center gap-3 px-2 text-center', stage ? 'h-full' : BOX)} aria-label="Lyrics" aria-live="polite" data-lyrics-mode="focus">
+    <div className={clsx('flex flex-col items-center justify-center gap-3 px-2 text-center', stage ? 'h-full' : BOX)} aria-label={tr('Lyrics')} aria-live="polite" data-lyrics-mode="focus">
       {shown.map(({ at, index, line }) => (
         <p
           key={index}
@@ -148,7 +149,7 @@ export function PlainLyrics({ text, time, duration, size, stage = false }) {
         onPointerDown={letGo}
         style={stage ? { fontSize: 'calc(clamp(1.5rem, 3.6vw, 3.2rem) * var(--ly-scale, 1))', color: 'var(--ly-next)' } : undefined}
         className={clsx('overflow-y-auto overscroll-contain whitespace-pre-line [mask-image:linear-gradient(transparent,#000_8%,#000_92%,transparent)]', stage ? 'h-full py-[20vh] font-body leading-[1.15] font-bold tracking-[-0.04em]' : clsx(BOX, 'py-4 font-display leading-relaxed text-bone', TEXT[size]))}
-        aria-label="Lyrics"
+        aria-label={tr('Lyrics')}
         tabIndex={0}
         data-plain-lyrics
       >
@@ -156,7 +157,7 @@ export function PlainLyrics({ text, time, duration, size, stage = false }) {
       </div>
       {!following && duration > 20 && (
         <button type="button" onClick={() => setFollowing(true)} className="absolute right-1 bottom-2 rounded-full border border-line-strong bg-ink-1/90 px-3 py-1 font-mono text-[0.68rem] text-bone backdrop-blur" data-follow>
-          Follow the song
+          {tr('Follow the song')}
         </button>
       )}
     </div>
@@ -171,7 +172,7 @@ export function LyricsBar({ synced, onStage, stage = false, children }) {
   return (
     <div className="flex flex-wrap items-center gap-1.5" data-lyrics-bar>
       {synced && (
-        <div className="flex flex-wrap items-center gap-1.5" role="radiogroup" aria-label="Lyrics look">
+        <div className="flex flex-wrap items-center gap-1.5" role="radiogroup" aria-label={tr('Lyrics look')}>
           {MODES.map(({ id, label, hint }) => (
             <button key={id} type="button" role="radio" aria-checked={mode === id} title={hint} onClick={() => setLyricPrefs({ mode: id })} className={chip(mode === id)}>
               {label}
@@ -180,14 +181,14 @@ export function LyricsBar({ synced, onStage, stage = false, children }) {
         </div>
       )}
       <span className="ml-auto flex items-center gap-1.5">
-        <button type="button" aria-label="Smaller text" disabled={size === 's'} onClick={() => setLyricPrefs({ size: stepSize(size, -1) })} className={step}>
-          A−
+        <button type="button" aria-label={tr('Smaller text')} disabled={size === 's'} onClick={() => setLyricPrefs({ size: stepSize(size, -1) })} className={step}>
+          {tr('A−')}
         </button>
-        <button type="button" aria-label="Larger text" disabled={size === 'l'} onClick={() => setLyricPrefs({ size: stepSize(size, 1) })} className={step}>
-          A+
+        <button type="button" aria-label={tr('Larger text')} disabled={size === 'l'} onClick={() => setLyricPrefs({ size: stepSize(size, 1) })} className={step}>
+          {tr('A+')}
         </button>
         {onStage && (
-          <button type="button" aria-label="Lyrics full screen" onClick={onStage} className={step}>
+          <button type="button" aria-label={tr('Lyrics full screen')} onClick={onStage} className={step}>
             <Maximize2 size={13} aria-hidden="true" />
           </button>
         )}
@@ -236,22 +237,22 @@ export function LyricsStage({ track, lines, text, time, duration, onSeek, onClos
       className="dark-island fixed inset-0 z-[88] flex animate-fade-in flex-col transition-colors duration-1000"
       style={{ backgroundColor: palette.bg, '--ly-active': palette.active, '--ly-next': palette.next, '--ly-past': palette.past, '--ly-scale': STAGE_SCALE[size] }}
       role="dialog"
-      aria-label="Lyrics"
+      aria-label={tr('Lyrics')}
       data-lyrics-stage
     >
       <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28 bg-gradient-to-b from-black/55 to-transparent" aria-hidden="true" />
       <header className="relative z-20 flex items-start gap-4 px-5 pt-[calc(0.9rem+env(safe-area-inset-top))] md:px-8">
         <div className="min-w-0 flex-1 leading-tight">
           <h2 className="truncate font-body text-[1.05rem] font-bold tracking-tight text-white uppercase">{track.title}</h2>
-          <p className="truncate font-body text-[0.8rem] text-white/60">{track.artist || 'Unknown artist'}</p>
+          <p className="truncate font-body text-[0.8rem] text-white/60">{track.artist || tr('Unknown artist')}</p>
         </div>
         <LyricsBar synced={lines.length > 0} stage>
           {canWide && (
-            <button type="button" aria-label={wide ? 'Leave the browser full screen' : 'Browser full screen'} onClick={toggleWide} className={iconButton} data-wide>
+            <button type="button" aria-label={wide ? tr('Leave the browser full screen') : tr('Browser full screen')} onClick={toggleWide} className={iconButton} data-wide>
               <Scan size={15} aria-hidden="true" />
             </button>
           )}
-          <button type="button" aria-label="Close the full screen lyrics" onClick={leave} className={iconButton} data-close-stage>
+          <button type="button" aria-label={tr('Close the full screen lyrics')} onClick={leave} className={iconButton} data-close-stage>
             <Minimize2 size={15} aria-hidden="true" />
           </button>
         </LyricsBar>

@@ -1,6 +1,7 @@
 import { useRef, useState, useSyncExternalStore } from 'react';
 import { AlertTriangle, CheckCircle2, Info, X } from 'lucide-react';
 import { clsx } from '../lib/format';
+import { word } from './words';
 
 // Short messages the workspace shows about what just happened ("Saved", "Server offline"). They slide in from the top of the
 // screen, stack (newest last), go away by themselves, and can be swiped or tapped away. Anything can call `pushToast`.
@@ -94,7 +95,7 @@ function Item({ toast }) {
           <Icon size={16} aria-hidden="true" />
         </span>
         <p className="min-w-0 flex-1 py-1 text-[0.9rem] leading-snug break-words text-bone">{toast.message}</p>
-        <button type="button" aria-label="Dismiss" onClick={() => dismissToast(toast.id)} onPointerDown={(e) => e.stopPropagation()} className="grid size-8 shrink-0 place-items-center rounded-full text-bone-faint transition-colors hover:text-bone active:scale-90">
+        <button type="button" aria-label={word('Dismiss')} onClick={() => dismissToast(toast.id)} onPointerDown={(e) => e.stopPropagation()} className="grid size-8 shrink-0 place-items-center rounded-full text-bone-faint transition-colors hover:text-bone active:scale-90">
           <X size={14} aria-hidden="true" />
         </button>
       </div>

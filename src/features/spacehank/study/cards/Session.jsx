@@ -9,6 +9,7 @@ import { GRADES, nextLabels, review } from '../model';
 import { flashcards } from '../store';
 import { recordReview, unrecordReview } from './log';
 import { clozeFront, clozeParts, dueIn, duration, hasCloze, summarize } from './states';
+import { tr } from '../../lang';
 
 const SWIPE = 100; // px to drag a card before letting go answers it
 const TONE = [
@@ -26,7 +27,7 @@ function Side({ card, back }) {
   const text = !back ? (cloze ? clozeFront(card.front) : card.front) : null;
   return (
     <div className="flex flex-col items-center gap-4 text-center">
-      <span className="font-mono text-[0.62rem] tracking-[0.16em] text-bone-faint uppercase">{back ? 'Answer' : cloze ? 'Fill the blank' : 'Question'}</span>
+      <span className="font-mono text-[0.62rem] tracking-[0.16em] text-bone-faint uppercase">{back ? tr('Answer') : cloze ? tr('Fill the blank') : tr('Question')}</span>
       {back ? (
         <>
           {cloze && (
@@ -121,7 +122,7 @@ function Flip({ card, flipped, canSwipe, onFlip, onSwipe }) {
       </div>
       {dx !== 0 && (
         <span className={clsx('pointer-events-none absolute top-4 rounded-full border-2 px-3 py-1 font-mono text-[0.78rem] font-semibold tracking-wide uppercase', dx > 0 ? 'left-4 border-ok text-ok' : 'right-4 border-danger text-danger')} style={{ opacity: share }}>
-          {dx > 0 ? 'Good' : 'Again'}
+          {dx > 0 ? tr('Good') : tr('Again')}
         </span>
       )}
     </div>
@@ -142,10 +143,10 @@ function Summary({ grades, startedAt, pool, onClose, onMore }) {
         <Check size={30} strokeWidth={2.6} aria-hidden="true" />
       </span>
       <div>
-        <h2 className="font-display text-h3 text-bone">{result.total ? 'Session complete' : 'Nothing answered'}</h2>
+        <h2 className="font-display text-h3 text-bone">{result.total ? tr('Session complete') : tr('Nothing answered')}</h2>
         {result.total > 0 && (
           <p className="mt-1 text-fine text-bone-dim">
-            {result.total} {result.total === 1 ? 'answer' : 'answers'} in {duration(Date.now() - startedAt)}
+            {result.total} {result.total === 1 ? tr('answer') : tr('answers')} {tr('in')} {duration(Date.now() - startedAt)}
           </p>
         )}
       </div>
@@ -154,14 +155,14 @@ function Summary({ grades, startedAt, pool, onClose, onMore }) {
           <div className="grid w-full grid-cols-2 gap-3">
             <div className="rounded-3xl border border-line bg-ink-1 p-4">
               <b className="block font-display text-h3 leading-none text-ok">{result.accuracy}%</b>
-              <small className="mt-2 block text-[0.74rem] text-bone-faint">Remembered</small>
+              <small className="mt-2 block text-[0.74rem] text-bone-faint">{tr('Remembered')}</small>
             </div>
             <div className="rounded-3xl border border-line bg-ink-1 p-4">
               <b className="block font-display text-h3 leading-none text-bone">{result.counts[0]}</b>
-              <small className="mt-2 block text-[0.74rem] text-bone-faint">To see again</small>
+              <small className="mt-2 block text-[0.74rem] text-bone-faint">{tr('To see again')}</small>
             </div>
           </div>
-          <ul className="flex w-full flex-col gap-2" aria-label="Answers">
+          <ul className="flex w-full flex-col gap-2" aria-label={tr('Answers')}>
             {GRADES.map((g, i) => (
               <li key={g.id} className="flex items-center gap-3 font-mono text-[0.72rem] text-bone-dim">
                 <span className="w-12 text-left">{g.label}</span>
@@ -174,15 +175,15 @@ function Summary({ grades, startedAt, pool, onClose, onMore }) {
           </ul>
         </>
       )}
-      <p className="text-fine text-bone-dim">{dueLeft ? `${dueLeft} more ${dueLeft === 1 ? 'card is' : 'cards are'} due.` : next ? `Next card ${dueIn(next.due, now)}.` : 'Everything here is done.'}</p>
+      <p className="text-fine text-bone-dim">{dueLeft ? tr('{0} more {1} due.', dueLeft, dueLeft === 1 ? tr('card is') : tr('cards are')) : next ? tr('Next card {0}.', dueIn(next.due, now)) : tr('Everything here is done.')}</p>
       <div className="flex w-full flex-col gap-2">
         {dueLeft > 0 && (
           <Button onClick={onMore} className="w-full justify-center">
-            Keep going
+            {tr('Keep going')}
           </Button>
         )}
         <Button variant={dueLeft > 0 ? 'ghost' : 'primary'} onClick={onClose} className="w-full justify-center">
-          Done
+          {tr('Done')}
         </Button>
       </div>
     </div>
@@ -259,18 +260,18 @@ export default function Session({ cards, onClose, onMore }) {
   const percent = queue.length ? Math.round((index / queue.length) * 100) : 0;
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex animate-fade-in flex-col overflow-y-auto bg-ink-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]" role="dialog" aria-label="Flashcard session" data-session>
+    <div className="fixed inset-0 z-[70] flex animate-fade-in flex-col overflow-y-auto bg-ink-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]" role="dialog" aria-label={tr('Flashcard session')} data-session>
       <header className="flex items-center gap-3 px-4 pt-3 pb-2">
-        <button type="button" onClick={leave} aria-label="Close the session" className="grid size-10 shrink-0 place-items-center rounded-full border border-line text-bone-dim transition-transform hover:text-bone active:scale-90">
+        <button type="button" onClick={leave} aria-label={tr('Close the session')} className="grid size-10 shrink-0 place-items-center rounded-full border border-line text-bone-dim transition-transform hover:text-bone active:scale-90">
           <X size={18} aria-hidden="true" />
         </button>
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-wash/[0.07]" role="progressbar" aria-label="Session progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
+        <div className="h-2 flex-1 overflow-hidden rounded-full bg-wash/[0.07]" role="progressbar" aria-label={tr('Session progress')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
           <i className="block h-full rounded-full bg-gradient-to-r from-signal to-[#8a3bff] transition-[width] duration-500" style={{ width: `${percent}%` }} />
         </div>
         <span className="w-12 shrink-0 text-right font-mono text-[0.72rem] text-bone-faint tabular-nums" data-progress>
           {Math.min(index, queue.length)}/{queue.length}
         </span>
-        <button type="button" onClick={undo} disabled={!history.length} aria-label="Undo the last answer" className="grid size-10 shrink-0 place-items-center rounded-full border border-line text-bone-dim transition-transform hover:text-bone active:scale-90 disabled:opacity-30">
+        <button type="button" onClick={undo} disabled={!history.length} aria-label={tr('Undo the last answer')} className="grid size-10 shrink-0 place-items-center rounded-full border border-line text-bone-dim transition-transform hover:text-bone active:scale-90 disabled:opacity-30">
           <Undo2 size={17} aria-hidden="true" />
         </button>
       </header>
@@ -282,7 +283,7 @@ export default function Session({ cards, onClose, onMore }) {
           <Flip key={`${card.id}-${index}`} card={card} flipped={flipped} canSwipe={revealed} onFlip={flip} onSwipe={answer} />
 
           {revealed ? (
-            <div className="grid grid-cols-4 gap-2" role="group" aria-label="How well did you know it?">
+            <div className="grid grid-cols-4 gap-2" role="group" aria-label={tr('How well did you know it?')}>
               {GRADES.map((g, i) => (
                 <button key={g.id} type="button" onClick={() => answer(g.id)} title={g.hint} className={clsx('flex min-h-16 flex-col items-center justify-center gap-0.5 rounded-2xl border px-1 transition-all active:scale-95', TONE[i].ring)} data-grade={g.id}>
                   <b className="text-[0.84rem] font-medium text-bone">{g.label}</b>
@@ -292,11 +293,11 @@ export default function Session({ cards, onClose, onMore }) {
             </div>
           ) : (
             <Button onClick={flip} className="w-full justify-center" data-show-answer>
-              <RotateCcw size={15} aria-hidden="true" /> Show the answer
+              <RotateCcw size={15} aria-hidden="true" /> {tr('Show the answer')}
             </Button>
           )}
-          <p className="hidden text-center font-mono text-[0.66rem] text-bone-faint md:block">Space to turn the card · 1 to 4 to answer · Z to undo · Esc to close</p>
-          <p className="text-center font-mono text-[0.66rem] text-bone-faint md:hidden">{revealed ? 'Drag the card right for Good, left for Again' : 'Tap the card to turn it over'}</p>
+          <p className="hidden text-center font-mono text-[0.66rem] text-bone-faint md:block">{tr('Space to turn the card · 1 to 4 to answer · Z to undo · Esc to close')}</p>
+          <p className="text-center font-mono text-[0.66rem] text-bone-faint md:hidden">{revealed ? tr('Drag the card right for Good, left for Again') : tr('Tap the card to turn it over')}</p>
         </div>
       )}
     </div>,

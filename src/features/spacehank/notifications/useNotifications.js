@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useEffect, useRef } from 'react';
 import { useUpdate } from '../../../lib/appUpdate';
 import { calendarBetween } from '../api/owner';
@@ -46,6 +47,7 @@ export function useNotifications({ guest, connected, agents, onTab }) {
     const tick = () => {
       const notes = notesStore.get();
       for (const item of reminders({
+        t: tr,
         now: new Date(),
         events: calendar,
         cards: flashcards.store.get().items,
@@ -83,14 +85,14 @@ export function useNotifications({ guest, connected, agents, onTab }) {
       everOnline.current = true;
       if (wasDown.current) {
         wasDown.current = false;
-        notify({ key: `online:${Date.now()}`, kind: 'system', title: 'Back online', body: 'The realtime server is connected again.', tone: 'success', announce: false });
+        notify({ key: `online:${Date.now()}`, kind: 'system', title: tr('Back online'), body: tr('The realtime server is connected again.'), tone: 'success', announce: false });
       }
       return undefined;
     }
     if (!everOnline.current) return undefined;
     const timer = window.setTimeout(() => {
       wasDown.current = true;
-      notify({ key: `offline:${Date.now()}`, kind: 'system', title: 'The server went offline', body: 'Tasks cannot be sent until it is back.', tone: 'error', announce: false });
+      notify({ key: `offline:${Date.now()}`, kind: 'system', title: tr('The server went offline'), body: tr('Tasks cannot be sent until it is back.'), tone: 'error', announce: false });
     }, OFFLINE_AFTER);
     return () => window.clearTimeout(timer);
   }, [connected, guest]);
@@ -106,7 +108,7 @@ export function useNotifications({ guest, connected, agents, onTab }) {
       const was = working.current.get(agent.id);
       const now = isWorking(agent);
       if (was && !now && agent.status === 'completed') {
-        notify({ key: `agent:${agent.id}:${Math.floor(Date.now() / 60000)}`, kind: 'system', title: `${agent.name} finished`, body: was.task, tab: 'space' });
+        notify({ key: `agent:${agent.id}:${Math.floor(Date.now() / 60000)}`, kind: 'system', title: tr('{0} finished', agent.name), body: was.task, tab: 'space' });
       }
       working.current.set(agent.id, now ? { task: agent.task } : null);
     }
@@ -115,7 +117,7 @@ export function useNotifications({ guest, connected, agents, onTab }) {
   // a new version of the app is waiting
   const update = useUpdate();
   useEffect(() => {
-    if (update.ready && !guest) notify({ key: `update:${Date.now()}`, kind: 'system', title: 'A new version is ready', body: 'Tap the update pill to switch to it.', tone: 'info' });
+    if (update.ready && !guest) notify({ key: `update:${Date.now()}`, kind: 'system', title: tr('A new version is ready'), body: tr('Tap the update pill to switch to it.'), tone: 'info' });
   }, [update.ready, guest]);
 
   // a tapped phone notification, with the app already open, asks it to go to a tab; a push from the server lands in the list

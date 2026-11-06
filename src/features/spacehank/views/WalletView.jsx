@@ -7,6 +7,7 @@ import { useFab } from '../fab';
 import { useStore } from '../store';
 import { CATEGORIES, categoryOf, compact, formatVnd, inMonth, monthKey, parseEntry, summarize, toCsv } from '../wallet/model';
 import { budgets, entries } from '../wallet/store';
+import { locale, tr } from '../lang';
 
 const CAT_ICONS = { utensils: Utensils, bus: Bus, home: House, study: GraduationCap, fun: Gamepad2, health: HeartPulse, bag: ShoppingBag, cash: Banknote, other: CircleEllipsis };
 
@@ -25,7 +26,7 @@ const EXAMPLES = ['ăn trưa 45k', 'grab 38 nghìn', 'cà phê 30k', 'lương 8t
 
 const monthLabel = (key) => {
   const [y, m] = key.split('-').map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  return new Date(y, m - 1, 1).toLocaleDateString(locale(), { month: 'long', year: 'numeric' });
 };
 const shift = (key, by) => {
   const [y, m] = key.split('-').map(Number);
@@ -38,7 +39,7 @@ function Donut({ parts, total }) {
   const c = 2 * Math.PI * r;
   let offset = 0;
   return (
-    <div className="relative size-40 shrink-0" role="img" aria-label="Spending by category">
+    <div className="relative size-40 shrink-0" role="img" aria-label={tr('Spending by category')}>
       <svg viewBox="0 0 140 140" className="-rotate-90">
         <circle cx="70" cy="70" r={r} fill="none" stroke="var(--color-line)" strokeWidth="16" />
         {parts.map((p) => {
@@ -51,7 +52,7 @@ function Donut({ parts, total }) {
       <span className="absolute inset-0 grid place-items-center text-center leading-tight">
         <span>
           <b className="block font-display text-h3 text-bone tabular-nums">{compact(total)}</b>
-          <small className="font-mono text-[0.62rem] text-bone-faint">spent</small>
+          <small className="font-mono text-[0.62rem] text-bone-faint">{tr('spent')}</small>
         </span>
       </span>
     </div>
@@ -66,7 +67,7 @@ function Days({ byDay, month }) {
   const max = Math.max(1, ...byDay.map((d) => d.total));
   const today = monthKey() === month ? new Date().getDate() : -1;
   return (
-    <div className="flex h-28 items-end gap-[3px]" role="img" aria-label="Spending per day">
+    <div className="flex h-28 items-end gap-[3px]" role="img" aria-label={tr('Spending per day')}>
       {Array.from({ length: count }, (_, i) => {
         const v = map.get(i + 1) ?? 0;
         return <i key={i} title={`${i + 1}: ${formatVnd(v)}`} className={clsx('block flex-1 rounded-full', v ? 'bg-gradient-to-t from-signal to-[#ffb38a]' : 'bg-line', i + 1 === today && 'ring-1 ring-bone/60')} style={{ height: v ? `${Math.max(8, (v / max) * 100)}%` : '5%' }} />;
@@ -83,7 +84,7 @@ export default function WalletView() {
   const [draft, setDraft] = useState(null); // what the line was understood as, before it is saved
   const [editing, setEditing] = useState(false);
   const field = useRef(null);
-  useFab({ label: 'Log money', icon: Plus, onPress: () => { window.scrollTo({ top: 0, behavior: 'smooth' }); field.current?.focus(); } });
+  useFab({ label: tr('Log money'), icon: Plus, onPress: () => { window.scrollTo({ top: 0, behavior: 'smooth' }); field.current?.focus(); } });
 
   useEffect(() => {
     void entries.load();
@@ -131,9 +132,9 @@ export default function WalletView() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHead eyebrow="Money" title="My" accent="Wallet." description="Type it the way you would say it: “ăn trưa 45k”, “grab 38 nghìn”, “lương 8tr”. It works out the amount and the category.">
+      <PageHead eyebrow={tr('Money')} title={tr('My')} accent="Wallet." description={tr('Type it the way you would say it: “ăn trưa 45k”, “grab 38 nghìn”, “lương 8tr”. It works out the amount and the category.')}>
         <Button variant="ghost" size="sm" disabled={!here.length} onClick={() => { const url = URL.createObjectURL(new Blob([toCsv(here)], { type: 'text/csv' })); const a = document.createElement('a'); a.href = url; a.download = `wallet-${month}.csv`; a.click(); URL.revokeObjectURL(url); }}>
-          <Download size={14} aria-hidden="true" /> Export CSV
+          <Download size={14} aria-hidden="true" /> {tr('Export CSV')}
         </Button>
       </PageHead>
 
@@ -142,15 +143,15 @@ export default function WalletView() {
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">
             <WalletIcon size={18} aria-hidden="true" />
           </span>
-          <input ref={field} aria-label="Log money" placeholder="ăn trưa 45k" autoComplete="off" value={text} onChange={(e) => { setText(e.target.value); setDraft(null); }} className="h-11 min-w-0 flex-1 bg-transparent text-lead text-bone placeholder:text-bone-faint focus-visible:outline-none" />
+          <input ref={field} aria-label={tr('Log money')} placeholder={tr('ăn trưa 45k')} autoComplete="off" value={text} onChange={(e) => { setText(e.target.value); setDraft(null); }} className="h-11 min-w-0 flex-1 bg-transparent text-lead text-bone placeholder:text-bone-faint focus-visible:outline-none" />
           <Button type="submit" className="shrink-0" disabled={!text.trim()}>
-            <Plus size={15} aria-hidden="true" /> Add
+            <Plus size={15} aria-hidden="true" /> {tr('Add')}
           </Button>
         </div>
 
         {!draft && !text && (
-          <div className="mt-3 flex flex-wrap items-center gap-1.5 px-1" aria-label="Examples">
-            <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">Try</span>
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 px-1" aria-label={tr('Examples')}>
+            <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Try')}</span>
             {EXAMPLES.map((example) => (
               <button key={example} type="button" onClick={() => tryExample(example)} className="rounded-full border border-wash/10 px-3 py-1 font-mono text-[0.74rem] text-bone-dim transition-colors hover:border-signal/50 hover:text-bone">
                 {example}
@@ -162,15 +163,15 @@ export default function WalletView() {
         {draft && (
           <div className="mt-4 flex animate-fade-in flex-col gap-3.5 border-t border-wash/8 px-1 pt-4" data-draft>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2.5">
-              <Segmented value={draft.type} onChange={retype} label="Type" options={[{ id: 'expense', label: 'Expense' }, { id: 'income', label: 'Income' }]} />
+              <Segmented value={draft.type} onChange={retype} label={tr('Type')} options={[{ id: 'expense', label: tr('Expense') }, { id: 'income', label: tr('Income') }]} />
               {draft.amount ? (
                 <b className={clsx('font-display text-h3 leading-none tabular-nums', draft.type === 'income' ? 'text-ok' : 'text-bone')}>{draft.type === 'income' ? '+' : ''}{formatVnd(draft.amount)}</b>
               ) : (
-                <span className="text-fine text-danger">No amount found. Add one like 45k.</span>
+                <span className="text-fine text-danger">{tr('No amount found. Add one like 45k.')}</span>
               )}
             </div>
 
-            <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Category">
+            <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={tr('Category')}>
               {CATEGORIES.filter((c) => (draft.type === 'income' ? c.id === 'income' || c.id === 'other' : c.id !== 'income')).map((c) => (
                 <button
                   key={c.id}
@@ -188,7 +189,7 @@ export default function WalletView() {
             <div className="flex items-center gap-3">
               <span className="min-w-0 flex-1 truncate text-fine text-bone-dim">{draft.note}</span>
               <Button type="button" onClick={save} disabled={draft.amount <= 0}>
-                <Check size={15} aria-hidden="true" /> Save
+                <Check size={15} aria-hidden="true" /> {tr('Save')}
               </Button>
             </div>
           </div>
@@ -196,24 +197,24 @@ export default function WalletView() {
       </form>
 
       <div className="flex flex-wrap items-center gap-2">
-        <button type="button" aria-label="Previous month" onClick={() => setMonth(shift(month, -1))} className="grid size-9 place-items-center rounded-full border border-line text-bone-dim hover:text-bone">
+        <button type="button" aria-label={tr('Previous month')} onClick={() => setMonth(shift(month, -1))} className="grid size-9 place-items-center rounded-full border border-line text-bone-dim hover:text-bone">
           <ChevronLeft size={16} aria-hidden="true" />
         </button>
         <h2 className="min-w-0 flex-1 text-center font-display text-lead text-bone sm:min-w-40 sm:flex-none" data-month>
           {monthLabel(month)}
         </h2>
-        <button type="button" aria-label="Next month" onClick={() => setMonth(shift(month, 1))} disabled={month >= monthKey()} className="grid size-9 place-items-center rounded-full border border-line text-bone-dim hover:text-bone disabled:opacity-35">
+        <button type="button" aria-label={tr('Next month')} onClick={() => setMonth(shift(month, 1))} disabled={month >= monthKey()} className="grid size-9 place-items-center rounded-full border border-line text-bone-dim hover:text-bone disabled:opacity-35">
           <ChevronRight size={16} aria-hidden="true" />
         </button>
         {items.some((e) => e.sample) && (
           <Button variant="ghost" size="sm" className="max-md:hidden sm:ml-auto" onClick={() => Promise.all(items.filter((e) => e.sample).map((e) => entries.remove(e.id)))}>
-            Remove samples
+            {tr('Remove samples')}
           </Button>
         )}
       </div>
 
-      <section className="relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(90%_140%_at_0%_0%,rgb(255_91_46/0.2),transparent_55%),radial-gradient(70%_120%_at_100%_100%,rgb(91_43_255/0.2),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" data-figures aria-label="This month">
-        <span className="font-mono text-[0.68rem] tracking-[0.14em] text-bone-dim uppercase">Balance this month</span>
+      <section className="relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(90%_140%_at_0%_0%,rgb(255_91_46/0.2),transparent_55%),radial-gradient(70%_120%_at_100%_100%,rgb(91_43_255/0.2),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" data-figures aria-label={tr('This month')}>
+        <span className="font-mono text-[0.68rem] tracking-[0.14em] text-bone-dim uppercase">{tr('Balance this month')}</span>
         <b className={clsx('mt-2 block font-display leading-none tabular-nums [font-size:clamp(2.4rem,6vw,4rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(sum.balance)}</b>
         <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
           {[
@@ -237,14 +238,14 @@ export default function WalletView() {
       {empty ? (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
           <div className="min-w-[min(100%,15rem)] flex-1">
-            <h2 className="font-display text-lead text-bone">Nothing logged yet</h2>
-            <p className="text-fine text-bone-dim">Type your first expense above.</p>
+            <h2 className="font-display text-lead text-bone">{tr('Nothing logged yet')}</h2>
+            <p className="text-fine text-bone-dim">{tr('Type your first expense above.')}</p>
           </div>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-            <Tile title="By category" aside={<button type="button" onClick={() => setEditing(!editing)} className="inline-flex items-center gap-1 font-mono text-[0.72rem] text-bone-dim hover:text-bone"><Target size={12} aria-hidden="true" /> {editing ? 'Done' : 'Budgets'}</button>}>
+            <Tile title={tr('By category')} aside={<button type="button" onClick={() => setEditing(!editing)} className="inline-flex items-center gap-1 font-mono text-[0.72rem] text-bone-dim hover:text-bone"><Target size={12} aria-hidden="true" /> {editing ? tr('Done') : tr('Budgets')}</button>}>
               {sum.byCategory.length ? (
                 <div className="flex flex-wrap items-center gap-5">
                   <Donut parts={sum.byCategory} total={sum.spent} />
@@ -265,7 +266,7 @@ export default function WalletView() {
                               <i className="block h-1 flex-1 overflow-hidden rounded-full bg-line">
                                 <i className={clsx('block h-full rounded-full', p.total > limit ? 'bg-danger' : 'bg-ok')} style={{ width: `${Math.min(100, (p.total / limit) * 100)}%` }} />
                               </i>
-                              <span className={clsx('font-mono text-[0.64rem]', p.total > limit ? 'text-danger' : 'text-bone-faint')}>of {compact(limit)}</span>
+                              <span className={clsx('font-mono text-[0.64rem]', p.total > limit ? 'text-danger' : 'text-bone-faint')}>{tr('of')} {compact(limit)}</span>
                             </div>
                           )}
                         </li>
@@ -274,16 +275,16 @@ export default function WalletView() {
                   </ul>
                 </div>
               ) : (
-                <p className="font-mono text-fine text-bone-faint">Nothing spent this month.</p>
+                <p className="font-mono text-fine text-bone-faint">{tr('Nothing spent this month.')}</p>
               )}
               {editing && (
-                <div className="mt-4 grid grid-cols-1 gap-2 border-t border-line pt-4 sm:grid-cols-2" aria-label="Monthly budgets">
+                <div className="mt-4 grid grid-cols-1 gap-2 border-t border-line pt-4 sm:grid-cols-2" aria-label={tr('Monthly budgets')}>
                   {CATEGORIES.filter((c) => c.id !== 'income').map((c) => (
                     <label key={c.id} className="flex items-center gap-2 font-mono text-[0.72rem] text-bone-dim">
                       <span className="w-24 truncate">{c.label}</span>
                       <input
                         inputMode="numeric"
-                        aria-label={`Budget for ${c.label}`}
+                        aria-label={tr('Budget for {0}', c.label)}
                         placeholder="0"
                         defaultValue={limitOf(c.id) || ''}
                         onBlur={(e) => {
@@ -299,17 +300,17 @@ export default function WalletView() {
               )}
             </Tile>
 
-            <Tile title="Day by day" aside={<span className="inline-flex items-center gap-1 font-mono text-[0.72rem] text-bone-faint">{sum.spent > sum.income ? <TrendingDown size={12} aria-hidden="true" /> : <TrendingUp size={12} aria-hidden="true" />} {here.length} entries</span>}>
+            <Tile title={tr('Day by day')} aside={<span className="inline-flex items-center gap-1 font-mono text-[0.72rem] text-bone-faint">{sum.spent > sum.income ? <TrendingDown size={12} aria-hidden="true" /> : <TrendingUp size={12} aria-hidden="true" />} {here.length} {tr('entries')}</span>}>
               <Days byDay={sum.byDay} month={month} />
             </Tile>
           </div>
 
-          <Tile title="Entries">
+          <Tile title={tr('Entries')}>
             {days.length ? (
               <ol className="flex max-h-[420px] flex-col gap-4 overflow-y-auto pr-1">
                 {days.map(([day, list]) => (
                   <li key={day}>
-                    <h3 className="mb-1 font-mono text-[0.68rem] tracking-[0.1em] text-bone-faint uppercase">{new Date(day).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' })}</h3>
+                    <h3 className="mb-1 font-mono text-[0.68rem] tracking-[0.1em] text-bone-faint uppercase">{new Date(day).toLocaleDateString(locale(), { weekday: 'long', day: 'numeric', month: 'short' })}</h3>
                     <ul className="flex flex-col">
                       {list.map((e) => {
                         const cat = categoryOf(e.category);
@@ -324,7 +325,7 @@ export default function WalletView() {
                               {e.type === 'income' ? '+' : '-'}
                               {formatVnd(e.amount)}
                             </b>
-                            <button type="button" aria-label={`Delete ${e.note || cat.label}`} onClick={() => entries.remove(e.id)} className="text-bone-faint opacity-0 transition-opacity group-hover:opacity-100 hover:text-danger focus-visible:opacity-100 max-sm:opacity-100">
+                            <button type="button" aria-label={tr('Delete {0}', e.note || cat.label)} onClick={() => entries.remove(e.id)} className="text-bone-faint opacity-0 transition-opacity group-hover:opacity-100 hover:text-danger focus-visible:opacity-100 max-sm:opacity-100">
                               <Trash2 size={14} aria-hidden="true" />
                             </button>
                           </li>
@@ -335,7 +336,7 @@ export default function WalletView() {
                 ))}
               </ol>
             ) : (
-              <p className="font-mono text-fine text-bone-faint">No entries in {monthLabel(month)}.</p>
+              <p className="font-mono text-fine text-bone-faint">{tr('No entries in')} {monthLabel(month)}.</p>
             )}
           </Tile>
         </>

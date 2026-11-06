@@ -1,3 +1,4 @@
+import { tr } from '../lang';
 import { useEffect, useRef, useState } from 'react';
 import { BookHeart, Flame, Timer } from 'lucide-react';
 import { Button } from '../../../design-system';
@@ -6,7 +7,7 @@ import Pet from '../pet/Pet';
 import { TAP_LINES } from '../pet/model';
 import { usePet } from '../pet/usePet';
 
-const MOOD_WORDS = { calm: 'đang thong thả', happy: 'đang vui', excited: 'đang rất phấn khích', sleepy: 'đang buồn ngủ', worried: 'đang hơi lo', lonely: 'đang nhớ bạn' };
+const MOOD_WORDS = { calm: tr('đang thong thả'), happy: tr('đang vui'), excited: tr('đang rất phấn khích'), sleepy: tr('đang buồn ngủ'), worried: tr('đang hơi lo'), lonely: tr('đang nhớ bạn') };
 
 const Heart = ({ x, delay }) => (
   <svg viewBox="0 0 24 24" width="18" height="18" className="pet-heart pointer-events-none absolute top-3" style={{ left: x, animationDelay: `${delay}ms` }} aria-hidden="true">
@@ -34,9 +35,9 @@ export default function PetCard({ onTab }) {
   const progress = Math.round(pet.progress * 100);
 
   return (
-    <section aria-label={`${pet.name}, thú cưng của bạn`} className="relative overflow-hidden rounded-[1.75rem] border border-line bg-[radial-gradient(90%_130%_at_0%_0%,rgb(150_205_170/0.16),transparent_62%),var(--color-ink-1)] p-4" data-pet data-pet-mood={pet.mood}>
+    <section aria-label={tr('{0}, thú cưng của bạn', pet.name)} className="relative overflow-hidden rounded-[1.75rem] border border-line bg-[radial-gradient(90%_130%_at_0%_0%,rgb(150_205_170/0.16),transparent_62%),var(--color-ink-1)] p-4" data-pet data-pet-mood={pet.mood}>
       <div className="flex items-center gap-3">
-        <button type="button" onClick={touch} aria-label={`Chạm vào ${pet.name}`} className="relative shrink-0 rounded-full active:scale-95">
+        <button type="button" onClick={touch} aria-label={tr('Chạm vào {0}', pet.name)} className="relative shrink-0 rounded-full active:scale-95">
           <span className={clsx('block', hopping && 'pet-hop')} key={poke.at}>
             <Pet mood={pet.mood} outfit={pet.outfit} size={96} label={`${pet.name} ${MOOD_WORDS[pet.mood]}`} />
           </span>
@@ -56,26 +57,26 @@ export default function PetCard({ onTab }) {
           <p className="mt-1.5 rounded-2xl rounded-tl-md bg-wash/[0.07] px-3 py-2 text-fine leading-snug text-bone" role="status" data-pet-line>
             {line}
           </p>
-          <div className="mt-2" aria-label={pet.next ? `Còn ${pet.left} điểm nữa để lên ${pet.next.name}` : `${pet.name} đã lớn hết cỡ`}>
+          <div className="mt-2" aria-label={pet.next ? tr('Còn {0} điểm nữa để lên {1}', pet.left, pet.next.name) : tr('{0} đã lớn hết cỡ', pet.name)}>
             <div className="h-1.5 overflow-hidden rounded-full bg-wash/10" aria-hidden="true">
               <i className="block h-full rounded-full bg-gradient-to-r from-[#9ad9b0] to-[#e9e2a0] transition-[width] duration-700" style={{ width: `${progress}%` }} />
             </div>
-            <small className="mt-1 block font-mono text-[0.64rem] text-bone-faint">{pet.next ? `Còn ${pet.left} điểm nữa để thành ${pet.next.name}` : `${pet.name} đã lớn hết cỡ rồi`}</small>
+            <small className="mt-1 block font-mono text-[0.64rem] text-bone-faint">{pet.next ? tr('Còn {0} điểm nữa để thành {1}', pet.left, pet.next.name) : tr('{0} đã lớn hết cỡ rồi', pet.name)}</small>
           </div>
         </div>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Button size="sm" onClick={() => onTab('diary')}>
-          <BookHeart size={14} aria-hidden="true" /> Nhật ký
+          <BookHeart size={14} aria-hidden="true" /> {tr('Nhật ký')}
         </Button>
         {pet.stats.streak > 0 && (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ink-2 px-2.5 py-1 font-mono text-[0.7rem] text-bone-dim">
-            <Flame size={12} className="text-signal" aria-hidden="true" /> {pet.stats.streak} ngày liền
+            <Flame size={12} className="text-signal" aria-hidden="true" /> {pet.stats.streak} {tr('ngày liền')}
           </span>
         )}
         {pet.focusToday > 0 && (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-ink-2 px-2.5 py-1 font-mono text-[0.7rem] text-bone-dim">
-            <Timer size={12} aria-hidden="true" /> {pet.focusToday} phút tập trung
+            <Timer size={12} aria-hidden="true" /> {pet.focusToday} {tr('phút tập trung')}
           </span>
         )}
       </div>
