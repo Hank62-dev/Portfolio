@@ -70,7 +70,7 @@ export const en2 = {
 
   // pet
   'Mầm non': 'Sprout',
-  'Anh chàng học IT': 'The IT student',
+  'Anh chàng học IT': 'Anh chàng học IT',
   'Lữ khách': 'Traveller',
   'Nhà thám hiểm': 'Explorer',
   'Huyền thoại': 'Legend',
