@@ -1,11 +1,12 @@
 import { locale, tr } from '../lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { BookOpen, Download, Flame, LayoutGrid, List as ListIcon, Pin, Plus, Search, Sparkles, Upload } from 'lucide-react';
+import { BookOpen, Download, FileUp, Flame, LayoutGrid, List as ListIcon, Pin, Plus, Search, Sparkles, Upload, X } from 'lucide-react';
 import { Badge, Button, Loading, Menu, Skeleton, SkeletonLines } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { askNotes } from '../api/owner';
 import { MOODS, excerpt, hueOf, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
-import { createNote, deleteNote, exportNotes, importNotes, intents, loadNotes, notesStore, openJournal } from '../notes/library';
+import { createNote, deleteNote, exportNotes, importFiles, intents, loadNotes, notesStore, openJournal } from '../notes/library';
+import { IMPORT_ACCEPT } from '../notes/readers';
 import { ensureUnlocked, readable } from '../diary/lock';
 import { useReadableNotes } from '../diary/useLock';
 import { useMediaQuery } from '../../../hooks/useMediaQuery';
@@ -207,13 +208,35 @@ export default function NotesView() {
     await deleteNote(current.id);
     setSelected(null);
   };
-  const restore = async (file) => {
-    try {
-      const added = await importNotes(await file.text());
-      setProblem(added ? '' : tr('Nothing new in that file.'));
-    } catch (e) {
-      setProblem(e.message);
+  // files chosen from the Backup menu or dropped on the page: each becomes a note (see notes/readers.js)
+  const [report, setReport] = useState(null); // { busy, lines, bad } after an import
+  const [dropping, setDropping] = useState(false);
+  const bringIn = async (files) => {
+    if (!files.length) return;
+    setReport({ busy: true, lines: [], bad: [] });
+    const result = await importFiles(files);
+    const lines = [];
+    if (result.added.length === 1 && !result.failed.length && !result.restored && !result.cut) {
+      setReport(null);
+      setSelected(result.added[0]); // a single file opens as the note it became
+      return;
     }
+    if (result.added.length) lines.push(result.added.length === 1 ? tr('1 file imported as a note.') : tr('{0} files imported as notes.', result.added.length));
+    if (result.restored) lines.push(tr('{0} notes restored from a backup.', result.restored));
+    if (result.cut) lines.push(tr('{0} too long, so only the first part was kept.', result.cut));
+    if (!lines.length && !result.failed.length) lines.push(tr('Nothing new in that file.'));
+    setReport({ busy: false, lines, bad: result.failed.map((f) => `${f.name}: ${f.reason}`) });
+  };
+  const onDragOver = (event) => {
+    if (!event.dataTransfer?.types?.includes('Files')) return;
+    event.preventDefault();
+    setDropping(true);
+  };
+  const onDrop = (event) => {
+    if (!event.dataTransfer?.files?.length) return;
+    event.preventDefault();
+    setDropping(false);
+    void bringIn([...event.dataTransfer.files]);
   };
 
   if (current) {
@@ -232,7 +255,17 @@ export default function NotesView() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div
+      className={clsx('relative flex flex-col gap-6', dropping && 'rounded-3xl outline-2 outline-offset-8 outline-signal/70 outline-dashed')}
+      onDragOver={onDragOver}
+      onDragLeave={(event) => !event.currentTarget.contains(event.relatedTarget) && setDropping(false)}
+      onDrop={onDrop}
+    >
+      {dropping && (
+        <p className="pointer-events-none absolute inset-x-0 top-24 z-10 mx-auto flex w-fit items-center gap-2 rounded-full bg-signal px-4 py-2 font-mono text-fine text-ink-0 shadow-lg">
+          <FileUp size={15} aria-hidden="true" /> {tr('Drop files to make notes')}
+        </p>
+      )}
       <PageHead keepOnPhone eyebrow={tr('Private notes')} title={tr('Second')} accent="Brain." description={tr('Notes and a daily journal, kept on this device. Ask them a question and Hank answers from what you wrote.')}>
         <Button variant="ghost" size="sm" onClick={today}>
           <BookOpen size={15} aria-hidden="true" /> {tr('Today\'s journal')}
@@ -375,22 +408,41 @@ export default function NotesView() {
             }
             items={[
               { id: 'export', label: tr('Export notes (.json)'), icon: Download, onSelect: () => notes.length && download('hank62-notes.json', exportNotes()) },
-              { id: 'import', label: tr('Import notes'), icon: Upload, onSelect: () => importer.current?.click() },
+              { id: 'import', label: tr('Import files (.md .docx .xlsx .txt .csv .json)'), icon: Upload, onSelect: () => importer.current?.click() },
             ]}
           />
           <input
             ref={importer}
             type="file"
-            accept="application/json,.json"
+            accept={IMPORT_ACCEPT}
+            multiple
             hidden
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void restore(file);
+              const files = [...(e.target.files ?? [])];
               e.target.value = '';
+              void bringIn(files);
             }}
           />
         </div>
       </div>
+
+      {report && (
+        <div className="-mt-2 flex items-start gap-3 rounded-2xl border border-line bg-wash/5 px-4 py-3 text-fine" role="status">
+          <div className="flex min-w-0 flex-1 flex-col gap-1">
+            {report.busy ? <p className="font-mono text-bone-dim">{tr('Importing…')}</p> : report.lines.map((line) => <p key={line} className="text-bone">{line}</p>)}
+            {report.bad.map((line) => (
+              <p key={line} className="font-mono text-danger">
+                {line}
+              </p>
+            ))}
+          </div>
+          {!report.busy && (
+            <button type="button" aria-label={tr('Dismiss')} onClick={() => setReport(null)} className="grid size-7 shrink-0 place-items-center rounded-full text-bone-faint hover:text-bone">
+              <X size={14} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      )}
 
       {tags.length > 0 && (
         <div className="-mt-3 flex flex-wrap gap-1.5 max-md:mt-0" aria-label={tr('Tags')}>

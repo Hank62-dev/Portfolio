@@ -54,4 +54,23 @@ export const vi6 = {
   CN: 'CN',
   Vui: 'Vui',
   'Saved to Second Brain.': 'Đã lưu vào Second Brain.',
+
+  // importing files as notes
+  'Import files (.md .docx .xlsx .txt .csv .json)': 'Nhập tệp (.md .docx .xlsx .txt .csv .json)',
+  'Drop files to make notes': 'Thả tệp vào đây để tạo ghi chú',
+  '1 file imported as a note.': 'Đã nhập 1 tệp thành ghi chú.',
+  '{0} files imported as notes.': 'Đã nhập {0} tệp thành ghi chú.',
+  '{0} notes restored from a backup.': 'Đã khôi phục {0} ghi chú từ bản sao lưu.',
+  '{0} too long, so only the first part was kept.': '{0} tệp quá dài nên chỉ giữ phần đầu.',
+  'Importing…': 'Đang nhập…',
+  Dismiss: 'Đóng thông báo',
+  'The rest of this file was too long to keep in a note, and was left out.': 'Phần còn lại của tệp quá dài để lưu trong một ghi chú nên đã bị bỏ.',
+  'Old .doc files cannot be read: save it as .docx in Word first.': 'Không đọc được tệp .doc cũ: hãy mở bằng Word và lưu thành .docx trước.',
+  'Old .xls files cannot be read: save it as .xlsx in Excel first.': 'Không đọc được tệp .xls cũ: hãy mở bằng Excel và lưu thành .xlsx trước.',
+  'PDF files cannot be turned into a note. Put them in Documents instead.': 'Chưa thể biến tệp PDF thành ghi chú. Hãy đưa nó vào mục Tài liệu.',
+  'This kind of file cannot be imported.': 'Loại tệp này chưa nhập được.',
+  'That file is bigger than 10 MB.': 'Tệp này lớn hơn 10 MB.',
+  '(empty sheet)': '(trang tính trống)',
+  '"{0}" could not be read: it may be damaged or protected.': 'Không đọc được "{0}": tệp có thể bị hỏng hoặc đặt mật khẩu.',
+  '"{0}" has nothing in it to import.': '"{0}" không có nội dung nào để nhập.',
 };

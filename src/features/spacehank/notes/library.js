@@ -2,6 +2,7 @@ import { createStore } from '../store';
 import { storage } from '../storage';
 import { onSynced } from '../sync/events';
 import { dayKey, journalTemplate, textToHtml } from './notes';
+import { kindOf, readNoteFile } from './readers';
 import { tr } from '../lang';
 
 // Notes live in this browser's IndexedDB, like the music. A note is { id, text, createdAt, updatedAt, pinned,
@@ -83,6 +84,29 @@ export const importNotes = async (json) => {
     if (!have) added += 1;
   }
   return added;
+};
+
+/**
+ * Files chosen by the person (or dropped on the page) become notes: markdown, text, csv, html, Word and Excel files each
+ * become one note, and a notes backup (.json) is read back as before. One bad file does not stop the others.
+ * Returns { added: [ids of the new notes], restored: notes brought back from backups, cut: files that were too long, failed: [{ name, reason }] }.
+ */
+export const importFiles = async (files) => {
+  const result = { added: [], restored: 0, cut: 0, failed: [] };
+  for (const file of files) {
+    try {
+      if (kindOf(file.name) === 'json') {
+        result.restored += await importNotes(await file.text());
+        continue;
+      }
+      const { html, text, truncated } = await readNoteFile(file);
+      result.added.push((await createNote(text, { html })).id);
+      if (truncated) result.cut += 1;
+    } catch (error) {
+      result.failed.push({ name: file.name, reason: error.message });
+    }
+  }
+  return result;
 };
 
 // A request from elsewhere (the command palette) for the notes tab or the studio to do something on arrival.
