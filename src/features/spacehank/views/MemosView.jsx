@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AudioLines, Download, FileText, Languages, Mic, Pause, Play, Sparkles, Square, Trash2 } from 'lucide-react';
-import { Badge, Button } from '../../../design-system';
+import { AudioLines, Download, Ellipsis, Languages, Mic, NotebookPen, Pause, Play, ScrollText, Sparkles, Square, Trash2 } from 'lucide-react';
+import { Badge, Button, Menu } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { PageHead, Segmented } from '../components/Page';
 import { transcribeRecording } from '../memos/audio';
@@ -57,22 +57,26 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify, writing, onWr
           </small>
         </div>
         <Wave peaks={memo.peaks} progress={progress} onSeek={(f) => onSeek(memo, f)} />
-        <span className="flex shrink-0 items-center gap-0.5 max-sm:order-2 max-sm:basis-full max-sm:justify-end max-sm:gap-1.5">
-          <Button variant="secondary" size="icon" aria-label={tr('Show the transcript')} aria-pressed={open} onClick={() => setOpen(!open)}>
-            <FileText size={14} aria-hidden="true" />
+        <span className="flex shrink-0 items-center gap-1.5 max-sm:order-2 max-sm:basis-full max-sm:justify-end">
+          <Button variant="secondary" size="sm" aria-label={tr('Show the transcript')} aria-pressed={open} onClick={() => setOpen(!open)} className={clsx(open && 'border-bone')}>
+            <ScrollText size={14} aria-hidden="true" /> {tr('Transcript')}
           </Button>
-          <Button variant="secondary" size="icon" aria-label={memo.transcript ? tr('Write it down again with AI') : tr('Write it down with AI')} title={memo.transcript ? tr('Write it down again with AI') : tr('Write it down with AI')} loading={Boolean(writing?.busy)} onClick={() => onWrite(memo)}>
-            <Sparkles size={14} className="text-signal" aria-hidden="true" />
+          <Button variant="secondary" size="sm" aria-label={memo.transcript ? tr('Write it down again with AI') : tr('Write it down with AI')} title={memo.transcript ? tr('Write it down again with AI') : tr('Write it down with AI')} loading={Boolean(writing?.busy)} onClick={() => onWrite(memo)}>
+            <Sparkles size={14} className="text-signal" aria-hidden="true" /> {tr('AI transcribe')}
           </Button>
-          <Button variant="secondary" size="icon" aria-label={tr('Save to Second Brain')} onClick={send}>
-            <FileText size={14} className="text-signal" aria-hidden="true" />
-          </Button>
-          <Button variant="secondary" size="icon" aria-label={tr('Download')} onClick={download}>
-            <Download size={14} aria-hidden="true" />
-          </Button>
-          <Button variant="danger" size="icon" aria-label={tr('Delete {0}', memo.title)} onClick={() => memos.remove(memo.id)}>
-            <Trash2 size={14} aria-hidden="true" />
-          </Button>
+          <Menu
+            align="end"
+            trigger={
+              <Button variant="secondary" size="icon" aria-label={tr('More')} title={tr('More')}>
+                <Ellipsis size={16} aria-hidden="true" />
+              </Button>
+            }
+            items={[
+              { id: 'note', label: tr('Save to Second Brain'), icon: NotebookPen, onSelect: send },
+              { id: 'download', label: tr('Download'), icon: Download, onSelect: download },
+              { id: 'delete', label: tr('Delete'), icon: Trash2, onSelect: () => memos.remove(memo.id) },
+            ]}
+          />
         </span>
       </div>
       {writing?.busy && (

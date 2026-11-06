@@ -60,6 +60,7 @@ export const vi6 = {
   'Exit full screen': 'Thoát toàn màn hình',
 
   // speech to text for voice memos
+  'AI transcribe': 'AI chép lời',
   'Write it down with AI': 'Viết lại lời nói bằng AI',
   'Write it down again with AI': 'Viết lại lời nói bằng AI lần nữa',
   'Writing down what was said…': 'Đang viết lại những gì đã nói…',
