@@ -17,6 +17,7 @@ const BLURB = {
   memory: tr('A timeline of what happened.'),
   studio: tr('Make pictures and keep them.'),
   music: tr('A music library and player.'),
+  podcast: tr('Podcasts you follow, played from where you stopped.'),
   missions: tr('A board for plans and tasks.'),
   wallet: tr('Spending and budgets.'),
   diary: tr('A private diary.'),

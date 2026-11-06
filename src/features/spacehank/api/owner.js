@@ -53,6 +53,13 @@ export const base64ToBlob = (data, mime) => {
 const owner = () => {
   if (isDemo()) throw new Error(tr('The Creator Lab is private. Sign in to use it.'));
 };
+// ---- Podcasts: the directory search and a podcast's episodes, read by the server (a browser cannot read most feeds itself)
+const podcastsNeedSignIn = () => {
+  if (isDemo()) throw new Error(tr('Podcasts are private. Sign in to use them.'));
+};
+export const podcastSearch = (term) => (podcastsNeedSignIn(), call(`/api/podcasts/search?q=${encodeURIComponent(term)}`));
+export const podcastFeed = (feedUrl) => (podcastsNeedSignIn(), call(`/api/podcasts/feed?url=${encodeURIComponent(feedUrl)}`));
+
 /** The words in a recording (a WAV Blob). `language` is 'vi' or 'en'. */
 export const transcribeAudio = (wav, language) => {
   if (isDemo()) throw new Error(tr('Turning speech into text needs you to sign in.'));

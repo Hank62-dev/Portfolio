@@ -1,4 +1,4 @@
-import { Activity, BookHeart, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet, Rocket } from 'lucide-react';
+import { Activity, BookHeart, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, Headphones, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet, Rocket } from 'lucide-react';
 import { tr } from './lang';
 
 export const NAV_SECTIONS = ['WORKSPACE', 'KNOWLEDGE', 'CREATE', 'LIFE'];
@@ -18,6 +18,7 @@ export const NAVIGATION = [
   { id: 'studio', label: tr('Image Studio'), icon: Palette, section: 'CREATE', blurb: tr('Pictures and brand'), keywords: 'image picture generate brand colours palette tokens design' },
   { id: 'creator', label: tr('Creator Lab'), icon: Rocket, section: 'CREATE', badge: 'NEW', blurb: tr('Content and income'), keywords: 'creator content tiktok discord money income sponsor clients freelance hooks script teleprompter deals quote pricing' },
   { id: 'music', label: tr('Hank Music'), icon: Music2, section: 'CREATE', blurb: tr('Your songs, offline'), keywords: 'songs player library playlist audio listen' },
+  { id: 'podcast', label: tr('Podcast'), icon: Headphones, section: 'CREATE', badge: 'NEW', blurb: tr('Shows you follow'), keywords: 'podcast listen audio episodes shows radio nghe' },
   { id: 'missions', label: tr('Mission Board'), icon: Kanban, section: 'LIFE', blurb: tr('Tasks on a board'), keywords: 'kanban tasks cards todo board plan agents' },
   { id: 'study', label: tr('Study Hub'), icon: GraduationCap, section: 'LIFE', blurb: tr('Courses and focus'), keywords: 'courses exams deadlines flashcards pomodoro focus learn school' },
   { id: 'habits', label: tr('Habit Garden'), icon: Sprout, section: 'LIFE', blurb: tr('Streaks that grow'), keywords: 'habits streak plants routine daily' },
@@ -47,6 +48,7 @@ const HUES = {
   studio: 304, // plum
   creator: 22, // persimmon
   music: 42, // brass
+  podcast: 286, // violet
   missions: 196, // slate
   study: 262, // indigo
   habits: 132, // sage

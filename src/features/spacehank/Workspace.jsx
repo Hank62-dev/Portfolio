@@ -54,6 +54,7 @@ const WalletView = lazy(() => import('./views/WalletView'));
 const PulseView = lazy(() => import('./views/PulseView'));
 const ShellView = lazy(() => import('./views/ShellView'));
 const MemosView = lazy(() => import('./views/MemosView'));
+const PodcastView = lazy(() => import('./views/PodcastView'));
 const GamesView = lazy(() => import('./views/GamesView'));
 const DiaryView = lazy(() => import('./views/DiaryView'));
 
@@ -260,6 +261,7 @@ export default function Workspace({
     notes: <NotesView />,
     constellation: <ConstellationView onOpenNote={(id) => { sendIntent('notes', { open: id }); onTab('notes'); }} />,
     memos: <MemosView onNotify={onNotify} />,
+    podcast: <PodcastView />,
     missions: <MissionView agents={agents} events={events} onNewTask={onNewTask} onNotify={onNotify} connected={connected} />,
     study: <StudyView onNotify={onNotify} onFocusMusic={() => playMood('deep focus, calm and steady').then(onNotify, (e) => onNotify?.(e.message))} />,
     creator: <CreatorView />,

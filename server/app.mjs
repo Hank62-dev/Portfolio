@@ -8,6 +8,7 @@ import { createCalendar } from './calendar.mjs';
 import { createDiscord } from './discord.mjs';
 import { HttpError, createResponder, readBytes, readJson } from './http.mjs';
 import { createHub } from './hub.mjs';
+import { createPodcasts } from './podcasts.mjs';
 import { createPush } from './push.mjs';
 import { createSync } from './sync.mjs';
 import { createTaskService } from './tasks.mjs';
@@ -17,7 +18,7 @@ const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 // Behind Render's proxy the socket address is the proxy, so prefer the forwarded client address.
 const clientKey = (req) => req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
 
-export const createApp = (config, { fetchImpl = fetch, db = null, sendPush } = {}) => {
+export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podcastGet } = {}) => {
   const agents = createAgents();
   const hub = createHub({ agents, maxEvents: config.maxEvents, maxTasks: config.maxTasks });
   const auth = createAuth(config);
@@ -25,6 +26,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush } = {
   const ai = createAi({ ai: config.ai, fetchImpl });
   const battle = createBattle();
   const calendar = createCalendar({ url: config.calendarIcsUrl, fetchImpl });
+  const podcasts = createPodcasts({ get: podcastGet });
   const discord = createDiscord({ webhooks: config.discordWebhooks, fetchImpl });
   const { json, bytes, preflight } = createResponder(config.origin);
   // personal data kept in a real database so every device sees the same thing; off when there is no database
@@ -220,6 +222,17 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush } = {
     'POST /api/ai/image': async (req, res) => {
       requireAuth(req);
       json(res, 200, await ai.image(await readJson(req, config.maxBodyBytes)));
+    },
+
+    // Podcasts: the directory search, and a podcast's episodes read from its own feed (see podcasts.mjs)
+    'GET /api/podcasts/search': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await podcasts.search(query(req).get('q')));
+    },
+
+    'GET /api/podcasts/feed': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await podcasts.feed(query(req).get('url')));
     },
 
     'GET /api/briefing/calendar': async (req, res) => {
