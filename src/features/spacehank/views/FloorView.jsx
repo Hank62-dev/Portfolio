@@ -39,7 +39,8 @@ export default function FloorView({ agents, events, selected, onSelect, paused, 
           </div>
           <Badge>{tr('WebGL / telemetry')}</Badge>
         </div>
-        <div className="dark-island relative h-[clamp(380px,62vh,640px)] bg-ink-0">
+        {/* isolate: the agents' name cards are DOM laid over the canvas with very high z-indexes; here they stay inside this box, under the menus and sheets */}
+        <div className="dark-island relative isolate h-[clamp(380px,62vh,640px)] bg-ink-0">
           <Suspense
             fallback={
               <Loading label={tr('Loading the 3D floor')} className="absolute inset-0 grid grid-cols-4 grid-rows-3 gap-3 p-4">

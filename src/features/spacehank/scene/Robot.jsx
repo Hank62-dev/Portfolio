@@ -88,7 +88,7 @@ export function Character({ agent, selected, onSelect, paused }) {
           <meshBasicMaterial color={agent.color} transparent opacity={0.9} />
         </mesh>
       )}
-      <Html position={[0, 2, 0]} center distanceFactor={9}>
+      <Html position={[0, 2, 0]} center distanceFactor={9} zIndexRange={[10, 0]}>
         <button
           onClick={select}
           aria-pressed={selected}
