@@ -9,11 +9,19 @@ updates:
     groups:
       minor-and-patch:
         update-types: [minor, patch]
+    ignore:
+      # A new MAJOR version changes how a library works and usually needs others to move with it (vitest 5 needs vite 6, React 19
+      # needs its own checks...), so the build of such a pull request breaks. Those upgrades are done by hand, on purpose.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: pip
     directory: /.integrations/hank62-rag
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:
