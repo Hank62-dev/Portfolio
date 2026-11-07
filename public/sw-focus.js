@@ -8,13 +8,28 @@ const UPDATE_TAG = 'hank62-update';
 
 const vietnamese = () => /^vi/i.test(self.navigator?.language ?? '');
 
+// The newest line of public/changelog.json, so the notification can say what is new. It is asked for fresh from the server (the file
+// is not part of the cached app) and given a few seconds: with no answer the notification simply says there is an update.
+const newestChange = async (vi) => {
+  try {
+    const response = await fetch('/changelog.json', { cache: 'no-store', signal: AbortSignal.timeout(4000) });
+    const entry = (await response.json())?.[0];
+    const text = vi ? entry?.vi : entry?.en;
+    return typeof text === 'string' ? text.slice(0, 140) : '';
+  } catch {
+    return '';
+  }
+};
+
 const announceUpdate = async () => {
   if (self.Notification?.permission !== 'granted') return;
   const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
   if (windows.some((client) => client.visibilityState === 'visible')) return; // the app is open in front: it shows its own pill
   const vi = vietnamese();
+  const latest = await newestChange(vi);
   await self.registration.showNotification(vi ? 'Hank62 có bản cập nhật mới' : 'Hank62 has an update', {
-    body: vi ? 'Chạm để mở app và cập nhật.' : 'Tap to open the app and update.',
+    body: `${latest ? `${vi ? 'Mới: ' : 'New: '}${latest}
+` : ''}${vi ? 'Chạm để mở app và cập nhật.' : 'Tap to open the app and update.'}`,
     tag: UPDATE_TAG,
     icon: '/icons/logo-192.png',
     badge: '/icons/badge-96.png',

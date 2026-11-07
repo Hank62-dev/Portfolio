@@ -40,7 +40,18 @@ const bundledMusic = () => ({
   },
 })
 
+// The newest entry of public/changelog.json when this copy is built: it is how the app knows which changes it already has, so a
+// newer copy can say what is new (see src/lib/appUpdate.js).
+const latestChange = (() => {
+  try {
+    return JSON.parse(readFileSync(resolve(__dirname, 'public/changelog.json'), 'utf8'))[0]?.id ?? ''
+  } catch {
+    return ''
+  }
+})()
+
 export default defineConfig({
+  define: { 'import.meta.env.VITE_LATEST_CHANGE': JSON.stringify(latestChange) },
   // Listen on IPv4. Vite's default ("localhost") can mean IPv6 only on Windows, and then a phone plugged in with
   // `adb reverse tcp:5173 tcp:5173` (which reaches 127.0.0.1) gets an empty response.
   server: { host: '127.0.0.1' },

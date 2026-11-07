@@ -59,6 +59,9 @@ export const vi6 = {
   'Full screen': 'Toàn màn hình',
   'Exit full screen': 'Thoát toàn màn hình',
 
+  'Read more': 'Xem thêm',
+  'Show less': 'Thu gọn',
+
   // podcasts
   Podcast: 'Podcast',
   'Shows you follow': 'Các chương trình bạn theo dõi',

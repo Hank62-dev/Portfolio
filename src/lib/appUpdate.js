@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { registerSW } from 'virtual:pwa-register';
+import { newerThan } from './changelog';
 
 // Keeping the installed app up to date. A phone keeps showing the copy of the site it saved until the app is fully
 // closed, so the app asks the server for a newer one on its own, and when there is one it says so and waits to be told.
@@ -8,8 +9,11 @@ import { registerSW } from 'virtual:pwa-register';
 
 const CHECK_EVERY = 15 * 60 * 1000;
 const NOTICE_TAG = 'hank62-update';
+const SEEN_KEY = 'hank62-changelog-seen'; // the newest change this device had already been shown
+const HERE = import.meta.env.VITE_LATEST_CHANGE || ''; // the newest change this copy of the app was built with
 
-let state = { ready: false, dismissed: false };
+// `changes`: what the waiting version brings; `news`: what the version that was just installed brought
+let state = { ready: false, dismissed: false, changes: [], news: [] };
 const listeners = new Set();
 const set = (patch) => {
   state = { ...state, ...patch };
@@ -44,10 +48,38 @@ export const applyUpdate = () => {
   apply?.(true);
 };
 export const later = () => set({ dismissed: true });
+export const dismissNews = () => set({ news: [] });
+
+/** The list of changes as the server has it now, or null when it cannot be read (offline, an older deploy). */
+const loadChanges = async () => {
+  try {
+    const response = await fetch('/changelog.json', { cache: 'no-store' });
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+};
+
+/** A copy that is newer than the one this device ran last time: say what it brought. The first run ever says nothing. */
+const announceWhatChanged = () => {
+  let seen = null;
+  try {
+    seen = localStorage.getItem(SEEN_KEY);
+    if (HERE) localStorage.setItem(SEEN_KEY, HERE);
+  } catch {
+    return;
+  }
+  if (!seen || !HERE || seen === HERE) return;
+  void loadChanges().then((list) => {
+    const news = list ? newerThan(list, seen, 6, HERE) : [];
+    if (news.length) set({ news });
+  });
+};
 
 /** Registers the service worker and starts looking for newer versions. Call once, at start. */
 export const startUpdates = () => {
   if (typeof window === 'undefined' || apply) return;
+  announceWhatChanged();
 
   // the notification opens the app as /spacehank?update=1 when it was closed
   const params = new URLSearchParams(window.location.search);
@@ -75,6 +107,7 @@ export const startUpdates = () => {
     immediate: true,
     onNeedRefresh: () => {
       set({ ready: true, dismissed: false });
+      void loadChanges().then((list) => list && set({ changes: newerThan(list, HERE) }));
       if (wanted) {
         apply?.(true);
         return;

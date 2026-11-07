@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
   CalendarDays,
   CalendarPlus,
@@ -170,6 +170,36 @@ function EmptyDay({ connected, onPreview }) {
 }
 
 /** The morning briefing, as three compact tiles: weather, today's calendar and, on request, a note from Hank. */
+/** Hank's note. A long one is shown in four lines with a "Read more" under it, so none of it is out of reach. */
+function BriefingNote({ text }) {
+  const [open, setOpen] = useState(false);
+  const [cut, setCut] = useState(false);
+  const paragraph = useRef(null);
+  useLayoutEffect(() => {
+    const element = paragraph.current;
+    if (!element) return undefined;
+    const look = () => {
+      if (!open) setCut(element.scrollHeight > element.clientHeight + 1);
+    };
+    look();
+    const observer = new ResizeObserver(look); // the card changes width with the window, and so does where the text breaks
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [text, open]);
+  return (
+    <div className="flex flex-col items-start gap-1.5">
+      <p ref={paragraph} className={clsx('font-display text-[1.1rem] leading-snug whitespace-pre-line text-bone', !open && 'line-clamp-4')} data-note>
+        “{text}”
+      </p>
+      {(cut || open) && (
+        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="font-mono text-[0.74rem] text-signal underline-offset-4 hover:underline">
+          {open ? tr('Show less') : tr('Read more')}
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function BriefingCard({ owner, agents, connected }) {
   const briefing = useBriefing({ owner });
   const { log: focusSessions } = useStore(focusLog);
@@ -257,9 +287,7 @@ export default function BriefingCard({ owner, agents, connected }) {
           <Eyebrow>{tr('From Hank')}</Eyebrow>
         </div>
         {note ? (
-          <p className="line-clamp-4 font-display text-[1.1rem] leading-snug text-bone" data-note>
-            “{note}”
-          </p>
+          <BriefingNote text={note} />
         ) : (
           <p className="font-display text-[1.1rem] leading-snug text-bone-dim">
             {working ? tr('{0} agent{1} at work. ', working, working > 1 ? tr('s are') : tr(' is')) : tr('The floor is quiet. ')}

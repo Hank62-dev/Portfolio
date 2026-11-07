@@ -1,0 +1,11 @@
+[
+  { "id": "security", "date": "2026-11-07", "vi": "Bảo mật: khoá dịch vụ RAG, giới hạn đăng nhập chặt hơn, thêm header bảo mật.", "en": "Security: the RAG service is locked, sign-in limits are stricter, security headers added." },
+  { "id": "podcast", "date": "2026-11-07", "vi": "Tab Podcast mới: tìm, theo dõi, nghe với tốc độ tuỳ ý và nghe tiếp đúng chỗ đã dừng.", "en": "New Podcast tab: find and follow shows, listen at your own speed, and carry on where you stopped." },
+  { "id": "memo-ai", "date": "2026-11-06", "vi": "Voice Memos: AI chép lời bản ghi, các nút gọn hơn, dải sóng chạy theo khi phát lại.", "en": "Voice Memos: AI writes down recordings, tidier buttons, and the waveform follows playback." },
+  { "id": "notes-view", "date": "2026-11-06", "vi": "Ghi chú: xem toàn màn hình và có nút lên đầu trang.", "en": "Notes: full-screen view and a back-to-top button." },
+  { "id": "notes-import", "date": "2026-11-06", "vi": "Second Brain nhập được file .md, .docx, .xlsx, .txt, .csv, kéo thả hoặc chọn từ menu Backup.", "en": "Second Brain imports .md, .docx, .xlsx, .txt and .csv files, by drag and drop or from the Backup menu." },
+  { "id": "diary-photos", "date": "2026-11-06", "vi": "Nhật ký: bấm vào ảnh để xem lớn, phóng to và vuốt giữa các ảnh.", "en": "Diary: tap a photo to see it large, zoom, and swipe between photos." },
+  { "id": "push", "date": "2026-11-06", "vi": "Thông báo đẩy từ server: nhắc việc kể cả khi đã đóng app.", "en": "Push notifications from the server: reminders even when the app is closed." },
+  { "id": "languages", "date": "2026-11-06", "vi": "Toàn bộ giao diện có hai ngôn ngữ Tiếng Việt và English, đổi ở thanh trên.", "en": "The whole workspace comes in Vietnamese and English, switched from the top bar." },
+  { "id": "creator-lab", "date": "2026-11-06", "vi": "Creator Lab được thiết kế lại với vòng mục tiêu, biểu đồ xu hướng và bảng pipeline nhiều màu.", "en": "Creator Lab redesigned with a goal ring, a trend line and a coloured pipeline board." }
+]
