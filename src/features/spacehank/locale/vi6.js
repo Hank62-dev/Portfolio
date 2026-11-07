@@ -124,4 +124,6 @@ export const vi6 = {
   '(empty sheet)': '(trang tính trống)',
   '"{0}" could not be read: it may be damaged or protected.': 'Không đọc được "{0}": tệp có thể bị hỏng hoặc đặt mật khẩu.',
   '"{0}" has nothing in it to import.': '"{0}" không có nội dung nào để nhập.',
+  'Everything will be fine in the end.': 'Cuối cùng thì mọi chuyện rồi sẽ ổn thôi.',
+  "If it's not fine, it's not the end.": 'Nếu chưa ổn, nghĩa là chưa phải cuối cùng.',
 };

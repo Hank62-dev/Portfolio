@@ -142,7 +142,6 @@ export const vi3 = {
   'Show fewer apps': 'Hiện ít ứng dụng hơn',
   'Show all apps': 'Hiện tất cả ứng dụng',
   'PERSONAL COMMAND CENTER': 'TRUNG TÂM CHỈ HUY CÁ NHÂN',
-  'Coordinate AI, knowledge and work from one command center.': 'Điều phối AI, tri thức và công việc từ một trung tâm chỉ huy.',
   'Open company floor': 'Mở văn phòng công ty',
   'AI WORKFORCE': 'ĐỘI NGŨ AI',
   'LIVE EVENTS': 'SỰ KIỆN TRỰC TIẾP',

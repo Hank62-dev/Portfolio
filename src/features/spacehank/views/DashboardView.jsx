@@ -63,7 +63,13 @@ export default function DashboardView({ agents, events, connected, onTab, owner:
             {greetingFor(new Date().getHours())}, <em>{owner.name}.</em>
           </>
         }
-        description={tr('Coordinate AI, knowledge and work from one command center.')}
+        description={
+          <>
+            {tr('Everything will be fine in the end.')}
+            <br />
+            {tr("If it's not fine, it's not the end.")}
+          </>
+        }
         actions={
           <Button variant="ghost" size="sm" onClick={() => onTab('space')}>
             <Boxes size={15} aria-hidden="true" /> {tr('Open company floor')} <ArrowUpRight size={14} aria-hidden="true" />
