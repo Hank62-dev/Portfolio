@@ -26,7 +26,7 @@ function CardView({ card, agents, onOpen, onMove, onDragStart }) {
   const agent = agents.find((a) => a.id === card.agent);
   return (
     <li data-card={card.id} draggable onDragStart={(e) => onDragStart(e, card)} className="list-none">
-      <div className="group relative rounded-2xl border border-line bg-ink-2 p-3.5 transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_14px_30px_-18px_rgb(var(--shadow-rgb)/0.9)]">
+      <div className="paper-note group relative overflow-hidden rounded-2xl border border-line p-3.5 transition-all hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_14px_30px_-18px_rgb(var(--shadow-rgb)/0.9)]" style={{ '--paper': 'var(--color-ink-2)', '--note-hue': card.labels?.length ? hueOf(card.labels[0]) : 30 }}>
         <button type="button" onClick={() => onOpen(card)} className="block w-full text-left" aria-label={tr('Open card: {0}', card.title)}>
           {card.labels.length > 0 && (
             <span className="mb-2 flex flex-wrap gap-1">

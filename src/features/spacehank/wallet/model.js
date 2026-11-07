@@ -52,6 +52,23 @@ export const dayOf = (time) => {
   const d = new Date(time);
   return `${monthKey(d)}-${String(d.getDate()).padStart(2, '0')}`;
 };
+/**
+ * How the balance of a month moved, day by day: the money in minus the money out up to the end of each day, from the 1st to
+ * `today` (or to the last day, for a month that is over). A list of numbers for a small line.
+ */
+export const balanceSeries = (entries, key, today = new Date()) => {
+  const [y, m] = key.split('-').map(Number);
+  const lastDay = new Date(y, m, 0).getDate();
+  const upTo = monthKey(today) === key ? today.getDate() : lastDay;
+  const net = Array.from({ length: lastDay }, () => 0);
+  for (const e of entries) {
+    if (monthKey(new Date(e.at)) !== key) continue;
+    net[new Date(e.at).getDate() - 1] += e.type === 'income' ? e.amount : -e.amount;
+  }
+  let running = 0;
+  return net.slice(0, upTo).map((n) => (running += n));
+};
+
 export const inMonth = (entries, key) => entries.filter((e) => monthKey(new Date(e.at)) === key);
 
 /** Totals for a month's entries: money in and out, each category's share, and spending per day. */

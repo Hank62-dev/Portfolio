@@ -105,14 +105,14 @@ function Flip({ card, flipped, canSwipe, onFlip, onSwipe }) {
       <div className="[perspective:1400px]">
         <div className="grid motion-reduce:!transition-none" style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)', transition: 'transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1)' }}>
           <div
-            className="col-start-1 row-start-1 grid min-h-[17rem] place-items-center rounded-[2rem] border border-line bg-[radial-gradient(90%_70%_at_50%_0%,rgb(138_59_255/0.16),transparent_62%),var(--color-ink-1)] p-6 shadow-[0_30px_70px_-40px_rgb(var(--shadow-rgb)/0.95)]"
+            className="paper-note relative col-start-1 row-start-1 grid min-h-[17rem] place-items-center overflow-hidden rounded-[2rem] border border-line p-6 shadow-[0_30px_70px_-40px_rgb(var(--shadow-rgb)/0.95)]"
             style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
             aria-hidden={flipped}
           >
             <Side card={card} />
           </div>
           <div
-            className="col-start-1 row-start-1 grid min-h-[17rem] place-items-center rounded-[2rem] border border-signal/30 bg-[radial-gradient(90%_70%_at_50%_0%,rgb(255_91_46/0.14),transparent_62%),var(--color-ink-1)] p-6 shadow-[0_30px_70px_-40px_rgb(var(--shadow-rgb)/0.95)]"
+            className="ink-panel col-start-1 row-start-1 grid min-h-[17rem] place-items-center rounded-[2rem] p-6"
             style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
             aria-hidden={!flipped}
           >
@@ -266,7 +266,7 @@ export default function Session({ cards, onClose, onMore }) {
           <X size={18} aria-hidden="true" />
         </button>
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-wash/[0.07]" role="progressbar" aria-label={tr('Session progress')} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent}>
-          <i className="block h-full rounded-full bg-gradient-to-r from-signal to-[#8a3bff] transition-[width] duration-500" style={{ width: `${percent}%` }} />
+          <i className="block h-full rounded-full bg-gradient-to-r from-signal to-[hsl(var(--tab)_62%_70%)] transition-[width] duration-500" style={{ width: `${percent}%` }} />
         </div>
         <span className="w-12 shrink-0 text-right font-mono text-[0.72rem] text-bone-faint tabular-nums" data-progress>
           {Math.min(index, queue.length)}/{queue.length}

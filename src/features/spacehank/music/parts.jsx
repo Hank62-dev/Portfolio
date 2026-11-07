@@ -26,7 +26,7 @@ export function Orbit({ tracks = [], liked, className }) {
   return (
     <span className={clsx('relative block aspect-square shrink-0 overflow-hidden rounded-full', className)}>
       {liked ? (
-        <span className="grid size-full place-items-center bg-gradient-to-br from-signal via-[#ff8a5c] to-[#8a3bff] text-ink-0">
+        <span className="grid size-full place-items-center bg-gradient-to-br from-signal via-[hsl(var(--tab)_70%_66%)] to-[hsl(var(--tab)_62%_72%)] text-ink-0">
           <Heart size="38%" fill="currentColor" aria-hidden="true" />
         </span>
       ) : withArt.length >= 4 ? (

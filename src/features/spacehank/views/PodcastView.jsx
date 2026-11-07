@@ -33,7 +33,7 @@ function NowPlaying() {
   if (!episode) return null;
   const length = duration || episode.duration || 0;
   return (
-    <section className="flex flex-col gap-4 rounded-3xl border border-line bg-[radial-gradient(80%_120%_at_0%_0%,hsl(var(--app-hue)_46%_64%/0.16),transparent_60%),var(--color-ink-1)] p-4 sm:p-5" aria-label={tr('Now playing')}>
+    <section className="ink-panel flex flex-col gap-4 rounded-3xl p-4 sm:p-5" aria-label={tr('Now playing')}>
       <div className="flex items-center gap-3.5">
         <Cover src={episode.image || show?.image} size={72} className="rounded-2xl" />
         <div className="min-w-0 flex-1">

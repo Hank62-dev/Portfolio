@@ -93,7 +93,7 @@ const hashHue = (text) => [...String(text)].reduce((h, c) => (h * 31 + c.charCod
 /** A card's colour: two soft glows on a dark ground, in a hue taken from its name, so each mix has a mood of its own. */
 const auroraOf = (text) => {
   const hue = hashHue(text);
-  return `radial-gradient(120% 90% at 0% 0%, hsl(${hue} 75% 52% / 0.85), transparent 60%), radial-gradient(100% 100% at 100% 100%, hsl(${(hue + 70) % 360} 70% 45% / 0.8), transparent 62%), hsl(${hue} 40% 12%)`;
+  return `radial-gradient(120% 90% at 0% 0%, hsl(${hue} 62% 50% / 0.62), transparent 60%), radial-gradient(100% 100% at 100% 100%, hsl(${(hue + 38) % 360} 56% 44% / 0.5), transparent 64%), hsl(${hue} 28% 11%)`;
 };
 
 const Layer = ({ children }) => createPortal(children, document.querySelector('.app-shell') ?? document.body);
@@ -200,7 +200,7 @@ function CollectionPage({ data, playlists, onClose, onDeleted }) {
   const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
   return (
     <Layer>
-      <div className="fixed inset-0 z-[25] animate-sheet-up overflow-y-auto overscroll-contain bg-ink-0 pb-48" style={{ ...drag.style, backgroundImage: `radial-gradient(90% 40% at 50% 0%, rgb(${accent} / 0.5), transparent 75%)` }} {...drag.bind} data-collection-page>
+      <div className="fixed inset-0 z-[25] animate-sheet-up overflow-y-auto overscroll-contain bg-ink-0 pb-48" style={{ ...drag.style, backgroundImage: `radial-gradient(90% 40% at 50% 0%, rgb(${accent} / 0.5), transparent 75%), radial-gradient(80% 36% at 100% 100%, rgb(${accent} / 0.16), transparent 70%)` }} {...drag.bind} data-collection-page>
         <div className="sticky top-0 z-10 flex items-center justify-between px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-2">
           <button type="button" aria-label={tr('Back')} onClick={leave} className="grid size-10 place-items-center rounded-full border border-wash/12 bg-shade/35 text-bone backdrop-blur active:scale-90">
             <ChevronLeft size={22} aria-hidden="true" />
@@ -269,7 +269,7 @@ function NowPlaying({ tracks, byId }) {
   const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
   return (
     <Layer>
-      <div className={clsx('fixed inset-0 z-[60] overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-10', !morphs && 'animate-sheet-up')} style={{ ...drag.style, background: `radial-gradient(120% 55% at 50% 0%, rgb(${accent} / 0.55), transparent 75%), var(--color-ink-0)` }} {...drag.bind} data-now-playing-page>
+      <div className={clsx('fixed inset-0 z-[60] overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-10', !morphs && 'animate-sheet-up')} style={{ ...drag.style, background: `radial-gradient(120% 55% at 50% 0%, rgb(${accent} / 0.55), transparent 75%), radial-gradient(90% 40% at 100% 100%, rgb(${accent} / 0.18), transparent 70%), var(--color-ink-0)` }} {...drag.bind} data-now-playing-page>
         <div className="flex items-center justify-between">
           <button type="button" aria-label={tr('Close the player')} onClick={leave} className="grid size-10 place-items-center rounded-full border border-wash/12 bg-wash/8 text-bone active:scale-90">
             <ChevronDown size={22} aria-hidden="true" />

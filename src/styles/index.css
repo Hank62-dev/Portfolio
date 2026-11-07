@@ -1209,24 +1209,12 @@ input[data-own-clear]::-webkit-search-decoration {
   isolation: isolate;
   overflow: hidden;
   background:
-    radial-gradient(70% 130% at 0% 0%, hsl(var(--app-hue) 90% 58% / 0.24), transparent 62%),
-    radial-gradient(55% 110% at 100% 0%, hsl(calc(var(--app-hue) + 34) 85% 62% / 0.16), transparent 66%),
-    radial-gradient(60% 90% at 60% 120%, hsl(calc(var(--app-hue) - 14) 80% 50% / 0.12), transparent 70%),
+    radial-gradient(90% 130% at 0% 0%, hsl(var(--app-hue) 46% 48% / 0.17), transparent 64%),
+    radial-gradient(60% 110% at 100% 0%, hsl(calc(var(--app-hue) + 28) 40% 52% / 0.09), transparent 68%),
     var(--color-ink-1);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--color-wash) 10%, transparent),
-    0 40px 80px -50px hsl(var(--app-hue) 90% 40% / 0.55);
-}
-/* a fine grain keeps the glow from banding and gives the card some paper */
-.cl-hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  opacity: 0.07;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    inset 0 1px 0 color-mix(in srgb, var(--color-wash) 8%, transparent),
+    0 34px 60px -46px rgb(0 0 0 / 0.8);
 }
 .cl-gleam {
   background-image: linear-gradient(100deg, var(--color-bone) 35%, hsl(calc(var(--app-hue) + 16) 95% 72%) 50%, var(--color-bone) 65%);
@@ -1234,7 +1222,7 @@ input[data-own-clear]::-webkit-search-decoration {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: cl-gleam 9s ease-in-out infinite;
+  animation: cl-gleam 5s ease-in-out 0.4s 1 both;
 }
 @keyframes cl-gleam {
   0%,
@@ -1721,4 +1709,138 @@ html[data-vt='player']::view-transition-new(root) {
     radial-gradient(ellipse 42% 28% at 24% 34%, rgb(255 255 255 / 0.34), transparent 70%),
     radial-gradient(ellipse 46% 32% at 76% 22%, rgb(255 255 255 / 0.28), transparent 70%),
     radial-gradient(ellipse 50% 26% at 54% 52%, rgb(255 255 255 / 0.18), transparent 72%);
+}
+
+/* ───────── Paper and ink, for the other screens ─────────
+   The same calm as the Today cards: the surface is the neutral ink, the colour is a faint glow in one corner and a hairline. */
+
+/* A panel for a screen's main figure or form (the tab's own colour, --tab, as the glow). */
+.ink-panel {
+  background:
+    radial-gradient(120% 90% at 0% 0%, hsl(var(--tab) 42% 46% / 0.13), transparent 62%),
+    var(--color-ink-1);
+  border: 1px solid hsl(var(--tab) 12% 30% / 0.7);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 22px 40px -30px rgb(0 0 0 / 0.85);
+}
+:root[data-theme='light'] .ink-panel {
+  background:
+    radial-gradient(120% 90% at 0% 0%, hsl(var(--tab) 60% 80% / 0.6), transparent 65%),
+    var(--color-ink-1);
+  border-color: hsl(var(--tab) 30% 70% / 0.7);
+  box-shadow: none;
+}
+
+/* A receipt: the list of entries, with a torn edge along the bottom and dotted lines between the name and the amount. */
+.receipt {
+  border-bottom: 0;
+  padding-bottom: calc(1.25rem + 10px);
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 9px) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 18px 9px repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - 9px) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 18px 9px repeat-x;
+}
+.receipt-line {
+  border-bottom: 1px dotted var(--color-line-strong);
+}
+.receipt-line:last-child {
+  border-bottom: 0;
+}
+
+/* A note on paper: the top right corner is folded over (--note-hue is the colour of its first tag). */
+.paper-note {
+  background:
+    radial-gradient(130% 80% at 0% 0%, hsl(var(--note-hue, 30) 40% 46% / 0.11), transparent 62%),
+    var(--paper, var(--color-ink-1));
+}
+.paper-note::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  background: linear-gradient(225deg, var(--color-ink-0) 50%, hsl(var(--note-hue, 30) 14% 26%) 50%);
+  border-bottom-left-radius: 0.35rem;
+  box-shadow: -2px 2px 5px -2px rgb(0 0 0 / 0.5);
+  transition: width 0.3s var(--ease-out-expo), height 0.3s var(--ease-out-expo);
+}
+.paper-note:hover::after {
+  width: 1.9rem;
+  height: 1.9rem;
+}
+:root[data-theme='light'] .paper-note::after {
+  background: linear-gradient(225deg, var(--color-ink-0) 50%, hsl(var(--note-hue, 30) 28% 78%) 50%);
+  box-shadow: -2px 2px 5px -2px rgb(0 0 0 / 0.18);
+}
+
+/* The garden: a small landscape with the sky of this hour behind the plants, two hills in front, and rain when one is watered. */
+.garden-scene {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  color: #fff;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 60%, var(--sky-low) 100%);
+  box-shadow: 0 30px 50px -36px var(--sky-top);
+}
+.garden-scene .sky-orb {
+  width: 5.5rem;
+}
+.garden-hill {
+  position: absolute;
+  inset-inline: -2%;
+  bottom: -1px;
+  z-index: 1;
+  width: 104%;
+  pointer-events: none;
+}
+.garden-plants {
+  position: relative;
+  z-index: 2;
+}
+.drop {
+  position: absolute;
+  top: -0.2rem;
+  left: calc(50% + var(--dx, 0px));
+  width: 0.28rem;
+  height: 0.7rem;
+  border-radius: 9999px;
+  background: linear-gradient(to bottom, transparent, rgb(150 210 255 / 0.95));
+  opacity: 0;
+  animation: drop-fall 0.9s ease-in var(--dd, 0s) both;
+}
+@keyframes drop-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-0.6rem);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(3.6rem);
+  }
+}
+
+/* A softer panel for the many small groups (Tile and Figure): a hint of the tab's colour and a hairline, nothing more. */
+.ink-tile {
+  background:
+    radial-gradient(120% 90% at 0% 0%, hsl(var(--tab) 40% 46% / 0.07), transparent 60%),
+    var(--color-ink-1);
+  border: 1px solid hsl(var(--tab) 10% 28% / 0.65);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 22px 40px -32px rgb(0 0 0 / 0.8);
+}
+:root[data-theme='light'] .ink-tile {
+  background:
+    radial-gradient(120% 90% at 0% 0%, hsl(var(--tab) 55% 80% / 0.4), transparent 62%),
+    var(--color-ink-1);
+  border-color: hsl(var(--tab) 28% 72% / 0.7);
+  box-shadow: none;
 }

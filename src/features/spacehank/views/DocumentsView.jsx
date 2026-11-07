@@ -129,7 +129,7 @@ export default function DocumentsView({ onTab }) {
           disabled={busy}
           className={clsx(
             'group relative flex w-full flex-col items-center justify-center gap-3 overflow-hidden rounded-3xl border-2 border-dashed px-6 py-14 text-center transition-all duration-500',
-            over ? 'scale-[1.01] border-signal bg-signal-soft' : 'border-line-strong bg-[radial-gradient(60%_90%_at_50%_0%,rgb(255_91_46/0.1),transparent),var(--color-ink-1)] hover:border-signal/60'
+            over ? 'scale-[1.01] border-signal bg-signal-soft' : 'border-line-strong bg-ink-1 hover:border-signal/60'
           )}
         >
           <span className="relative grid size-16 place-items-center rounded-full bg-ink-3 text-signal">

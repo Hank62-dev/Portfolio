@@ -168,7 +168,7 @@ export default function RagView() {
 
   return (
     <div className="relative mx-auto flex min-h-[calc(100vh-11rem)] w-full max-w-[860px] flex-col">
-      <div className="pointer-events-none absolute -top-10 left-1/2 h-72 w-[min(720px,100%)] -translate-x-1/2 bg-[radial-gradient(50%_60%_at_50%_0%,rgb(255_91_46/0.16),transparent),radial-gradient(40%_50%_at_80%_20%,rgb(91_43_255/0.14),transparent)] blur-2xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute -top-10 left-1/2 h-72 w-[min(720px,100%)] -translate-x-1/2 bg-[radial-gradient(50%_60%_at_50%_0%,hsl(var(--tab)_42%_46%/0.16),transparent)]" aria-hidden="true" />
 
       <header className="relative flex flex-wrap items-center justify-between gap-3 pb-4">
         <div className="flex w-full items-center gap-2" data-chat-bar>

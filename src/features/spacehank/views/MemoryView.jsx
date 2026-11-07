@@ -28,7 +28,7 @@ function Ring({ value, max }) {
         <defs>
           <linearGradient id="mem" x1="0" x2="1">
             <stop offset="0" stopColor="#ff5b2e" />
-            <stop offset="1" stopColor="#8a3bff" />
+            <stop offset="1" stopColor="hsl(var(--tab) 62% 72%)" />
           </linearGradient>
         </defs>
       </svg>
@@ -105,7 +105,7 @@ export default function MemoryView({ events }) {
 
       {/* the glance: the newest signal, how full the memory is, and who has been talking */}
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
-        <section className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(80%_120%_at_0%_0%,rgb(255_91_46/0.12),transparent_60%),var(--color-ink-1)] p-5" aria-label={tr('Latest signal')}>
+        <section className="relative overflow-hidden ink-panel rounded-3xl p-5" aria-label={tr('Latest signal')}>
           <span className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Latest signal')}</span>
           {latest ? (
             <div className="mt-3 flex items-start gap-3.5">

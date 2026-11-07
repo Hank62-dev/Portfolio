@@ -318,7 +318,7 @@ export default function MemosView({ onNotify }) {
     <div className="flex flex-col gap-6">
       <PageHead eyebrow={tr('Capture')} title={tr('Voice')} accent="Memos." description={tr('Press the button and say it. It keeps the recording, turns your words into text when the browser can, and can send it to Second Brain.')} />
 
-      <section className="relative overflow-hidden rounded-3xl border border-line bg-[radial-gradient(70%_100%_at_50%_0%,rgb(255_91_46/0.16),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" aria-label={tr('Recorder')}>
+      <section className="relative overflow-hidden ink-panel rounded-3xl p-6 sm:p-8" aria-label={tr('Recorder')}>
         <div className="mx-auto flex max-w-xl flex-col items-center gap-5">
           <div className="relative grid size-28 place-items-center">
             {recording && <i className="absolute inset-0 animate-ping rounded-full bg-danger/25 [animation-duration:1.8s]" aria-hidden="true" />}

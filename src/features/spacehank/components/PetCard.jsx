@@ -35,7 +35,7 @@ export default function PetCard({ onTab }) {
   const progress = Math.round(pet.progress * 100);
 
   return (
-    <section aria-label={tr('{0}, thú cưng của bạn', pet.name)} className="relative overflow-hidden rounded-[1.75rem] border border-line bg-[radial-gradient(90%_130%_at_0%_0%,rgb(150_205_170/0.16),transparent_62%),var(--color-ink-1)] p-4" data-pet data-pet-mood={pet.mood}>
+    <section aria-label={tr('{0}, thú cưng của bạn', pet.name)} className="relative overflow-hidden ink-panel rounded-[1.75rem] p-4" data-pet data-pet-mood={pet.mood}>
       <div className="flex items-center gap-3">
         <button type="button" onClick={touch} aria-label={tr('Chạm vào {0}', pet.name)} className="relative shrink-0 rounded-full active:scale-95">
           <span className={clsx('block', hopping && 'pet-hop')} key={poke.at}>

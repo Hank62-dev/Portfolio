@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Banknote, Bus, Check, ChevronLeft, ChevronRight, CircleEllipsis, Download, Gamepad2, GraduationCap, HeartPulse, House, Plus, ShoppingBag, Sparkles, Target, Trash2, TrendingDown, TrendingUp, Utensils, Wallet as WalletIcon } from 'lucide-react';
 import { Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
@@ -6,7 +6,7 @@ import { PageHead, Segmented, Tile } from '../components/Page';
 import { useFab } from '../fab';
 import { useStore } from '../store';
 import { useArrived, useCountUp } from '../motion/hooks';
-import { CATEGORIES, categoryOf, compact, formatVnd, inMonth, monthKey, parseEntry, summarize, toCsv } from '../wallet/model';
+import { CATEGORIES, balanceSeries, categoryOf, compact, formatVnd, inMonth, monthKey, parseEntry, summarize, toCsv } from '../wallet/model';
 import { budgets, entries } from '../wallet/store';
 import { locale, tr } from '../lang';
 
@@ -20,6 +20,29 @@ function CatIcon({ id, size = 16, className = 'size-9' }) {
     <span className={clsx('grid shrink-0 place-items-center rounded-full', className)} style={{ background: `hsl(${cat.hue} 60% 50% / 0.2)`, color: `hsl(${cat.hue} 85% 76%)` }}>
       <Icon size={size} aria-hidden="true" />
     </span>
+  );
+}
+
+/** The balance of the month as a thin line that draws itself from left to right, with a soft area under it. */
+function BalanceLine({ values, className }) {
+  const arrived = useArrived();
+  if (values.length < 2) return null;
+  const lo = Math.min(0, ...values);
+  const hi = Math.max(1, ...values);
+  const x = (i) => (i / (values.length - 1)) * 100;
+  const y = (v) => 30 - ((v - lo) / (hi - lo || 1)) * 26 - 2;
+  const line = values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(2)} ${y(v).toFixed(2)}`).join(' ');
+  return (
+    <svg viewBox="0 0 100 30" preserveAspectRatio="none" className={className} role="img" aria-label={tr('Balance through the month')}>
+      <defs>
+        <linearGradient id="balance-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="var(--color-signal)" stopOpacity="0.28" />
+          <stop offset="1" stopColor="var(--color-signal)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d={`${line} L100 30 L0 30 Z`} fill="url(#balance-fill)" style={{ opacity: arrived ? 1 : 0, transition: 'opacity 1.1s ease 0.5s' }} />
+      <path d={line} pathLength="1" fill="none" stroke="var(--color-signal)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" style={{ strokeDasharray: 1, strokeDashoffset: arrived ? 0 : 1, transition: 'stroke-dashoffset 1.4s var(--ease-out-expo)' }} />
+    </svg>
   );
 }
 
@@ -41,13 +64,25 @@ function Donut({ parts, total }) {
   let offset = 0;
   const arrived = useArrived(); // the arcs are drawn one after another when the chart appears
   const counted = useCountUp(total);
+  const uid = useId().replace(/:/g, '');
   return (
     <div className="relative size-40 shrink-0" role="img" aria-label={tr('Spending by category')}>
-      <svg viewBox="0 0 140 140" className="-rotate-90">
+      <svg viewBox="0 0 140 140" className="-rotate-90" style={{ filter: 'drop-shadow(0 8px 14px rgb(0 0 0 / 0.35))' }}>
+        <defs>
+          {parts.map((p) => {
+            const hue = categoryOf(p.category).hue;
+            return (
+              <linearGradient key={p.category} id={`${uid}-${p.category}`} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor={`hsl(${hue} 78% 68%)`} />
+                <stop offset="1" stopColor={`hsl(${hue + 22} 72% 54%)`} />
+              </linearGradient>
+            );
+          })}
+        </defs>
         <circle cx="70" cy="70" r={r} fill="none" stroke="var(--color-line)" strokeWidth="16" />
         {parts.map((p) => {
           const len = (p.total / total) * c;
-          const node = <circle key={p.category} cx="70" cy="70" r={r} fill="none" strokeWidth="16" stroke={`hsl(${categoryOf(p.category).hue} 75% 62%)`} strokeDasharray={`${arrived ? Math.max(0, len - 2) : 0} ${c}`} strokeDashoffset={-offset} style={{ transition: 'stroke-dasharray 0.9s var(--ease-out-expo)', transitionDelay: `${parts.indexOf(p) * 90}ms` }} />;
+          const node = <circle key={p.category} cx="70" cy="70" r={r} fill="none" strokeWidth="16" stroke={`url(#${uid}-${p.category})`} strokeDasharray={`${arrived ? Math.max(0, len - 2) : 0} ${c}`} strokeDashoffset={-offset} style={{ transition: 'stroke-dasharray 0.9s var(--ease-out-expo)', transitionDelay: `${parts.indexOf(p) * 90}ms` }} />;
           offset += len;
           return node;
         })}
@@ -101,6 +136,7 @@ export default function WalletView() {
   const balanceShown = useCountUp(sum.balance);
   const spentShown = useCountUp(sum.spent);
   const incomeShown = useCountUp(sum.income);
+  const line = useMemo(() => balanceSeries(here, month), [here, month]);
   const days = useMemo(() => {
     const groups = new Map();
     for (const e of here) {
@@ -146,7 +182,7 @@ export default function WalletView() {
         </Button>
       </PageHead>
 
-      <form onSubmit={understand} className="rounded-[2rem] border border-wash/10 bg-[radial-gradient(70%_130%_at_0%_0%,rgb(255_91_46/0.13),transparent_60%),radial-gradient(60%_120%_at_100%_100%,rgb(91_43_255/0.1),transparent_60%),var(--color-ink-1)] p-3 sm:p-4">
+      <form onSubmit={understand} className="ink-panel rounded-[2rem] p-3 sm:p-4">
         <div className="flex items-center gap-2.5 rounded-full bg-shade/35 p-1.5 pl-2 ring-1 ring-wash/10 transition-shadow focus-within:ring-2 focus-within:ring-signal/55">
           <span className="grid size-10 shrink-0 place-items-center rounded-full bg-signal-soft text-signal">
             <WalletIcon size={18} aria-hidden="true" />
@@ -221,23 +257,25 @@ export default function WalletView() {
         )}
       </div>
 
-      <section className="relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(90%_140%_at_0%_0%,rgb(255_91_46/0.2),transparent_55%),radial-gradient(70%_120%_at_100%_100%,rgb(91_43_255/0.2),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" data-figures aria-label={tr('This month')}>
-        <span className="font-mono text-[0.68rem] tracking-[0.14em] text-bone-dim uppercase">{tr('Balance this month')}</span>
-        <b className={clsx('mt-2 block font-display leading-none tabular-nums [font-size:clamp(2.4rem,6vw,4rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(balanceShown)}</b>
-        <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+      <section className="ink-panel relative overflow-hidden rounded-[2rem] p-6 sm:p-8" data-figures aria-label={tr('This month')}>
+        <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
+          <div className="min-w-0">
+            <span className="font-mono text-[0.68rem] tracking-[0.14em] text-bone-dim uppercase">{tr('Balance this month')}</span>
+            <b className={clsx('numeral mt-3 block [font-size:clamp(3rem,12vw,6rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(balanceShown)}</b>
+          </div>
+          <BalanceLine values={line} className="h-16 w-full sm:w-72" />
+        </div>
+        <div className="mt-8 grid grid-cols-3 divide-x divide-line border-t border-line pt-5">
           {[
             ['Spent', formatVnd(spentShown), 'text-bone', TrendingDown],
             ['Income', formatVnd(incomeShown), 'text-ok', TrendingUp],
             ['Biggest', lead ? categoryOf(lead.category).label : '-', 'text-bone', Target],
           ].map(([label, value, tone, Icon]) => (
-            <div key={label} className="flex items-center gap-3 rounded-2xl bg-shade/25 px-4 py-3 backdrop-blur max-md:flex-col max-md:items-start max-md:gap-1.5 max-md:px-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-wash/8 text-bone-dim max-md:size-7">
-                <Icon size={16} aria-hidden="true" />
-              </span>
-              <span className="min-w-0 leading-tight">
-                <small className="block font-mono text-[0.64rem] tracking-[0.12em] text-bone-faint uppercase">{label}</small>
-                <b className={clsx('block truncate text-fine font-medium tabular-nums', tone)}>{value}</b>
-              </span>
+            <div key={label} className="min-w-0 px-3 first:pl-0 sm:px-6">
+              <small className="flex items-center gap-1.5 font-mono text-[0.64rem] tracking-[0.12em] text-bone-faint uppercase">
+                <Icon size={12} aria-hidden="true" /> {label}
+              </small>
+              <b className={clsx('mt-1.5 block truncate font-display text-[clamp(1.05rem,3.6vw,1.6rem)] leading-tight font-normal tabular-nums', tone)}>{value}</b>
             </div>
           ))}
         </div>
@@ -313,7 +351,7 @@ export default function WalletView() {
             </Tile>
           </div>
 
-          <Tile title={tr('Entries')}>
+          <Tile title={tr('Entries')} className="receipt">
             {days.length ? (
               <ol className="flex max-h-[420px] flex-col gap-4 overflow-y-auto pr-1">
                 {days.map(([day, list]) => (
@@ -323,7 +361,7 @@ export default function WalletView() {
                       {list.map((e) => {
                         const cat = categoryOf(e.category);
                         return (
-                          <li key={e.id} className="group flex items-center gap-3 rounded-xl px-2 py-1.5 hover:bg-wash/[0.04]" data-entry>
+                          <li key={e.id} className="receipt-line group flex items-center gap-3 px-2 py-2 hover:bg-wash/[0.04]" data-entry>
                             <CatIcon id={e.category} size={15} className="size-8" />
                             <span className="min-w-0 flex-1 leading-tight">
                               <b className="block truncate text-fine font-medium text-bone">{e.note || cat.label}</b>

@@ -46,7 +46,7 @@ export function Segmented({ value, onChange, options, label, large = false, roun
 /** A rounded surface for a group of things, optionally with a title row. */
 export function Tile({ title, aside, className, children, ...rest }) {
   return (
-    <section className={clsx('min-w-0 rounded-[1.75rem] border border-line bg-ink-1 p-5 shadow-[0_30px_70px_-50px_rgb(var(--shadow-rgb)/0.95)]', className)} {...rest}>
+    <section className={clsx('ink-tile min-w-0 rounded-[1.75rem] p-5', className)} {...rest}>
       {(title || aside) && (
         <div className="mb-3 flex items-center justify-between gap-3">
           {title && <h2 className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{title}</h2>}
@@ -61,8 +61,8 @@ export function Tile({ title, aside, className, children, ...rest }) {
 /** A big number with a label under it. */
 export function Figure({ value, label, tone }) {
   return (
-    <div className="min-w-0 rounded-3xl border border-line bg-gradient-to-b from-wash/[0.04] to-transparent bg-ink-1 p-3.5 md:p-4">
-      <b className={clsx('block font-display text-h3 leading-none tabular-nums', tone ?? 'text-bone')}>{value}</b>
+    <div className="ink-tile min-w-0 rounded-3xl p-3.5 md:p-4">
+      <b className={clsx('numeral block text-[clamp(1.9rem,5vw,2.7rem)]', tone ?? 'text-bone')}>{value}</b>
       {/* short labels, and on a phone plain sentence case: three columns are narrow, and a spaced-out capital label wraps */}
       <small className="mt-2 block text-[0.74rem] leading-tight text-balance text-bone-faint md:mt-1.5 md:font-mono md:text-[0.68rem] md:tracking-[0.12em] md:uppercase">{label}</small>
     </div>

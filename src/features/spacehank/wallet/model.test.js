@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compact, formatVnd, inMonth, monthKey, parseAmount, parseEntry, summarize, toCsv } from './model';
+import { balanceSeries, compact, formatVnd, inMonth, monthKey, parseAmount, parseEntry, summarize, toCsv } from './model';
 
 describe('parseAmount', () => {
   it('reads Vietnamese shorthand', () => {
@@ -79,5 +79,30 @@ describe('formatting', () => {
   it('exports a CSV with quoted notes', () => {
     const csv = toCsv([{ type: 'expense', category: 'food', amount: 45000, note: 'Phở "đặc biệt"', at: new Date(2026, 10, 2, 12).getTime() }]);
     expect(csv.split('\n')[1]).toBe('2026-11-02,expense,food,45000,"Phở ""đặc biệt"""');
+  });
+});
+
+describe('balanceSeries', () => {
+  const at = (day, hour = 12) => new Date(2026, 10, day, hour).getTime();
+  const lines = [
+    { type: 'income', amount: 1000000, at: at(1) },
+    { type: 'expense', amount: 200000, at: at(2) },
+    { type: 'expense', amount: 50000, at: at(2, 20) },
+    { type: 'expense', amount: 100000, at: at(4) },
+    { type: 'expense', amount: 999, at: new Date(2026, 9, 31, 12).getTime() }, // another month
+  ];
+
+  it('runs from the 1st to today for the month in progress', () => {
+    expect(balanceSeries(lines, '2026-11', new Date(2026, 10, 5))).toEqual([1000000, 750000, 750000, 650000, 650000]);
+  });
+
+  it('covers the whole month once it is over', () => {
+    const series = balanceSeries(lines, '2026-11', new Date(2026, 11, 20));
+    expect(series).toHaveLength(30);
+    expect(series.at(-1)).toBe(650000);
+  });
+
+  it('is flat zero for a month with nothing in it', () => {
+    expect(balanceSeries([], '2026-11', new Date(2026, 10, 3))).toEqual([0, 0, 0]);
   });
 });

@@ -81,10 +81,10 @@ function NoteCard({ note, query, onOpen, grid }) {
       <button
         type="button"
         onClick={() => onOpen(note.id)}
-        className="group relative flex w-full flex-col gap-2 overflow-hidden rounded-2xl border border-line bg-ink-1 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_18px_40px_-20px_rgb(var(--shadow-rgb)/0.9)] max-md:gap-1.5 max-md:rounded-xl max-md:p-3 max-md:active:scale-[0.98]"
-        style={{ backgroundImage: `linear-gradient(160deg, hsl(${hue} 55% 50% / 0.13), transparent 70%)` }}
+        className="paper-note group relative flex w-full flex-col gap-2 overflow-hidden rounded-2xl border border-line p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-line-strong hover:shadow-[0_18px_40px_-20px_rgb(var(--shadow-rgb)/0.9)] max-md:gap-1.5 max-md:rounded-xl max-md:p-3 max-md:active:scale-[0.98]"
+        style={{ '--note-hue': hue }}
       >
-        <i className="absolute inset-x-0 top-0 h-0.5 opacity-80" style={{ background: `linear-gradient(90deg, hsl(${hue} 80% 60%), transparent)` }} aria-hidden="true" />
+        <i className="absolute top-0 left-4 h-[3px] w-9 rounded-b-full" style={{ background: `hsl(${hue} 70% 62%)` }} aria-hidden="true" />
         <span className="flex items-start gap-2">
           <b className="min-w-0 flex-1 font-display text-lead leading-snug text-bone max-md:line-clamp-2 max-md:text-[1.02rem]">{titleOf(note.text)}</b>
           {note.pinned && <Pin size={13} className="mt-1.5 shrink-0 text-signal" aria-label={tr('Pinned')} />}
@@ -276,7 +276,7 @@ export default function NotesView() {
 
       {/* ask + journal, as a bento */}
       <div className={clsx('grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]', !askOpen && 'max-md:hidden')}>
-        <section className="relative overflow-hidden rounded-3xl border border-signal/25 bg-[radial-gradient(90%_120%_at_0%_0%,rgb(255_91_46/0.16),transparent_60%),radial-gradient(70%_100%_at_100%_100%,rgb(91_43_255/0.16),transparent_60%),var(--color-ink-1)] p-5 sm:p-6">
+        <section className="ink-panel relative overflow-hidden rounded-3xl p-5 sm:p-6">
           <div className="flex items-center gap-2.5">
             <span className="grid size-8 place-items-center rounded-full bg-signal text-ink-0">
               <Sparkles size={15} aria-hidden="true" />

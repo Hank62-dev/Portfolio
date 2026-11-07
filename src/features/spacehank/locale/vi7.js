@@ -132,4 +132,7 @@ export const vi7 = {
   'Next card': 'Thẻ sau',
   'SPENT TODAY': 'CHI HÔM NAY',
   'It is late': 'Khuya rồi',
+  'The garden': 'Khu vườn',
+  'Water {0}': 'Tưới cho {0}',
+  'Balance through the month': 'Số dư trong tháng',
 };

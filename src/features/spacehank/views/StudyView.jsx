@@ -27,7 +27,7 @@ function Focus({ onFocusMusic }) {
 
   return (
     <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
-      <section className="flex flex-col items-center gap-6 rounded-3xl border border-line bg-[radial-gradient(70%_100%_at_50%_0%,rgb(255_91_46/0.14),transparent_60%),var(--color-ink-1)] p-8">
+      <section className="flex flex-col items-center gap-6 ink-panel rounded-3xl p-8">
         <Segmented value={mode} onChange={setMode} options={MODES.map((m) => ({ id: m.id, label: m.label }))} label={tr('Timer mode')} />
         <div className="relative size-60" role="timer" aria-live="off" aria-label={tr('{0} left', clock(left))}>
           <svg viewBox="0 0 220 220" className="-rotate-90">
@@ -35,13 +35,13 @@ function Focus({ onFocusMusic }) {
             <circle cx="110" cy="110" r={r} fill="none" stroke="url(#pomo)" strokeWidth="10" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - left / total)} className="transition-[stroke-dashoffset] duration-300" />
             <defs>
               <linearGradient id="pomo" x1="0" x2="1">
-                <stop offset="0" stopColor="#ff5b2e" />
-                <stop offset="1" stopColor="#8a3bff" />
+                <stop offset="0" stopColor="var(--color-signal)" />
+                <stop offset="1" stopColor="hsl(var(--tab) 62% 76%)" />
               </linearGradient>
             </defs>
           </svg>
           <span className="absolute inset-0 grid place-items-center">
-            <b className={clsx('font-display text-display leading-none text-bone tabular-nums [font-size:clamp(3rem,7vw,4.4rem)]', ringing && 'animate-pulse text-signal')} data-clock>
+            <b className={clsx('numeral text-bone [font-size:clamp(3.2rem,8vw,4.8rem)]', ringing && 'animate-pulse text-signal')} data-clock>
               {clock(left)}
             </b>
           </span>
@@ -55,7 +55,7 @@ function Focus({ onFocusMusic }) {
             <Button variant="ghost" size="icon" aria-label={tr('Reset the timer')} onClick={reset}>
               <RotateCcw size={15} aria-hidden="true" />
             </Button>
-            <button type="button" onClick={running ? pause : start} aria-label={running ? tr('Pause the timer') : tr('Start the timer')} className="grid size-16 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-[0_10px_30px_-8px_rgb(255_91_46/0.8)] transition-transform hover:scale-105 active:scale-95">
+            <button type="button" onClick={running ? pause : start} aria-label={running ? tr('Pause the timer') : tr('Start the timer')} className="grid size-16 place-items-center rounded-full bg-gradient-to-br from-signal to-[hsl(var(--tab)_70%_66%)] text-ink-0 shadow-[0_10px_30px_-10px_var(--color-signal)] transition-transform hover:scale-105 active:scale-95">
               {running ? <Pause size={24} fill="currentColor" aria-hidden="true" /> : <Play size={24} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
             </button>
             <Button variant="ghost" size="sm" onClick={onFocusMusic}>

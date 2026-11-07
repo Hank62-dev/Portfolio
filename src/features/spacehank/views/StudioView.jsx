@@ -110,7 +110,7 @@ function Stage({ record, busy, shape, onFavorite, onReuse, onRemove }) {
   return (
     <div className="flex flex-col gap-3">
       <div
-        className="relative grid min-h-[320px] w-full place-items-center overflow-hidden rounded-2xl border border-line bg-[radial-gradient(120%_90%_at_50%_0%,rgb(255_91_46/0.12),transparent_60%),var(--color-ink-1)]"
+        className="relative grid min-h-[320px] w-full place-items-center overflow-hidden ink-panel rounded-2xl"
         data-stage
       >
         {record && url && !busy ? (

@@ -276,7 +276,7 @@ export default function BriefingCard({ owner, agents, connected }) {
         )}
       </Card>
 
-      <Card className={clsx(TILE, 'border-signal/25 bg-[radial-gradient(120%_100%_at_100%_0%,rgb(255_91_46/0.14),transparent_60%)]')}>
+      <Card className={clsx(TILE, 'ink-panel')}>
         <div className="flex items-center gap-2">
           <span className="grid size-6 place-items-center rounded-full bg-signal text-ink-0">
             <Sparkles size={12} aria-hidden="true" />

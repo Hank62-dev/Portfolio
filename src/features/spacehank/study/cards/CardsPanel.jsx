@@ -131,7 +131,7 @@ export default function CardsPanel() {
   return (
     <div className="flex flex-col gap-4">
       {/* today */}
-      <section className="rounded-[1.75rem] border border-line bg-[radial-gradient(80%_120%_at_100%_0%,rgb(138_59_255/0.16),transparent_60%),var(--color-ink-1)] p-5 max-md:p-4" aria-label={tr('Study today')} data-study-today>
+      <section className="ink-panel rounded-[1.75rem] p-5 max-md:p-4" aria-label={tr('Study today')} data-study-today>
         <div className="flex items-end justify-between gap-3">
           <div>
             <p className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{deckName}</p>

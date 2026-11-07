@@ -361,7 +361,7 @@ function MusicDesktop() {
                   type="button"
                   aria-label={playing ? tr('Pause') : tr('Play')}
                   onClick={togglePlay}
-                  className={clsx('grid size-14 place-items-center rounded-full bg-gradient-to-br from-signal to-[#ff8a5c] text-ink-0 shadow-[0_10px_30px_-8px_rgb(255_91_46/0.8)] transition-transform hover:scale-105 active:scale-95', loading && 'animate-pulse')}
+                  className={clsx('grid size-14 place-items-center rounded-full bg-gradient-to-br from-signal to-[hsl(var(--tab)_70%_66%)] text-ink-0 shadow-[0_10px_30px_-10px_var(--color-signal)] transition-transform hover:scale-105 active:scale-95', loading && 'animate-pulse')}
                 >
                   {playing ? <Pause size={22} fill="currentColor" aria-hidden="true" /> : <Play size={22} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
                 </button>
