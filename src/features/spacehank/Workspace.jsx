@@ -359,7 +359,7 @@ export default function Workspace({
             <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} onCapture={(event) => openCapture('', event)} />
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
-              <div key={tab} className={clsx(!transitions && 'animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')} style={{ viewTransitionName: transitions ? 'page' : undefined }}>
+              <div key={tab} className={clsx(transitions ? 'vt-page' : 'animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
                 <Suspense fallback={<PageLoading />}>{page}</Suspense>
               </div>
             </main>

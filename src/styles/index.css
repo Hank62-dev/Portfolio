@@ -1425,32 +1425,37 @@ input[data-own-clear]::-webkit-search-decoration {
 }
 
 /* ───────── View transitions: the browser slides between two states of the page ─────────
-   Only the tab's content and the player are named; the rest of the page stays where it is. */
+   Only transform and opacity are animated (the cheap kind), and a thing carries its view-transition name only while its own
+   transition is running (html[data-vt]), so a transition never has to take pictures of anything it does not move. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
 html[data-vt='forward'] {
-  --vt-x: 26px;
+  --vt-x: 22px;
 }
 html[data-vt='back'] {
-  --vt-x: -26px;
+  --vt-x: -22px;
+}
+html[data-vt='forward'] .vt-page,
+html[data-vt='back'] .vt-page {
+  view-transition-name: page;
 }
 ::view-transition-old(page),
 ::view-transition-new(page) {
   mix-blend-mode: normal;
 }
 ::view-transition-old(page) {
-  animation: vt-page-out 0.26s var(--ease-out-expo) both;
+  animation: vt-page-out 0.2s ease both;
 }
 ::view-transition-new(page) {
-  animation: vt-page-in 0.55s var(--ease-out-expo) both;
+  animation: vt-page-in 0.42s var(--ease-out-expo) both;
 }
 @keyframes vt-page-out {
   to {
     opacity: 0;
-    transform: translateX(calc(var(--vt-x, 0px) * -1));
+    transform: translateX(calc(var(--vt-x, 0px) * -0.5));
   }
 }
 @keyframes vt-page-in {
@@ -1460,26 +1465,27 @@ html[data-vt='back'] {
   }
 }
 
-/* The little player grows into the full one (and back): the box and the record travel, the insides cross-fade. */
-::view-transition-group(player),
+/* The record travels from the little player to the big one (and back); the rest of the screen cross-fades under it. */
+html[data-vt='player'] [data-mini-disc]:not([data-covered]),
+html[data-vt='player'] [data-vinyl] {
+  view-transition-name: player-disc;
+}
+html[data-vt='player']::view-transition-old(root) {
+  animation: none;
+}
+html[data-vt='player']::view-transition-new(root) {
+  animation: vt-fade-in 0.3s ease both;
+}
 ::view-transition-group(player-disc) {
-  animation-duration: 0.55s;
+  animation-duration: 0.5s;
   animation-timing-function: var(--ease-out-expo);
 }
-::view-transition-old(player),
-::view-transition-new(player),
 ::view-transition-old(player-disc),
 ::view-transition-new(player-disc) {
   mix-blend-mode: normal;
   height: 100%;
   width: 100%;
   object-fit: cover;
-}
-::view-transition-old(player) {
-  animation: vt-fade-out 0.2s ease both;
-}
-::view-transition-new(player) {
-  animation: vt-fade-in 0.4s ease 0.08s both;
 }
 @keyframes vt-fade-out {
   to {
@@ -1591,4 +1597,128 @@ html[data-vt='back'] {
   .app-shell [data-card].is-lit::before {
     opacity: 1;
   }
+}
+
+/* ───────────────────────── Paper and ink ─────────────────────────
+   One look for the whole workspace: a fine grain over everything (as on printed paper), big serif numerals, and cards that
+   each lean toward the colour of what they hold. */
+
+/* Grain: a fixed, still layer of speckle (no blend mode, so it costs a phone almost nothing). By day the speckle is dark. */
+.app-shell::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.95 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+:root[data-theme='light'] .app-shell::after {
+  filter: invert(1);
+  opacity: 0.075;
+}
+
+/* A big number is set in the serif, tight and tabular, so it reads as a figure on a page. */
+.numeral {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.035em;
+  line-height: 0.88;
+}
+
+/* A card that leans toward its own colour (--card-hue): a wash from the top left, and a border of the same family. */
+.tint-card {
+  /* by night the colour is only a faint glow in one corner and a hairline on the edge: the surface itself stays the neutral ink,
+     so three cards side by side read as one family and not as three paints */
+  background:
+    radial-gradient(130% 90% at 0% 0%, hsl(var(--card-hue) 42% 46% / 0.15), transparent 62%),
+    var(--color-ink-1);
+  border-color: hsl(var(--card-hue) 14% 30% / 0.7);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 22px 40px -30px rgb(0 0 0 / 0.85);
+}
+:root[data-theme='light'] .tint-card {
+  box-shadow: none;
+  background:
+    linear-gradient(155deg, hsl(var(--card-hue) 62% 80% / 0.8), transparent 75%),
+    var(--color-ink-1);
+  border-color: hsl(var(--card-hue) 35% 68% / 0.7);
+}
+
+/* The sky at the top of the home screen. Its colours come from today/sky.js (--sky-top, --sky-mid, --sky-low, --orb-x, --orb-y). */
+.sky-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 17rem;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 2rem;
+  padding: 1.15rem 1.35rem 1.35rem;
+  color: #fff;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 58%, var(--sky-low) 100%);
+  box-shadow: 0 34px 60px -38px var(--sky-top);
+}
+.sky-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(to top, rgb(0 0 0 / 0.46), transparent 64%);
+}
+.sky-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+.sky-orb {
+  position: absolute;
+  z-index: 0;
+  top: var(--orb-y);
+  left: var(--orb-x);
+  width: 8rem;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border-radius: 9999px;
+  animation: orb-rise 1.8s var(--ease-out-expo) backwards;
+}
+.sky-orb[data-kind='sun'] {
+  background: radial-gradient(circle, #fffbe8 0 15%, rgb(255 226 150 / 0.78) 25%, rgb(255 190 110 / 0.3) 45%, transparent 68%);
+}
+.sky-orb[data-kind='moon'] {
+  width: 6rem;
+  background: radial-gradient(circle, #f1efff 0 20%, rgb(205 210 255 / 0.4) 34%, rgb(150 160 255 / 0.14) 52%, transparent 70%);
+}
+@keyframes orb-rise {
+  from {
+    opacity: 0;
+    translate: -50% -10%;
+  }
+}
+.sky-stars {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(1.5px 1.5px at 8% 16%, #fff, transparent), radial-gradient(1px 1px at 17% 38%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 27% 12%, #fff, transparent), radial-gradient(1px 1px at 36% 30%, #fff, transparent),
+    radial-gradient(2px 2px at 47% 9%, #fff, transparent), radial-gradient(1px 1px at 58% 24%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 69% 14%, #fff, transparent), radial-gradient(1px 1px at 78% 36%, #fff, transparent),
+    radial-gradient(2px 2px at 88% 11%, #fff, transparent), radial-gradient(1px 1px at 94% 28%, #fff, transparent),
+    radial-gradient(1px 1px at 12% 52%, #fff, transparent), radial-gradient(1.5px 1.5px at 62% 46%, #fff, transparent);
+  transition: opacity 1s ease;
+}
+.sky-cloud {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 42% 28% at 24% 34%, rgb(255 255 255 / 0.34), transparent 70%),
+    radial-gradient(ellipse 46% 32% at 76% 22%, rgb(255 255 255 / 0.28), transparent 70%),
+    radial-gradient(ellipse 50% 26% at 54% 52%, rgb(255 255 255 / 0.18), transparent 72%);
 }

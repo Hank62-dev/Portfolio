@@ -49,6 +49,21 @@ export const spentToday = (entries, now = new Date()) => {
   return { total: today.reduce((n, e) => n + e.amount, 0), count: today.length };
 };
 
+/** What was spent on each of the last seven days (today last), oldest first: a list of seven numbers for a small chart. */
+export const spendLast7 = (entries, now = new Date()) => {
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (6 - i));
+    return dayKey(d);
+  });
+  const totals = new Map(days.map((d) => [d, 0]));
+  for (const e of entries) {
+    if (e.type !== 'expense' || e.sample) continue;
+    const key = dayOf(e.at);
+    if (totals.has(key)) totals.set(key, totals.get(key) + e.amount);
+  }
+  return days.map((d) => totals.get(d));
+};
+
 /**
  * One or two things Hank would nudge, as { id, text, tab }: the most pressing first. Never more than two, so the
  * screen stays calm.

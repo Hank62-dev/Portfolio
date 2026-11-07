@@ -47,7 +47,7 @@ import Lyrics from '../music/Lyrics';
 import { MOODS, Orbit, SheetRow, Slider, matches } from '../music/parts';
 import { cycleRepeat, next, playList, player, playTrack, previous, seek, setSleepTimer, toggleShuffle, togglePlay } from '../music/player';
 import { musicUi } from '../music/ui';
-import { hidePlayer, playerNames } from '../music/morph';
+import { hidePlayer } from '../music/morph';
 import { canMorph } from '../motion/transition';
 import { useSlider } from '../components/useSlider';
 import { useStore } from '../store';
@@ -99,9 +99,9 @@ const auroraOf = (text) => {
 const Layer = ({ children }) => createPortal(children, document.querySelector('.app-shell') ?? document.body);
 
 /** A record: the cover as its label inside the grooves. It turns while `spinning`; `progress` (0 to 1) draws a ring of gold around it. */
-function Vinyl({ track, spinning, progress = null, tonearm = false, tint = GOLD, className, viewName }) {
+function Vinyl({ track, spinning, progress = null, tonearm = false, tint = GOLD, className, shared }) {
   return (
-    <div className={clsx('relative aspect-square', className)} style={viewName ? { viewTransitionName: viewName } : undefined}>
+    <div className={clsx('relative aspect-square', className)} data-vinyl={shared ? '' : undefined}>
       {progress !== null && (
         <svg viewBox="0 0 100 100" className="absolute inset-0 size-full -rotate-90" aria-hidden="true">
           <circle cx="50" cy="50" r="48.6" fill="none" stroke="rgb(255 255 255 / 0.09)" strokeWidth="0.9" />
@@ -263,14 +263,13 @@ function NowPlaying({ tracks, byId }) {
   const tint = useCoverTint(current);
   const accent = current?.hasCover ? tint : GOLD;
   const leave = useHistoryLayer(true, hidePlayer);
-  const names = playerNames(true);
   const [morphs] = useState(canMorph);
   const drag = useSheetDrag(leave); // pull the player down to put it away
   const upNext = queue.order.slice(queue.index + 1, queue.index + 6).map((id) => byId.get(id)).filter(Boolean);
   const RepeatIcon = repeat === 'one' ? Repeat1 : Repeat;
   return (
     <Layer>
-      <div className={clsx('fixed inset-0 z-[60] overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-10', !morphs && 'animate-sheet-up')} style={{ ...drag.style, viewTransitionName: names.page, background: `radial-gradient(120% 55% at 50% 0%, rgb(${accent} / 0.55), transparent 75%), var(--color-ink-0)` }} {...drag.bind} data-now-playing-page>
+      <div className={clsx('fixed inset-0 z-[60] overflow-x-hidden overflow-y-auto overscroll-contain px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-10', !morphs && 'animate-sheet-up')} style={{ ...drag.style, background: `radial-gradient(120% 55% at 50% 0%, rgb(${accent} / 0.55), transparent 75%), var(--color-ink-0)` }} {...drag.bind} data-now-playing-page>
         <div className="flex items-center justify-between">
           <button type="button" aria-label={tr('Close the player')} onClick={leave} className="grid size-10 place-items-center rounded-full border border-wash/12 bg-wash/8 text-bone active:scale-90">
             <ChevronDown size={22} aria-hidden="true" />
@@ -287,7 +286,7 @@ function NowPlaying({ tracks, byId }) {
           />
         </div>
 
-        <Vinyl track={current} spinning={playing} progress={duration > 0 ? time / duration : 0} tonearm tint={accent} viewName={names.pageDisc} className="mx-auto mt-8 w-[min(19.5rem,80vw)]" />
+        <Vinyl track={current} spinning={playing} progress={duration > 0 ? time / duration : 0} tonearm tint={accent} shared className="mx-auto mt-8 w-[min(19.5rem,80vw)]" />
 
         <div className="mx-auto mt-8 flex w-full max-w-[22rem] items-center gap-3">
           <div className="min-w-0 flex-1 leading-tight">

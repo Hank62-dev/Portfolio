@@ -4,7 +4,6 @@ import { Heart, ListMusic, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, Skip
 import { clsx } from '../../../lib/format';
 import { useStore } from '../store';
 import Cover, { useCoverTint } from './Cover';
-import { playerNames } from './morph';
 import { musicUi } from './ui';
 import { formatTime, library, toggleFavorite } from './library';
 import { cycleRepeat, next, player, previous, seek, setVolume, stop, toggleShuffle, togglePlay } from './player';
@@ -45,7 +44,7 @@ export default function NowPlayingBar({ onOpen, lifted = false, rail = false }) 
   const { trackId, playing, loading, time, duration, volume, shuffle, repeat, error } = useStore(player);
   const track = useStore(library, (s) => s.tracks.find((t) => t.id === trackId));
   const tint = useCoverTint(track);
-  const names = playerNames(useStore(musicUi, (s) => s.full));
+  const covered = useStore(musicUi, (s) => s.full); // the full player is over this one: its record is the one that travels
 
   // on a phone, swipe the mini player to the right to put the music away
   const [slide, setSlide] = useState({ x: 0, dragging: false });
@@ -88,12 +87,12 @@ export default function NowPlayingBar({ onOpen, lifted = false, rail = false }) 
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onTouchCancel={onTouchEnd}
-        style={{ ...(slide.x ? { transform: `translateX(${slide.x}px)`, opacity: Math.max(0, 1 - slide.x / 280), transition: slide.dragging ? 'none' : 'transform 0.22s ease-out, opacity 0.22s ease-out' } : {}), viewTransitionName: names.mini }}
+        style={slide.x ? { transform: `translateX(${slide.x}px)`, opacity: Math.max(0, 1 - slide.x / 280), transition: slide.dragging ? 'none' : 'transform 0.22s ease-out, opacity 0.22s ease-out' } : undefined}
         className="fixed inset-x-3 bottom-[calc(6.4rem+env(safe-area-inset-bottom))] z-30 touch-pan-y"
       >
         <div className="flex items-center gap-2.5 rounded-full border border-wash/12 bg-ink-1/80 p-1.5 pr-2 shadow-[0_20px_44px_-16px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur-2xl transition-[background-image] duration-700" style={{ backgroundImage: `linear-gradient(100deg, rgb(${tint} / 0.24), transparent 62%)` }}>
           <button type="button" onClick={onOpen} aria-label={tr('Open Hank Music')} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-            <span className="relative size-[3.1rem] shrink-0" style={{ viewTransitionName: names.miniDisc }}>
+            <span className="relative size-[3.1rem] shrink-0" data-mini-disc data-covered={covered ? '' : undefined}>
               <svg viewBox="0 0 100 100" className="absolute inset-0 size-full -rotate-90" aria-hidden="true">
                 <circle cx="50" cy="50" r="47" fill="none" stroke="rgb(255 255 255 / 0.12)" strokeWidth="3" />
                 <circle cx="50" cy="50" r="47" fill="none" stroke="var(--color-signal)" strokeWidth="4" strokeLinecap="round" pathLength="100" strokeDasharray={`${Math.max(0.01, ratio * 100)} 100`} />

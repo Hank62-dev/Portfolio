@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildToday, spentToday, tasksForToday } from './model';
+import { buildToday, spendLast7, spentToday, tasksForToday } from './model';
 
 const NOW = new Date(2026, 10, 7, 21, 0); // Saturday evening
 const card = (title, column, due = '', extra = {}) => ({ id: title, title, column, due, ...extra });
@@ -27,6 +27,25 @@ describe('what was spent today', () => {
       { type: 'expense', amount: 5000, at: at(7), sample: true },
     ];
     expect(spentToday(entries, NOW)).toEqual({ total: 75000, count: 2 });
+  });
+});
+
+describe('the last seven days of spending', () => {
+  it('has seven days, today last, with money out only', () => {
+    const entries = [
+      { type: 'expense', amount: 10000, at: at(7, 9) },
+      { type: 'expense', amount: 5000, at: at(7, 19) },
+      { type: 'expense', amount: 20000, at: at(5) },
+      { type: 'expense', amount: 40000, at: at(1) },
+      { type: 'expense', amount: 99000, at: at(0) }, // a week ago, outside the window
+      { type: 'income', amount: 9e6, at: at(6) },
+      { type: 'expense', amount: 7000, at: at(6), sample: true },
+    ];
+    expect(spendLast7(entries, NOW)).toEqual([40000, 0, 0, 0, 20000, 0, 15000]);
+  });
+
+  it('is seven zeros when nothing was spent', () => {
+    expect(spendLast7([], NOW)).toEqual([0, 0, 0, 0, 0, 0, 0]);
   });
 });
 

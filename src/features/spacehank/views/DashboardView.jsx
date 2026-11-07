@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { tr } from '../lang';
-import { Activity, ArrowUpRight, BrainCircuit, Boxes, ChevronDown, Database, Gauge, MessageCircle, Network, SlidersHorizontal, Users, Wifi } from 'lucide-react';
-import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, PageHeader, Stat } from '../../../design-system';
+import { Activity, BrainCircuit, Boxes, ChevronDown, Database, Gauge, MessageCircle, Network, SlidersHorizontal, Users, Wifi } from 'lucide-react';
+import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, Stat } from '../../../design-system';
 import BriefingCard from '../components/BriefingCard';
 import AppIcon from '../components/AppIcon';
 import PetCard from '../components/PetCard';
-import { greetingFor, owner } from '../config';
 import { isWorking } from '../model/agents';
 import { bySection, openModules, useNav } from '../modules';
+import SkyHero from '../today/SkyHero';
 import TodayPanel from '../today/TodayPanel';
 
 function LayerRow({ icon: Icon, label, value }) {
@@ -64,31 +64,7 @@ export default function DashboardView({ agents, events, connected, onTab, onNoti
   const active = connected ? agents.filter(isWorking).length : 0;
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        eyebrow={tr('PERSONAL COMMAND CENTER')}
-        title={
-          <>
-            {greetingFor(new Date().getHours())}, <em>{owner.name}.</em>
-          </>
-        }
-        description={
-          <>
-            {tr('Everything will be fine in the end.')}
-            <br />
-            {tr("If it's not fine, it's not the end.")}
-          </>
-        }
-        actions={
-          <>
-            <Button variant="ghost" size="sm" className="max-md:hidden" onClick={openModules}>
-              <SlidersHorizontal size={14} aria-hidden="true" /> {tr('Customise')}
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => onTab('space')}>
-              <Boxes size={15} aria-hidden="true" /> {tr('Open company floor')} <ArrowUpRight size={14} aria-hidden="true" />
-            </Button>
-          </>
-        }
-      />
+      <SkyHero owner={isOwner} onTab={onTab} onCustomise={openModules} onNotify={onNotify} />
       <TodayPanel onTab={onTab} onNotify={onNotify} />
       <Launcher onTab={onTab} />
       <PetCard onTab={onTab} />

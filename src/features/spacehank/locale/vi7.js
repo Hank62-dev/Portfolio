@@ -130,4 +130,6 @@ export const vi7 = {
   'Hank can write you a short review of this week.': 'Hank có thể viết cho bạn một lời tổng kết ngắn về tuần này.',
   'Previous card': 'Thẻ trước',
   'Next card': 'Thẻ sau',
+  'SPENT TODAY': 'CHI HÔM NAY',
+  'It is late': 'Khuya rồi',
 };
