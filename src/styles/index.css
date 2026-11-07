@@ -1423,3 +1423,172 @@ input[data-own-clear]::-webkit-search-decoration {
   pointer-events: none;
   box-shadow: 0 10px 30px -10px var(--color-signal);
 }
+
+/* ───────── View transitions: the browser slides between two states of the page ─────────
+   Only the tab's content and the player are named; the rest of the page stays where it is. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html[data-vt='forward'] {
+  --vt-x: 26px;
+}
+html[data-vt='back'] {
+  --vt-x: -26px;
+}
+::view-transition-old(page),
+::view-transition-new(page) {
+  mix-blend-mode: normal;
+}
+::view-transition-old(page) {
+  animation: vt-page-out 0.26s var(--ease-out-expo) both;
+}
+::view-transition-new(page) {
+  animation: vt-page-in 0.55s var(--ease-out-expo) both;
+}
+@keyframes vt-page-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--vt-x, 0px) * -1));
+  }
+}
+@keyframes vt-page-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--vt-x, 0px));
+  }
+}
+
+/* The little player grows into the full one (and back): the box and the record travel, the insides cross-fade. */
+::view-transition-group(player),
+::view-transition-group(player-disc) {
+  animation-duration: 0.55s;
+  animation-timing-function: var(--ease-out-expo);
+}
+::view-transition-old(player),
+::view-transition-new(player),
+::view-transition-old(player-disc),
+::view-transition-new(player-disc) {
+  mix-blend-mode: normal;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+::view-transition-old(player) {
+  animation: vt-fade-out 0.2s ease both;
+}
+::view-transition-new(player) {
+  animation: vt-fade-in 0.4s ease 0.08s both;
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* A habit's plant grows: the stem is drawn upward, the leaves open from the stem, the flower blooms. --d is each part's delay. */
+.grow-stem {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: grow-stem 0.9s var(--ease-out-expo) 0.1s forwards;
+}
+@keyframes grow-stem {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.grow-leaf {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: grow-pop 0.75s var(--ease-out-expo) var(--d, 0.3s) backwards;
+}
+.grow-bloom {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: grow-bloom 1s var(--ease-out-expo) var(--d, 0.8s) backwards;
+}
+@keyframes grow-pop {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+@keyframes grow-bloom {
+  from {
+    opacity: 0;
+    transform: scale(0) rotate(-70deg);
+  }
+}
+
+/* The diary's flame: it flickers gently, and the longer the streak the bigger and warmer it is. */
+.flame {
+  transform-origin: 50% 100%;
+  animation: flame 2.4s ease-in-out infinite;
+}
+.flame-core {
+  transform-origin: 50% 100%;
+  animation: flame 1.7s ease-in-out infinite reverse;
+}
+@keyframes flame {
+  0%,
+  100% {
+    transform: scale(1, 1) skewX(0deg);
+  }
+  35% {
+    transform: scale(0.94, 1.07) skewX(-3deg);
+  }
+  70% {
+    transform: scale(1.04, 0.96) skewX(2.5deg);
+  }
+}
+
+/* The command palette opens with a small spring, and the highlight bar slides to the row you move to. */
+[data-palette] {
+  animation: palette-open 0.42s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+@keyframes palette-open {
+  from {
+    opacity: 0;
+    scale: 0.94;
+  }
+}
+.palette-bar {
+  transition:
+    transform 0.22s var(--ease-out-expo),
+    height 0.22s var(--ease-out-expo);
+}
+
+/* On a desktop, a card has a soft light under the pointer (--mx / --my are set by useCardGlow, one listener for the whole app). */
+@media (hover: hover) and (pointer: fine) {
+  /* a card that is already positioned (absolute, fixed, sticky) holds the light as it is; any other becomes the box it is drawn in */
+  .app-shell [data-card]:not(.absolute, .fixed, .sticky) {
+    position: relative;
+  }
+  .app-shell [data-card]::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgb(255 255 255 / 0.1), transparent 70%);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box exclude,
+      linear-gradient(#000 0 0);
+    padding: 1px;
+  }
+  .app-shell [data-card].is-lit::before {
+    opacity: 1;
+  }
+}

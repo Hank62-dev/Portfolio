@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CornerDownLeft, Inbox, MessageCircleQuestion, Music2, Search, Sparkles } from 'lucide-react';
 import { Button, Loading, SkeletonLines } from '../../../design-system';
@@ -33,6 +33,8 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
   const [active, setActive] = useState(0);
   const [ask, setAsk] = useState(IDLE); // idle | thinking | confirm | refused
   const list = useRef(null);
+  // the bar behind the chosen row: it slides to the row you move to, instead of the highlight jumping
+  const [bar, setBar] = useState(null);
   const tracks = useStore(library, (s) => s.tracks);
 
   useEffect(() => {
@@ -74,6 +76,10 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
   useEffect(() => {
     list.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
   }, [active]);
+  useLayoutEffect(() => {
+    const row = list.current?.querySelector('[aria-selected="true"]');
+    setBar(row ? { top: row.offsetTop, height: row.offsetHeight } : null);
+  }, [active, results, ask.status]);
 
   const interpret = async () => {
     setAsk({ status: 'thinking' });
@@ -179,7 +185,8 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
           </div>
 
           {ask.status === 'idle' ? (
-            <ul ref={list} id="palette-list" role="listbox" aria-label={tr('Results')} className="max-h-[50vh] overflow-y-auto p-2">
+            <ul ref={list} id="palette-list" role="listbox" aria-label={tr('Results')} className="relative max-h-[50vh] overflow-y-auto p-2">
+              {bar && results.length > 0 && <span aria-hidden="true" className="palette-bar pointer-events-none absolute inset-x-2 top-0 rounded-sm bg-ink-3" style={{ height: bar.height, transform: `translateY(${bar.top}px)` }} />}
               {results.length === 0 && <li className="px-3 py-6 text-center font-mono text-fine text-bone-faint">{tr('Nothing matches "')}{query}".</li>}
               {results.map((command, index) => {
                 const Icon = command.icon;
@@ -191,7 +198,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
                     aria-selected={index === active}
                     onMouseMove={() => setActive(index)}
                     onClick={() => run(command)}
-                    className={clsx('flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2.5', index === active ? 'bg-ink-3 text-bone' : 'text-bone-dim')}
+                    className={clsx('relative flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2.5', index === active ? 'text-bone' : 'text-bone-dim')}
                   >
                     {Icon && <Icon size={16} className={index === active || command.id === ASK_ID || command.id === ASK_DATA_ID ? 'text-signal' : 'text-bone-faint'} aria-hidden="true" />}
                     <span className="flex-1 truncate text-fine">{command.label}</span>

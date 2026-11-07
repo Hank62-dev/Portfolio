@@ -53,5 +53,20 @@ export const useJustCompleted = (done, ms = 2200) => {
   return just;
 };
 
+/**
+ * False for the first frame, true from the next: a thing that starts at its "before" look (a bar at zero, an arc not yet drawn)
+ * and is given its real size a moment later, so that a CSS transition has something to travel from. Always true where motion
+ * is not wanted.
+ */
+export const useArrived = () => {
+  const reduced = prefersReducedMotion();
+  const [arrived, setArrived] = useState(false);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setArrived(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  return reduced || arrived;
+};
+
 /** Plays `work` one frame after the screen has drawn what it needs (so a target that has only just appeared can be found). */
 export const afterPaint = (work) => requestAnimationFrame(() => requestAnimationFrame(work));

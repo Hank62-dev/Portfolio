@@ -48,7 +48,8 @@ import { cycleRepeat, next, playList, player, playTrack, previous, seek, setSlee
 import Lyrics from '../music/Lyrics';
 import { MOODS, Orbit, SheetRow, Slider, matches } from '../music/parts';
 import RadialVisualizer from '../music/RadialVisualizer';
-import { closePlayer, musicUi } from '../music/ui';
+import { musicUi } from '../music/ui';
+import { hidePlayer } from '../music/morph';
 import MusicPhone from './MusicPhone';
 import { useSlider } from '../components/useSlider';
 import { storageEstimate } from '../storage';
@@ -132,10 +133,10 @@ function MusicDesktop() {
     if (location.state?.player) armed.current = true;
     else if (armed.current && layered) {
       armed.current = false;
-      closePlayer();
+      hidePlayer();
     }
   }, [layered, location]);
-  const leavePlayer = () => (armed.current ? navigate(-1) : closePlayer());
+  const leavePlayer = () => (armed.current ? navigate(-1) : hidePlayer());
   const filePicker = useRef(null);
   const folderPicker = useRef(null);
 

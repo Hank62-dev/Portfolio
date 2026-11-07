@@ -1,5 +1,5 @@
 import { tr } from './lang';
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BookHeart, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
 import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-system';
@@ -37,7 +37,9 @@ import FocusWidget from './components/FocusWidget';
 import ShareSheet from './components/ShareSheet';
 import NowPlayingBar from './music/NowPlayingBar';
 import { useNotifications } from './notifications/useNotifications';
-import { openPlayer } from './music/ui';
+import { showPlayer } from './music/morph';
+import { canMorph, releasePage } from './motion/transition';
+import { useCardGlow } from './motion/useCardGlow';
 import { next, player, previous, setSleepTimer, togglePlay } from './music/player';
 import { toCss } from './studio/brand';
 import { useStore } from './store';
@@ -99,6 +101,10 @@ export default function Workspace({
   const [collapsed, setCollapsed] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const shellRef = useRef(null);
+  useCardGlow(shellRef);
+  // where the browser can slide between tabs itself, the tab's own fade-in is left out (the two would fight)
+  const [transitions] = useState(canMorph);
   // Tablets get the icon rail; phones get a bottom bar instead; the collapse toggle only matters on wide screens.
   const wide = useMediaQuery('(min-width: 1000px)');
   const phone = !useMediaQuery('(min-width: 768px)');
@@ -298,6 +304,10 @@ export default function Workspace({
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [tab]);
+  // the screen is on the page: a slide between tabs that was waiting for it can go on
+  useLayoutEffect(() => {
+    releasePage();
+  }, [tab]);
 
   const shell = useShellContext({ tabs: shellTabs, agents, onTab, onNewTask });
 
@@ -330,7 +340,7 @@ export default function Workspace({
   return (
     <SoftContext.Provider value>
       <TooltipProvider>
-        <div className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', tab === 'diary' && phone && 'sky', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab) }}>
+        <div ref={shellRef} className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', tab === 'diary' && phone && 'sky', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab) }}>
           {!phone && (
             <Sidebar
               tab={tab}
@@ -349,7 +359,7 @@ export default function Workspace({
             <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} onCapture={(event) => openCapture('', event)} />
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
-              <div key={tab} className={clsx('animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
+              <div key={tab} className={clsx(!transitions && 'animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')} style={{ viewTransitionName: transitions ? 'page' : undefined }}>
                 <Suspense fallback={<PageLoading />}>{page}</Suspense>
               </div>
             </main>
@@ -365,7 +375,7 @@ export default function Workspace({
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}
           {phone && <Fab raised={hasTrack} />}
-          {music && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => { if (phone) openPlayer(); onTab('music'); }} lifted={phone} rail={rail} />}
+          {music && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => (phone ? showPlayer(() => onTab('music')) : onTab('music'))} lifted={phone} rail={rail} />}
           <CommandPalette
             open={paletteOpen}
             onOpenChange={setPaletteOpen}

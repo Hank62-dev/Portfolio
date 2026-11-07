@@ -5,6 +5,7 @@ import { clsx } from '../../../lib/format';
 import { PageHead, Segmented, Tile } from '../components/Page';
 import { useFab } from '../fab';
 import { useStore } from '../store';
+import { useArrived, useCountUp } from '../motion/hooks';
 import { CATEGORIES, categoryOf, compact, formatVnd, inMonth, monthKey, parseEntry, summarize, toCsv } from '../wallet/model';
 import { budgets, entries } from '../wallet/store';
 import { locale, tr } from '../lang';
@@ -38,20 +39,22 @@ function Donut({ parts, total }) {
   const r = 52;
   const c = 2 * Math.PI * r;
   let offset = 0;
+  const arrived = useArrived(); // the arcs are drawn one after another when the chart appears
+  const counted = useCountUp(total);
   return (
     <div className="relative size-40 shrink-0" role="img" aria-label={tr('Spending by category')}>
       <svg viewBox="0 0 140 140" className="-rotate-90">
         <circle cx="70" cy="70" r={r} fill="none" stroke="var(--color-line)" strokeWidth="16" />
         {parts.map((p) => {
           const len = (p.total / total) * c;
-          const node = <circle key={p.category} cx="70" cy="70" r={r} fill="none" strokeWidth="16" stroke={`hsl(${categoryOf(p.category).hue} 75% 62%)`} strokeDasharray={`${Math.max(0, len - 2)} ${c}`} strokeDashoffset={-offset} />;
+          const node = <circle key={p.category} cx="70" cy="70" r={r} fill="none" strokeWidth="16" stroke={`hsl(${categoryOf(p.category).hue} 75% 62%)`} strokeDasharray={`${arrived ? Math.max(0, len - 2) : 0} ${c}`} strokeDashoffset={-offset} style={{ transition: 'stroke-dasharray 0.9s var(--ease-out-expo)', transitionDelay: `${parts.indexOf(p) * 90}ms` }} />;
           offset += len;
           return node;
         })}
       </svg>
       <span className="absolute inset-0 grid place-items-center text-center leading-tight">
         <span>
-          <b className="block font-display text-h3 text-bone tabular-nums">{compact(total)}</b>
+          <b className="block font-display text-h3 text-bone tabular-nums">{compact(Math.round(counted))}</b>
           <small className="font-mono text-[0.62rem] text-bone-faint">{tr('spent')}</small>
         </span>
       </span>
@@ -66,11 +69,12 @@ function Days({ byDay, month }) {
   const map = new Map(byDay.map((d) => [Number(d.day.slice(8)), d.total]));
   const max = Math.max(1, ...byDay.map((d) => d.total));
   const today = monthKey() === month ? new Date().getDate() : -1;
+  const arrived = useArrived(); // the bars grow up from the floor, left to right
   return (
     <div className="flex h-28 items-end gap-[3px]" role="img" aria-label={tr('Spending per day')}>
       {Array.from({ length: count }, (_, i) => {
         const v = map.get(i + 1) ?? 0;
-        return <i key={i} title={`${i + 1}: ${formatVnd(v)}`} className={clsx('block flex-1 rounded-full', v ? 'bg-gradient-to-t from-signal to-[#ffb38a]' : 'bg-line', i + 1 === today && 'ring-1 ring-bone/60')} style={{ height: v ? `${Math.max(8, (v / max) * 100)}%` : '5%' }} />;
+        return <i key={i} title={`${i + 1}: ${formatVnd(v)}`} className={clsx('block flex-1 rounded-full', v ? 'bg-gradient-to-t from-signal to-[#ffb38a]' : 'bg-line', i + 1 === today && 'ring-1 ring-bone/60')} style={{ height: arrived ? (v ? `${Math.max(8, (v / max) * 100)}%` : '5%') : '0%', transition: 'height 0.8s var(--ease-out-expo)', transitionDelay: `${i * 14}ms` }} />;
       })}
     </div>
   );
@@ -93,6 +97,10 @@ export default function WalletView() {
 
   const here = useMemo(() => inMonth(items, month), [items, month]);
   const sum = useMemo(() => summarize(here), [here]);
+  // the figures count up when the screen opens and glide when the month changes
+  const balanceShown = useCountUp(sum.balance);
+  const spentShown = useCountUp(sum.spent);
+  const incomeShown = useCountUp(sum.income);
   const days = useMemo(() => {
     const groups = new Map();
     for (const e of here) {
@@ -215,11 +223,11 @@ export default function WalletView() {
 
       <section className="relative overflow-hidden rounded-[2rem] border border-line bg-[radial-gradient(90%_140%_at_0%_0%,rgb(255_91_46/0.2),transparent_55%),radial-gradient(70%_120%_at_100%_100%,rgb(91_43_255/0.2),transparent_60%),var(--color-ink-1)] p-6 sm:p-8" data-figures aria-label={tr('This month')}>
         <span className="font-mono text-[0.68rem] tracking-[0.14em] text-bone-dim uppercase">{tr('Balance this month')}</span>
-        <b className={clsx('mt-2 block font-display leading-none tabular-nums [font-size:clamp(2.4rem,6vw,4rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(sum.balance)}</b>
+        <b className={clsx('mt-2 block font-display leading-none tabular-nums [font-size:clamp(2.4rem,6vw,4rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(balanceShown)}</b>
         <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
           {[
-            ['Spent', formatVnd(sum.spent), 'text-bone', TrendingDown],
-            ['Income', formatVnd(sum.income), 'text-ok', TrendingUp],
+            ['Spent', formatVnd(spentShown), 'text-bone', TrendingDown],
+            ['Income', formatVnd(incomeShown), 'text-ok', TrendingUp],
             ['Biggest', lead ? categoryOf(lead.category).label : '-', 'text-bone', Target],
           ].map(([label, value, tone, Icon]) => (
             <div key={label} className="flex items-center gap-3 rounded-2xl bg-shade/25 px-4 py-3 backdrop-blur max-md:flex-col max-md:items-start max-md:gap-1.5 max-md:px-3">

@@ -1,3 +1,4 @@
+import Flame from '../diary/Flame';
 import { tr } from '../lang';
 import { useEffect, useMemo, useState } from 'react';
 import { Footprints, Lock, PenLine, ShieldCheck } from 'lucide-react';
@@ -21,7 +22,7 @@ import { useStore } from '../store';
 
 const PAGE = 21; // days shown at first, and how many more each time
 
-const Pill = ({ children }) => <span className="rounded-full bg-[color:var(--dz-text)]/15 px-3.5 py-1.5 font-body text-[0.95rem] leading-none text-[color:var(--dz-text)] backdrop-blur">{children}</span>;
+const Pill = ({ children }) => <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--dz-text)]/15 px-3.5 py-1.5 font-body text-[0.95rem] leading-none text-[color:var(--dz-text)] backdrop-blur">{children}</span>;
 
 /** Nhật ký: a diary written a day at a time and walked as a journey. The pages are journal notes, so Second Brain shows them too. */
 export default function DiaryView({ onNotify }) {
@@ -127,7 +128,7 @@ export default function DiaryView({ onNotify }) {
               {stats.total > 0 ? (
                 <>
                   <Pill>{tr('Ngày thứ')} {stats.day}</Pill>
-                  <Pill>{stats.streak > 0 ? tr('{0} ngày liền', stats.streak) : tr('Chuỗi mới đang chờ')}</Pill>
+                  <Pill>{stats.streak > 0 && <Flame days={stats.streak} />}{stats.streak > 0 ? tr('{0} ngày liền', stats.streak) : tr('Chuỗi mới đang chờ')}</Pill>
                   <Pill>{stats.total} {tr('trang')}</Pill>
                 </>
               ) : (

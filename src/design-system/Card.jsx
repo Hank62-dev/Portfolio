@@ -8,7 +8,7 @@ export const Eyebrow = ({ children, className }) => (
 );
 
 export const Card = ({ as: Component = 'section', className, children, ...rest }) => (
-  <Component className={clsx('min-w-0 rounded-card border border-line bg-ink-1 p-5', className)} {...rest}>
+  <Component className={clsx('min-w-0 rounded-card border border-line bg-ink-1 p-5', className)} data-card {...rest}>
     {children}
   </Component>
 );
