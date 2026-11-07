@@ -4,6 +4,7 @@ import { BookOpen, Download, FileUp, Flame, LayoutGrid, List as ListIcon, Pin, P
 import { Badge, Button, Loading, Menu, Skeleton, SkeletonLines } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { askNotes } from '../api/owner';
+import { createDraft, startJob, useDraft, useJob } from '../jobs';
 import { MOODS, excerpt, hueOf, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
 import { createNote, deleteNote, exportNotes, importFiles, intents, loadNotes, notesStore, openJournal } from '../notes/library';
 import { IMPORT_ACCEPT } from '../notes/readers';
@@ -16,6 +17,9 @@ import { useStore } from '../store';
 
 const Markdown = lazy(() => import('../components/Markdown'));
 const NoteEditor = lazy(() => import('../notes/NoteEditor'));
+
+// The question and Hank's answer live outside the tab, and the answering runs as a job: leaving for another tab does not lose it.
+const asked = createDraft({ question: '', answer: null });
 
 const SCOPES = [
   { id: 'all', label: tr('All') },
@@ -112,39 +116,31 @@ export default function NotesView() {
   const [layout, setLayout] = useState('grid');
   const [query, setQuery] = useState('');
   const [tag, setTag] = useState('');
-  const [question, setQuestion] = useState('');
-  const [asking, setAsking] = useState(false);
-  const [answer, setAnswer] = useState(null);
-  const [problem, setProblem] = useState('');
+  const [question, setQuestion] = useDraft(asked, 'question');
+  const [answer] = useDraft(asked, 'answer');
+  const job = useJob('notes-ask');
+  const asking = job.busy;
+  const problem = job.error;
   const importer = useRef(null);
 
   useEffect(() => {
     void loadNotes();
   }, []);
 
-  const ask = useCallback(
-    async (text) => {
-      const q = text.trim();
-      if (!q || asking) return;
-      setAsking(true);
-      setProblem('');
-      setAnswer(null);
-      try {
-        const found = searchNotes(readable(notesStore.get().notes), q, 6);
-        if (!found.length) {
-          setAnswer({ question: q, text: tr('None of your notes mention that, so there is nothing to answer from.'), sources: [] });
-          return;
-        }
-        const result = await askNotes({ question: q, notes: found.map(({ note }) => ({ title: titleOf(note.text), text: note.text })) });
-        setAnswer({ question: q, text: result.answer, sources: found.map(({ note }) => note), cited: result.cited });
-      } catch (e) {
-        setProblem(e.message);
-      } finally {
-        setAsking(false);
+  const ask = useCallback((text) => {
+    const q = text.trim();
+    if (!q) return undefined;
+    return startJob('notes-ask', async () => {
+      asked.set({ answer: null });
+      const found = searchNotes(readable(notesStore.get().notes), q, 6);
+      if (!found.length) {
+        asked.set({ answer: { question: q, text: tr('None of your notes mention that, so there is nothing to answer from.'), sources: [] } });
+        return;
       }
-    },
-    [asking]
-  );
+      const result = await askNotes({ question: q, notes: found.map(({ note }) => ({ title: titleOf(note.text), text: note.text })) });
+      asked.set({ answer: { question: q, text: result.answer, sources: found.map(({ note }) => note), cited: result.cited } });
+    });
+  }, []);
 
   // requests from the command palette
   const handled = useRef(null);
@@ -160,7 +156,7 @@ export default function NotesView() {
     if (intent.open) setSelected(intent.open);
     if (intent.text) createNote(intent.text, { html: textToHtml(intent.text) }).then((note) => setSelected(note.id));
     intents.set({ notes: null });
-  }, [intent, loaded, ask]);
+  }, [intent, loaded, ask, setQuestion]);
 
   const tags = useMemo(() => [...new Set(notes.flatMap((n) => tagsOf(n.text)))].sort(), [notes]);
   const visible = useMemo(() => {

@@ -59,6 +59,7 @@ export const vi6 = {
   'Full screen': 'Toàn màn hình',
   'Exit full screen': 'Thoát toàn màn hình',
 
+  'Something went wrong. Try again.': 'Có lỗi xảy ra. Hãy thử lại.',
   'Read more': 'Xem thêm',
   'Show less': 'Thu gọn',
 

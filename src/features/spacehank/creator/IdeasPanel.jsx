@@ -4,6 +4,7 @@ import { Clapperboard, ListPlus, Lightbulb, Send, Sparkles, Trophy, Wand2 } from
 import { Button, DatePicker, Input, Select, Textarea, pushToast } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { generateContent } from '../api/owner';
+import { createDraft, startJob, useDraft, useJob } from '../jobs';
 import { Segmented } from '../components/Page';
 import { useStore } from '../store';
 import { PLATFORMS, hashtagLine, hookFormulas, newPiece, rankHooks, scoreHook, scriptSheet, speakSeconds } from './model';
@@ -47,42 +48,43 @@ function HookLab({ value, onChange }) {
   );
 }
 
+// What is typed and what came back live outside the tab, and the writing runs as a job: leaving for another tab neither loses
+// the idea nor the pack the AI is still writing for it (see ../jobs.js).
+const ideas = createDraft({ topic: '', seconds: '30', tone: '', pack: null, hook: '', platforms: ['tiktok'], date: '' });
+
 /** From one idea to a content pack: hooks that are scored, a script in beats, a caption, a Discord post and a thread. */
 export default function IdeasPanel({ onSaved }) {
   const settings = useStore(creatorSettings);
-  const [topic, setTopic] = useState('');
-  const [seconds, setSeconds] = useState('30');
-  const [tone, setTone] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [pack, setPack] = useState(null); // { hooks, script, caption, hashtags, discord, thread, source: 'ai' | 'formulas' }
-  const [hook, setHook] = useState('');
-  const [platforms, setPlatforms] = useState(['tiktok']);
-  const [date, setDate] = useState('');
+  const [topic, setTopic] = useDraft(ideas, 'topic');
+  const [seconds, setSeconds] = useDraft(ideas, 'seconds');
+  const [tone, setTone] = useDraft(ideas, 'tone');
+  const job = useJob('creator-ideas');
+  const busy = job.busy;
+  const [notice, setNotice] = useState('');
+  const error = notice || job.error;
+  const [pack, setPack] = useDraft(ideas, 'pack'); // { hooks, script, caption, hashtags, discord, thread, source: 'ai' | 'formulas' }
+  const [hook, setHook] = useDraft(ideas, 'hook');
+  const [platforms, setPlatforms] = useDraft(ideas, 'platforms');
+  const [date, setDate] = useDraft(ideas, 'date');
   const [prompter, setPrompter] = useState(false);
 
-  const write = async () => {
-    setBusy(true);
-    setError('');
-    try {
-      const result = await generateContent({ topic, niche: settings.niche, audience: settings.audience, language: settings.language, tone, seconds: Number(seconds) });
+  const write = () => {
+    setNotice('');
+    const input = { topic, niche: settings.niche, audience: settings.audience, language: settings.language, tone, seconds: Number(seconds) };
+    void startJob('creator-ideas', async () => {
+      const result = await generateContent(input);
       const hooks = rankHooks(result.hooks);
-      setPack({ ...result, hooks, source: 'ai' });
-      setHook(hooks[0]?.text ?? '');
-    } catch (problem) {
-      setError(problem.message);
-    } finally {
-      setBusy(false);
-    }
+      ideas.set({ pack: { ...result, hooks, source: 'ai' }, hook: hooks[0]?.text ?? '' }); // saved here, so it lands even if this tab is not on screen
+    });
   };
 
   const quick = () => {
     const hooks = rankHooks(hookFormulas(topic, settings.language));
     if (!hooks.length) {
-      setError(tr('Say what the video is about first.'));
+      setNotice(tr('Say what the video is about first.'));
       return;
     }
-    setError('');
+    setNotice('');
     setPack({ hooks, script: null, caption: '', hashtags: [], discord: '', thread: [], source: 'formulas' });
     setHook(hooks[0].text);
   };

@@ -21,6 +21,7 @@ import {
 import { Badge, Button, Card, Eyebrow, Skeleton } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { aiNote } from '../api/owner';
+import { createDraft, startJob, useDraft, useJob } from '../jobs';
 import { spacehankConfig } from '../config';
 import { focusLog } from '../focus/log';
 import { hoursMinutes, summarize as summarizeFocus } from '../focus/stats';
@@ -169,7 +170,9 @@ function EmptyDay({ connected, onPreview }) {
   );
 }
 
-/** The morning briefing, as three compact tiles: weather, today's calendar and, on request, a note from Hank. */
+// Hank's note lives outside the tab, and the writing runs as a job: going to another tab and back does not lose it.
+const noteDraft = createDraft({ note: '' });
+
 /** Hank's note. A long one is shown in four lines with a "Read more" under it, so none of it is out of reach. */
 function BriefingNote({ text }) {
   const [open, setOpen] = useState(false);
@@ -200,6 +203,7 @@ function BriefingNote({ text }) {
   );
 }
 
+/** The morning briefing, as three compact tiles: weather, today's calendar and, on request, a note from Hank. */
 export default function BriefingCard({ owner, agents, connected }) {
   const briefing = useBriefing({ owner });
   const { log: focusSessions } = useStore(focusLog);
@@ -208,37 +212,30 @@ export default function BriefingCard({ owner, agents, connected }) {
   // With no calendar connected, "Preview" shows a made-up day so the timeline can be seen.
   const [preview, setPreview] = useState(false);
   const events = preview && !briefing.events?.length ? demoSchedule() : briefing.events;
-  const [note, setNote] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [note, setNote] = useDraft(noteDraft, 'note');
+  const job = useJob('briefing-note');
+  const busy = job.busy;
+  const error = job.error;
   const now = new Date();
   const working = connected ? agents.filter(isWorking).length : 0;
   const next = events?.find((e) => new Date(e.end) > now && !e.allDay);
 
-  const askForNote = async () => {
+  const askForNote = () => {
     if (!owner) {
       setNote(GUEST_NOTE);
       return;
     }
-    setBusy(true);
-    setError('');
-    try {
-      const { text } = await aiNote({
-        language: getLang(),
-        context: {
-          date: now.toDateString(),
-          place: spacehankConfig.home.name,
-          weather: summarize(weather, getLang()) || 'unknown',
-          schedule: (events ?? []).map((e) => `${e.allDay ? 'all day' : clock(e.start)} ${e.title}`),
-          agentsWorking: working,
-        },
-      });
-      setNote(text);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setBusy(false);
-    }
+    const context = {
+      date: now.toDateString(),
+      place: spacehankConfig.home.name,
+      weather: summarize(weather, getLang()) || 'unknown',
+      schedule: (events ?? []).map((e) => `${e.allDay ? 'all day' : clock(e.start)} ${e.title}`),
+      agentsWorking: working,
+    };
+    void startJob('briefing-note', async () => {
+      const { text } = await aiNote({ language: getLang(), context });
+      noteDraft.set({ note: text }); // saved here, so it lands even if the home tab is not on screen
+    });
   };
 
   return (

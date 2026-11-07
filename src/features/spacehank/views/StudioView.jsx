@@ -5,6 +5,7 @@ import { Badge, Button, Loading, Skeleton } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { Segmented } from '../components/Page';
 import { aiUsage, base64ToBlob, generateImage } from '../api/owner';
+import { createDraft, startJob, useDraft, useJob } from '../jobs';
 import { intents } from '../notes/library';
 import { useStore } from '../store';
 import { COLORS, brandPrompt } from '../studio/brand';
@@ -155,17 +156,22 @@ function Stage({ record, busy, shape, onFavorite, onReuse, onRemove }) {
   );
 }
 
+// The description, the choices and the picture on show live outside the tab, and the drawing runs as a job: going to another
+// tab does not stop it, and its picture is waiting in the gallery when you come back (see ../jobs.js).
+const studio = createDraft({ text: '', style: 'editorial', shape: 'square', brand: true, selectedId: null });
+
 function Create({ locked }) {
-  const [text, setText] = useState('');
-  const [style, setStyle] = useState('editorial');
-  const [shape, setShape] = useState('square');
-  const [brand, setBrand] = useState(true);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
+  const [text, setText] = useDraft(studio, 'text');
+  const [style, setStyle] = useDraft(studio, 'style');
+  const [shape, setShape] = useDraft(studio, 'shape');
+  const [brand, setBrand] = useDraft(studio, 'brand');
+  const job = useJob('studio-image');
+  const busy = job.busy;
+  const error = job.error;
   const [images, setImages] = useState([]);
   const [prompts, setPrompts] = useState([]);
   const [usage, setUsage] = useState(null);
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedId, setSelectedId] = useDraft(studio, 'selectedId');
   const [only, setOnly] = useState('all');
   const field = useRef(null);
 
@@ -176,7 +182,7 @@ function Create({ locked }) {
     setText(intent.prompt);
     intents.set({ studio: null });
     field.current?.focus();
-  }, [intent]);
+  }, [intent, setText]);
 
   const refreshUsage = useCallback(() => {
     if (!locked) aiUsage().then(setUsage).catch(() => setUsage(null));
@@ -190,12 +196,13 @@ function Create({ locked }) {
       })
       .catch(() => {});
     listPrompts().then(setPrompts).catch(() => {});
-  }, []);
+  }, [setSelectedId]);
 
+  // on arrival, and each time a drawing ends (maybe while another tab was on screen): read the gallery and the budget again
   useEffect(() => {
     readAll();
     refreshUsage();
-  }, [readAll, refreshUsage]);
+  }, [readAll, refreshUsage, job.at]);
 
   // another device added or removed pictures
   useSynced(['images', 'prompts'], readAll);
@@ -204,23 +211,16 @@ function Create({ locked }) {
   const shown = useMemo(() => (only === 'favorites' ? images.filter((r) => r.favorite) : images), [images, only]);
   const hasSamples = images.some((r) => r.sample);
 
-  const generate = async (event) => {
+  const generate = (event) => {
     event.preventDefault();
     if (busy || !text.trim() || locked) return;
-    setBusy(true);
-    setError('');
     const prompt = composePrompt({ text, style, shape, brand, brandText: brandPrompt() });
-    try {
+    const description = text.trim();
+    void startJob('studio-image', async () => {
       const { data, mime } = await generateImage(prompt);
-      const record = await saveImage({ prompt: text.trim(), blob: base64ToBlob(data, mime) });
-      setImages((list) => [record, ...list]);
-      setSelectedId(record.id);
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setBusy(false);
-      refreshUsage();
-    }
+      const record = await saveImage({ prompt: description, blob: base64ToBlob(data, mime) });
+      studio.set({ selectedId: record.id }); // saved and chosen here, so it is done even if this tab is not on screen
+    });
   };
 
   const reuse = (prompt) => {
