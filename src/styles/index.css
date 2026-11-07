@@ -1287,3 +1287,139 @@ input[data-own-clear]::-webkit-search-decoration {
     transform: none;
   }
 }
+
+/* ───────────────────────── Quiet motion (entrances, finishing, the capture flight) ─────────────────────────
+   Everything here happens once, when you arrive or when you touch something. The reduced-motion block above turns it all off. */
+
+/* A card or row that rises into place; --i is its place in the list, so a screen arrives one piece after another. */
+.rise {
+  animation: rise 0.75s var(--ease-out-expo) backwards;
+  animation-delay: calc(var(--i, 0) * 70ms);
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* A row that folds shut (see Leave): the rows below slide up into the gap. */
+.leave {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 0.34s var(--ease-out-expo),
+    opacity 0.22s ease,
+    transform 0.34s var(--ease-out-expo);
+}
+.leave > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.leave[data-leaving='true'] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateX(18px);
+}
+
+/* A tick that is drawn, stroke by stroke. */
+.drawn-tick path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: draw-tick 0.45s var(--ease-out-expo) 0.04s forwards;
+}
+@keyframes draw-tick {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Dots that spread from the middle once. */
+.burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.burst i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.32rem;
+  height: 0.32rem;
+  margin: -0.16rem 0 0 -0.16rem;
+  border-radius: 9999px;
+  background: var(--color-signal);
+  opacity: 0;
+  animation: burst 1.2s var(--ease-out-expo) forwards;
+  animation-delay: calc(var(--k, 0) * 16ms);
+}
+@keyframes burst {
+  0% {
+    opacity: 0.9;
+    transform: rotate(var(--a)) translateY(-0.6rem) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--a)) translateY(-3.4rem) scale(0.3);
+  }
+}
+
+/* A number that has just changed gives one small nudge. */
+.bump {
+  animation: bump 0.5s var(--ease-out-expo);
+}
+@keyframes bump {
+  40% {
+    transform: scale(1.18);
+  }
+}
+
+/* The capture sheet opens out of the pen button that was pressed (wider screens; a phone's is a sheet from the bottom). */
+@media (min-width: 640px) {
+  [data-capture-sheet] {
+    transform-origin: calc(50% + var(--ox, 0px)) calc(50% + var(--oy, 0px));
+    animation: capture-open 0.5s var(--ease-out-expo) both;
+  }
+}
+@keyframes capture-open {
+  from {
+    opacity: 0;
+    scale: 0.55;
+  }
+}
+
+/* The weekly review as a story: each card has its own tint and arrives from slightly below. */
+.story-tint {
+  background:
+    radial-gradient(120% 70% at 50% 0%, hsl(var(--hue) 50% 32% / 0.55), transparent 70%),
+    radial-gradient(90% 60% at 100% 100%, hsl(var(--hue) 45% 26% / 0.35), transparent 70%);
+  animation: fade-in 0.9s ease both;
+}
+.story-in {
+  animation: story-in 0.7s var(--ease-out-expo) both;
+}
+@keyframes story-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+/* The copy of a captured line that flies to the Inbox. */
+.fly-ghost {
+  position: fixed;
+  z-index: 100;
+  max-width: 14rem;
+  padding: 0.3rem 0.8rem;
+  overflow: hidden;
+  border: 1px solid var(--color-signal);
+  border-radius: 9999px;
+  background: var(--color-ink-2);
+  color: var(--color-bone);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  box-shadow: 0 10px 30px -10px var(--color-signal);
+}

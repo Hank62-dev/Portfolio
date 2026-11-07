@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Inbox as InboxIcon, Sparkles, Trash2 } from 'lucide-react';
 import { Button, Card, CardHeader } from '../../../design-system';
+import { Leave } from '../motion/Pieces';
 import { clsx } from '../../../lib/format';
 import { organizeText } from '../api/owner';
 import { addManyToInbox, fileItem } from '../inbox/file';
@@ -16,17 +17,30 @@ const LONG = 80;
 
 const detail = (item) => [kindLabel(item.kind), item.amount ? formatVnd(item.amount) : '', item.kind === 'expense' && item.category ? categoryLabel(item.category) : '', item.due ? tr('due {0}', item.due) : ''].filter(Boolean).join(' · ');
 
-function Row({ item, onNotify }) {
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function Row({ item, first, onNotify }) {
   const job = useJob(`inbox-split-${item.id}`);
   const money = item.amount > 0;
+  const [leaving, setLeaving] = useState(false);
 
+  // the row folds shut first and is filed a moment later, so the rows below slide up instead of jumping
   const file = async (kind) => {
+    setLeaving(true);
+    await pause(300);
     try {
       const done = await fileItem(item, kind);
       onNotify?.(done.label);
     } catch (error) {
+      setLeaving(false);
       onNotify?.(error.message);
     }
+  };
+
+  const discard = async () => {
+    setLeaving(true);
+    await pause(300);
+    await inbox.remove(item.id);
   };
 
   const split = () =>
@@ -38,13 +52,15 @@ function Row({ item, onNotify }) {
     });
 
   return (
-    <li className="flex flex-col gap-2 border-t border-line py-3 first:border-t-0 first:pt-0" data-inbox-item>
+    <li data-inbox-item>
+      <Leave leaving={leaving}>
+        <div className={`flex flex-col gap-2 py-3 ${first ? 'pt-0' : 'border-t border-line'}`}>
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <p className="line-clamp-2 text-fine break-words whitespace-pre-line text-bone">{item.text}</p>
           <small className="font-mono text-[0.68rem] text-bone-faint">{detail(item)}</small>
         </div>
-        <button type="button" aria-label={tr('Delete from the Inbox')} onClick={() => inbox.remove(item.id)} className="grid size-8 shrink-0 place-items-center rounded-full text-bone-faint hover:text-danger active:scale-90">
+        <button type="button" aria-label={tr('Delete from the Inbox')} onClick={discard} className="grid size-8 shrink-0 place-items-center rounded-full text-bone-faint hover:text-danger active:scale-90">
           <Trash2 size={14} aria-hidden="true" />
         </button>
       </div>
@@ -70,6 +86,8 @@ function Row({ item, onNotify }) {
           {job.error}
         </p>
       )}
+        </div>
+      </Leave>
     </li>
   );
 }
@@ -98,12 +116,16 @@ export default function InboxCard({ items, onNotify }) {
     <Card data-inbox>
       <CardHeader
         eyebrow={tr('INBOX')}
-        title={items.length === 1 ? tr('One thing to sort') : tr('{0} things to sort', items.length)}
+        title={
+          <span key={items.length} data-inbox-target className="bump inline-block">
+            {items.length === 1 ? tr('One thing to sort') : tr('{0} things to sort', items.length)}
+          </span>
+        }
         aside={<InboxIcon size={17} aria-hidden="true" />}
       />
       <ul>
-        {list.map((item) => (
-          <Row key={item.id} item={item} onNotify={onNotify} />
+        {list.map((item, index) => (
+          <Row key={item.id} item={item} first={index === 0} onNotify={onNotify} />
         ))}
       </ul>
       <div className="mt-3 flex flex-wrap gap-2">

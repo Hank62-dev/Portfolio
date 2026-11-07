@@ -12,6 +12,7 @@ import { startJob, useJob } from '../jobs';
 import { tr } from '../lang';
 import { captureUi, closeCapture } from './ui';
 import { shrinkPhoto } from './receipt';
+import { flyToInbox } from './fly';
 
 /** What the guess says, in a few words: "Spending · 45.000 ₫ · Food & drink" or "Task · due 2026-11-08". */
 const guessLine = (guess) => {
@@ -27,7 +28,8 @@ const guessLine = (guess) => {
  * Inbox to be sorted later (one tap per item); when the guess looks right it can also be filed at once.
  */
 export default function CaptureSheet({ onNotify, onTab }) {
-  const { open, text: initial } = useStore(captureUi);
+  const { open, text: initial, from } = useStore(captureUi);
+  const input = useRef(null);
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const photo = useRef(null);
@@ -44,7 +46,9 @@ export default function CaptureSheet({ onNotify, onTab }) {
     if (!trimmed) return;
     setBusy(true);
     try {
+      const where = input.current?.getBoundingClientRect();
       await addToInbox(trimmed);
+      flyToInbox(where, trimmed);
       onNotify?.(tr('Added to your Inbox'));
       setText('');
       closeCapture();
@@ -95,8 +99,10 @@ export default function CaptureSheet({ onNotify, onTab }) {
       eyebrow={tr('QUICK CAPTURE')}
       title={tr('Put it down, sort it later')}
       description={tr('A thought, a task, something you spent. It goes to your Inbox.')}
+      contentProps={{ 'data-capture-sheet': '', style: from ? { '--ox': `${from.x - window.innerWidth / 2}px`, '--oy': `${from.y - window.innerHeight / 2}px` } : undefined }}
     >
       <textarea
+        ref={input}
         autoFocus
         rows={3}
         value={text}
@@ -114,7 +120,7 @@ export default function CaptureSheet({ onNotify, onTab }) {
       />
       {trimmed && (
         <p className="-mt-2 font-mono text-fine text-bone-dim" data-capture-guess>
-          {tr('Looks like')}: <b className="font-medium text-bone">{guessLine(guess)}</b>
+          {tr('Looks like')}: <b key={guessLine(guess)} className="animate-fade-in font-medium text-bone">{guessLine(guess)}</b>
         </p>
       )}
       <div className="flex flex-col gap-2">
