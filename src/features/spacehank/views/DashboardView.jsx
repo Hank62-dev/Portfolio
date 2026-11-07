@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { tr } from '../lang';
-import { Activity, ArrowUpRight, BrainCircuit, Boxes, Database, Gauge, MessageCircle, Network, SlidersHorizontal, Users, Wifi } from 'lucide-react';
+import { Activity, ArrowUpRight, BrainCircuit, Boxes, ChevronDown, Database, Gauge, MessageCircle, Network, SlidersHorizontal, Users, Wifi } from 'lucide-react';
 import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, PageHeader, Stat } from '../../../design-system';
 import BriefingCard from '../components/BriefingCard';
 import AppIcon from '../components/AppIcon';
@@ -19,24 +20,42 @@ function LayerRow({ icon: Icon, label, value }) {
   );
 }
 
-/** A phone's home screen: every place of the workspace that is switched on, as an app icon, grouped like the menu. */
+/**
+ * A phone's menu of every place that is switched on, as app icons grouped like the menu. It is folded away on the home screen
+ * (the bar below and its "More" sheet already reach every place), and opens with one tap.
+ */
 function Launcher({ onTab }) {
+  const [open, setOpen] = useState(false);
   const groups = bySection(useNav().filter((item) => item.id !== 'hank'));
   return (
-    <nav aria-label={tr('All apps')} className="flex flex-col gap-5 md:hidden" data-launcher>
-      {groups.map(({ section, items }) => (
-        <div key={section}>
-          <p className="mb-3 font-mono text-[0.62rem] tracking-[0.18em] text-bone-faint uppercase">{tr(section)}</p>
-          <ul className="grid grid-cols-4 gap-x-2 gap-y-4">
-            {items.map((item) => (
-              <AppIcon key={item.id} item={item} onPick={onTab} />
-            ))}
-          </ul>
-        </div>
-      ))}
-      <button type="button" onClick={openModules} className="inline-flex items-center gap-2 self-center rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim active:scale-95" data-customise>
-        <SlidersHorizontal size={14} aria-hidden="true" /> {tr('Choose which places to show')}
+    <nav aria-label={tr('All apps')} className="flex flex-col items-center gap-5 md:hidden" data-launcher>
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim active:scale-95"
+        data-launcher-toggle
+      >
+        {open ? tr('Show fewer apps') : tr('Show all apps')}
+        <ChevronDown size={15} className={open ? 'rotate-180 transition-transform' : 'transition-transform'} aria-hidden="true" />
       </button>
+      {open && (
+        <div className="flex w-full animate-fade-in flex-col gap-5">
+          {groups.map(({ section, items }) => (
+            <div key={section}>
+              <p className="mb-3 font-mono text-[0.62rem] tracking-[0.18em] text-bone-faint uppercase">{tr(section)}</p>
+              <ul className="grid grid-cols-4 gap-x-2 gap-y-4">
+                {items.map((item) => (
+                  <AppIcon key={item.id} item={item} onPick={onTab} />
+                ))}
+              </ul>
+            </div>
+          ))}
+          <button type="button" onClick={openModules} className="inline-flex items-center gap-2 self-center rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim active:scale-95" data-customise>
+            <SlidersHorizontal size={14} aria-hidden="true" /> {tr('Choose which places to show')}
+          </button>
+        </div>
+      )}
     </nav>
   );
 }

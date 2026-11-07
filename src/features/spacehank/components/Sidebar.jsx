@@ -111,18 +111,26 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
             onClick={() => (app.canInstall ? app.install() : onNotify?.(tr('On iPhone: tap Share, then Add to Home Screen')))}
           />
         )}
-        <NavButton rail={rail} label={tr('Choose which places to show')} icon={SlidersHorizontal} onClick={openModules} />
         {!guest && !rail && <SyncStatus />}
         {guest && <NavButton rail={rail} label={tr('Reset demo data')} icon={RotateCcw} onClick={onResetDemo} />}
-        <NavButton rail={rail} label={guest ? tr('Exit demo') : tr('Lock workspace')} icon={guest ? LogOut : LockKeyhole} onClick={onLogout} />
-        {canCollapse && (
-          <NavButton
-            rail={rail}
-            label={toggleLabel}
-            icon={rail ? PanelLeftOpen : PanelLeftClose}
-            onClick={onCollapse}
-          />
-        )}
+        {/* the three small actions share one row when the sidebar is open, and stack in the narrow rail */}
+        <div className={clsx(rail ? 'flex flex-col gap-1' : 'flex items-center justify-between gap-1 px-1')}>
+          {[
+            { id: 'customise', label: tr('Customise'), icon: SlidersHorizontal, onClick: openModules },
+            { id: 'lock', label: guest ? tr('Exit demo') : tr('Lock workspace'), icon: guest ? LogOut : LockKeyhole, onClick: onLogout },
+            ...(canCollapse ? [{ id: 'collapse', label: toggleLabel, icon: rail ? PanelLeftOpen : PanelLeftClose, onClick: onCollapse }] : []),
+          ].map((action) =>
+            rail ? (
+              <NavButton key={action.id} rail label={action.label} icon={action.icon} onClick={action.onClick} />
+            ) : (
+              <Tooltip key={action.id} content={action.label} side="top">
+                <button type="button" aria-label={action.label} onClick={action.onClick} className="grid h-9 flex-1 place-items-center rounded-sm text-bone-dim transition-colors hover:bg-ink-2 hover:text-bone">
+                  <action.icon size={17} strokeWidth={1.8} aria-hidden="true" />
+                </button>
+              </Tooltip>
+            )
+          )}
+        </div>
         <div className={clsx('mt-2 flex items-center gap-3 px-2', rail && 'justify-center px-0')}>
           <Avatar>{guest ? tr('G') : owner.initials}</Avatar>
           {!rail && (
