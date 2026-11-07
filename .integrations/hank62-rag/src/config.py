@@ -135,6 +135,11 @@ class Settings(BaseSettings):
         description="Comma-separated browser origins allowed to call the API (e.g. the Vercel URL)",
     )
     debug: bool = Field(default=False, validation_alias="AI_DEBUG")
+    rag_token_secret: str = Field(
+        default="",
+        description="Shared with the realtime server: requests must carry a ticket signed with it. Empty leaves the service open.",
+    )
+    max_upload_bytes: int = Field(default=25 * 1024 * 1024, description="Largest document the upload route accepts")
 
     # --- Anti-Hallucination Thresholds ---
     confidence_threshold: float = Field(

@@ -121,7 +121,7 @@ describe('pictures and recordings', () => {
   it('refuses a file for a store that has none, an empty one, and one that is too big', async () => {
     await expect(sync.putBlob({ store: 'notes', id: 'n1', mime: 'x', data: Buffer.from([1]) })).rejects.toMatchObject({ status: 400 });
     await expect(sync.putBlob({ store: 'photos', id: 'p1', mime: 'x', data: Buffer.alloc(0) })).rejects.toMatchObject({ status: 400 });
-    await expect(sync.putBlob({ store: 'photos', id: 'p1', mime: 'x', data: Buffer.alloc(1001) })).rejects.toMatchObject({ status: 413, message: expect.stringContaining('this device only') });
+    await expect(sync.putBlob({ store: 'photos', id: 'p1', mime: 'image/jpeg', data: Buffer.alloc(1001) })).rejects.toMatchObject({ status: 413, message: expect.stringContaining('this device only') });
   });
 
   it('stops when the storage would go over the quota, but lets a file be replaced', async () => {

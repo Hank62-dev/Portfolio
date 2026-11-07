@@ -6,8 +6,10 @@ const HOUR = 60 * MINUTE;
 
 export const loadConfig = (env = process.env) => {
   const password = env.SPACEHANK_PASSWORD;
+  // the password can be kept as a scrypt hash instead (`npm run spacehank:hash-password`), so it is not sitting in the settings in clear text
+  const passwordHash = env.SPACEHANK_PASSWORD_HASH || '';
   const origin = env.SPACEHANK_ORIGIN;
-  if (!password) throw new Error('SPACEHANK_PASSWORD is required');
+  if (!password && !passwordHash) throw new Error('SPACEHANK_PASSWORD (or SPACEHANK_PASSWORD_HASH) is required');
   if (!origin) throw new Error('SPACEHANK_ORIGIN is required');
 
   const normalizedOrigin = origin.replace(/\/+$/, '');
@@ -16,6 +18,7 @@ export const loadConfig = (env = process.env) => {
     env,
     port: Number(env.SPACEHANK_PORT || 8787),
     password,
+    passwordHash,
     origin: normalizedOrigin,
     // Cross-site cookies (Vercel -> Render) need SameSite=None, which browsers only accept with Secure.
     secureCookie: normalizedOrigin.startsWith('https://'),
@@ -57,6 +60,15 @@ export const loadConfig = (env = process.env) => {
     maxTaskChars: 20000,
     maxTasks: 200,
     maxEvents: 40,
-    loginLimit: { maxFailures: 10, windowMs: 15 * MINUTE },
+    loginLimit: { maxFailures: 10, maxFailuresGlobal: 50, windowMs: 15 * MINUTE }, // per address, and in all (many addresses guessing together)
+    // how many proxies stand in front of this server (Render's edge is one): the client's address is that many entries from the end of X-Forwarded-For
+    trustedProxyHops: Math.max(1, Number(env.TRUSTED_PROXY_HOPS || 1)),
+    rateLimit: {
+      general: { max: 600, windowMs: MINUTE },
+      heavy: { max: 40, windowMs: MINUTE },
+      auth: { max: 40, windowMs: MINUTE },
+    },
+    // shared with the Hank RAG service, which only answers a request that carries a ticket signed with it (see ragToken.mjs)
+    ragTokenSecret: env.RAG_TOKEN_SECRET || '',
   };
 };

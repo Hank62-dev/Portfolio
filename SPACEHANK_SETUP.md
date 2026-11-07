@@ -68,6 +68,9 @@ Các biến đã có sẵn trong `render.yaml`, không cần nhập: `NODE_VERSI
 | `CALENDAR_ICS_URL` | Lịch hôm nay trong bản tin | Google Calendar → Settings → chọn lịch → "Secret address in iCal format". Link này là bí mật, chỉ đặt trên Render, không đặt vào biến `VITE_*` |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Thông báo đẩy (Web Push): nhắc việc ngay cả khi đã đóng app | Tạo khoá ở mục 4.2c. `VAPID_SUBJECT` là `mailto:` cộng email của bạn. Cần cả `DATABASE_URL` |
 | `PUSH_TIMEZONE` | Múi giờ để tính "buổi tối", "sáng" cho nhắc việc | Tuỳ chọn, mặc định `Asia/Ho_Chi_Minh` |
+| `RAG_TOKEN_SECRET` | Khoá chung giữa server realtime và RAG: RAG chỉ trả lời request có "vé" ký bằng khoá này | Tự tạo, đặt **cùng một giá trị** cho cả `hank62-realtime` và `hank62-rag`. Xem mục 4.2d |
+| `SPACEHANK_PASSWORD_HASH` | Mật khẩu dạng băm (scrypt) thay cho `SPACEHANK_PASSWORD`, để mật khẩu thật không nằm trong cài đặt | Chạy `npm run spacehank:hash-password -- "mật khẩu dài"` trên máy bạn, dán kết quả vào đây rồi **xoá** `SPACEHANK_PASSWORD`. Đăng nhập vẫn bằng mật khẩu cũ |
+| `TRUSTED_PROXY_HOPS` | Số lớp proxy đứng trước server, để đếm đúng địa chỉ người gọi khi giới hạn tần suất | Tuỳ chọn, mặc định `1` (Render). Nếu có thêm một lớp (Cloudflare đứng trước) thì đặt `2` |
 
 Tạo ảnh bằng Gemini cũng được (khi không có `HF_TOKEN`), nhưng model ảnh của Gemini có thể không nằm trong gói free, nên Image Studio ưu tiên Hugging Face.
 
@@ -119,6 +122,19 @@ Ghi chú, nhật ký, ảnh, thói quen, thu chi, thẻ ôn, Creator Lab… đư
 4. Dữ liệu đã có sẵn trên từng máy sẽ được tải lên một lần ở lần đồng bộ đầu tiên; máy mới chỉ cần đăng nhập để kéo về.
 
 Giới hạn: nhạc (file quá lớn), file ghi âm và ảnh trên 4 MB (`SYNC_MAX_BLOB_MB`) chỉ ở lại trên máy; dung lượng đồng bộ tối đa 300 MB (`SYNC_QUOTA_MB`) để không làm đầy database miễn phí (Neon free 0,5 GB, dùng chung với RAG). Hai máy sửa cùng một bản ghi cùng lúc thì lần sửa sau thắng. Dữ liệu trong database không được mã hoá đầu cuối: chủ database và Neon đọc được.
+
+### 4.2d. Khoá dịch vụ RAG lại (RAG_TOKEN_SECRET)
+
+Mặc định RAG trả lời bất kỳ ai biết địa chỉ của nó: hỏi, tải tài liệu lên, xoá tài liệu, và tiêu tốn quota Gemini của bạn. CORS chỉ chặn trình duyệt, không chặn `curl`. Bước này làm RAG chỉ trả lời khi request có "vé" do server realtime cấp (server realtime chỉ cấp vé cho người đã đăng nhập).
+
+1. Tạo một chuỗi ngẫu nhiên dài, ví dụ chạy `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`.
+2. Render → service **`hank62-realtime`** → Environment → thêm `RAG_TOKEN_SECRET` = chuỗi đó.
+3. Render → service **`hank62-rag`** → Environment → thêm `RAG_TOKEN_SECRET` = **đúng chuỗi đó**.
+4. Lưu cả hai service (Save, rebuild, and deploy).
+
+Kiểm tra: mở `https://<rag>.onrender.com/api/stats` trực tiếp trên trình duyệt phải báo `A valid ticket is required.` (401), còn chat trong app vẫn chạy bình thường. `/health` vẫn mở để monitor ping.
+
+Nếu chỉ đặt ở một trong hai service thì chat sẽ báo 401. Chưa đặt ở cả hai thì mọi thứ chạy như trước (RAG mở), và log của RAG có dòng cảnh báo `RAG_TOKEN_SECRET is not set`. Vé hết hạn sau 15 phút và app tự xin vé mới. Đổi `RAG_TOKEN_SECRET` là thu hồi mọi vé cũ.
 
 ### 4.2c. Thông báo đẩy (Web Push): nhắc việc khi đã đóng app
 
@@ -314,5 +330,8 @@ Task và event lưu trong bộ nhớ. Restart server là mất lịch sử và p
 - Khoá vân tay của nhật ký chỉ che nhật ký trên màn hình, không mã hoá dữ liệu lưu trên máy. Ghi chú, nhật ký, ảnh và Niú nằm trong trình duyệt của từng thiết bị, xoá dữ liệu trang hoặc gỡ app là mất, và chưa có sao lưu.
 - Đổi `SPACEHANK_PASSWORD` ngay nếu nghi ngờ bị lộ.
 - Giới hạn quyền của worker và `SPACEHANK_WORKDIR`.
-- RAG chỉ cho trình duyệt từ các origin trong `CORS_ORIGINS` gọi API. CORS chỉ chặn trình duyệt, không chặn `curl` hay script, và RAG chưa có đăng nhập. Ai biết URL RAG vẫn gọi được ngoài trình duyệt và tiêu tốn quota Gemini của bạn. Nếu cần chặn hẳn, thêm xác thực (ví dụ API key hoặc đi qua proxy có đăng nhập) trước khi công khai rộng rãi.
+- RAG chỉ trả lời request có vé từ server realtime khi bạn đã đặt `RAG_TOKEN_SECRET` ở cả hai service (mục 4.2d). Chưa đặt thì RAG vẫn mở cho bất kỳ ai biết URL, và họ có thể tiêu tốn quota Gemini của bạn. CORS chỉ chặn trình duyệt, không chặn `curl`.
+- Nên dùng `SPACEHANK_PASSWORD_HASH` thay cho `SPACEHANK_PASSWORD` để mật khẩu thật không nằm trong cài đặt của Render.
+- Đăng nhập bị khoá sau 10 lần sai từ một địa chỉ, hoặc 50 lần sai từ mọi địa chỉ cộng lại, trong 15 phút. Mọi route còn lại có giới hạn tần suất riêng. Nếu bị khoá oan, chờ hết thời gian đếm ngược.
+- Xem `SECURITY.md` để biết 20 điểm bảo mật đã kiểm tra, điểm nào đã xong, điểm nào chưa.
 - Bật backup cho Postgres và Qdrant trước khi nạp dữ liệu quan trọng.

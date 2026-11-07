@@ -131,9 +131,9 @@ describe('realtime server', () => {
 
   afterAll(() => app.close());
 
-  it('reports health and configured workers without authentication', async () => {
+  it('reports health, and only that, without authentication', async () => {
     const body = await (await call('/health')).json();
-    expect(body).toMatchObject({ ok: true, mode: 'production', agents: 11, configuredWorkers: ['codex'] });
+    expect(body).toEqual({ ok: true }); // and nothing about how the server is set up
   });
 
   it('answers CORS preflight for the allowed origin only', async () => {

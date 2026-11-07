@@ -1,22 +1,21 @@
 import http from 'node:http';
 import { WebSocketServer } from 'ws';
-import { configuredWorkers, createAgents } from './agents.mjs';
+import { createAgents } from './agents.mjs';
 import { createAi } from './ai.mjs';
 import { createAuth } from './auth.mjs';
 import { createBattle } from './battle.mjs';
 import { createCalendar } from './calendar.mjs';
 import { createDiscord } from './discord.mjs';
-import { HttpError, createResponder, readBytes, readJson } from './http.mjs';
+import { HttpError, clientKey, createResponder, readBytes, readJson } from './http.mjs';
 import { createHub } from './hub.mjs';
+import { createLimiter } from './limits.mjs';
 import { createPodcasts } from './podcasts.mjs';
 import { createPush } from './push.mjs';
+import { RAG_TOKEN_TTL_MS, mintRagToken } from './ragToken.mjs';
 import { createSync } from './sync.mjs';
 import { createTaskService } from './tasks.mjs';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
-
-// Behind Render's proxy the socket address is the proxy, so prefer the forwarded client address.
-const clientKey = (req) => req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || 'unknown';
 
 export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podcastGet } = {}) => {
   const agents = createAgents();
@@ -39,6 +38,15 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
   const push = createPush({ db, sync, calendar, vapid: config.push, zone: config.push.zone, send: sendPush });
   push.start();
   const query = (req) => new URL(req.url, 'http://localhost').searchParams;
+  const who = (req) => clientKey(req, config.trustedProxyHops);
+
+  // Who may ask how often. Sign-in has its own, stricter count in auth.mjs; these catch a runaway script or a flood.
+  const limits = {
+    general: createLimiter(config.rateLimit.general),
+    heavy: createLimiter(config.rateLimit.heavy), // what costs something to answer: AI, podcast feeds, tickets for the RAG service
+    auth: createLimiter(config.rateLimit.auth),
+  };
+  const tierOf = (pathname) => (pathname.startsWith('/api/auth/') ? 'auth' : /^\/api\/(ai|podcasts|rag)\//.test(pathname) ? 'heavy' : 'general');
 
   const requireAuth = (req) => {
     if (!auth.isAuthorized(req)) throw new HttpError(401, 'Authentication required');
@@ -55,13 +63,8 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
   const routes = {
     'GET /health': (req, res) => {
       push.nudge(); // an uptime ping that wakes a sleeping server also gets the reminders looked at
-      return json(res, 200, {
-        ok: true,
-        mode: 'production',
-        uptime: process.uptime(),
-        agents: agents.length,
-        configuredWorkers: configuredWorkers(config.env, agents),
-      });
+      // nothing about the server's set-up: this answer is for anyone, an uptime monitor included
+      return json(res, 200, { ok: true });
     },
 
     // Asking who is signed in also renews a lapsed access token from the refresh token, so a page that wakes up after a while
@@ -81,7 +84,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
 
     'POST /api/auth/login': async (req, res) => {
       const input = await readJson(req, config.maxBodyBytes);
-      const result = auth.login(clientKey(req), input.password);
+      const result = auth.login(who(req), input.password);
       if (result.retryAfterSeconds) {
         return json(res, 429, { error: 'Too many attempts' }, { 'Retry-After': String(result.retryAfterSeconds) });
       }
@@ -224,6 +227,13 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
       json(res, 200, await ai.image(await readJson(req, config.maxBodyBytes)));
     },
 
+    // A ticket the browser shows to the Hank RAG service, which answers nobody without one (see ragToken.mjs)
+    'POST /api/rag/token': (req, res) => {
+      requireAuth(req);
+      if (!config.ragTokenSecret) return json(res, 200, { enabled: false, token: '', expiresIn: 0 });
+      json(res, 200, { enabled: true, token: mintRagToken({ secret: config.ragTokenSecret }), expiresIn: Math.floor(RAG_TOKEN_TTL_MS / 1000) });
+    },
+
     // Podcasts: the directory search, and a podcast's episodes read from its own feed (see podcasts.mjs)
     'GET /api/podcasts/search': async (req, res) => {
       requireAuth(req);
@@ -248,6 +258,8 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
       const { pathname } = new URL(req.url, 'http://localhost');
       const handler = routes[`${req.method} ${pathname}`];
       if (!handler) return json(res, 404, { error: 'Not found' });
+      const allowed = limits[tierOf(pathname)].hit(who(req));
+      if (!allowed.ok) return json(res, 429, { error: 'Too many requests. Slow down a little.' }, { 'Retry-After': String(allowed.retryAfterSeconds) });
       requireTrustedOrigin(req);
       return await handler(req, res);
     } catch (error) {

@@ -31,6 +31,20 @@ export const SYNC_STORES = {
   photos: { blob: true },
 };
 
+// What a stored file may say it is. A picture is a picture and a recording is a recording: anything else (a web page, a script,
+// an image that is really markup, such as SVG) is refused, because the file is served from the server's own address.
+const FILE_KINDS = {
+  photos: /^image\/(jpeg|png|webp|gif|avif|heic|heif)$/,
+  images: /^image\/(jpeg|png|webp|gif|avif)$/,
+  memos: /^audio\/(webm|mp4|mpeg|mp3|ogg|wav|x-wav|aac|x-m4a|m4a|opus|flac)$/,
+};
+
+/** The type to serve a file under: its own when it is one the store allows, otherwise a plain download. */
+export const safeMime = (store, mime) => {
+  const bare = String(mime ?? '').split(';')[0].trim().toLowerCase();
+  return FILE_KINDS[store]?.test(bare) ? String(mime).slice(0, 100) : 'application/octet-stream';
+};
+
 const MAX_DOC_BYTES = 256 * 1024;
 const MAX_CHANGES = 100;
 const MAX_PULL = 200;
@@ -163,6 +177,7 @@ export const createSync = ({ db, maxBlobBytes = 4 * 1024 * 1024, quotaBytes = 30
     checkId(id);
     if (!SYNC_STORES[store].blob) throw new HttpError(400, 'That store has no files.');
     if (!data?.length) throw new HttpError(400, 'The file is empty.');
+    if (safeMime(store, mime) === 'application/octet-stream') throw new HttpError(400, 'That kind of file cannot be synced here.');
     if (data.length > maxBlobBytes) throw new HttpError(413, `That file is larger than ${Math.round(maxBlobBytes / 1024 / 1024)} MB, so it stays on this device only.`);
     const { usedBytes } = await usage();
     const existing = await db.query(`SELECT size FROM sync_blobs WHERE store = $1 AND id = $2`, [store, id]);
@@ -171,7 +186,7 @@ export const createSync = ({ db, maxBlobBytes = 4 * 1024 * 1024, quotaBytes = 30
     await db.query(
       `INSERT INTO sync_blobs (store, id, mime, size, data, updated_at) VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (store, id) DO UPDATE SET mime = EXCLUDED.mime, size = EXCLUDED.size, data = EXCLUDED.data, updated_at = EXCLUDED.updated_at`,
-      [store, id, String(mime || 'application/octet-stream').slice(0, 100), data.length, Buffer.from(data), Math.floor(Number(updatedAt)) || Date.now()]
+      [store, id, safeMime(store, mime), data.length, Buffer.from(data), Math.floor(Number(updatedAt)) || Date.now()]
     );
     return { ok: true, size: data.length };
   };
@@ -182,7 +197,7 @@ export const createSync = ({ db, maxBlobBytes = 4 * 1024 * 1024, quotaBytes = 30
     checkId(id);
     const result = await db.query(`SELECT mime, data FROM sync_blobs WHERE store = $1 AND id = $2`, [store, id]);
     if (!result.rows.length) throw new HttpError(404, 'No such file.');
-    return { mime: result.rows[0].mime, data: Buffer.from(result.rows[0].data) };
+    return { mime: safeMime(store, result.rows[0].mime), data: Buffer.from(result.rows[0].data) };
   };
 
   return { init, push, pull, putBlob, getBlob, usage, version: () => version };

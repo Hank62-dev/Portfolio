@@ -1,15 +1,37 @@
 import { spacehankConfig } from '../config';
+import { ragTicket } from './owner';
 import { isDemo } from '../demo/mode';
 import * as demo from '../demo/mock';
 import { tr } from '../lang';
 
 const { ragApiUrl, ragUserId, maxUploadBytes } = spacehankConfig;
 
+// The RAG service answers only a request with a ticket from the realtime server (which knows the owner is signed in). A ticket lasts
+// a quarter of an hour; one is fetched when none is held, and again if the service says the one held is no good.
+let held = { token: '', until: 0 };
+const ticket = async (fresh = false) => {
+  if (!fresh && held.until > Date.now() + 60 * 1000) return held.token;
+  const given = await ragTicket();
+  // when the service is not protected (no secret set) there is no ticket: ask again in a few minutes, not for every request
+  held = { token: given.token || '', until: Date.now() + (given.enabled ? given.expiresIn * 1000 : 5 * 60 * 1000) };
+  return held.token;
+};
+
+/** A fetch to the RAG service that carries a ticket (when there is one) and tries once more with a new one if it is refused. */
+const reach = async (path, init = {}) => {
+  const attempt = async (fresh) => {
+    const token = await ticket(fresh).catch(() => '');
+    return fetch(`${ragApiUrl}${path}`, token ? { ...init, headers: { ...init.headers, Authorization: `Bearer ${token}` } } : init);
+  };
+  const response = await attempt(false);
+  return response.status === 401 ? attempt(true) : response;
+};
+
 /** POST to the RAG service, mapping network failures and non-JSON error pages to readable errors. */
 const post = async (path, init) => {
   let response;
   try {
-    response = await fetch(`${ragApiUrl}${path}`, { method: 'POST', ...init });
+    response = await reach(path, { method: 'POST', ...init });
   } catch {
     throw new Error(tr('Hank RAG offline.'));
   }
@@ -63,7 +85,7 @@ export const listDocuments = async (scope = spacehankConfig.libraryScope) => {
   if (isDemo()) return demo.listDocuments();
   let response;
   try {
-    response = await fetch(`${ragApiUrl}/api/docs/${encodeURIComponent(scope)}`);
+    response = await reach(`/api/docs/${encodeURIComponent(scope)}`);
   } catch {
     throw new Error(tr('Hank RAG offline.'));
   }
@@ -77,7 +99,7 @@ export const deleteDocument = async (docId, scope = spacehankConfig.libraryScope
   if (isDemo()) return demo.deleteDocument(docId);
   let response;
   try {
-    response = await fetch(`${ragApiUrl}/api/docs/${encodeURIComponent(scope)}/${encodeURIComponent(docId)}`, { method: 'DELETE' });
+    response = await reach(`/api/docs/${encodeURIComponent(scope)}/${encodeURIComponent(docId)}`, { method: 'DELETE' });
   } catch {
     throw new Error(tr('Hank RAG offline.'));
   }

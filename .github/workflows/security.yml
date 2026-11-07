@@ -1,0 +1,54 @@
+name: Security checks
+
+# On every push and pull request, and once a week (a new advisory can appear without a new commit):
+# the libraries that ship to users must have no high or critical known vulnerability, and no secret may be in the code.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 3 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # production libraries only: a flaw in a test or build tool does not reach the people who use the app
+      - run: npm audit --omit=dev --audit-level=high
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Look for keys and passwords in the history
+        run: |
+          set -u
+          pattern='AIza[0-9A-Za-z_-]{30,}|sk-[A-Za-z0-9]{20,}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|hf_[A-Za-z0-9]{30,}|xox[bp]-[0-9A-Za-z-]+|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|discord(app)?\.com/api/webhooks/[0-9]+/[A-Za-z0-9_-]+'
+          if git log --all -G"$pattern" --pretty=format:%h -E | grep -q .; then
+            echo "A key or secret looks to be in the git history:"; git log --all -G"$pattern" --pretty=format:'%h %s' -E; exit 1
+          fi
+          echo "No keys found in the history."
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test

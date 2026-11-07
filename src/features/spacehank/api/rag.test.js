@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { askRag, deleteDocument, listDocuments, uploadDocument } from './rag';
 
+// the ticket the service asks for is tested in rag.ticket.test.js; here the service is not protected, so only the calls themselves are seen
+vi.mock('./owner', () => ({ ragTicket: vi.fn(async () => ({ enabled: false, token: '', expiresIn: 0 })) }));
+
 const reply = (status, body) => Promise.resolve({ ok: status < 400, status, json: () => Promise.resolve(body) });
 
 afterEach(() => vi.unstubAllGlobals());

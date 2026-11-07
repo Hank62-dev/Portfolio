@@ -9,7 +9,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -21,9 +21,13 @@ from src.db.postgres import close_pool as close_db_pool
 from src.db.postgres import init_pool as init_db_pool
 from src.rag.engine import RAGEngine
 from src.schemas.request import ChatRequest, ConversationChatRequest, IngestRequest, DashboardAnalysisRequest
+from src.security import require_ticket
 from src.schemas.response import ChatResponse, create_error_response, DashboardAnalysisResponse
 from src.utils.logger import setup_logging
 from src.workers.chat_worker import start_worker, stop_worker
+
+# the documents the upload route takes (the workspace offers the same list)
+ALLOWED_UPLOAD_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".csv", ".json"}
 
 rag_engine: RAGEngine | None = None
 pipeline: AgentPipeline | None = None
@@ -40,6 +44,10 @@ async def lifespan(app: FastAPI):
     logger.info("Fast model: %s", settings.gemini_fast_model)
     logger.info("Embedding: %s", settings.embedding_model)
     logger.info("Groq models suppressed by user directive.")
+    if settings.rag_token_secret:
+        logger.info("Requests need a ticket from the realtime server (RAG_TOKEN_SECRET is set).")
+    else:
+        logger.warning("RAG_TOKEN_SECRET is not set: anyone who can reach this address can use the service. Set it here and on the realtime server.")
 
     # Init Postgres pool (shared DB with BE)
     await init_db_pool()
@@ -146,17 +154,14 @@ app.mount("/ui", StaticFiles(directory=str(frontend_dist), check_dir=False), nam
 
 @app.get("/health")
 async def health_check():
+    # for anyone, an uptime monitor included: nothing about how the service is set up
     return {
         "status": "healthy",
         "rag_initialized": rag_engine.is_initialized if rag_engine else False,
-        "models": {
-            "main": settings.main_model,
-            "fast": settings.fast_model,
-        },
     }
 
 
-@app.post("/api/chat", response_model=ChatResponse)
+@app.post("/api/chat", response_model=ChatResponse, dependencies=[Depends(require_ticket)])
 async def chat(request: ChatRequest):
     """Synchronous chat endpoint - waits for full pipeline result."""
     if not pipeline:
@@ -190,7 +195,7 @@ async def chat(request: ChatRequest):
     return response
 
 
-@app.post("/api/chat/async", status_code=202)
+@app.post("/api/chat/async", status_code=202, dependencies=[Depends(require_ticket)])
 async def chat_async(request: ConversationChatRequest, background_tasks: BackgroundTasks):
     """Async chat endpoint - returns 202 immediately, processes in background.
 
@@ -225,7 +230,7 @@ async def chat_async(request: ConversationChatRequest, background_tasks: Backgro
     }
 
 
-@app.post("/api/dashboard/analyze", response_model=DashboardAnalysisResponse)
+@app.post("/api/dashboard/analyze", response_model=DashboardAnalysisResponse, dependencies=[Depends(require_ticket)])
 async def dashboard_analyze(request: DashboardAnalysisRequest):
     """Direct analysis endpoint for the dashboard, bypassing generic agents."""
     if not pipeline:
@@ -264,7 +269,7 @@ Lưu ý: Không giải thích lề mề, đi thẳng vào vấn đề. Format Ma
         raise HTTPException(status_code=500, detail="Failed to analyze dashboard data")
 
 
-@app.post("/api/ingest")
+@app.post("/api/ingest", dependencies=[Depends(require_ticket)])
 async def ingest_documents(request: IngestRequest):
     if not rag_engine:
         raise HTTPException(status_code=503, detail="RAG Engine not initialized")
@@ -275,7 +280,7 @@ async def ingest_documents(request: IngestRequest):
     return result
 
 
-@app.get("/api/stats")
+@app.get("/api/stats", dependencies=[Depends(require_ticket)])
 async def get_stats():
     stats = {
         "rag_initialized": rag_engine.is_initialized if rag_engine else False,
@@ -288,7 +293,7 @@ async def get_stats():
 
 # ── Test endpoints (demo only, bypasses BE) ─────────────────────
 
-@app.post("/api/test/upload")
+@app.post("/api/test/upload", dependencies=[Depends(require_ticket)])
 async def test_upload_document(
     file: UploadFile = File(...),
     conversation_id: str = Form(default=""),
@@ -306,12 +311,16 @@ async def test_upload_document(
     if not conversation_id:
         conversation_id = str(uuid_lib.uuid4())
 
-    # Read file content
-    content = await file.read()
+    filename = file.filename or "unknown.txt"
+    if os.path.splitext(filename)[1].lower() not in ALLOWED_UPLOAD_EXTENSIONS:
+        raise HTTPException(status_code=415, detail="That kind of file cannot be added. Use PDF, DOCX, TXT, MD, CSV or JSON.")
+
+    # Read at most one byte over the limit, so a huge file is refused without being held in memory
+    content = await file.read(settings.max_upload_bytes + 1)
+    if len(content) > settings.max_upload_bytes:
+        raise HTTPException(status_code=413, detail="That file is too large.")
     if not content:
         raise HTTPException(status_code=400, detail="Empty file")
-
-    filename = file.filename or "unknown.txt"
     doc_id = str(uuid_lib.uuid4())
 
     logger.info(
@@ -370,7 +379,7 @@ async def test_upload_document(
         raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
 
 
-@app.get("/api/docs/{scope}")
+@app.get("/api/docs/{scope}", dependencies=[Depends(require_ticket)])
 async def list_documents(scope: str):
     """The documents indexed under a scope. The vault uses the shared library scope, which every chat reads."""
     if not pipeline or not pipeline.doc_store:
@@ -378,7 +387,7 @@ async def list_documents(scope: str):
     return {"scope": scope, "documents": await pipeline.doc_store.list_documents(scope)}
 
 
-@app.delete("/api/docs/{scope}/{doc_id}")
+@app.delete("/api/docs/{scope}/{doc_id}", dependencies=[Depends(require_ticket)])
 async def delete_document(scope: str, doc_id: str):
     """Remove one document from a scope."""
     if not pipeline or not pipeline.doc_store:
@@ -386,7 +395,7 @@ async def delete_document(scope: str, doc_id: str):
     return {"deleted_chunks": await pipeline.doc_store.delete_document(scope, doc_id)}
 
 
-@app.get("/api/test/docs/{conversation_id}")
+@app.get("/api/test/docs/{conversation_id}", dependencies=[Depends(require_ticket)])
 async def test_list_documents(conversation_id: str):
     """List indexed documents for a conversation (demo testing)."""
     if not pipeline or not pipeline.doc_store:

@@ -53,6 +53,9 @@ export const base64ToBlob = (data, mime) => {
 const owner = () => {
   if (isDemo()) throw new Error(tr('The Creator Lab is private. Sign in to use it.'));
 };
+/** A ticket for the Hank RAG service, which answers nobody without one: { enabled, token, expiresIn (seconds) }. */
+export const ragTicket = () => call('/api/rag/token', { method: 'POST', body: {} });
+
 // ---- Podcasts: the directory search and a podcast's episodes, read by the server (a browser cannot read most feeds itself)
 const podcastsNeedSignIn = () => {
   if (isDemo()) throw new Error(tr('Podcasts are private. Sign in to use them.'));

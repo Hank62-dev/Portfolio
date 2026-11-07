@@ -41,6 +41,12 @@ services:
         sync: false
       - key: AI_DAILY_LIMIT
         value: 60
+      # Locks the Hank RAG service: it only answers a request with a ticket from this server. Give BOTH services the same value.
+      - key: RAG_TOKEN_SECRET
+        sync: false
+      # Optional: the password as a scrypt hash (npm run spacehank:hash-password) instead of SPACEHANK_PASSWORD
+      - key: SPACEHANK_PASSWORD_HASH
+        sync: false
 
   - type: web
     name: hank62-rag
@@ -71,4 +77,7 @@ services:
       - key: REDIS_URL
         sync: false
       - key: CORS_ORIGINS
+        sync: false
+      # The same value as on hank62-realtime: requests without a ticket signed with it are refused
+      - key: RAG_TOKEN_SECRET
         sync: false
