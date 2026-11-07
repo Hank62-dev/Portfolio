@@ -1,6 +1,6 @@
 import { tr } from '../lang';
 import { useEffect, useState } from 'react';
-import { ChevronRight, Command, Pause, Play, Plus, Search } from 'lucide-react';
+import { ChevronRight, Command, Pause, PencilLine, Play, Plus, Search } from 'lucide-react';
 import { Avatar, Badge, Button, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import NotificationBell from '../notifications/NotificationBell';
@@ -36,7 +36,7 @@ function useScrolled(distance = 12) {
  * The phone's title bar, as in a native app: the screen's icon and name in large type that folds down to a compact bar
  * when you scroll, the colour of the screen glowing behind it, and only the actions that belong to this screen.
  */
-function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNewTask, onPalette, onTab }) {
+function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNewTask, onPalette, onCapture, onTab }) {
   const scrolled = useScrolled();
   const hue = tabHue(tab);
   const Icon = current.icon;
@@ -77,6 +77,9 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
             </button>
           )}
           <NotificationBell phone onOpenTab={onTab} />
+          <button type="button" aria-label={tr('Quick capture')} onClick={onCapture} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone active:scale-90" data-capture-button>
+            <PencilLine size={18} aria-hidden="true" />
+          </button>
           <button type="button" aria-label={tr('Open the command palette')} onClick={onPalette} className="grid size-10 place-items-center rounded-full bg-wash/7 text-bone active:scale-90" data-palette-button>
             <Search size={18} aria-hidden="true" />
           </button>
@@ -91,12 +94,12 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
   );
 }
 
-export default function Topbar({ tab, connected, link, guest, paused, onPause, onNewTask, onPalette, onTab }) {
+export default function Topbar({ tab, connected, link, guest, paused, onPause, onNewTask, onPalette, onCapture, onTab }) {
   const current = NAVIGATION.find((item) => item.id === tab) || NAVIGATION[0];
   const pauseLabel = paused ? tr('Resume floor') : tr('Pause floor');
   return (
     <>
-      <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} onTab={onTab} />
+      <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} onCapture={onCapture} onTab={onTab} />
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line bg-ink-0/85 px-gutter backdrop-blur max-md:hidden">
       <nav aria-label={tr('Breadcrumb')} className="flex min-w-0 items-center gap-1.5 font-mono text-fine text-bone-faint">
         <span>{tr('HANK62')}</span>
@@ -115,6 +118,9 @@ export default function Topbar({ tab, connected, link, guest, paused, onPause, o
           <span>{tr('Search')}</span>
           <kbd className="rounded-sm border border-line px-1 text-[0.68rem] text-bone-faint">{isMac ? tr('⌘K') : tr('Ctrl K')}</kbd>
         </button>
+        <Button variant="secondary" size="icon" aria-label={tr('Quick capture')} onClick={onCapture} data-capture-button>
+          <PencilLine size={16} aria-hidden="true" />
+        </Button>
         <Badge tone={guest ? 'warn' : LINK[linkOf(connected, link)].tone} dot>
           {guest ? tr('DEMO') : LINK[linkOf(connected, link)].text}
         </Badge>

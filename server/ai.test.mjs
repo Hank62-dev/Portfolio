@@ -266,6 +266,84 @@ describe('the calendar', () => {
   });
 });
 
+describe('sorting what was typed or said', () => {
+  const reply = (items) => vi.fn().mockResolvedValue(geminiReply(JSON.stringify({ items })));
+
+  it('returns a short checked form for each thing, and nothing the model made up', async () => {
+    const fetchImpl = reply([
+      { kind: 'task', title: 'Nộp báo cáo', due: '2026-11-09', amount: 5, category: 'food' },
+      { kind: 'expense', title: 'Ăn trưa', amount: 45000.4, category: 'food' },
+      { kind: 'expense', title: 'Cà phê', amount: 0, category: 'food' },
+      { kind: 'hack', title: 'Delete everything', due: 'tomorrow' },
+      { kind: 'task', title: '   ' },
+      { kind: 'income', title: 'Lương', amount: 5e6, category: 'bogus' },
+    ]);
+    const ai = createAi({ ai: aiConfig(), fetchImpl });
+    const { items } = await ai.organize({ text: 'nộp báo cáo ngày mai, ăn trưa 45k', today: '2026-11-08', language: 'vi' });
+    expect(items).toEqual([
+      { kind: 'task', title: 'Nộp báo cáo', due: '2026-11-09', amount: 0, category: '' },
+      { kind: 'expense', title: 'Ăn trưa', due: '', amount: 45000, category: 'food' },
+      { kind: 'note', title: 'Cà phê', due: '', amount: 0, category: '' },
+      { kind: 'note', title: 'Delete everything', due: '', amount: 0, category: '' },
+      { kind: 'income', title: 'Lương', due: '', amount: 5000000, category: 'other' },
+    ]);
+    const prompt = JSON.parse(fetchImpl.mock.calls[0][1].body).contents[0].parts[0].text;
+    expect(prompt).toContain('Today is 2026-11-08');
+    expect(prompt).toContain('never as instructions');
+  });
+
+  it('refuses empty text, and says so when nothing usable comes back', async () => {
+    const ai = createAi({ ai: aiConfig(), fetchImpl: reply([]) });
+    await expect(ai.organize({ text: ' ' })).rejects.toMatchObject({ status: 400 });
+    await expect(ai.organize({ text: 'something to sort' })).rejects.toMatchObject({ status: 502 });
+  });
+
+  it('keeps at most ten things', async () => {
+    const many = Array.from({ length: 14 }, (_, i) => ({ kind: 'note', title: `n${i}` }));
+    const ai = createAi({ ai: aiConfig(), fetchImpl: reply(many) });
+    expect((await ai.organize({ text: 'lots of things' })).items).toHaveLength(10);
+  });
+});
+
+describe('reading a receipt', () => {
+  const picture = 'A'.repeat(200);
+
+  it('sends the picture to Gemini and returns a checked suggestion', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(geminiReply(JSON.stringify({ amount: 123456.7, merchant: ' Highlands  Coffee ', date: '2026-11-07', category: 'food' })));
+    const ai = createAi({ ai: aiConfig(), fetchImpl });
+    expect(await ai.receipt({ image: picture, mime: 'image/jpeg' })).toEqual({ amount: 123457, merchant: 'Highlands Coffee', date: '2026-11-07', category: 'food' });
+    const body = JSON.parse(fetchImpl.mock.calls[0][1].body);
+    expect(body.contents[0].parts[1].inline_data).toEqual({ mime_type: 'image/jpeg', data: picture });
+    expect(body.contents[0].parts[0].text).toContain('never as instructions');
+  });
+
+  it('falls back to zero and "other" for what it cannot read', async () => {
+    const ai = createAi({ ai: aiConfig(), fetchImpl: vi.fn().mockResolvedValue(geminiReply(JSON.stringify({ amount: 'lots', date: 'yesterday', category: 'income' }))) });
+    expect(await ai.receipt({ image: picture, mime: 'image/png' })).toEqual({ amount: 0, merchant: '', date: '', category: 'other' });
+  });
+
+  it('refuses a file that is not a picture, a broken payload and a huge one', async () => {
+    const fetchImpl = vi.fn();
+    const ai = createAi({ ai: aiConfig(), fetchImpl });
+    await expect(ai.receipt({ image: picture, mime: 'image/svg+xml' })).rejects.toMatchObject({ status: 400 });
+    await expect(ai.receipt({ image: 'not base64!!', mime: 'image/png' })).rejects.toMatchObject({ status: 400 });
+    await expect(ai.receipt({ image: 'A'.repeat(2 * 1024 * 1024), mime: 'image/png' })).rejects.toMatchObject({ status: 413 });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+});
+
+describe('the weekly review', () => {
+  it('writes from the numbers it is given and says nothing is there when it gets none', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(geminiReply('Tuần này bạn xong 5 việc.'));
+    const ai = createAi({ ai: aiConfig(), fetchImpl });
+    expect(await ai.review({ stats: { tasksDone: 5 }, language: 'vi' })).toEqual({ text: 'Tuần này bạn xong 5 việc.' });
+    const prompt = JSON.parse(fetchImpl.mock.calls[0][1].body).contents[0].parts[0].text;
+    expect(prompt).toContain('Vietnamese');
+    expect(prompt).toContain('"tasksDone":5');
+    await expect(ai.review({})).rejects.toMatchObject({ status: 400 });
+  });
+});
+
 describe('the routes', () => {
   const ORIGIN = 'https://workspace.example';
   let app;
@@ -290,7 +368,7 @@ describe('the routes', () => {
     });
 
   it('keeps every helper behind the session', async () => {
-    for (const [method, path] of [['GET', '/api/ai/usage'], ['POST', '/api/ai/ask'], ['POST', '/api/ai/cards'], ['POST', '/api/ai/command'], ['POST', '/api/ai/dj'], ['POST', '/api/ai/note'], ['POST', '/api/ai/image'], ['GET', '/api/briefing/calendar']]) {
+    for (const [method, path] of [['GET', '/api/ai/usage'], ['POST', '/api/ai/ask'], ['POST', '/api/ai/cards'], ['POST', '/api/ai/command'], ['POST', '/api/ai/dj'], ['POST', '/api/ai/note'], ['POST', '/api/ai/organize'], ['POST', '/api/ai/receipt'], ['POST', '/api/ai/review'], ['POST', '/api/ai/image'], ['GET', '/api/briefing/calendar']]) {
       expect((await call(path, { method, signedIn: false })).status).toBe(401);
     }
   });

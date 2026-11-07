@@ -2,12 +2,13 @@ import { tr } from '../lang';
 import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, Search, X } from 'lucide-react';
+import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, Search, SlidersHorizontal, X } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import { LangPills } from './LangSwitch';
 import { ThemePills } from './ThemeMenu';
 import AppIcon from './AppIcon';
 import { NAVIGATION } from '../navigation';
+import { bySection, openModules, useNav } from '../modules';
 
 const matches = (item, q) => !q || `${item.label} ${item.section} ${item.keywords ?? ''}`.toLowerCase().includes(q);
 
@@ -28,7 +29,8 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
   const [more, setMore] = useState(false); // there is more of the list below
   const [query, setQuery] = useState('');
   const q = query.trim().toLowerCase();
-  const found = NAVIGATION.filter((item) => matches(item, q));
+  const visible = useNav();
+  const found = visible.filter((item) => matches(item, q));
   const pinned = PINNED.map((id) => NAVIGATION.find((item) => item.id === id));
 
   const go = (id) => {
@@ -133,7 +135,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             <span className="mx-auto mt-2.5 block h-1 w-10 rounded-full bg-line-strong" aria-hidden="true" />
             <div className="relative flex items-end justify-between px-5 pt-3 pb-3">
               <div className="min-w-0">
-                <p className="mb-1.5 font-mono text-[0.6rem] tracking-[0.22em] text-bone-faint">{tr('INDEX ·')} {String(NAVIGATION.length).padStart(2, '0')} {tr('PLACES')}</p>
+                <p className="mb-1.5 font-mono text-[0.6rem] tracking-[0.22em] text-bone-faint">{tr('INDEX ·')} {String(visible.length).padStart(2, '0')} {tr('PLACES')}</p>
                 <Dialog.Title className="font-display text-[1.95rem] leading-none font-normal tracking-tight text-bone">
                   {tr('Everything in')} <em className="text-signal">{tr('Hank62')}</em>
                 </Dialog.Title>
@@ -171,11 +173,18 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             onTouchCancel={release}
           >
             {found.length > 0 && (
-              <ul className="grid grid-cols-4 gap-x-2 gap-y-4 pt-1" key={q}>
-                {found.map((item, i) => (
-                  <AppIcon key={item.id} item={item} index={i} current={tab === item.id} onPick={go} className="sheet-tile" />
+              <div className="flex flex-col gap-5 pt-1" key={q}>
+                {(q ? [{ section: '', items: found }] : bySection(found)).map(({ section, items }) => (
+                  <div key={section || 'found'}>
+                    {section && <p className="mb-3 font-mono text-[0.62rem] tracking-[0.18em] text-bone-faint uppercase">{tr(section)}</p>}
+                    <ul className="grid grid-cols-4 gap-x-2 gap-y-4">
+                      {items.map((item) => (
+                        <AppIcon key={item.id} item={item} index={found.indexOf(item)} current={tab === item.id} onPick={go} className="sheet-tile" />
+                      ))}
+                    </ul>
+                  </div>
                 ))}
-              </ul>
+              </div>
             )}
             {!found.length && (
               <p className="py-8 text-center font-mono text-fine text-bone-faint" role="status">
@@ -205,6 +214,16 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
                   <RotateCcw size={15} aria-hidden="true" /> {tr('Reset demo data')}
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(false);
+                  openModules();
+                }}
+                className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim"
+              >
+                <SlidersHorizontal size={15} aria-hidden="true" /> {tr('Choose places')}
+              </button>
               <button type="button" onClick={onLogout} className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim">
                 {guest ? <LogOut size={15} aria-hidden="true" /> : <LockKeyhole size={15} aria-hidden="true" />} {guest ? tr('Exit demo') : tr('Lock workspace')}
               </button>

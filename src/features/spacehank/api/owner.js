@@ -68,6 +68,17 @@ export const transcribeAudio = (wav, language) => {
   if (isDemo()) throw new Error(tr('Turning speech into text needs you to sign in.'));
   return call(`/api/ai/transcribe?lang=${language === 'en' ? 'en' : 'vi'}`, { method: 'POST', body: wav, raw: 'audio/wav' });
 };
+
+// ---- Capture: sorting a typed or spoken text into tasks / spending / notes, reading a receipt, and the weekly review
+const needSignIn = () => {
+  if (isDemo()) throw new Error(tr('This needs you to sign in.'));
+};
+/** Splits a text into the separate things in it: { items: [{ kind, title, due, amount, category }] }. */
+export const organizeText = ({ text, today, language }) => (needSignIn(), call('/api/ai/organize', { method: 'POST', body: { text, today, language } }));
+/** Reads a receipt photo (base64 and its type): { amount, merchant, date, category }. */
+export const readReceipt = ({ image, mime }) => (needSignIn(), call('/api/ai/receipt', { method: 'POST', body: { image, mime } }));
+/** A short written look back at the week, from numbers counted on the device: { text }. */
+export const writeReview = ({ stats, language }) => (needSignIn(), call('/api/ai/review', { method: 'POST', body: { stats, language } }));
 export const generateContent = (input) => (owner(), call('/api/ai/content', { method: 'POST', body: input }));
 export const generatePitch = (input) => (owner(), call('/api/ai/pitch', { method: 'POST', body: input }));
 export const discordChannels = () => (owner(), call('/api/discord/channels'));

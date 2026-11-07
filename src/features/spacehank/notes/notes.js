@@ -2,7 +2,7 @@ import { locale } from '../lang';
 // Notes as plain data and plain functions: what a note's title and tags are, how a search ranks them, and the
 // numbers behind the journal's mood chart. Nothing here touches the browser, so all of it is tested.
 
-const strip = (text) =>
+export const strip = (text) =>
   String(text ?? '')
     .toLowerCase()
     .normalize('NFD')

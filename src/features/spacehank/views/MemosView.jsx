@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AudioLines, Download, Ellipsis, Languages, Mic, NotebookPen, Pause, Play, ScrollText, Sparkles, Square, Trash2 } from 'lucide-react';
+import { AudioLines, Download, Ellipsis, Languages, ListChecks, Mic, NotebookPen, Pause, Play, ScrollText, Sparkles, Square, Trash2 } from 'lucide-react';
 import { Badge, Button, Menu } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { PageHead, Segmented } from '../components/Page';
+import { organizeText } from '../api/owner';
+import { addManyToInbox } from '../inbox/file';
+import { dayKey } from '../habits/model';
+import { startJob } from '../jobs';
 import { transcribeRecording } from '../memos/audio';
 import { LANGUAGES, asNote, bars, canTranscribe, formatDuration, titleFrom } from '../memos/model';
 import { memos } from '../memos/store';
@@ -10,7 +14,7 @@ import { createNote } from '../notes/library';
 import { textToHtml } from '../notes/notes';
 import { useFab } from '../fab';
 import { useStore } from '../store';
-import { locale, tr } from '../lang';
+import { getLang, locale, tr } from '../lang';
 
 const PEAKS = 64;
 
@@ -36,6 +40,17 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify, writing, onWr
     await createNote(asNote({ ...memo, title }), { html: textToHtml(asNote({ ...memo, title })) });
     onNotify?.(tr('Saved to Second Brain'));
   };
+  // what was said, split into things to do, money spent and notes: they go to the Inbox, where each is one tap to file
+  const findActions = () =>
+    startJob(`memo-actions-${memo.id}`, async () => {
+      try {
+        const { items } = await organizeText({ text: memo.transcript, today: dayKey(), language: getLang() });
+        await addManyToInbox(items, 'voice');
+        onNotify?.(tr('{0} things from this memo are in your Inbox', items.length));
+      } catch (error) {
+        onNotify?.(error.message);
+      }
+    });
   const download = () => {
     const url = URL.createObjectURL(memo.blob);
     const a = document.createElement('a');
@@ -72,6 +87,7 @@ function Memo({ memo, playing, progress, onPlay, onSeek, onNotify, writing, onWr
               </Button>
             }
             items={[
+              ...(memo.transcript ? [{ id: 'todos', label: tr('Find to-dos and spending'), icon: ListChecks, onSelect: findActions }] : []),
               { id: 'note', label: tr('Save to Second Brain'), icon: NotebookPen, onSelect: send },
               { id: 'download', label: tr('Download'), icon: Download, onSelect: download },
               { id: 'delete', label: tr('Delete'), icon: Trash2, onSelect: () => memos.remove(memo.id) },

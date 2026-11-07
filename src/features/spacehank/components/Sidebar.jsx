@@ -1,11 +1,11 @@
 import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Download, LockKeyhole, LogOut, PanelLeftClose, PanelLeftOpen, RotateCcw } from 'lucide-react';
+import { ChevronDown, Download, LockKeyhole, LogOut, PanelLeftClose, PanelLeftOpen, RotateCcw, SlidersHorizontal } from 'lucide-react';
 import { Avatar, Badge, Tooltip } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import Logo from '../../../components/ui/Logo';
 import { owner } from '../config';
-import { NAVIGATION, NAV_SECTIONS } from '../navigation';
+import { bySection, openModules, useNav } from '../modules';
 import { tr } from '../lang';
 
 const ITEM =
@@ -52,6 +52,7 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
   const toggleLabel = rail ? tr('Expand sidebar') : tr('Collapse sidebar');
   const list = useRef(null);
   const more = useMoreBelow(list);
+  const groups = bySection(useNav());
   return (
     <aside
       className={clsx(
@@ -73,12 +74,12 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
 
       <div className="relative min-h-0 flex-1">
         <nav ref={list} aria-label={tr('Workspace')} className="no-scrollbar flex h-full flex-col gap-5 overflow-y-auto">
-          {NAV_SECTIONS.map((section) => (
+          {groups.map(({ section, items }) => (
             <div className="flex flex-col gap-1" key={section}>
               {!rail && (
                 <span className="px-3 pb-1 font-mono text-[0.68rem] tracking-[0.14em] text-bone-faint">{tr(section)}</span>
               )}
-              {NAVIGATION.filter((item) => item.section === section).map((item) => (
+              {items.map((item) => (
                 <NavButton key={item.id} rail={rail} active={tab === item.id} onClick={() => onTab(item.id)} {...item} />
               ))}
             </div>
@@ -110,6 +111,7 @@ export default function Sidebar({ tab, onTab, rail, guest, app, onNotify, canCol
             onClick={() => (app.canInstall ? app.install() : onNotify?.(tr('On iPhone: tap Share, then Add to Home Screen')))}
           />
         )}
+        <NavButton rail={rail} label={tr('Choose which places to show')} icon={SlidersHorizontal} onClick={openModules} />
         {!guest && !rail && <SyncStatus />}
         {guest && <NavButton rail={rail} label={tr('Reset demo data')} icon={RotateCcw} onClick={onResetDemo} />}
         <NavButton rail={rail} label={guest ? tr('Exit demo') : tr('Lock workspace')} icon={guest ? LogOut : LockKeyhole} onClick={onLogout} />

@@ -5,13 +5,13 @@ import { isDemo } from './demo/mode';
 
 // the demo keeps its made-up data in a database of its own, so it can never touch the owner's real one
 const name = () => (isDemo() ? 'hank62-demo' : 'hank62-workspace');
-const VERSION = 8;
+const VERSION = 9;
 // tracks / playlists / images / prompts / notes / photos (a diary's pictures) hold records; blobs / covers hold the raw files, keyed by the owner id.
-const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos', 'photos', 'content', 'income', 'deals', 'settings', 'chats', 'chatMsgs', 'shows', 'listens', 'outbox'];
+const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos', 'photos', 'content', 'income', 'deals', 'settings', 'chats', 'chatMsgs', 'shows', 'listens', 'inbox', 'outbox'];
 
 // The stores that are kept in step across devices (see ./sync). The music library is not: its files are too big. `outbox` is the
 // list of changes this device has not sent yet.
-export const SYNCED_STORES = ['notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'content', 'income', 'deals', 'prompts', 'settings', 'memos', 'images', 'photos', 'chats', 'chatMsgs', 'shows', 'listens'];
+export const SYNCED_STORES = ['notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'content', 'income', 'deals', 'prompts', 'settings', 'memos', 'images', 'photos', 'chats', 'chatMsgs', 'shows', 'listens', 'inbox'];
 const SYNCED = new Set(SYNCED_STORES);
 let writeHook = null;
 /** The sync engine registers here to hear about every change made to a synced store. */

@@ -1,7 +1,7 @@
 import { tr } from './lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Copy, Download, Pause, Play, Plus, SkipBack, SkipForward, Users } from 'lucide-react';
+import { BookHeart, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
 import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useInstall } from './hooks/useInstall';
@@ -13,9 +13,15 @@ import { THEME_CHOICES } from './components/ThemeMenu';
 import Sidebar from './components/Sidebar';
 import TaskModal from './components/TaskModal';
 import Topbar from './components/Topbar';
-import { interpretCommand } from './api/owner';
+import { askNotes, interpretCommand } from './api/owner';
 import { buildCatalog, validate } from './model/nlcommands';
 import { DEFAULT_TAB, NAVIGATION, tabHue } from './navigation';
+import { loadModules, loadSharedModules, openModules, useNav } from './modules';
+import CaptureSheet from './capture/CaptureSheet';
+import { openCapture } from './capture/ui';
+import ModulesSheet from './components/ModulesSheet';
+import { lifeSnapshot, loadLife } from './today/useLifeData';
+import { lifeDocs, searchEverything } from './search/model';
 import { GUEST_HOME, guestCan } from './demo/mode';
 import PrivateTab from './components/PrivateTab';
 import { sendIntent } from './notes/library';
@@ -57,6 +63,8 @@ const MemosView = lazy(() => import('./views/MemosView'));
 const PodcastView = lazy(() => import('./views/PodcastView'));
 const GamesView = lazy(() => import('./views/GamesView'));
 const DiaryView = lazy(() => import('./views/DiaryView'));
+
+const KIND_ICON = { note: NotebookPen, task: CheckCircle2, spending: Coins, memo: Mic, habit: Sprout, study: GraduationCap };
 
 const PageLoading = () => (
   <Loading label={tr('Loading')} className="flex flex-col gap-4 py-4">
@@ -102,6 +110,7 @@ export default function Workspace({
   const app = useInstall();
   useNotifications({ guest, connected, agents, onTab });
   const { mode, setMode } = useTheme();
+  const visibleNav = useNav();
 
   // another app shared something to Hank62: the address says so (?share=1) and the sheet asks where it goes
   const [params, setParams] = useSearchParams();
@@ -124,11 +133,26 @@ export default function Workspace({
     if (music) void loadLibrary().then(syncBundledMusic);
   }, [music]);
 
+  // which places are switched on: what this device remembers at once, then what the other devices chose
+  useEffect(() => {
+    loadModules();
+    void loadSharedModules();
+  }, []);
+
+  // the search reads everything that is kept, so it is read into memory the first time the palette opens
+  useEffect(() => {
+    if (paletteOpen) void loadLife();
+  }, [paletteOpen]);
+
   useEffect(() => {
     const onKey = (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         setPaletteOpen((open) => !open);
+      }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'j') {
+        event.preventDefault();
+        openCapture();
       }
     };
     window.addEventListener('keydown', onKey);
@@ -137,7 +161,9 @@ export default function Workspace({
 
   const commands = useMemo(() => {
     const list = [
-      ...NAVIGATION.map((item) => ({ id: `go-${item.id}`, label: tr('Go to {0}', item.label), hint: tr('Navigate'), icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
+      { id: 'capture', label: tr('Quick capture'), hint: tr('Action'), icon: Inbox, keywords: 'inbox add note task expense receipt write ghi nhanh', run: () => openCapture() },
+      { id: 'customise', label: tr('Choose which places to show'), hint: tr('Appearance'), icon: SlidersHorizontal, keywords: 'modules hide show tabs menu customise customize', run: openModules },
+      ...visibleNav.map((item) => ({ id: `go-${item.id}`, label: tr('Go to {0}', item.label), hint: tr('Navigate'), icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
       { id: 'new-task', label: tr('New task for an agent'), hint: tr('Action'), icon: Plus, keywords: 'dispatch assign', run: () => setTaskOpen(true) },
       ...THEME_CHOICES.filter(({ id }) => id !== mode).map(({ id, label, short, icon }) => ({ id: `theme-${id}`, label: id === 'auto' ? tr('Theme: follow the time of day') : tr('Theme: {0}', label.toLowerCase()), hint: short ?? tr('Appearance'), icon, keywords: 'dark light mode appearance night day auto time sunrise sunset', run: () => setMode(id) })),
       { id: 'pause', label: paused ? tr('Resume the floor') : tr('Pause the floor'), hint: tr('Action'), icon: paused ? Play : Pause, keywords: 'stop animation', run: onPause },
@@ -169,7 +195,31 @@ export default function Workspace({
       );
     }
     return list;
-  }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing, mode, setMode]);
+  }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing, mode, setMode, visibleNav]);
+
+  // what matches in everything that is kept, as rows for the palette
+  const searchData = useCallback(
+    (query) =>
+      searchEverything(lifeSnapshot(), query, 8).map((hit) => ({
+        id: hit.id,
+        label: hit.title,
+        hint: hit.hint,
+        icon: hit.tab === 'diary' ? BookHeart : KIND_ICON[hit.kind],
+        run: () => {
+          if (hit.open) sendIntent('notes', { open: hit.open });
+          onTab(hit.tab);
+        },
+      })),
+    [onTab]
+  );
+
+  // a question about the person's own data: a few short facts are chosen on the device and only those are sent
+  const answerData = async (question) => {
+    await loadLife();
+    const docs = lifeDocs(lifeSnapshot(), question);
+    if (!docs.length) throw new Error(tr('There is nothing kept yet to answer from. Add a task, a note or a spending line first.'));
+    return askNotes({ question, notes: docs });
+  };
 
   const shellTabs = useMemo(() => NAVIGATION.map(({ id, label }) => ({ id, label })), []);
 
@@ -273,7 +323,7 @@ export default function Workspace({
     pulse: <PulseView owner />,
   };
   const fit = tab === 'shell'; // Git Bash fills the screen and scrolls inside itself, not the page
-  const home = <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} owner={!guest} />;
+  const home = <DashboardView agents={agents} events={events} connected={connected} onTab={onTab} onNotify={onNotify} owner={!guest} />;
   // a guest only gets a few light places; the owner's own tabs, the home screen too, say they are private
   const page = guest && !guestCan(tab) ? <PrivateTab tab={tab} onHome={() => onTab(GUEST_HOME)} onSignIn={onLogout} /> : views[tab] || home;
 
@@ -296,7 +346,7 @@ export default function Workspace({
             />
           )}
           <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} />
+            <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} onCapture={() => openCapture()} />
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
               <div key={tab} className={clsx('animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
@@ -309,6 +359,8 @@ export default function Workspace({
             </footer>
           </div>
           {sharing && <ShareSheet onDone={doneSharing} onNotify={onNotify} />}
+          <CaptureSheet onNotify={onNotify} onTab={onTab} />
+          <ModulesSheet />
           {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}
@@ -321,6 +373,9 @@ export default function Workspace({
             music={music && trackCount > 0}
             onInterpret={interpret}
             onRun={execute}
+            onSearch={searchData}
+            onAnswer={answerData}
+            onCapture={openCapture}
           />
         </div>
       </TooltipProvider>

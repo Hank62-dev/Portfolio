@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
-import { CornerDownLeft, Music2, Search, Sparkles } from 'lucide-react';
+import { CornerDownLeft, Inbox, MessageCircleQuestion, Music2, Search, Sparkles } from 'lucide-react';
 import { Button, Loading, SkeletonLines } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { filterCommands } from '../model/commands';
 import { looksLikeRequest } from '../model/nlcommands';
+import { looksLikeQuestion } from '../search/model';
 import { library } from '../music/library';
 import { playTrack } from '../music/player';
 import { useStore } from '../store';
@@ -12,6 +13,8 @@ import { tr } from '../lang';
 
 const MAX_TRACKS = 6;
 const ASK_ID = 'ask-hank';
+const ASK_DATA_ID = 'ask-data';
+const CAPTURE_ID = 'capture-line';
 const IDLE = { status: 'idle' };
 
 /**
@@ -19,10 +22,13 @@ const IDLE = { status: 'idle' };
  * are plain data ({ id, label, hint, keywords, icon, run }); songs from the private library are added while
  * you type, when `music` is on.
  *
+ * `onSearch(query)` adds matches from everything that is kept (notes, tasks, spending, memos, habits, study); `onAnswer(query)`
+ * answers a question from that data; `onCapture(query)` puts the typed words in the Inbox.
+ *
  * With `onInterpret`, a sentence ("give Codex a task to fix the login bug") gets an extra "Ask Hank" row. Hank
  * works out which action it means, the palette says what it understood, and nothing runs until you confirm.
  */
-export default function CommandPalette({ open, onOpenChange, commands, music, onInterpret, onRun }) {
+export default function CommandPalette({ open, onOpenChange, commands, music, onInterpret, onRun, onSearch, onAnswer, onCapture }) {
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
   const [ask, setAsk] = useState(IDLE); // idle | thinking | confirm | refused
@@ -54,12 +60,15 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
       }));
       all = [...found, ...songs];
     }
-    if (onInterpret && looksLikeRequest(query)) {
-      // a whole sentence is most likely a request, so offer Hank first
-      return [{ id: ASK_ID, label: tr('Ask Hank: {0}', query.trim()), hint: tr('AI'), icon: Sparkles }, ...all];
-    }
-    return all;
-  }, [commands, query, music, tracks, onInterpret]);
+    const typed = query.trim();
+    if (onSearch && typed.length >= 2) all = [...all, ...onSearch(typed)];
+    if (onCapture && typed.length >= 3) all = [...all, { id: CAPTURE_ID, label: tr('Add "{0}" to your Inbox', typed), hint: tr('Capture'), icon: Inbox }];
+    const top = [];
+    if (onAnswer && looksLikeQuestion(typed)) top.push({ id: ASK_DATA_ID, label: tr('Ask about my data: {0}', typed), hint: tr('AI'), icon: MessageCircleQuestion });
+    // a whole sentence is most likely a request, so offer Hank first
+    if (onInterpret && looksLikeRequest(query)) top.push({ id: ASK_ID, label: tr('Ask Hank: {0}', typed), hint: tr('AI'), icon: Sparkles });
+    return [...top, ...all];
+  }, [commands, query, music, tracks, onInterpret, onSearch, onAnswer, onCapture]);
 
   useEffect(() => setActive(0), [query]);
   useEffect(() => {
@@ -76,6 +85,16 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
     }
   };
 
+  const answer = async () => {
+    setAsk({ status: 'answering' });
+    try {
+      const reply = await onAnswer(query.trim());
+      setAsk({ status: 'answer', text: reply.answer });
+    } catch (error) {
+      setAsk({ status: 'refused', say: error.message });
+    }
+  };
+
   const confirm = () => {
     const { parsed } = ask;
     onOpenChange(false);
@@ -85,6 +104,15 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
   const run = (command) => {
     if (command.id === ASK_ID) {
       void interpret();
+      return;
+    }
+    if (command.id === ASK_DATA_ID) {
+      void answer();
+      return;
+    }
+    if (command.id === CAPTURE_ID) {
+      onOpenChange(false);
+      window.setTimeout(() => onCapture(query.trim()), 0);
       return;
     }
     onOpenChange(false);
@@ -165,7 +193,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
                     onClick={() => run(command)}
                     className={clsx('flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2.5', index === active ? 'bg-ink-3 text-bone' : 'text-bone-dim')}
                   >
-                    {Icon && <Icon size={16} className={index === active || command.id === ASK_ID ? 'text-signal' : 'text-bone-faint'} aria-hidden="true" />}
+                    {Icon && <Icon size={16} className={index === active || command.id === ASK_ID || command.id === ASK_DATA_ID ? 'text-signal' : 'text-bone-faint'} aria-hidden="true" />}
                     <span className="flex-1 truncate text-fine">{command.label}</span>
                     {command.hint && <span className="shrink-0 font-mono text-[0.72rem] text-bone-faint">{command.hint}</span>}
                     {index === active && <CornerDownLeft size={13} className="shrink-0 text-bone-faint" aria-hidden="true" />}
@@ -194,6 +222,23 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
                     </Button>
                     <Button variant="ghost" size="sm" onClick={() => setAsk(IDLE)}>
                       {tr('Not that')}
+                    </Button>
+                  </div>
+                </>
+              )}
+              {ask.status === 'answering' && (
+                <Loading label={tr('Hank is reading your notes, tasks and spending')}>
+                  <SkeletonLines lines={3} />
+                </Loading>
+              )}
+              {ask.status === 'answer' && (
+                <>
+                  <p className="text-body leading-relaxed whitespace-pre-line text-bone" data-answer>
+                    {ask.text}
+                  </p>
+                  <div>
+                    <Button variant="ghost" size="sm" onClick={() => setAsk(IDLE)}>
+                      {tr('Back to search')}
                     </Button>
                   </div>
                 </>

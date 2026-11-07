@@ -154,6 +154,21 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
       json(res, 200, await ai.cards(await readJson(req, config.maxAiBodyBytes)));
     },
 
+    'POST /api/ai/organize': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.organize(await readJson(req, config.maxBodyBytes)));
+    },
+
+    'POST /api/ai/receipt': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.receipt(await readJson(req, 2 * 1024 * 1024)));
+    },
+
+    'POST /api/ai/review': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await ai.review(await readJson(req, config.maxBodyBytes)));
+    },
+
     'POST /api/ai/command': async (req, res) => {
       requireAuth(req);
       json(res, 200, await ai.command(await readJson(req, config.maxBodyBytes)));

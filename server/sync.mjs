@@ -22,6 +22,7 @@ export const SYNC_STORES = {
   deals: {},
   prompts: {},
   settings: {},
+  inbox: {}, // things captured quickly, waiting to be sorted into tasks, spending or notes
   shows: {}, // the podcasts followed
   listens: {}, // where each podcast episode was left, and whether it was finished
   chats: {}, // Hank RAG conversations: one record each (title, session) …

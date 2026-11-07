@@ -1,13 +1,13 @@
 import { tr } from '../lang';
-import { useState } from 'react';
-import { Activity, ArrowUpRight, BrainCircuit, Boxes, ChevronDown, Database, Gauge, MessageCircle, Network, Users, Wifi } from 'lucide-react';
+import { Activity, ArrowUpRight, BrainCircuit, Boxes, Database, Gauge, MessageCircle, Network, SlidersHorizontal, Users, Wifi } from 'lucide-react';
 import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Eyebrow, PageHeader, Stat } from '../../../design-system';
 import BriefingCard from '../components/BriefingCard';
 import AppIcon from '../components/AppIcon';
 import PetCard from '../components/PetCard';
 import { greetingFor, owner } from '../config';
 import { isWorking } from '../model/agents';
-import { NAVIGATION } from '../navigation';
+import { bySection, openModules, useNav } from '../modules';
+import TodayPanel from '../today/TodayPanel';
 
 function LayerRow({ icon: Icon, label, value }) {
   return (
@@ -19,40 +19,29 @@ function LayerRow({ icon: Icon, label, value }) {
   );
 }
 
-/** A phone's home screen: every part of the workspace as an app icon, like a launcher. Two rows show; the rest open on request. */
-const FIRST_ROWS = 8;
-
+/** A phone's home screen: every place of the workspace that is switched on, as an app icon, grouped like the menu. */
 function Launcher({ onTab }) {
-  const [more, setMore] = useState(false);
-  const items = NAVIGATION.filter((item) => item.id !== 'hank');
+  const groups = bySection(useNav().filter((item) => item.id !== 'hank'));
   return (
-    <nav aria-label={tr('All apps')} className="md:hidden" data-launcher>
-      <ul className="grid grid-cols-4 gap-x-2 gap-y-4">
-        {items.slice(0, FIRST_ROWS).map((item) => (
-          <AppIcon key={item.id} item={item} onPick={onTab} />
-        ))}
-      </ul>
-      <div className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out-expo ${more ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`} aria-hidden={!more}>
-        <ul className="grid min-h-0 grid-cols-4 gap-x-2 gap-y-4 overflow-hidden pt-4">
-          {items.slice(FIRST_ROWS).map((item) => (
-            <AppIcon key={item.id} item={item} onPick={onTab} />
-          ))}
-        </ul>
-      </div>
-      <button
-        type="button"
-        aria-expanded={more}
-        aria-label={more ? tr('Show fewer apps') : tr('Show all apps')}
-        onClick={() => setMore((open) => !open)}
-        className="mx-auto mt-3 grid size-9 place-items-center rounded-full border border-line bg-ink-2/80 text-bone-dim shadow-[0_8px_18px_-8px_rgb(var(--shadow-rgb)/0.8)] backdrop-blur transition-colors active:scale-90"
-      >
-        <ChevronDown size={17} className={`transition-transform duration-500 ${more ? 'rotate-180' : ''}`} aria-hidden="true" />
+    <nav aria-label={tr('All apps')} className="flex flex-col gap-5 md:hidden" data-launcher>
+      {groups.map(({ section, items }) => (
+        <div key={section}>
+          <p className="mb-3 font-mono text-[0.62rem] tracking-[0.18em] text-bone-faint uppercase">{tr(section)}</p>
+          <ul className="grid grid-cols-4 gap-x-2 gap-y-4">
+            {items.map((item) => (
+              <AppIcon key={item.id} item={item} onPick={onTab} />
+            ))}
+          </ul>
+        </div>
+      ))}
+      <button type="button" onClick={openModules} className="inline-flex items-center gap-2 self-center rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim active:scale-95" data-customise>
+        <SlidersHorizontal size={14} aria-hidden="true" /> {tr('Choose which places to show')}
       </button>
     </nav>
   );
 }
 
-export default function DashboardView({ agents, events, connected, onTab, owner: isOwner = true }) {
+export default function DashboardView({ agents, events, connected, onTab, onNotify, owner: isOwner = true }) {
   const active = connected ? agents.filter(isWorking).length : 0;
   return (
     <div className="flex flex-col gap-6">
@@ -71,11 +60,17 @@ export default function DashboardView({ agents, events, connected, onTab, owner:
           </>
         }
         actions={
-          <Button variant="ghost" size="sm" onClick={() => onTab('space')}>
-            <Boxes size={15} aria-hidden="true" /> {tr('Open company floor')} <ArrowUpRight size={14} aria-hidden="true" />
-          </Button>
+          <>
+            <Button variant="ghost" size="sm" className="max-md:hidden" onClick={openModules}>
+              <SlidersHorizontal size={14} aria-hidden="true" /> {tr('Customise')}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => onTab('space')}>
+              <Boxes size={15} aria-hidden="true" /> {tr('Open company floor')} <ArrowUpRight size={14} aria-hidden="true" />
+            </Button>
+          </>
         }
       />
+      <TodayPanel onTab={onTab} onNotify={onNotify} />
       <Launcher onTab={onTab} />
       <PetCard onTab={onTab} />
       <BriefingCard owner={isOwner} agents={agents} connected={connected} />
