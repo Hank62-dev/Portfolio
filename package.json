@@ -43,7 +43,7 @@
     "pg": "^8.23.1",
     "postprocessing": "^6.39.5",
     "pullcord": "^0.1.0",
-    "react": "^18.2.0",
+    "react": "^19.3.1",
     "react-day-picker": "^10.0.2",
     "react-dom": "^18.2.0",
     "react-i18next": "^17.1.8",
