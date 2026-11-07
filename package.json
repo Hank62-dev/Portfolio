@@ -22,7 +22,7 @@
     "@radix-ui/react-tooltip": "^1.4.1",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.17.10",
-    "@react-three/postprocessing": "^2.19.1",
+    "@react-three/postprocessing": "^3.2.2",
     "@react-three/xr": "^6.6.32",
     "@tiptap/extension-placeholder": "^3.32.2",
     "@tiptap/extension-table": "^3.32.2",
