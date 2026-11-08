@@ -15,7 +15,7 @@ import TaskModal from './components/TaskModal';
 import Topbar from './components/Topbar';
 import { askNotes, interpretCommand } from './api/owner';
 import { buildCatalog, validate } from './model/nlcommands';
-import { DEFAULT_TAB, NAVIGATION, tabHue } from './navigation';
+import { DEFAULT_TAB, NAVIGATION, SKY_TABS, tabHue } from './navigation';
 import { loadModules, loadSharedModules, openModules, useNav } from './modules';
 import CaptureSheet from './capture/CaptureSheet';
 import { openCapture } from './capture/ui';
@@ -354,7 +354,9 @@ export default function Workspace({
               onResetDemo={onResetDemo}
             />
           )}
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-x-clip">
+          <div className="relative isolate flex min-h-0 min-w-0 flex-1 flex-col overflow-x-clip">
+            {/* the tab's colour, glowing in the top corner behind the bar and the page alike, so the bar is not a band of its own */}
+            {!SKY_TABS.includes(tab) && <span aria-hidden="true" className="tab-glow" />}
             <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} onCapture={(event) => openCapture('', event)} />
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}

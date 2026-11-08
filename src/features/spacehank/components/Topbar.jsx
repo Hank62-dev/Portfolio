@@ -7,7 +7,7 @@ import NotificationBell from '../notifications/NotificationBell';
 import { LangMenu } from './LangSwitch';
 import { ThemeMenu } from './ThemeMenu';
 import { owner } from '../config';
-import { NAVIGATION, tabAccent, tabHue } from '../navigation';
+import { NAVIGATION, SKY_TABS, tabAccent, tabHue } from '../navigation';
 
 // the realtime link: green when open, amber while it is being (re)opened, red when it is not coming back
 const LINK = {
@@ -16,9 +16,6 @@ const LINK = {
   offline: { tone: 'danger', dot: 'bg-danger', text: 'SERVER OFFLINE', title: tr('Server offline') },
 };
 const linkOf = (connected, link) => (connected ? 'online' : link === 'connecting' ? 'connecting' : 'offline');
-
-// screens whose top is a sky that runs up behind the bar
-const SKY_TABS = ['hank', 'habits'];
 
 const isMac = typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(navigator.platform ?? '');
 
@@ -106,7 +103,7 @@ export default function Topbar({ tab, connected, link, guest, paused, onPause, o
   return (
     <>
       <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} onCapture={onCapture} onTab={onTab} scrolled={scrolled} />
-    <header data-on-sky={onSky ? '' : undefined} className={clsx('sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b px-gutter transition-[background-color,border-color,backdrop-filter] duration-300 max-md:hidden', onSky ? 'border-transparent bg-transparent' : 'border-line bg-ink-0/85 backdrop-blur')}>
+    <header data-on-sky={onSky ? '' : undefined} className={clsx('sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b px-gutter transition-[background-color,border-color,backdrop-filter] duration-300 max-md:hidden', scrolled ? 'border-line bg-ink-0/85 backdrop-blur' : 'border-transparent bg-transparent')}>
       <nav aria-label={tr('Breadcrumb')} className="flex min-w-0 items-center gap-1.5 font-mono text-fine text-bone-faint">
         <span>{tr('HANK62')}</span>
         <ChevronRight size={14} aria-hidden="true" className="shrink-0" />

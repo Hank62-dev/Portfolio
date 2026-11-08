@@ -60,5 +60,8 @@ const HUES = {
 };
 export const tabHue = (id) => HUES[id] ?? 16;
 
+/** Screens whose top is a sky that runs up behind the top bar; the others have the tab's colour glowing in the corner. */
+export const SKY_TABS = ['hank', 'habits'];
+
 /** The tab's colour as an accent on a dark or light surface: a tone of the hue, never the full-strength one. */
 export const tabAccent = (id) => `hsl(${tabHue(id)} 46% 64%)`;

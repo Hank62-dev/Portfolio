@@ -908,6 +908,22 @@ input[data-own-clear]::-webkit-search-decoration {
   background-image: radial-gradient(75% 44% at 0% 0%, hsl(var(--tab) 60% 60% / 0.13), transparent 70%);
 }
 
+/* The tab's colour glowing in the top corner of the page, behind the top bar and the first of the page alike (the bar is clear glass
+   at the top of the page), so there is no band where the bar ends. It thins out down the page. */
+.tab-glow {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto 0;
+  height: 30rem;
+  pointer-events: none;
+  background: radial-gradient(80% 100% at 0% 0%, hsl(var(--tab) 55% 50% / 0.16), transparent 72%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 40%, transparent 100%);
+}
+:root[data-theme='light'] .tab-glow {
+  background: radial-gradient(80% 100% at 0% 0%, hsl(var(--tab) 60% 60% / 0.2), transparent 72%);
+}
+
 /* "Ra chơi": a wooden desk with a squared notebook on it, everything in blue ballpoint. */
 .desk {
   background-color: #6a4426;
