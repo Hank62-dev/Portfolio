@@ -17,6 +17,9 @@ const LINK = {
 };
 const linkOf = (connected, link) => (connected ? 'online' : link === 'connecting' ? 'connecting' : 'offline');
 
+// screens whose top is a sky that runs up behind the bar
+const SKY_TABS = ['hank', 'habits'];
+
 const isMac = typeof navigator !== 'undefined' && /mac|iphone|ipad/i.test(navigator.platform ?? '');
 
 
@@ -43,11 +46,11 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
   return (
     // the box keeps its height, and sticks 1.1rem above the top once scrolled, so folding never moves the page
     <header
-      data-on-sky={tab === 'hank' && !scrolled ? '' : undefined}
+      data-on-sky={SKY_TABS.includes(tab) && !scrolled ? '' : undefined}
       className={clsx('sticky top-[-1.1rem] z-20 flex h-[calc(4.4rem+env(safe-area-inset-top))] items-end px-gutter pb-2.5 transition-[background-color,box-shadow,backdrop-filter] duration-300 md:hidden', scrolled ? 'bg-ink-0/80 shadow-[0_1px_0_var(--color-line)] backdrop-blur-xl' : 'bg-transparent')}
       data-phone-bar
     >
-      <span aria-hidden="true" className={clsx('pointer-events-none absolute inset-0 transition-opacity duration-500', scrolled ? 'opacity-40' : 'opacity-100', tab === 'hank' && !scrolled && 'hidden')} style={{ background: `radial-gradient(80% 140% at 0% 0%, hsl(${hue} 55% 50% / 0.13), transparent 70%)` }} />
+      <span aria-hidden="true" className={clsx('pointer-events-none absolute inset-0 transition-opacity duration-500', scrolled ? 'opacity-40' : 'opacity-100', SKY_TABS.includes(tab) && !scrolled && 'hidden')} style={{ background: `radial-gradient(80% 140% at 0% 0%, hsl(${hue} 55% 50% / 0.13), transparent 70%)` }} />
       <div className="relative flex w-full items-center gap-3">
         <span
           className={clsx('grid shrink-0 place-items-center border border-line-strong bg-ink-2/80 transition-all duration-300', scrolled ? 'size-8 rounded-[0.7rem]' : 'size-11 rounded-[1rem]')}
@@ -99,7 +102,7 @@ export default function Topbar({ tab, connected, link, guest, paused, onPause, o
   const pauseLabel = paused ? tr('Resume floor') : tr('Pause floor');
   const scrolled = useScrolled();
   // on the home screen the sky runs up behind the bar, so at the top of the page the bar is clear glass over it
-  const onSky = tab === 'hank' && !scrolled;
+  const onSky = SKY_TABS.includes(tab) && !scrolled;
   return (
     <>
       <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} onCapture={onCapture} onTab={onTab} scrolled={scrolled} />

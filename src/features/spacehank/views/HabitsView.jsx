@@ -303,17 +303,22 @@ export default function HabitsView() {
   const ordered = useMemo(() => todoFirst(items), [items]);
 
   return (
-    <div className="flex flex-col gap-4 md:gap-6">
-      <PageHead eyebrow={tr('Life')} title={tr('Habit')} accent="Garden." description={tr('Every habit is a plant. Water it on the days you do it and it grows; leave it too long and it droops.')}>
-        {items.some((h) => h.sample) && (
-          <Button variant="ghost" size="sm" onClick={() => Promise.all(items.filter((h) => h.sample).map((h) => habits.remove(h.id)))}>
-            {tr('Remove samples')}
-          </Button>
-        )}
-        <Button size="sm" onClick={() => setEditing({})} className="max-md:hidden">
-          <Plus size={15} aria-hidden="true" /> {tr('Plant a habit')}
-        </Button>
-      </PageHead>
+    <div className="relative isolate flex flex-col gap-4 md:gap-6">
+      <Garden
+        items={items}
+        head={
+          <PageHead eyebrow={tr('Life')} title={tr('Habit')} accent="Garden." description={tr('Every habit is a plant. Water it on the days you do it and it grows; leave it too long and it droops.')}>
+            {items.some((h) => h.sample) && (
+              <Button variant="ghost" size="sm" onClick={() => Promise.all(items.filter((h) => h.sample).map((h) => habits.remove(h.id)))}>
+                {tr('Remove samples')}
+              </Button>
+            )}
+            <Button size="sm" onClick={() => setEditing({})} className="max-md:hidden">
+              <Plus size={15} aria-hidden="true" /> {tr('Plant a habit')}
+            </Button>
+          </PageHead>
+        }
+      />
 
       {loaded && items.length === 0 ? (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
@@ -334,7 +339,6 @@ export default function HabitsView() {
         </div>
       ) : (
         <>
-          <Garden items={items} />
           <Today items={items} />
           <ul className="grid grid-cols-1 gap-3 xl:grid-cols-2" aria-label={tr('Habits')}>
             {ordered.map((h) => (

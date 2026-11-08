@@ -1786,26 +1786,121 @@ html[data-vt='player']::view-transition-new(root) {
   box-shadow: -2px 2px 5px -2px rgb(0 0 0 / 0.18);
 }
 
-/* The garden: a small landscape with the sky of this hour behind the plants, two hills in front, and rain when one is watered. */
-.garden-scene {
+/* The garden: the top of the Habit screen is a landscape that is the page's background: the sky of this hour (the same .sky-bg as
+   the home screen) from the top bar down, two hills under it, and the plants standing on them. Hills and sky melt into the paper. */
+.garden-top {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  border-radius: 1.75rem;
-  color: #fff;
-  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 60%, var(--sky-low) 100%);
-  box-shadow: 0 30px 50px -36px var(--sky-top);
 }
-.garden-scene .sky-orb {
+.garden-top .sky-orb {
+  z-index: -1;
   width: 5.5rem;
+}
+.sky-bg.garden-sky {
+  bottom: -1.5rem;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 4rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 4rem), transparent 100%);
 }
 .garden-hill {
   position: absolute;
-  inset-inline: -2%;
-  bottom: -1px;
-  z-index: 1;
-  width: 104%;
+  z-index: -1;
+  left: calc(50% - 50vw);
+  bottom: -1.5rem;
+  width: 100vw;
+  height: 5.5rem;
   pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent 100%);
+}
+.garden-scene {
+  position: relative;
+}
+/* One plant in the garden: a soft glow under it (bright once watered), a badge (a drop while it waits for water, a tick once
+   watered), and its name on a pill with the streak. --h is the habit's hue. */
+.plant-glow {
+  position: absolute;
+  inset: 8% -14% -4%;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, hsl(var(--h) 85% 70% / 0.16), transparent 74%);
+  transition: background 0.8s ease;
+}
+.plant-tile[data-state='done'] .plant-glow {
+  background: radial-gradient(closest-side, hsl(var(--h) 95% 74% / 0.5), hsl(var(--h) 90% 70% / 0.12) 55%, transparent 76%);
+  animation: plant-breathe 3.6s ease-in-out infinite;
+}
+.plant-badge {
+  position: absolute;
+  top: 0.1rem;
+  right: 0.35rem;
+  display: grid;
+  width: 1.2rem;
+  height: 1.2rem;
+  place-items: center;
+  border-radius: 9999px;
+  color: #fff;
+  background: rgb(98 168 236 / 0.92);
+  box-shadow: 0 2px 8px -2px rgb(0 0 0 / 0.5), 0 0 0 2px rgb(255 255 255 / 0.22);
+}
+.plant-tile[data-state='done'] .plant-badge {
+  background: hsl(var(--h) 62% 44%);
+}
+.plant-tile[data-state='wilting'] .plant-badge {
+  background: rgb(214 140 74 / 0.95);
+}
+.plant-tile:not([data-state='done']) .plant-badge {
+  animation: plant-nudge 2.2s ease-in-out infinite;
+}
+.plant-name {
+  display: flex;
+  max-width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  margin: 0.2rem auto 0;
+  width: fit-content;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 9999px;
+  padding: 0.12rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.92);
+  background: rgb(0 0 0 / 0.28);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.plant-streak {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.1rem;
+  font-weight: 600;
+  color: hsl(var(--h) 95% 78%);
+}
+@keyframes plant-breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+@keyframes plant-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plant-tile .plant-glow,
+  .plant-tile .plant-badge {
+    animation: none !important;
+  }
 }
 .garden-plants {
   position: relative;

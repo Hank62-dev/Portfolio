@@ -284,6 +284,21 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
     []
   );
 
+  // full screen, pin and delete: in the top row, and on a wide screen at the head of the side column, which stays in view as the note scrolls (in full screen too)
+  const actions = (
+    <>
+      <Button variant="secondary" size="icon" aria-label={full ? tr('Exit full screen') : tr('Full screen')} title={full ? tr('Exit full screen') : tr('Full screen')} onClick={full ? leaveFull : enterFull}>
+        {full ? <Minimize2 size={14} aria-hidden="true" /> : <Maximize2 size={14} aria-hidden="true" />}
+      </Button>
+      <Button variant="secondary" size="icon" aria-label={note.pinned ? tr('Unpin') : tr('Pin')} onClick={() => togglePin(note.id)}>
+        {note.pinned ? <PinOff size={14} aria-hidden="true" /> : <Pin size={14} aria-hidden="true" />}
+      </Button>
+      <Button variant="danger" size="icon" aria-label={tr('Delete note')} onClick={onDelete}>
+        <Trash2 size={14} aria-hidden="true" />
+      </Button>
+    </>
+  );
+
   return (
     <div ref={root} className={clsx('flex flex-col gap-5', full && 'fixed inset-0 z-[88] overflow-y-auto bg-ink-0 px-4 py-4 sm:px-10 sm:py-8')} data-note-editor>
       <div className="flex flex-wrap items-center gap-2">
@@ -294,20 +309,10 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
           {state === 'saved' ? <Check size={12} aria-hidden="true" /> : null}
           {state === 'saved' ? tr('Saved on this device') : tr('Saving…')}
         </span>
-        <span className="ml-auto flex items-center gap-1.5">
-          <Button variant="secondary" size="icon" aria-label={full ? tr('Exit full screen') : tr('Full screen')} title={full ? tr('Exit full screen') : tr('Full screen')} onClick={full ? leaveFull : enterFull}>
-            {full ? <Minimize2 size={14} aria-hidden="true" /> : <Maximize2 size={14} aria-hidden="true" />}
-          </Button>
-          <Button variant="secondary" size="icon" aria-label={note.pinned ? tr('Unpin') : tr('Pin')} onClick={() => togglePin(note.id)}>
-            {note.pinned ? <PinOff size={14} aria-hidden="true" /> : <Pin size={14} aria-hidden="true" />}
-          </Button>
-          <Button variant="danger" size="icon" aria-label={tr('Delete note')} onClick={onDelete}>
-            <Trash2 size={14} aria-hidden="true" />
-          </Button>
-        </span>
+        <span className="ml-auto flex items-center gap-1.5 xl:hidden">{actions}</span>
       </div>
 
-      <div className={clsx('grid grid-cols-1 items-start gap-6', !full && 'xl:grid-cols-[minmax(0,1fr)_260px]')}>
+      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
         <article className="flex min-w-0 flex-col gap-4">
           {editor && <Toolbar editor={editor} full={full} />}
 
@@ -333,7 +338,8 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
           </div>
         </article>
 
-        <aside className="flex flex-col gap-4 xl:sticky xl:top-24" aria-label={tr('About this note')}>
+        <aside className={clsx('no-scrollbar flex flex-col gap-4 xl:sticky xl:overflow-y-auto xl:pb-1', full ? 'xl:top-8 xl:max-h-[calc(100dvh-4rem)]' : 'xl:top-24 xl:max-h-[calc(100dvh-7.5rem)]')} aria-label={tr('About this note')}>
+          <div className="flex items-center justify-end gap-1.5 max-xl:hidden">{actions}</div>
           <section className="rounded-2xl border border-line bg-ink-1 p-4">
             <h2 className="mb-3 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Details')}</h2>
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 font-mono text-[0.78rem]">
