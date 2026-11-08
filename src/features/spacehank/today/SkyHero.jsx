@@ -25,15 +25,18 @@ export default function SkyHero({ owner = true, onTab, onCustomise, onNotify }) 
 
   return (
     <header
-      className="sky-hero rise"
+      className="sky-hero"
       style={{ '--sky-top': sky.top, '--sky-mid': sky.mid, '--sky-low': sky.low, '--orb-x': `${sky.orb.x}%`, '--orb-y': `${sky.orb.y}%` }}
       data-sky-hero
     >
-      <span className="sky-stars" style={{ opacity: sky.stars }} aria-hidden="true" />
-      <span className="sky-cloud" style={{ opacity: Math.min(1, sky.grey * 1.3) }} aria-hidden="true" />
+      {/* the sky is the background of the top of the page: it runs edge to edge, behind the cards that follow, and thins out downward */}
+      <div className="sky-bg" aria-hidden="true">
+        <span className="sky-stars" style={{ opacity: sky.stars }} />
+        <span className="sky-cloud" style={{ opacity: Math.min(1, sky.grey * 1.3) }} />
+      </div>
       <span className="sky-orb" data-kind={sky.orb.kind} aria-hidden="true" />
 
-      <div className="sky-content">
+      <div className="sky-content rise">
         <div className="mb-auto flex items-start justify-between gap-3">
           <span className="font-mono text-[0.7rem] tracking-[0.16em] text-white/75 uppercase">{date}</span>
           <div className="flex items-center gap-2">

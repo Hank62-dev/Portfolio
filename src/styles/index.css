@@ -1602,27 +1602,69 @@ html[data-vt='player']::view-transition-new(root) {
   border-color: hsl(var(--card-hue) 35% 68% / 0.7);
 }
 
-/* The sky at the top of the home screen. Its colours come from today/sky.js (--sky-top, --sky-mid, --sky-low, --orb-x, --orb-y). */
+/* The sky at the top of the home screen. Its colours come from today/sky.js (--sky-top, --sky-mid, --sky-low, --orb-x, --orb-y).
+   It is not a card: .sky-bg is the background of the top of the page, as wide as the screen, running on under the first cards and
+   thinning to nothing, so the colour seems to pour down into the paper. The parent (the home screen) is `relative isolate`. */
 .sky-hero {
   position: relative;
-  isolation: isolate;
   display: flex;
   min-height: 17rem;
   flex-direction: column;
-  overflow: hidden;
-  border-radius: 2rem;
-  padding: 1.15rem 1.35rem 1.35rem;
+  padding: 0.35rem 0 0.4rem;
   color: #fff;
-  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 58%, var(--sky-low) 100%);
-  box-shadow: 0 34px 60px -38px var(--sky-top);
 }
-.sky-hero::after {
+.sky-bg {
+  position: absolute;
+  z-index: -1;
+  /* up behind the top bar (the phone's 4.4rem plus the page's 1rem of padding), so the bar wears the colour of the sky */
+  top: calc(-5.4rem - env(safe-area-inset-top));
+  bottom: -9rem;
+  left: calc(50% - 50vw);
+  width: 100vw;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-mid) 42%, var(--sky-low) 74%, var(--sky-low) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 10rem), rgb(0 0 0 / 0.55) calc(100% - 6.5rem), rgb(0 0 0 / 0.18) calc(100% - 3rem), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 calc(100% - 10rem), rgb(0 0 0 / 0.55) calc(100% - 6.5rem), rgb(0 0 0 / 0.18) calc(100% - 3rem), transparent 100%);
+  animation: sky-in 0.9s var(--ease-out-expo) backwards;
+}
+/* a soft shade under the words so white stays readable in the light theme, thinning out with the sky */
+.sky-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: linear-gradient(to top, rgb(0 0 0 / 0.46), transparent 64%);
+  background: linear-gradient(to bottom, rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.3) 70%, transparent 100%);
+}
+@media (min-width: 768px) {
+  .sky-bg {
+    top: -6rem; /* the desktop bar is 4rem, the page has 2rem of padding */
+  }
+}
+@keyframes sky-in {
+  from {
+    opacity: 0;
+  }
+}
+.sky-hero .sky-orb {
+  z-index: -1;
+}
+
+/* The top bar on the home screen, while the page is at the top: it sits on the sky, so it wears the sky's colours (white on glass). */
+[data-on-sky] {
+  color: #fff;
+  --color-bone: #fff;
+  --color-bone-dim: rgb(255 255 255 / 0.82);
+  --color-bone-faint: rgb(255 255 255 / 0.66);
+  --color-signal: rgb(255 255 255 / 0.8);
+  --color-line: rgb(255 255 255 / 0.22);
+  --color-line-strong: rgb(255 255 255 / 0.34);
+  --color-ink-0: #14110d; /* the ink on a white button (New task) */
+  --color-ink-1: rgb(255 255 255 / 0.12);
+  --color-ink-2: rgb(255 255 255 / 0.14);
+  --color-ink-3: rgb(255 255 255 / 0.16);
+  --color-ok: #86efb4;
+  --color-warn: #ffd37a;
+  --color-danger: #ffa192;
+  --color-wash: #fff;
 }
 .sky-content {
   position: relative;

@@ -36,18 +36,18 @@ function useScrolled(distance = 12) {
  * The phone's title bar, as in a native app: the screen's icon and name in large type that folds down to a compact bar
  * when you scroll, the colour of the screen glowing behind it, and only the actions that belong to this screen.
  */
-function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNewTask, onPalette, onCapture, onTab }) {
-  const scrolled = useScrolled();
+function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNewTask, onPalette, onCapture, onTab, scrolled }) {
   const hue = tabHue(tab);
   const Icon = current.icon;
   const agentsScreen = tab === 'hank' || tab === 'space';
   return (
     // the box keeps its height, and sticks 1.1rem above the top once scrolled, so folding never moves the page
     <header
+      data-on-sky={tab === 'hank' && !scrolled ? '' : undefined}
       className={clsx('sticky top-[-1.1rem] z-20 flex h-[calc(4.4rem+env(safe-area-inset-top))] items-end px-gutter pb-2.5 transition-[background-color,box-shadow,backdrop-filter] duration-300 md:hidden', scrolled ? 'bg-ink-0/80 shadow-[0_1px_0_var(--color-line)] backdrop-blur-xl' : 'bg-transparent')}
       data-phone-bar
     >
-      <span aria-hidden="true" className={clsx('pointer-events-none absolute inset-0 transition-opacity duration-500', scrolled ? 'opacity-40' : 'opacity-100')} style={{ background: `radial-gradient(80% 140% at 0% 0%, hsl(${hue} 55% 50% / 0.13), transparent 70%)` }} />
+      <span aria-hidden="true" className={clsx('pointer-events-none absolute inset-0 transition-opacity duration-500', scrolled ? 'opacity-40' : 'opacity-100', tab === 'hank' && !scrolled && 'hidden')} style={{ background: `radial-gradient(80% 140% at 0% 0%, hsl(${hue} 55% 50% / 0.13), transparent 70%)` }} />
       <div className="relative flex w-full items-center gap-3">
         <span
           className={clsx('grid shrink-0 place-items-center border border-line-strong bg-ink-2/80 transition-all duration-300', scrolled ? 'size-8 rounded-[0.7rem]' : 'size-11 rounded-[1rem]')}
@@ -97,10 +97,13 @@ function PhoneBar({ tab, current, connected, link, guest, paused, onPause, onNew
 export default function Topbar({ tab, connected, link, guest, paused, onPause, onNewTask, onPalette, onCapture, onTab }) {
   const current = NAVIGATION.find((item) => item.id === tab) || NAVIGATION[0];
   const pauseLabel = paused ? tr('Resume floor') : tr('Pause floor');
+  const scrolled = useScrolled();
+  // on the home screen the sky runs up behind the bar, so at the top of the page the bar is clear glass over it
+  const onSky = tab === 'hank' && !scrolled;
   return (
     <>
-      <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} onCapture={onCapture} onTab={onTab} />
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b border-line bg-ink-0/85 px-gutter backdrop-blur max-md:hidden">
+      <PhoneBar tab={tab} current={current} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={onNewTask} onPalette={onPalette} onCapture={onCapture} onTab={onTab} scrolled={scrolled} />
+    <header data-on-sky={onSky ? '' : undefined} className={clsx('sticky top-0 z-20 flex h-16 items-center justify-between gap-3 border-b px-gutter transition-[background-color,border-color,backdrop-filter] duration-300 max-md:hidden', onSky ? 'border-transparent bg-transparent' : 'border-line bg-ink-0/85 backdrop-blur')}>
       <nav aria-label={tr('Breadcrumb')} className="flex min-w-0 items-center gap-1.5 font-mono text-fine text-bone-faint">
         <span>{tr('HANK62')}</span>
         <ChevronRight size={14} aria-hidden="true" className="shrink-0" />

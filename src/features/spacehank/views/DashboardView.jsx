@@ -63,7 +63,7 @@ function Launcher({ onTab }) {
 export default function DashboardView({ agents, events, connected, onTab, onNotify, owner: isOwner = true }) {
   const active = connected ? agents.filter(isWorking).length : 0;
   return (
-    <div className="flex flex-col gap-6">
+    <div className="relative isolate flex flex-col gap-6">
       <SkyHero owner={isOwner} onTab={onTab} onCustomise={openModules} onNotify={onNotify} />
       <TodayPanel onTab={onTab} onNotify={onNotify} />
       <Launcher onTab={onTab} />
