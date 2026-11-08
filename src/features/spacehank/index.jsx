@@ -11,7 +11,6 @@ import { useAppViewport } from './hooks/useAppViewport';
 import { DEFAULT_AGENT_ID } from './model/agents';
 import { spacehankConfig } from './config';
 import { DEFAULT_TAB, NAVIGATION } from './navigation';
-import { transition, nextPage } from './motion/transition';
 
 // the open tab lives in the address (/spacehank?tab=notes), which is also what an installed app's shortcuts use
 const tabOf = (params, fallback) => {
@@ -31,19 +30,13 @@ export default function SpaceHank() {
   const [params, setParams] = useSearchParams();
   const tab = tabOf(params, guest ? GUEST_HOME : DEFAULT_TAB);
   // each tab is its own history entry, so the browser's Back button returns to the tab you came from
-  // going to a place further along the menu slides the new screen in from the right, going back to an earlier one from the left
   const setTab = (next) => {
     if (next === tab) return;
-    const order = (id) => NAVIGATION.findIndex((item) => item.id === id);
-    transition(
-      () =>
-        setParams((previous) => {
-          const search = new URLSearchParams(previous);
-          search.set('tab', next);
-          return search;
-        }),
-      { type: order(next) > order(tab) ? 'forward' : 'back', ready: nextPage }
-    );
+    setParams((previous) => {
+      const search = new URLSearchParams(previous);
+      search.set('tab', next);
+      return search;
+    });
   };
   const [selected, setSelected] = useState(DEFAULT_AGENT_ID);
   const [paused, setPaused] = useState(false);

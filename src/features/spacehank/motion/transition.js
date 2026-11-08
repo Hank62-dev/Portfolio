@@ -9,16 +9,6 @@ import { prefersReducedMotion } from './hooks';
 export const canMorph = () => typeof document !== 'undefined' && typeof document.startViewTransition === 'function' && !prefersReducedMotion();
 
 let active = false;
-let pageWaiters = [];
-
-/** The page calls this once its new screen is on the page; whoever was waiting for it is let go. */
-export const releasePage = () => {
-  const waiting = pageWaiters;
-  pageWaiters = [];
-  waiting.forEach((resolve) => resolve());
-};
-/** Resolves when the next screen has been drawn (see releasePage). */
-export const nextPage = () => new Promise((resolve) => pageWaiters.push(resolve));
 
 /** Resolves as soon as `test()` is true (checked every frame). */
 export const waitUntil = (test) =>
@@ -31,6 +21,8 @@ export const waitUntil = (test) =>
  * Runs `change` inside a view transition. `type` is written on the page for the styles to read ('forward', 'back'…);
  * `ready()` returns a promise that settles when the new state is on the page (it is cut off after `timeout` ms, so a slow screen
  * can never freeze the page). A change made while another transition is running just happens, without a second one.
+ * (Changing tab does not use this: a transition draws its pictures above the whole page, the bars included, and a page full of
+ * cards is heavy to take a picture of. A tab slides in with a plain CSS animation instead.)
  */
 export const transition = (change, { type = '', ready, timeout = 900 } = {}) => {
   if (!canMorph() || active) {

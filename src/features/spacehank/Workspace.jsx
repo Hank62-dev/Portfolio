@@ -1,5 +1,5 @@
 import { tr } from './lang';
-import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BookHeart, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
 import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-system';
@@ -38,7 +38,6 @@ import ShareSheet from './components/ShareSheet';
 import NowPlayingBar from './music/NowPlayingBar';
 import { useNotifications } from './notifications/useNotifications';
 import { showPlayer } from './music/morph';
-import { canMorph, releasePage } from './motion/transition';
 import { useCardGlow } from './motion/useCardGlow';
 import { next, player, previous, setSleepTimer, togglePlay } from './music/player';
 import { toCss } from './studio/brand';
@@ -103,8 +102,10 @@ export default function Workspace({
   const [paletteOpen, setPaletteOpen] = useState(false);
   const shellRef = useRef(null);
   useCardGlow(shellRef);
-  // where the browser can slide between tabs itself, the tab's own fade-in is left out (the two would fight)
-  const [transitions] = useState(canMorph);
+  // which way the screen came from: a place further along the menu slides in from the right, an earlier one from the left
+  const order = (id) => NAVIGATION.findIndex((item) => item.id === id);
+  const [nav, setNav] = useState({ tab, way: '' });
+  if (nav.tab !== tab) setNav({ tab, way: order(tab) >= order(nav.tab) ? 'forward' : 'back' });
   // Tablets get the icon rail; phones get a bottom bar instead; the collapse toggle only matters on wide screens.
   const wide = useMediaQuery('(min-width: 1000px)');
   const phone = !useMediaQuery('(min-width: 768px)');
@@ -304,10 +305,6 @@ export default function Workspace({
   useEffect(() => {
     window.scrollTo({ top: 0 });
   }, [tab]);
-  // the screen is on the page: a slide between tabs that was waiting for it can go on
-  useLayoutEffect(() => {
-    releasePage();
-  }, [tab]);
 
   const shell = useShellContext({ tabs: shellTabs, agents, onTab, onNewTask });
 
@@ -359,7 +356,7 @@ export default function Workspace({
             <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} onCapture={(event) => openCapture('', event)} />
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
-              <div key={tab} className={clsx(transitions ? 'vt-page' : 'animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
+              <div key={tab} className={clsx(nav.way === 'forward' ? 'page-from-right' : nav.way === 'back' ? 'page-from-left' : 'animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
                 <Suspense fallback={<PageLoading />}>{page}</Suspense>
               </div>
             </main>

@@ -1412,47 +1412,14 @@ input[data-own-clear]::-webkit-search-decoration {
   box-shadow: 0 10px 30px -10px var(--color-signal);
 }
 
-/* ───────── View transitions: the browser slides between two states of the page ─────────
-   Only transform and opacity are animated (the cheap kind), and a thing carries its view-transition name only while its own
-   transition is running (html[data-vt]), so a transition never has to take pictures of anything it does not move. */
+/* ───────── View transitions: only the player uses them ─────────
+   Only the record is carried across, and it carries its view-transition name only while the transition runs (html[data-vt]),
+   so the browser never takes pictures of anything it does not move. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
 }
-html[data-vt='forward'] {
-  --vt-x: 22px;
-}
-html[data-vt='back'] {
-  --vt-x: -22px;
-}
-html[data-vt='forward'] .vt-page,
-html[data-vt='back'] .vt-page {
-  view-transition-name: page;
-}
-::view-transition-old(page),
-::view-transition-new(page) {
-  mix-blend-mode: normal;
-}
-::view-transition-old(page) {
-  animation: vt-page-out 0.2s ease both;
-}
-::view-transition-new(page) {
-  animation: vt-page-in 0.42s var(--ease-out-expo) both;
-}
-@keyframes vt-page-out {
-  to {
-    opacity: 0;
-    transform: translateX(calc(var(--vt-x, 0px) * -0.5));
-  }
-}
-@keyframes vt-page-in {
-  from {
-    opacity: 0;
-    transform: translateX(var(--vt-x, 0px));
-  }
-}
-
 /* The record travels from the little player to the big one (and back); the rest of the screen cross-fades under it. */
 html[data-vt='player'] [data-mini-disc]:not([data-covered]),
 html[data-vt='player'] [data-vinyl] {
@@ -1843,4 +1810,22 @@ html[data-vt='player']::view-transition-new(root) {
     var(--color-ink-1);
   border-color: hsl(var(--tab) 28% 72% / 0.7);
   box-shadow: none;
+}
+
+/* A tab slides in from the side it lies on in the menu (and fades in): transform and opacity only, drawn by the compositor. */
+.page-from-right,
+.page-from-left {
+  animation: page-slide 0.5s var(--ease-out-expo) backwards;
+}
+.page-from-right {
+  --slide: 22px;
+}
+.page-from-left {
+  --slide: -22px;
+}
+@keyframes page-slide {
+  from {
+    opacity: 0;
+    transform: translateX(var(--slide, 0px));
+  }
 }
