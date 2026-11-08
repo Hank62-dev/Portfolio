@@ -312,8 +312,9 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
         <span className="ml-auto flex items-center gap-1.5 xl:hidden">{actions}</span>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_260px]">
-        <article className="flex min-w-0 flex-col gap-4">
+      {/* in full screen the note is centred on the screen: a free column on its left balances the side column on its right */}
+      <div className={clsx('grid grid-cols-1 items-start gap-6', full ? 'xl:grid-cols-[minmax(0,1fr)_minmax(0,64rem)_minmax(260px,1fr)]' : 'xl:grid-cols-[minmax(0,1fr)_260px]')}>
+        <article className={clsx('flex min-w-0 flex-col gap-4', full && 'xl:col-start-2')}>
           {editor && <Toolbar editor={editor} full={full} />}
 
           {note.day && (
@@ -338,7 +339,7 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
           </div>
         </article>
 
-        <aside className={clsx('no-scrollbar flex flex-col gap-4 xl:sticky xl:overflow-y-auto xl:pb-1', full ? 'xl:top-8 xl:max-h-[calc(100dvh-4rem)]' : 'xl:top-24 xl:max-h-[calc(100dvh-7.5rem)]')} aria-label={tr('About this note')}>
+        <aside className={clsx('no-scrollbar flex flex-col gap-4 xl:sticky xl:overflow-y-auto xl:pb-1', full ? 'xl:col-start-3 xl:top-8 xl:max-h-[calc(100dvh-4rem)] xl:w-[260px] xl:justify-self-end' : 'xl:top-24 xl:max-h-[calc(100dvh-7.5rem)]')} aria-label={tr('About this note')}>
           <div className="flex items-center justify-end gap-1.5 max-xl:hidden">{actions}</div>
           <section className="rounded-2xl border border-line bg-ink-1 p-4">
             <h2 className="mb-3 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Details')}</h2>
