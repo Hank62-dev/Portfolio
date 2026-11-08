@@ -42,6 +42,15 @@ export const loadConfig = (env = process.env) => {
       dailyLimit: Number(env.AI_DAILY_LIMIT || 60),
     },
     calendarIcsUrl: env.CALENDAR_ICS_URL || '',
+    // The owner's Google Calendar through Google's own API (see gcal.mjs). The redirect address is the one set on the OAuth client
+    // in Google Cloud: this server's /api/calendar/google/callback. The key seals the refresh token in the database; without one
+    // of its own it falls back to the key that signs sign-in tokens.
+    google: {
+      clientId: env.GOOGLE_CLIENT_ID || '',
+      clientSecret: env.GOOGLE_CLIENT_SECRET || '',
+      redirectUri: env.GOOGLE_REDIRECT_URI || '',
+      key: env.CALENDAR_TOKEN_KEY || env.SPACEHANK_SESSION_SECRET || '',
+    },
     discordWebhooks: parseWebhooks(env), // { channelName: webhook url }, kept on the server
     // the database that keeps the owner's data in step across devices; without it the workspace stays on each device
     databaseUrl: env.DATABASE_URL || '',

@@ -104,10 +104,16 @@ export const createResponder = (origin) => {
     res.end(data);
   };
 
+  /** Sends the browser on to another address (back to the app after Google's sign-in). */
+  const redirect = (res, location) => {
+    res.writeHead(302, { Location: location, 'Cache-Control': 'no-store', ...corsHeaders });
+    res.end();
+  };
+
   const preflight = (res) => {
     res.writeHead(204, corsHeaders);
     res.end();
   };
 
-  return { json, bytes, preflight };
+  return { json, bytes, redirect, preflight };
 };

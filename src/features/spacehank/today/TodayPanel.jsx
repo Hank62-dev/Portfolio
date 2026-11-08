@@ -8,6 +8,7 @@ import DayCard from './DayCard';
 import DoNowCard from './DoNowCard';
 import InboxCard from './InboxCard';
 import ReviewCard from './ReviewCard';
+import UpcomingCard from './UpcomingCard';
 import { HabitsCard, MoneyCard } from './SmallCards';
 import { useLifeData } from './useLifeData';
 import { buildToday, spendLast7 } from './model';
@@ -59,13 +60,15 @@ export default function TodayPanel({ onTab, onNotify }) {
         <MoneyCard spent={spent} week={week} onTab={onTab} className="rise col-span-2 md:col-span-2" style={at(step + 3)} />
       </div>
 
-      <div className="rise" style={at(step + 4)}>
+      <UpcomingCard onTab={onTab} className="rise" style={at(step + 4)} />
+
+      <div className="rise" style={at(step + 5)}>
         <InboxCard items={data.inbox} onNotify={onNotify} />
       </div>
-      <div className="rise" style={at(step + 5)}>
+      <div className="rise" style={at(step + 6)}>
         <DayCard data={data} onTab={onTab} />
       </div>
-      <div className="rise" style={at(step + 6)}>
+      <div className="rise" style={at(step + 7)}>
         <ReviewCard data={data} onNotify={onNotify} />
       </div>
     </section>

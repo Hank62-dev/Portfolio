@@ -66,6 +66,7 @@ Các biến đã có sẵn trong `render.yaml`, không cần nhập: `NODE_VERSI
 | `GEMINI_API_KEY` | Hank DJ (chọn nhạc theo tâm trạng) và bản tin buổi sáng | Cùng key Gemini ở mục 3.3 |
 | `HF_TOKEN` | Image Studio (tạo ảnh bằng FLUX qua Hugging Face) | https://huggingface.co/settings/tokens → tạo token loại Read. Có hạn mức free, hạn mức đổi theo thời điểm nên hãy xem trang của Hugging Face |
 | `CALENDAR_ICS_URL` | Lịch hôm nay trong bản tin | Google Calendar → Settings → chọn lịch → "Secret address in iCal format". Link này là bí mật, chỉ đặt trên Render, không đặt vào biến `VITE_*` |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`, `CALENDAR_TOKEN_KEY` | Tab Lịch nối Google Calendar hai chiều (xem, thêm, sửa, xoá sự kiện) | Tạo ở mục 4.2e. Cần cả `DATABASE_URL` |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Thông báo đẩy (Web Push): nhắc việc ngay cả khi đã đóng app | Tạo khoá ở mục 4.2c. `VAPID_SUBJECT` là `mailto:` cộng email của bạn. Cần cả `DATABASE_URL` |
 | `PUSH_TIMEZONE` | Múi giờ để tính "buổi tối", "sáng" cho nhắc việc | Tuỳ chọn, mặc định `Asia/Ho_Chi_Minh` |
 | `RAG_TOKEN_SECRET` | Khoá chung giữa server realtime và RAG: RAG chỉ trả lời request có "vé" ký bằng khoá này | Tự tạo, đặt **cùng một giá trị** cho cả `hank62-realtime` và `hank62-rag`. Xem mục 4.2d |
@@ -176,6 +177,27 @@ Giới hạn và lưu ý:
 - Server dev chạy `npm run dev` không có service worker nên bật thông báo đẩy sẽ báo lỗi. Hãy thử trên bản đã deploy.
 - Thiết bị đã gỡ app hoặc thu hồi quyền sẽ tự bị server quên.
 - Demo (`?demo`) và khách không có thông báo đẩy.
+
+### 4.2e. Google Calendar hai chiều (tab Lịch)
+
+Tab **Lịch** hiện sự kiện Google cùng hạn nộp, kỳ thi và việc có ngày của bạn, và cho thêm, sửa, xoá sự kiện ngay trong app. Phần này chỉ cần nếu bạn muốn nối Google; bỏ qua thì tab Lịch vẫn dùng được với hạn nộp và việc có ngày, còn bản tin buổi sáng vẫn đọc lịch qua `CALENDAR_ICS_URL`. **Bắt buộc có `DATABASE_URL` (mục 4.2b)**, vì server lưu token đăng nhập Google trong đó (đã mã hoá).
+
+**Bước 1. Tạo project trên Google Cloud.** Vào https://console.cloud.google.com → tạo project mới → *APIs & Services* → *Library* → bật **Google Calendar API**.
+
+**Bước 2. Màn hình đồng ý (OAuth consent screen).** *APIs & Services* → *OAuth consent screen* → loại **External**, điền tên app và email của bạn. Ở mục *Data access* thêm hai quyền: `.../auth/calendar.events` và `.../auth/calendar.calendarlist.readonly`. Cuối cùng bấm **Publish app** để chuyển sang *In production*. **Đừng để ở chế độ Testing**: Google sẽ huỷ quyền sau 7 ngày và bạn phải kết nối lại mỗi tuần. App chỉ dùng riêng nên không cần Google xác minh; lần đăng nhập đầu sẽ hiện cảnh báo "Google hasn't verified this app", chọn *Advanced* → *Go to ... (unsafe)*.
+
+**Bước 3. Tạo OAuth client.** *APIs & Services* → *Credentials* → *Create credentials* → *OAuth client ID* → loại **Web application**. Ở *Authorized redirect URIs* điền đúng địa chỉ server realtime của bạn, ví dụ `https://hank62-realtime.onrender.com/api/calendar/google/callback`. Lưu lại Client ID và Client secret.
+
+**Bước 4. Đặt biến trên Render (`hank62-realtime`).**
+
+| Biến | Giá trị |
+|---|---|
+| `GOOGLE_CLIENT_ID` | Client ID ở bước 3 |
+| `GOOGLE_CLIENT_SECRET` | Client secret ở bước 3 (bí mật như mật khẩu) |
+| `GOOGLE_REDIRECT_URI` | Đúng địa chỉ callback ở bước 3, từng ký tự phải khớp |
+| `CALENDAR_TOKEN_KEY` | Chuỗi ngẫu nhiên dài (từ 32 ký tự) để mã hoá token trong database. Để trống thì dùng `SPACEHANK_SESSION_SECRET`; nếu cả hai trống thì Google Calendar tắt. Đổi khoá thì phải kết nối lại |
+
+Lưu rồi để Render deploy lại. Mở tab **Lịch** → **Kết nối Google Calendar** → đăng nhập → app đưa bạn về tab Lịch. Mặc định chỉ hiện lịch chính; bấm **Các lịch** để bật thêm lịch khác. Muốn gỡ: **Ngắt kết nối** trong cùng chỗ đó (server thu hồi quyền ở Google và xoá token). Khi đã kết nối, bản tin và nhắc lịch đọc từ Google thay vì link ICS.
 
 ### 4.3. Redis (cache và bộ nhớ hội thoại)
 

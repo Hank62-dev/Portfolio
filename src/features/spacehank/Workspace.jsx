@@ -1,7 +1,7 @@
 import { tr } from './lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookHeart, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
+import { BookHeart, CalendarDays, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
 import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useInstall } from './hooks/useInstall';
@@ -54,6 +54,7 @@ const StudioView = lazy(() => import('./views/StudioView'));
 const NotesView = lazy(() => import('./views/NotesView'));
 const ConstellationView = lazy(() => import('./views/ConstellationView'));
 const MissionView = lazy(() => import('./views/MissionView'));
+const CalendarView = lazy(() => import('./calendar/CalendarView'));
 const CreatorView = lazy(() => import('./creator/CreatorView'));
 const StudyView = lazy(() => import('./views/StudyView'));
 const HabitsView = lazy(() => import('./views/HabitsView'));
@@ -65,7 +66,7 @@ const PodcastView = lazy(() => import('./views/PodcastView'));
 const GamesView = lazy(() => import('./views/GamesView'));
 const DiaryView = lazy(() => import('./views/DiaryView'));
 
-const KIND_ICON = { note: NotebookPen, task: CheckCircle2, spending: Coins, memo: Mic, habit: Sprout, study: GraduationCap };
+const KIND_ICON = { note: NotebookPen, task: CheckCircle2, spending: Coins, memo: Mic, habit: Sprout, study: GraduationCap, event: CalendarDays };
 
 const PageLoading = () => (
   <Loading label={tr('Loading')} className="flex flex-col gap-4 py-4">
@@ -319,6 +320,7 @@ export default function Workspace({
     constellation: <ConstellationView onOpenNote={(id) => { sendIntent('notes', { open: id }); onTab('notes'); }} />,
     memos: <MemosView onNotify={onNotify} />,
     podcast: <PodcastView />,
+    calendar: <CalendarView onTab={onTab} />,
     missions: <MissionView agents={agents} events={events} onNewTask={onNewTask} onNotify={onNotify} connected={connected} />,
     study: <StudyView onNotify={onNotify} onFocusMusic={() => playMood('deep focus, calm and steady').then(onNotify, (e) => onNotify?.(e.message))} />,
     creator: <CreatorView />,

@@ -1,4 +1,4 @@
-import { Activity, BookHeart, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, Headphones, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet, Rocket } from 'lucide-react';
+import { Activity, BookHeart, CalendarDays, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, Headphones, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet, Rocket } from 'lucide-react';
 import { tr } from './lang';
 
 export const NAV_SECTIONS = ['WORKSPACE', 'KNOWLEDGE', 'CREATE', 'LIFE'];
@@ -19,6 +19,7 @@ export const NAVIGATION = [
   { id: 'creator', label: tr('Creator Lab'), icon: Rocket, section: 'CREATE', badge: 'NEW', blurb: tr('Content and income'), keywords: 'creator content tiktok discord money income sponsor clients freelance hooks script teleprompter deals quote pricing' },
   { id: 'music', label: tr('Hank Music'), icon: Music2, section: 'CREATE', blurb: tr('Your songs, offline'), keywords: 'songs player library playlist audio listen' },
   { id: 'podcast', label: tr('Podcast'), icon: Headphones, section: 'CREATE', badge: 'NEW', blurb: tr('Shows you follow'), keywords: 'podcast listen audio episodes shows radio nghe' },
+  { id: 'calendar', label: tr('Calendar'), icon: CalendarDays, section: 'LIFE', blurb: tr('Events, deadlines, agenda'), keywords: 'calendar agenda schedule events google lich lịch sự kiện hạn deadline thang tuan month week' },
   { id: 'missions', label: tr('Mission Board'), icon: Kanban, section: 'LIFE', blurb: tr('Tasks on a board'), keywords: 'kanban tasks cards todo board plan agents' },
   { id: 'study', label: tr('Study Hub'), icon: GraduationCap, section: 'LIFE', blurb: tr('Courses and focus'), keywords: 'courses exams deadlines flashcards pomodoro focus learn school' },
   { id: 'habits', label: tr('Habit Garden'), icon: Sprout, section: 'LIFE', blurb: tr('Streaks that grow'), keywords: 'habits streak plants routine daily' },
@@ -49,6 +50,7 @@ const HUES = {
   creator: 22, // persimmon
   music: 42, // brass
   podcast: 286, // violet
+  calendar: 228, // blue ink
   missions: 196, // slate
   study: 262, // indigo
   habits: 132, // sage

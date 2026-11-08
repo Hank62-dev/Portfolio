@@ -18,6 +18,7 @@ const BLURB = {
   studio: tr('Make pictures and keep them.'),
   music: tr('A music library and player.'),
   podcast: tr('Podcasts you follow, played from where you stopped.'),
+  calendar: tr('Your Google events next to deadlines and dated tasks.'),
   missions: tr('A board for plans and tasks.'),
   wallet: tr('Spending and budgets.'),
   diary: tr('A private diary.'),

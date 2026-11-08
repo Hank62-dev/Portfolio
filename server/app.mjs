@@ -5,6 +5,7 @@ import { createAi } from './ai.mjs';
 import { createAuth } from './auth.mjs';
 import { createBattle } from './battle.mjs';
 import { createCalendar } from './calendar.mjs';
+import { createGoogleCalendar } from './gcal.mjs';
 import { createDiscord } from './discord.mjs';
 import { HttpError, clientKey, createResponder, readBytes, readJson } from './http.mjs';
 import { createHub } from './hub.mjs';
@@ -24,10 +25,19 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
   const tasks = createTaskService({ agents, hub, config });
   const ai = createAi({ ai: config.ai, fetchImpl });
   const battle = createBattle();
-  const calendar = createCalendar({ url: config.calendarIcsUrl, fetchImpl });
+  const ics = createCalendar({ url: config.calendarIcsUrl, fetchImpl });
+  const google = createGoogleCalendar({ db, settings: config.google, fetchImpl, zone: config.push.zone });
+  google.start();
+  // what the briefing and the reminders read: the Google calendar when the owner has connected it, the secret ICS feed otherwise
+  const calendar = {
+    get configured() {
+      return ics.configured || google.connected;
+    },
+    between: async (from, to) => ((await google.isConnected()) ? { configured: true, events: await google.between(from, to) } : ics.between(from, to)),
+  };
   const podcasts = createPodcasts({ get: podcastGet });
   const discord = createDiscord({ webhooks: config.discordWebhooks, fetchImpl });
-  const { json, bytes, preflight } = createResponder(config.origin);
+  const { json, bytes, redirect, preflight } = createResponder(config.origin);
   // personal data kept in a real database so every device sees the same thing; off when there is no database
   const sync = db ? createSync({ db, ...config.sync }) : null;
   const needSync = () => {
@@ -258,6 +268,63 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
     'GET /api/podcasts/feed': async (req, res) => {
       requireAuth(req);
       json(res, 200, await podcasts.feed(query(req).get('url')));
+    },
+
+    // ---- the owner's Google Calendar (see gcal.mjs). Changes are POSTs, so the CORS list stays as short as it is.
+    'GET /api/calendar/status': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await google.status());
+    },
+
+    'POST /api/calendar/google/connect': (req, res) => {
+      requireAuth(req);
+      json(res, 200, { url: google.authUrl() });
+    },
+
+    // Google sends the browser here; the signed state proves the sign-in was started by the owner, so no cookie is needed.
+    'GET /api/calendar/google/callback': async (req, res) => {
+      const params = query(req);
+      const back = (result) => redirect(res, `${config.origin}/spacehank?tab=calendar&google=${result}`);
+      if (params.get('error')) return back('denied');
+      try {
+        await google.connect({ code: params.get('code'), state: params.get('state') });
+        return back('connected');
+      } catch (error) {
+        if (!(error instanceof HttpError)) console.error('Google sign-in failed:', error);
+        return back('failed');
+      }
+    },
+
+    'POST /api/calendar/google/disconnect': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await google.disconnect());
+    },
+
+    'POST /api/calendar/google/select': async (req, res) => {
+      requireAuth(req);
+      const body = await readJson(req, config.maxBodyBytes);
+      json(res, 200, { calendars: await google.select(body.ids) });
+    },
+
+    'GET /api/calendar/events': async (req, res) => {
+      requireAuth(req);
+      const params = query(req);
+      json(res, 200, { events: await google.range(new Date(params.get('from') ?? ''), new Date(params.get('to') ?? '')) });
+    },
+
+    'POST /api/calendar/events/create': async (req, res) => {
+      requireAuth(req);
+      json(res, 201, await google.create(await readJson(req, config.maxBodyBytes)));
+    },
+
+    'POST /api/calendar/events/update': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await google.update(await readJson(req, config.maxBodyBytes)));
+    },
+
+    'POST /api/calendar/events/delete': async (req, res) => {
+      requireAuth(req);
+      json(res, 200, await google.remove(await readJson(req, config.maxBodyBytes)));
     },
 
     'GET /api/briefing/calendar': async (req, res) => {

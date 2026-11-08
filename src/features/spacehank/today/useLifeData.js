@@ -4,6 +4,7 @@ import { habits } from '../habits/store';
 import { inbox } from '../inbox/store';
 import { memos } from '../memos/store';
 import { missions } from '../missions/store';
+import { calendar } from '../calendar/store';
 import { loadNotes, notesStore } from '../notes/library';
 import { useStore } from '../store';
 import { entries } from '../wallet/store';
@@ -20,6 +21,7 @@ export const lifeSnapshot = () => ({
   inbox: inbox.store.get().items,
   memos: memos.store.get().items,
   notes: notesStore.get().notes,
+  events: calendar.get().events, // whatever Google events were last loaded (none until the Calendar has been opened)
 });
 
 /** The same, kept up to date: the screen redraws when any of it changes. */

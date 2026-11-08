@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
-import { BookOpenCheck, CalendarClock, Check, ChevronDown, Flag, KanbanSquare, ListChecks, Pencil, Plus, Sparkles } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { BookOpenCheck, CalendarClock, CalendarDays, Check, ChevronDown, Flag, KanbanSquare, ListChecks, Pencil, Plus, Sparkles } from 'lucide-react';
 import { Badge, Button } from '../../../../design-system';
 import { clsx } from '../../../../lib/format';
 import { useFab } from '../../fab';
+import { modules } from '../../modules';
+import { useStore } from '../../store';
 import { Segmented } from '../../components/Page';
 import { countdown } from '../model';
 import { agenda, columnItems, courseProgress, saveItem, stepsProgress, weekSummary } from '../planner';
@@ -204,11 +207,21 @@ function BoardView({ list, now, onOpen, onAdd, onEditCourse, onNewCourse, onMove
 }
 
 /**
- * The Overview of the Study Hub: how the week looks in four numbers, then either an agenda of what is due (grouped by when,
- * as in a task manager) or a board with a column for each course (as in Trello).
+ * The Overview of the Study Hub: how the week looks in four numbers, then a board with a column for each course (as in Trello).
+ * The agenda of what is due lives in the Calendar, next to the person's other events; only when the Calendar is switched off
+ * does the agenda stay here as a second view.
  */
 export default function Overview({ list, cardList, onTab }) {
-  const [view, setView] = useState('agenda');
+  const calendarOn = !useStore(modules, (s) => s.hidden).includes('calendar');
+  const [, setParams] = useSearchParams();
+  const [chosen, setView] = useState('agenda');
+  const view = calendarOn ? 'board' : chosen;
+  const openCalendar = () =>
+    setParams((previous) => {
+      const next = new URLSearchParams(previous);
+      next.set('tab', 'calendar');
+      return next;
+    });
   const [sheet, setSheet] = useState(null); // { type: 'item', item?, courseId?, kind? } or { type: 'course', course? }
   const now = Date.now();
   const summary = useMemo(() => weekSummary(list, cardList, now), [list, cardList, now]);
@@ -263,7 +276,13 @@ export default function Overview({ list, cardList, onTab }) {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Segmented value={view} onChange={setView} options={VIEWS} label={tr('View')} />
+        {calendarOn ? (
+          <Button variant="ghost" size="sm" onClick={openCalendar} data-open-calendar>
+            <CalendarDays size={14} aria-hidden="true" /> {tr('Agenda in the Calendar')}
+          </Button>
+        ) : (
+          <Segmented value={view} onChange={setView} options={VIEWS} label={tr('View')} />
+        )}
         <div className="flex gap-2 max-md:hidden">
           <Button variant="ghost" size="sm" onClick={() => setSheet({ type: 'course' })}>
             <Plus size={14} aria-hidden="true" /> {tr('Course')}

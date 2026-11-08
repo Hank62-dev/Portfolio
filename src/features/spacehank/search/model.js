@@ -3,6 +3,7 @@ import { excerpt, strip, titleOf, searchNotes } from '../notes/notes.js';
 import { categoryOf, dayOf, formatVnd, inMonth, monthKey, summarize } from '../wallet/model.js';
 import { streak, rate, dayKey } from '../habits/model.js';
 import { agenda } from '../study/planner.js';
+import { searchEvents } from '../calendar/model.js';
 
 // Search and questions across everything the person keeps (notes, tasks, spending, voice memos, habits, study), not just
 // notes. Plain functions: they read data that is already on the device.
@@ -20,9 +21,9 @@ const hits = (text, terms) => {
 
 /**
  * Finds what matches `query` in every kind of data: [{ id, kind, title, hint, tab, open? }], at most `limit`.
- * `kind` is note | task | spending | memo | habit | study. `open` is the id to open inside the tab, for notes.
+ * `kind` is note | task | spending | memo | habit | study | event. `open` is the id to open inside the tab, for notes.
  */
-export const searchEverything = ({ notes = [], cards = [], entries = [], memos = [], habits = [], courses = [] }, query, limit = 10) => {
+export const searchEverything = ({ notes = [], cards = [], entries = [], memos = [], habits = [], courses = [], events = [] }, query, limit = 10) => {
   const terms = words(query);
   if (!terms.length) return [];
   const out = [];
@@ -46,6 +47,10 @@ export const searchEverything = ({ notes = [], cards = [], entries = [], memos =
     const found = hits(c.name, terms) ? c.name : [...(c.exams ?? []), ...(c.deadlines ?? [])].find((i) => hits(i.title, terms))?.title;
     if (found) out.push({ id: `study-${c.id}`, kind: 'study', title: found, hint: c.name, tab: 'study' });
   }
+  for (const event of searchEvents(events, query, 4)) {
+    const day = event.allDay ? event.start : new Date(event.start).toLocaleString();
+    out.push({ id: `event-${event.calendarId}-${event.id}`, kind: 'event', title: event.title || tr('Untitled'), hint: day, tab: 'calendar' });
+  }
   return out.slice(0, limit);
 };
 
@@ -63,7 +68,7 @@ const clip = (text, max) => (text.length > max ? `${text.slice(0, max - 1)}…` 
  * open tasks, of this month's and last month's spending, of habits and of study deadlines, then the notes and memos that
  * match the question. Nothing leaves the device until the person asks a question.
  */
-export const lifeDocs = ({ notes = [], cards = [], entries = [], memos = [], habits = [], courses = [] }, question, now = new Date()) => {
+export const lifeDocs = ({ notes = [], cards = [], entries = [], memos = [], habits = [], courses = [], events = [] }, question, now = new Date()) => {
   const docs = [];
   const open = cards.filter((c) => c.column !== 'done' && !c.sample);
   if (open.length) docs.push({ title: tr('Open tasks'), text: clip(open.map((c) => `- ${c.title}${c.due ? ` (due ${c.due})` : ''} [${c.column}]`).join('\n'), 1700) });
@@ -85,6 +90,9 @@ export const lifeDocs = ({ notes = [], cards = [], entries = [], memos = [], hab
 
   const due = agenda(courses, now.getTime());
   if (due.open) docs.push({ title: tr('Study deadlines'), text: clip(due.groups.map((g) => `${g.label}: ${g.items.map((i) => `${i.title} (${i.course?.name ?? ''})`).join('; ')}`).join('\n'), 1700) });
+
+  const coming = events.filter((e) => Date.parse(e.allDay ? `${e.end}T00:00:00` : e.end) > now.getTime()).slice(0, 15);
+  if (coming.length) docs.push({ title: tr('Calendar'), text: clip(coming.map((e) => `- ${e.allDay ? e.start : new Date(e.start).toLocaleString()}: ${e.title}${e.location ? ` @ ${e.location}` : ''}`).join('\n'), 1700) });
 
   const terms = words(question).slice(0, 4);
   const matching = [

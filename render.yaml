@@ -24,6 +24,15 @@ services:
         sync: false
       - key: CALENDAR_ICS_URL
         sync: false
+      # The Calendar tab, two-way with Google Calendar (SPACEHANK_SETUP.md 4.2e). Needs DATABASE_URL.
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
+        sync: false
+      - key: CALENDAR_TOKEN_KEY
+        sync: false
       # Keeps notes, diary, photos, habits, money and the Creator Lab in step across devices. A Postgres address (Neon's free tier works).
       # Leave blank and each device keeps its own copy.
       - key: DATABASE_URL

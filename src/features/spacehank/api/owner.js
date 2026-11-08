@@ -43,6 +43,25 @@ export const generateImage = (prompt) => (isDemo() ? demo.generateImage(prompt) 
 export const calendarBetween = (from, to) =>
   call(`/api/briefing/calendar?from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`);
 
+const needSignIn = () => {
+  if (isDemo()) throw new Error(tr('This needs you to sign in.'));
+};
+
+// ---- the owner's Google Calendar (the server holds the sign-in; see server/gcal.mjs)
+const iso = (date) => encodeURIComponent(date.toISOString());
+/** { enabled, connected, lost, email, calendars: [{ id, name, color, primary, writable, selected }] } */
+export const calendarStatus = () => (needSignIn(), call('/api/calendar/status'));
+/** The address of Google's consent screen: { url }. */
+export const calendarConnect = () => (needSignIn(), call('/api/calendar/google/connect', { method: 'POST', body: {} }));
+export const calendarDisconnect = () => (needSignIn(), call('/api/calendar/google/disconnect', { method: 'POST', body: {} }));
+/** Which calendars are shown: { calendars }. */
+export const calendarSelect = (ids) => (needSignIn(), call('/api/calendar/google/select', { method: 'POST', body: { ids } }));
+/** The events overlapping [from, to): { events }. */
+export const calendarEvents = (from, to) => (needSignIn(), call(`/api/calendar/events?from=${iso(from)}&to=${iso(to)}`));
+export const createEvent = (event) => (needSignIn(), call('/api/calendar/events/create', { method: 'POST', body: event }));
+export const updateEvent = (event) => (needSignIn(), call('/api/calendar/events/update', { method: 'POST', body: event }));
+export const deleteEvent = (event) => (needSignIn(), call('/api/calendar/events/delete', { method: 'POST', body: event }));
+
 /** base64 from the server to a Blob the browser can show and store. */
 export const base64ToBlob = (data, mime) => {
   const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
@@ -70,9 +89,6 @@ export const transcribeAudio = (wav, language) => {
 };
 
 // ---- Capture: sorting a typed or spoken text into tasks / spending / notes, reading a receipt, and the weekly review
-const needSignIn = () => {
-  if (isDemo()) throw new Error(tr('This needs you to sign in.'));
-};
 /** Splits a text into the separate things in it: { items: [{ kind, title, due, amount, category }] }. */
 export const organizeText = ({ text, today, language }) => (needSignIn(), call('/api/ai/organize', { method: 'POST', body: { text, today, language } }));
 /** Reads a receipt photo (base64 and its type): { amount, merchant, date, category }. */
