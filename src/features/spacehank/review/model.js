@@ -1,4 +1,4 @@
-import { tr } from '../lang.js';
+import { locale, tr } from '../lang.js';
 import { categoryOf, formatVnd, summarize } from '../wallet/model.js';
 import { dayKey, rate } from '../habits/model.js';
 import { isWritten, entryOf } from '../diary/model.js';
@@ -55,6 +55,35 @@ export const weekStats = ({ cards = [], habits = [], entries = [], notes = [], m
     memos: real(memos).filter((m) => within(m.at ?? 0, from, to)).length,
     inboxWaiting: inbox.length,
   };
+};
+
+/**
+ * The week day by day, oldest first (the seven days of the window): what the story draws as bars and dots. Kept apart from
+ * `weekStats` because that is what is sent to the AI, and only totals go there.
+ * [{ key, label, tasks, habitsDone, habitsTotal, spent, diary, mood }]
+ */
+export const weekDays = ({ cards = [], habits = [], entries = [], notes = [] }, now = new Date()) => {
+  const { from } = weekWindow(now);
+  const real = (list) => list.filter((x) => !x.sample);
+  const liveHabits = real(habits);
+  const money = real(entries);
+  const done = real(cards).filter((c) => c.column === 'done');
+  return Array.from({ length: 7 }, (_, i) => {
+    const start = from + i * DAY;
+    const date = new Date(start + 3600000);
+    const key = dayKey(date);
+    const entry = entryOf(notes, key);
+    return {
+      key,
+      label: date.toLocaleDateString(locale(), { weekday: 'short' }),
+      tasks: done.filter((c) => within(c.updatedAt ?? 0, start, start + DAY)).length,
+      habitsDone: liveHabits.filter((h) => h.days.includes(key)).length,
+      habitsTotal: liveHabits.length,
+      spent: summarize(money.filter((e) => within(e.at, start, start + DAY))).spent,
+      diary: isWritten(entry),
+      mood: entry?.mood ?? null,
+    };
+  });
 };
 
 /** True when there is something to look back on at all. */

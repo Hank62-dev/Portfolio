@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { hasWeek, weekLabel, weekLines, weekStats, weekWindow } from './model';
+import { hasWeek, weekDays, weekLabel, weekLines, weekStats, weekWindow } from './model';
 import { dayTimeline } from './timeline';
 
 const NOW = new Date(2026, 10, 7, 21, 0);
@@ -27,6 +27,28 @@ const data = {
   memos: [{ id: 'm', title: 'Memo', at: at(5), transcript: 'hello' }],
   inbox: [{}],
 };
+
+describe('the week day by day', () => {
+  it('has seven days from the first of the window to today, with what happened on each', () => {
+    const days = weekDays(data, NOW);
+    expect(days.map((d) => d.key)).toEqual(['2026-11-01', '2026-11-02', '2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06', '2026-11-07']);
+    expect(days[4]).toMatchObject({ tasks: 1, habitsDone: 1, habitsTotal: 1, spent: 0, diary: false });
+    expect(days[5]).toMatchObject({ tasks: 0, habitsDone: 1, spent: 100000, diary: true, mood: 4 });
+    expect(days[1].spent).toBe(50000);
+  });
+
+  it('adds up to what the week says, and leaves the demo out', () => {
+    const days = weekDays(data, NOW);
+    const s = weekStats(data, NOW);
+    expect(days.reduce((n, d) => n + d.tasks, 0)).toBe(s.tasksDone);
+    expect(days.reduce((n, d) => n + d.habitsDone, 0)).toBe(s.habitChecks);
+    expect(days.reduce((n, d) => n + d.spent, 0)).toBe(s.spent);
+  });
+
+  it('is seven quiet days for an empty week', () => {
+    expect(weekDays({}, NOW).every((d) => d.tasks === 0 && d.spent === 0 && !d.diary && d.mood === null)).toBe(true);
+  });
+});
 
 describe('the last seven days', () => {
   it('spans today and the six days before', () => {
