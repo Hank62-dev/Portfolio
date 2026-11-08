@@ -190,7 +190,6 @@ export const vi7 = {
   'Tap again to delete the whole series': 'Bấm lần nữa để xoá cả chuỗi',
   'Your Google events next to deadlines and dated tasks.': 'Sự kiện Google cạnh hạn nộp và việc có ngày.',
   'Events, deadlines, agenda': 'Sự kiện, hạn nộp, lịch trình',
-  'Agenda in the Calendar': 'Lịch trình trong Lịch',
   'COMING UP': 'SẮP TỚI',
   'Open the Calendar': 'Mở Lịch',
   'Nothing on your calendar for the next three days.': 'Ba ngày tới chưa có gì trên lịch.',

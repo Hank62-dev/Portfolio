@@ -2,8 +2,8 @@
   {
     "id": "calendar",
     "date": "2026-11-08",
-    "vi": "Tab Lịch mới: nối Google Calendar hai chiều (xem, thêm, sửa, xoá sự kiện), xem theo tháng, tuần hoặc lịch trình cùng hạn nộp, kỳ thi và việc có ngày. Agenda của Study Hub chuyển sang đây, và màn Hôm nay có mục Sắp tới.",
-    "en": "A new Calendar tab: two-way Google Calendar (see, add, change and delete events), as a month, a week or an agenda next to deadlines, exams and dated tasks. The Study Hub's agenda moved here, and the Today screen has a Coming up card."
+    "vi": "Tab Lịch mới: nối Google Calendar hai chiều (xem, thêm, sửa, xoá sự kiện), xem theo tháng, tuần hoặc lịch trình cùng hạn nộp, kỳ thi và việc có ngày. Agenda của Study Hub vẫn giữ nguyên, và màn Hôm nay có mục Sắp tới.",
+    "en": "A new Calendar tab: two-way Google Calendar (see, add, change and delete events), as a month, a week or an agenda next to deadlines, exams and dated tasks. The Study Hub keeps its own agenda, and the Today screen has a Coming up card."
   },
   {
     "id": "paper-ink",
