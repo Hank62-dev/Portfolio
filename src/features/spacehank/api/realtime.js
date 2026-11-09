@@ -28,14 +28,27 @@ export const refreshSession = async () => {
   }
 };
 
+/** A refused sign-in: `retryAfter` (seconds) is set while the client is locked out, `attemptsLeft` before the first lockout. */
+export class LoginError extends Error {
+  constructor(message, { retryAfter = 0, attemptsLeft = null, locked = false } = {}) {
+    super(message);
+    this.retryAfter = retryAfter;
+    this.attemptsLeft = attemptsLeft;
+    this.locked = locked;
+  }
+}
+
 export const login = async (password) => {
   const response = await request('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password }),
   });
-  if (response.status === 429) throw new Error(tr('Too many attempts. Try again later.'));
-  if (!response.ok) throw new Error(tr('Wrong access key.'));
+  if (response.ok) return;
+  const body = await response.json().catch(() => ({}));
+  const retryAfter = Number(body.retryAfterSeconds) || Number(response.headers.get('Retry-After')) || 0;
+  if (response.status === 429) throw new LoginError(tr('Too many wrong tries. Wait a moment, then try again.'), { retryAfter, locked: true });
+  throw new LoginError(tr('Wrong access key.'), { retryAfter, attemptsLeft: Number.isFinite(body.attemptsLeft) ? body.attemptsLeft : null });
 };
 
 export const logout = () => request('/api/auth/logout', { method: 'POST' }).catch(() => {});

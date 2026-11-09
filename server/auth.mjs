@@ -27,6 +27,14 @@ export const verifyPassword = (candidate, stored) => {
   }
 };
 
+/**
+ * How long a client is locked out after its `strikes`-th wrong password in a row: nothing for the first few (a typo is
+ * not an attack), then `baseLockMs`, doubling with every further wrong guess up to `maxLockMs`. 4 free, 30 s base, 1 h cap:
+ * 30 s, 1 min, 2 min, 4 min, 8 min, 16 min, 32 min, 1 h, 1 h… so guessing becomes hopeless while one slip costs nothing.
+ */
+export const lockoutMs = (strikes, { freeFailures = 4, baseLockMs = 30_000, maxLockMs = 3_600_000 } = {}) =>
+  strikes <= freeFailures ? 0 : Math.min(maxLockMs, baseLockMs * 2 ** (strikes - freeFailures - 1));
+
 const digest = (value) => createHash('sha256').update(String(value ?? '')).digest();
 const b64 = (value) => Buffer.from(value).toString('base64url');
 
@@ -77,9 +85,11 @@ export const createAuth = ({ password, passwordHash = '', sessionSecret, accessT
       .find((part) => part.startsWith(`${name}=`))
       ?.slice(name.length + 1);
 
+  // a client's wrong guesses are forgotten a while (a day by default) after its last one, once it is not locked out
+  const forgetMs = loginLimit.forgetMs ?? 24 * 60 * 60 * 1000;
   const prune = () => {
     const t = now();
-    for (const [k, entry] of failures) if (entry.resetAt < t) failures.delete(k);
+    for (const [k, entry] of failures) if (entry.lockedUntil <= t && entry.lastAt + forgetMs < t) failures.delete(k);
   };
 
   const isAuthorized = (req) => valid(readCookie(req, SESSION_COOKIE), 'access');
@@ -90,24 +100,27 @@ export const createAuth = ({ password, passwordHash = '', sessionSecret, accessT
   /** The two Set-Cookie lines for a fresh pair of tokens. */
   const issue = () => [accessCookie(sign('access', accessTtlMs)), refreshCookie(sign('refresh', refreshTtlMs))];
 
-  /** Returns { ok: true, cookies } or { ok: false, retryAfterSeconds? } (set when the client is locked out). */
+  /**
+   * Returns { ok: true, cookies } or { ok: false, locked, retryAfterSeconds?, attemptsLeft? }. `locked` is true when the
+   * password was not even tried because the client is still locked out; a wrong guess that starts a lockout comes back
+   * with `retryAfterSeconds` set, and one that does not says how many free tries are left before the first lockout.
+   */
   const login = (clientKey, candidate) => {
     prune();
+    const t = now();
     const entry = failures.get(clientKey);
-    if (entry && entry.count >= loginLimit.maxFailures) {
-      return { ok: false, retryAfterSeconds: Math.ceil((entry.resetAt - now()) / 1000) };
-    }
-    if (allFailures.resetAt <= now()) allFailures = { count: 0, resetAt: now() + loginLimit.windowMs };
+    if (entry && entry.lockedUntil > t) return { ok: false, locked: true, retryAfterSeconds: Math.ceil((entry.lockedUntil - t) / 1000) };
+    if (allFailures.resetAt <= t) allFailures = { count: 0, resetAt: t + loginLimit.windowMs };
     if (loginLimit.maxFailuresGlobal && allFailures.count >= loginLimit.maxFailuresGlobal) {
-      return { ok: false, retryAfterSeconds: Math.ceil((allFailures.resetAt - now()) / 1000) };
+      return { ok: false, locked: true, retryAfterSeconds: Math.ceil((allFailures.resetAt - t) / 1000) };
     }
     if (!passwordMatches(candidate)) {
       allFailures.count += 1;
-      failures.set(clientKey, {
-        count: (entry?.count ?? 0) + 1,
-        resetAt: entry?.resetAt ?? now() + loginLimit.windowMs,
-      });
-      return { ok: false };
+      const strikes = (entry?.strikes ?? 0) + 1;
+      const lock = lockoutMs(strikes, loginLimit);
+      failures.set(clientKey, { strikes, lockedUntil: t + lock, lastAt: t });
+      const free = loginLimit.freeFailures ?? 4;
+      return lock ? { ok: false, locked: false, retryAfterSeconds: Math.ceil(lock / 1000) } : { ok: false, locked: false, attemptsLeft: free - strikes };
     }
     failures.delete(clientKey);
     return { ok: true, cookies: issue() };

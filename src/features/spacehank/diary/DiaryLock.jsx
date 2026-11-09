@@ -39,8 +39,9 @@ export default function DiaryLock() {
     try {
       if (!demo) await login(password);
       resetLock();
-    } catch {
-      setError(tr('Mật khẩu chưa đúng.'));
+    } catch (error) {
+      // the same sign-in lockout guards this: say how long, rather than "wrong" while even the right one would be refused
+      setError(error?.retryAfter ? tr('Sai quá nhiều lần. Đợi {0} giây rồi thử lại.', Math.ceil(error.retryAfter)) : tr('Mật khẩu chưa đúng.'));
     }
   };
 

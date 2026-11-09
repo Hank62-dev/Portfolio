@@ -13,6 +13,7 @@ export const en1 = {
   'Try Ra chơi': 'Try Break Room',
   'Tiếng Việt': 'Vietnamese',
   'Mật khẩu chưa đúng.': 'That password is not right.',
+  'Sai quá nhiều lần. Đợi {0} giây rồi thử lại.': 'Too many wrong tries. Wait {0} seconds, then try again.',
   'Nhật ký đang khoá': 'The diary is locked',
   'Chạm vân tay để mở. Niú đang giữ sổ cho bạn.': 'Touch your fingerprint to open it. Niú is keeping the book for you.',
   'Mở bằng vân tay': 'Open with fingerprint',

@@ -95,10 +95,12 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
     'POST /api/auth/login': async (req, res) => {
       const input = await readJson(req, config.maxBodyBytes);
       const result = auth.login(who(req), input.password);
-      if (result.retryAfterSeconds) {
-        return json(res, 429, { error: 'Too many attempts' }, { 'Retry-After': String(result.retryAfterSeconds) });
+      // still locked out: the password was not tried. A wrong one that starts a lockout says so, with how long it lasts.
+      if (result.locked) return json(res, 429, { error: 'Too many attempts', retryAfterSeconds: result.retryAfterSeconds }, { 'Retry-After': String(result.retryAfterSeconds) });
+      if (!result.ok) {
+        const lockedFor = result.retryAfterSeconds ? { 'Retry-After': String(result.retryAfterSeconds) } : {};
+        return json(res, 401, { error: 'Invalid password', retryAfterSeconds: result.retryAfterSeconds ?? 0, attemptsLeft: result.attemptsLeft ?? 0 }, lockedFor);
       }
-      if (!result.ok) return json(res, 401, { error: 'Invalid password' });
       return json(res, 200, { authenticated: true }, { 'Set-Cookie': result.cookies });
     },
 

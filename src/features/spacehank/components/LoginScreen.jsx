@@ -1,10 +1,66 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Logo from '../../../components/ui/Logo';
 import { Button, Card, ErrorState, Eyebrow, Field, Input, Loading, Skeleton } from '../../../design-system';
 import { tr } from '../lang';
 
-const messageFor = (error) =>
-  error.message === 'Failed to fetch' ? tr('Realtime server is unreachable. Check that it is running.') : error.message;
+const messageFor = (error) => {
+  if (error.message === 'Failed to fetch') return tr('Realtime server is unreachable. Check that it is running.');
+  if (error.retryAfter) return tr('Sign-in is locked for {0}: each wrong try past the first few locks it for longer.', wait(error.retryAfter));
+  if (error.attemptsLeft === 1) return tr('Wrong access key. One more wrong try locks sign-in for a while.');
+  if (error.attemptsLeft > 1) return tr('Wrong access key. {0} tries left before sign-in locks for a while.', error.attemptsLeft);
+  return error.message;
+};
+
+/** 28 -> "28 s", 150 -> "2 min 30 s", 3600 -> "60 min": how long the wait is, in words. */
+const wait = (seconds) => {
+  const s = Math.max(0, Math.ceil(seconds));
+  if (s < 60) return tr('{0} s', s);
+  return s % 60 ? tr('{0} min {1} s', Math.floor(s / 60), s % 60) : tr('{0} min', s / 60);
+};
+const clock = (seconds) => `${Math.floor(seconds / 60)}:${String(Math.ceil(seconds) % 60).padStart(2, '0')}`;
+
+// when sign-in is locked, kept in this browser too, so a reload still shows the countdown (the server is what enforces it)
+const LOCK_KEY = 'hank62.loginLockedUntil';
+const readLock = () => {
+  try {
+    const until = Number(localStorage.getItem(LOCK_KEY));
+    return until > Date.now() ? until : 0;
+  } catch {
+    return 0;
+  }
+};
+const writeLock = (until) => {
+  try {
+    if (until) localStorage.setItem(LOCK_KEY, String(until));
+    else localStorage.removeItem(LOCK_KEY);
+  } catch {
+    /* the countdown lasts until the page closes */
+  }
+};
+
+/** Seconds left of a lockout, counting down every second; 0 when sign-in is open. */
+function useLock() {
+  const [until, setUntil] = useState(readLock);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!until) return undefined;
+    const tick = window.setInterval(() => {
+      setNow(Date.now());
+      if (Date.now() >= until) {
+        setUntil(0);
+        writeLock(0);
+      }
+    }, 1000);
+    return () => window.clearInterval(tick);
+  }, [until]);
+  const lockFor = (seconds) => {
+    const next = seconds > 0 ? Date.now() + seconds * 1000 : 0;
+    setNow(Date.now());
+    setUntil(next);
+    writeLock(next);
+  };
+  return [until ? Math.max(0, (until - now) / 1000) : 0, lockFor];
+}
 
 export function AuthLoading({ label = tr('Securing workspace') }) {
   return (
@@ -44,15 +100,22 @@ export default function LoginScreen({ onLogin, onGuest }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [locked, lockFor] = useLock();
 
   const submit = async (event) => {
     event.preventDefault();
+    if (locked) return;
     setLoading(true);
     setError('');
     try {
       await onLogin(password);
+      lockFor(0);
     } catch (loginError) {
       setError(messageFor(loginError));
+      if (loginError.retryAfter) {
+        lockFor(loginError.retryAfter);
+        setPassword('');
+      }
       setLoading(false);
     }
   };
@@ -81,10 +144,11 @@ export default function LoginScreen({ onLogin, onGuest }) {
             />
           )}
         </Field>
-        <Button type="submit" loading={loading} disabled={!password}>
-          {loading ? tr('Checking access…') : tr('Enter SpaceHank ↗')}
+        <Button type="submit" loading={loading} disabled={!password || locked > 0}>
+          {loading ? tr('Checking access…') : locked > 0 ? tr('Try again in {0}', clock(locked)) : tr('Enter SpaceHank ↗')}
         </Button>
-        {error && <ErrorState title={tr('Could not sign in')} message={error} />}
+        {error && <ErrorState title={locked > 0 ? tr('Sign-in is locked for now') : tr('Could not sign in')} message={error} />}
+        {!error && locked > 0 && <ErrorState title={tr('Sign-in is locked for now')} message={tr('Too many wrong tries. Wait a moment, then try again.')} />}
         {onGuest && (
           <div className="flex flex-col gap-2 border-t border-line pt-4">
             <Button type="button" variant="ghost" onClick={onGuest}>

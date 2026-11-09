@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
 import { createApp } from './app.mjs';
-import { createAuth } from './auth.mjs';
+import { createAuth, lockoutMs } from './auth.mjs';
 import { loadConfig } from './config.mjs';
 import { randomFleet } from '../src/features/spacehank/games/battleship.js';
 
@@ -23,7 +23,7 @@ describe('loadConfig', () => {
 });
 
 describe('auth', () => {
-  const options = { password: PASSWORD, accessTtlMs: 1000, refreshTtlMs: 10000, secureCookie: true, loginLimit: { maxFailures: 2, windowMs: 5000 } };
+  const options = { password: PASSWORD, accessTtlMs: 1000, refreshTtlMs: 10000, secureCookie: true, loginLimit: { freeFailures: 2, baseLockMs: 5000, maxLockMs: 20000, forgetMs: 60000, windowMs: 5000 } };
   const pair = (cookies) => Object.fromEntries(cookies.map((c) => c.split(';')[0].split('=')));
   const request = (cookies) => ({ headers: { cookie: Object.entries(pair(cookies)).map(([k, v]) => `${k}=${v}`).join('; ') } });
 
@@ -85,17 +85,39 @@ describe('auth', () => {
     expect(createAuth({ ...options, sessionSecret: 'two' }).isAuthorized(request(cookies))).toBe(false);
   });
 
-  it('locks a client out after repeated failures, then lets it retry', () => {
+  it('locks a client out longer with every wrong password past the free ones, then lets it retry', () => {
     let now = 0;
     const auth = createAuth({ ...options, now: () => now });
-    expect(auth.login('ip', 'nope').ok).toBe(false);
-    expect(auth.login('ip', 'nope').ok).toBe(false);
-    const locked = auth.login('ip', PASSWORD);
-    expect(locked.ok).toBe(false);
-    expect(locked.retryAfterSeconds).toBeGreaterThan(0);
+    expect(auth.login('ip', 'nope')).toMatchObject({ ok: false, locked: false, attemptsLeft: 1 });
+    expect(auth.login('ip', 'nope')).toMatchObject({ ok: false, locked: false, attemptsLeft: 0 });
+    expect(auth.login('ip', 'nope')).toMatchObject({ ok: false, locked: false, retryAfterSeconds: 5 }); // the third wrong one starts a 5 s lockout
+    const held = auth.login('ip', PASSWORD); // even the right password is not tried while locked out
+    expect(held).toMatchObject({ ok: false, locked: true });
+    expect(held.retryAfterSeconds).toBeGreaterThan(0);
     expect(auth.login('other-ip', PASSWORD).ok).toBe(true);
     now = 5001;
-    expect(auth.login('ip', PASSWORD).ok).toBe(true);
+    expect(auth.login('ip', 'nope').retryAfterSeconds).toBe(10); // the next wrong one doubles it
+    now += 10001;
+    expect(auth.login('ip', 'nope').retryAfterSeconds).toBe(20);
+    now += 20001;
+    expect(auth.login('ip', 'nope').retryAfterSeconds).toBe(20); // up to the cap
+    now += 20001;
+    expect(auth.login('ip', PASSWORD).ok).toBe(true); // and the right one clears it all
+    expect(auth.login('ip', 'nope')).toMatchObject({ attemptsLeft: 1 });
+  });
+
+  it('forgets old wrong guesses after a quiet while', () => {
+    let now = 0;
+    const auth = createAuth({ ...options, now: () => now });
+    auth.login('ip', 'nope');
+    auth.login('ip', 'nope');
+    now = 60001;
+    expect(auth.login('ip', 'nope')).toMatchObject({ attemptsLeft: 1 });
+  });
+
+  it('grows the lockout by doubling from a few free tries, capped', () => {
+    const limit = { freeFailures: 4, baseLockMs: 30_000, maxLockMs: 3_600_000 };
+    expect([1, 4, 5, 6, 7, 11, 12, 30].map((n) => lockoutMs(n, limit) / 1000)).toEqual([0, 0, 30, 60, 120, 1920, 3600, 3600]);
   });
 
   it('sets cross-site cookie attributes only for https origins', () => {

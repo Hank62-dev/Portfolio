@@ -69,7 +69,9 @@ export const loadConfig = (env = process.env) => {
     maxTaskChars: 20000,
     maxTasks: 200,
     maxEvents: 40,
-    loginLimit: { maxFailures: 10, maxFailuresGlobal: 50, windowMs: 15 * MINUTE }, // per address, and in all (many addresses guessing together)
+    // per address: 4 wrong passwords are free, then a lockout of 30 s that doubles with each further wrong one, up to an hour,
+    // forgotten a day after the last; and in all (many addresses guessing together): 50 wrong in 15 minutes stops everyone
+    loginLimit: { freeFailures: 4, baseLockMs: 30 * 1000, maxLockMs: HOUR, forgetMs: 24 * HOUR, maxFailuresGlobal: 50, windowMs: 15 * MINUTE },
     // how many proxies stand in front of this server (Render's edge is one): the client's address is that many entries from the end of X-Forwarded-For
     trustedProxyHops: Math.max(1, Number(env.TRUSTED_PROXY_HOPS || 1)),
     rateLimit: {

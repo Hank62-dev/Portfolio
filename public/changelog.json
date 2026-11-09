@@ -1,5 +1,11 @@
 [
   {
+    "id": "login-lockout",
+    "date": "2026-11-09",
+    "vi": "Đăng nhập an toàn hơn: sai mật khẩu 4 lần đầu không sao, sau đó bị khoá 30 giây và mỗi lần sai tiếp lại khoá gấp đôi, tối đa 1 giờ. Màn hình đăng nhập báo còn mấy lần thử và đếm ngược thời gian khoá.",
+    "en": "Safer sign-in: the first 4 wrong passwords are free, then sign-in locks for 30 s and each further wrong one doubles it, up to an hour. The sign-in screen says how many tries are left and counts the lock down."
+  },
+  {
     "id": "lighter-start",
     "date": "2026-11-09",
     "vi": "App mở nhẹ hơn: trình soạn thảo của giấy nhớ chỉ tải khi có giấy nhớ trên màn hình, và bản cập nhật lại được lưu sẵn để dùng khi không có mạng.",

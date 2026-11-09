@@ -118,6 +118,15 @@ export const vi6 = {
   'Pause the podcast': 'Tạm dừng podcast',
   'Resume the podcast': 'Phát tiếp podcast',
 
+  // sign-in lockout
+  'Too many wrong tries. Wait a moment, then try again.': 'Sai quá nhiều lần. Đợi một lát rồi thử lại.',
+  'Sign-in is locked for {0}: each wrong try past the first few locks it for longer.': 'Đăng nhập bị khoá trong {0}: sau vài lần đầu, mỗi lần sai sẽ bị khoá lâu hơn.',
+  'Wrong access key. One more wrong try locks sign-in for a while.': 'Sai mật khẩu. Sai thêm một lần nữa là đăng nhập bị khoá một lúc.',
+  'Wrong access key. {0} tries left before sign-in locks for a while.': 'Sai mật khẩu. Còn {0} lần thử trước khi đăng nhập bị khoá một lúc.',
+  '{0} min {1} s': '{0} phút {1} giây',
+  'Try again in {0}': 'Thử lại sau {0}',
+  'Sign-in is locked for now': 'Đăng nhập đang bị khoá',
+
   // sticky notes
   'Take off the screen': 'Gỡ khỏi màn hình',
   'Float on the screen': 'Ghim lên màn hình',
