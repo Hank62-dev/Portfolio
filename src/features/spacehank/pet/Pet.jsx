@@ -173,8 +173,8 @@ export default function Pet({ mood = 'calm', outfit = {}, size = 120, className,
         {/* face: two tilted dark patches, the eyes on them, a nose, a mouth */}
         <ellipse cx="38" cy="51" rx="13" ry="15" fill={FUR} transform="rotate(-22 38 51)" />
         <ellipse cx="82" cy="51" rx="13" ry="15" fill={FUR} transform="rotate(22 82 51)" />
-        <ellipse cx="26" cy="66" rx="5.5" ry="3.6" fill="#ff8f8f" opacity="0.4" />
-        <ellipse cx="94" cy="66" rx="5.5" ry="3.6" fill="#ff8f8f" opacity="0.4" />
+        <ellipse cx="26" cy="66" rx="5.5" ry="3.6" fill="#ff8f8f" opacity="0.2" />
+        <ellipse cx="94" cy="66" rx="5.5" ry="3.6" fill="#ff8f8f" opacity="0.2" />
         <Brows mood={mood} />
         <Eye x={40} mood={mood} blink />
         <Eye x={80} mood={mood} />

@@ -2,7 +2,7 @@ import { tr } from '../lang';
 import { PenLine } from 'lucide-react';
 import { clsx } from '../../../lib/format';
 import Pet from '../pet/Pet';
-import MoodFace from './MoodFace';
+import MoodFace, { MOOD_COLORS } from './MoodFace';
 import { bodyOf, excerptOf, moodWord, monthLabel, shortLabel } from './model';
 import { Thumb } from './ui';
 
@@ -36,40 +36,72 @@ export const layout = (days) => {
   return { rows, height: y };
 };
 
+/** A small panda head at (cx, cy), `k` times its size: the landmarks are things a panda stands beside, holds or looks out of. */
+const MiniPanda = ({ cx, cy, k = 1 }) => (
+  <g transform={`translate(${cx} ${cy}) scale(${k})`}>
+    <circle cx="-9" cy="-8.4" r="4.8" fill="#26232a" />
+    <circle cx="9" cy="-8.4" r="4.8" fill="#26232a" />
+    <ellipse cx="0" cy="0" rx="12.5" ry="10.6" fill="#fbf8f2" stroke="#26232a" strokeWidth="1" />
+    <ellipse cx="-5.2" cy="-0.6" rx="3.4" ry="4.1" fill="#26232a" transform="rotate(-20 -5.2 -0.6)" />
+    <ellipse cx="5.2" cy="-0.6" rx="3.4" ry="4.1" fill="#26232a" transform="rotate(20 5.2 -0.6)" />
+    <circle cx="-5.2" cy="-1.2" r="1.15" fill="#fff" />
+    <circle cx="5.2" cy="-1.2" r="1.15" fill="#fff" />
+    <ellipse cx="0" cy="3.4" rx="2.3" ry="1.6" fill="#26232a" />
+    <path d="M-2.6 6 q2.6 2.4 5.2 0" fill="none" stroke="#26232a" strokeWidth="1" strokeLinecap="round" />
+  </g>
+);
+
 const Landmark = ({ kind, className }) => {
   const common = { fill: 'none', stroke: 'var(--dz-text)', strokeWidth: 2.4, strokeLinecap: 'round', strokeLinejoin: 'round' };
   return (
     <svg viewBox="0 0 48 48" className={className} aria-hidden="true">
       {kind === 'flag' && (
         <g {...common}>
-          <path d="M14 42 V8" />
-          <path d="M14 9 q9 -5 14 0 t12 0 v14 q-6 4 -12 0 t-14 0" fill="#e0a458" stroke="var(--dz-text)" />
+          <path d="M33 43 V6" />
+          <path d="M33 7 q7 -4 11 0 t0 0 v11 q-5 3 -11 0z" fill="#e0a458" stroke="var(--dz-text)" strokeWidth="1.8" />
+          <MiniPanda cx={17} cy={34} k={0.95} />
         </g>
       )}
       {kind === 'tent' && (
         <g {...common}>
-          <path d="M5 40 L24 8 L43 40 Z" fill="#b08a55" />
-          <path d="M24 8 V40 M24 40 L17 40 L24 26 L31 40" />
+          <path d="M5 42 L24 9 L43 42 Z" fill="#b08a55" />
+          <path d="M24 9 V42 M24 42 L16 42 L24 27 L32 42" fill="#4a3a26" />
+          <MiniPanda cx={24} cy={36} k={0.62} />
         </g>
       )}
       {kind === 'lighthouse' && (
         <g {...common}>
-          <path d="M18 42 L21 14 H27 L30 42 Z" fill="#e8f0f8" />
-          <path d="M19 26 H29 M20 34 H28" stroke="#e0a458" />
-          <path d="M20 14 L24 7 L28 14" fill="#ffd35e" />
-          <path d="M10 10 L16 12 M38 10 L32 12" stroke="#ffd35e" />
+          <path d="M16 43 L20 17 H28 L32 43 Z" fill="#e8f0f8" />
+          <path d="M18 29 H30 M19 36 H29" stroke="#e0a458" />
+          <path d="M19 17 L24 9 L29 17 Z" fill="#ffd35e" />
+          <path d="M8 11 L15 13 M40 11 L33 13" stroke="#ffd35e" />
+          <MiniPanda cx={24} cy={23.5} k={0.34} />
         </g>
       )}
       {kind === 'mountain' && (
         <g {...common}>
-          <path d="M3 41 L18 14 L26 28 L31 20 L45 41 Z" fill="#7f9fc6" />
-          <path d="M18 14 L14 22 L18 20 L22 23 Z" fill="#fff" stroke="none" />
-          <path d="M31 20 L28 25 L31 24 L34 26 Z" fill="#fff" stroke="none" />
+          <path d="M2 43 L20 15 L28 29 L33 21 L46 43 Z" fill="#7f9fc6" />
+          <path d="M20 15 L15 24 L20 22 L25 25 Z" fill="#fff" stroke="none" />
+          <MiniPanda cx={20} cy={9.5} k={0.5} />
+          <path d="M31 21 V9 l7 2.4 -7 2.4" stroke="var(--dz-text)" strokeWidth="1.6" fill="#e0a458" />
         </g>
       )}
     </svg>
   );
 };
+
+/** A point on the cubic curve through two stones, and which way it is heading (an angle in degrees). */
+const along = (a, b, t) => {
+  const half = (b.cy - a.cy) / 2;
+  const p = [[a.x, a.cy], [a.x, a.cy + half], [b.x, b.cy - half], [b.x, b.cy]];
+  const u = 1 - t;
+  const at = (i) => u ** 3 * p[0][i] + 3 * u * u * t * p[1][i] + 3 * u * t * t * p[2][i] + t ** 3 * p[3][i];
+  const slope = (i) => 3 * u * u * (p[1][i] - p[0][i]) + 6 * u * t * (p[2][i] - p[1][i]) + 3 * t * t * (p[3][i] - p[2][i]);
+  return { x: at(0), y: at(1), angle: (Math.atan2(slope(1), slope(0)) * 180) / Math.PI };
+};
+
+/** The prints of a panda walking from one stone to the next, left and right in turn; in amber when both days were written. */
+const PAWS = [0.27, 0.42, 0.58, 0.73];
 
 function Stone({ row, mood, onPress, today }) {
   const written = Boolean(row.d.written);
@@ -86,8 +118,11 @@ function Stone({ row, mood, onPress, today }) {
       {written ? (
         <MoodFace mood={mood || 3} size="100%" ring />
       ) : today ? (
-        <span className="grid size-full place-items-center rounded-full bg-[#e0a458] text-[#1b1407] shadow-[0_0_0_6px_rgb(224_164_88/0.28)] animate-pulse">
-          <PenLine size={22} aria-hidden="true" />
+        <span className="diary-bounce relative grid size-full place-items-center rounded-full shadow-[0_0_0_6px_rgb(224_164_88/0.28)]">
+          <MoodFace mood={4} color="#e0a458" size="100%" ring />
+          <span className="absolute -right-1 -bottom-1 grid size-[42%] place-items-center rounded-full bg-[#1b1407] text-[#e0a458] shadow-md">
+            <PenLine size={12} aria-hidden="true" />
+          </span>
         </span>
       ) : (
         <MoodFace mood={null} size="100%" />
@@ -103,20 +138,34 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
   const { rows, height } = layout(days);
   const dayRows = rows.filter((r) => r.type === 'day').map((r) => ({ ...r, height }));
 
-  // the path: a dotted line through every stone, drawn solid between two written days
-  const segments = dayRows.slice(0, -1).map((a, k) => {
+  // the path: the prints of a panda through every stone, amber between two written days and faint between the others
+  const prints = dayRows.slice(0, -1).flatMap((a, k) => {
     const b = dayRows[k + 1];
-    const half = (b.cy - a.cy) / 2;
-    return { d: `M ${a.x} ${a.cy} C ${a.x} ${a.cy + half}, ${b.x} ${b.cy - half}, ${b.x} ${b.cy}`, solid: a.d.written && b.d.written };
+    const solid = a.d.written && b.d.written;
+    return PAWS.map((t, j) => {
+      const { x, y, angle } = along(a, b, t);
+      const side = (j % 2 ? 1 : -1) * 5.2; // left foot, right foot
+      const turn = angle - 90; // the toes point up the path, towards today
+      const rad = (turn * Math.PI) / 180;
+      return { key: `${k}-${j}`, x: x + Math.cos(rad) * side, y: y + Math.sin(rad) * side, turn, solid, i: k * 4 + j };
+    });
   });
 
   return (
     <div className="relative mx-auto w-full max-w-[30rem]" style={{ aspectRatio: `${W} / ${height}` }} data-journey>
       <svg viewBox={`0 0 ${W} ${height}`} className="absolute inset-0 size-full" aria-hidden="true">
-        {segments.map((s, i) => (
-          <g key={i}>
-            <path d={s.d} fill="none" stroke="var(--dz-trail)" strokeOpacity="0.55" strokeWidth="4" strokeDasharray="1 11" strokeLinecap="round" />
-            {s.solid && <path d={s.d} fill="none" stroke="#e0a458" strokeOpacity="0.95" strokeWidth="4.5" strokeLinecap="round" />}
+        <defs>
+          <g id="niu-paw">
+            <ellipse cx="0" cy="2" rx="3.7" ry="3.1" />
+            <circle cx="-4.1" cy="-2.6" r="1.7" />
+            <circle cx="-1.45" cy="-4.6" r="1.75" />
+            <circle cx="1.45" cy="-4.6" r="1.75" />
+            <circle cx="4.1" cy="-2.6" r="1.7" />
+          </g>
+        </defs>
+        {prints.map((p) => (
+          <g key={p.key} transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) rotate(${p.turn.toFixed(1)}) scale(1.35)`}>
+            <use href="#niu-paw" className="diary-paw" fill={p.solid ? '#e0a458' : 'var(--dz-trail)'} opacity={p.solid ? 0.95 : 0.4} style={{ animationDelay: `${Math.min(p.i, 24) * 40}ms` }} />
           </g>
         ))}
       </svg>
@@ -132,7 +181,7 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
         const { d } = row;
         const left = row.x >= W / 2; // the card goes on the roomier side of the path
         const card = left ? { l: 10, w: row.x - R - 20 } : { l: row.x + R + 10, w: W - (row.x + R + 10) - 10 };
-        const free = left ? { l: row.x + R + 8 } : { l: row.x - R - 8 - 44 };
+        const free = left ? { l: row.x + R + 8 } : { l: row.x - R - 8 - 54 };
         const mark = marks.get(d.day);
         const body = d.entry ? bodyOf(d.entry.text) : '';
         const photo = d.entry?.photos?.[0];
@@ -143,7 +192,7 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
 
             <div className="absolute flex flex-col justify-center" style={{ left: pc(card.l, W), width: pc(card.w, W), top: pc(row.y + 10, height), height: pc(DAY_H - 20, height) }}>
               {d.written ? (
-                <button type="button" onClick={press} className="paper flex max-h-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl p-2.5 text-left transition-transform active:scale-[0.97]" data-card>
+                <button type="button" onClick={press} className="paper flex max-h-full min-w-0 items-center gap-2 overflow-hidden rounded-2xl p-2.5 text-left transition-transform active:scale-[0.97]" style={d.mood ? { borderLeft: `5px solid ${MOOD_COLORS[d.mood - 1]}` } : undefined} data-card>
                   <span className="min-w-0 flex-1">
                     <span className="flex flex-wrap items-center gap-x-1.5 font-mono text-[0.62rem] tracking-[0.06em] text-[color:var(--dz-text-3)] uppercase">
                       {d.isToday ? tr('Hôm nay') : shortLabel(d.day)}
@@ -167,7 +216,7 @@ export default function Journey({ days, marks, pet, onOpen, onWrite, todayKey })
               </div>
             )}
             {!d.isToday && mark && (
-              <div className="absolute" style={{ left: pc(free.l, W), top: pc(row.cy - 22, height), width: pc(44, W) }}>
+              <div className="absolute" style={{ left: pc(free.l, W), top: pc(row.cy - 22, height), width: pc(54, W) }}>
                 <Landmark kind={mark.kind} className="w-full drop-shadow" />
               </div>
             )}

@@ -1039,16 +1039,68 @@ input[data-own-clear]::-webkit-search-decoration {
   }
 }
 
-/* "Nhật ký": a clear blue sky for a trail, deeper at the top and lighter toward a warm horizon. */
+/* "Nhật ký": the sky over a trail. By night: deep blue to a dusk-lit horizon, with a moon, stars and a slow aurora (real elements in the
+   screen, since on a phone this class paints the whole shell). By day: a pale clear morning with a warm sun glow. A fine grain over both. */
 .sky {
-  background-color: #1b3a6e;
-  background-image: radial-gradient(1.5px 1.5px at 12% 8%, rgb(255 255 255 / 0.7), transparent), radial-gradient(1px 1px at 38% 4%, rgb(255 255 255 / 0.6), transparent), radial-gradient(1.5px 1.5px at 72% 10%, rgb(255 255 255 / 0.7), transparent), radial-gradient(1px 1px at 90% 3%, rgb(255 255 255 / 0.5), transparent), linear-gradient(180deg, #1c3f78 0%, #28558f 26%, #3277ab 54%, #4690bb 78%, #6aa7c0 92%, #a3ae86 100%);
+  background-color: #0a1330;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E"), radial-gradient(70% 42% at 86% 0%, rgb(120 150 255 / 0.3), transparent 66%), radial-gradient(64% 40% at 6% 30%, rgb(255 160 110 / 0.12), transparent 70%), linear-gradient(180deg, #091230 0%, #0f1f48 28%, #17305f 55%, #264677 78%, #5f6a8e 92%, #a4806f 100%);
+  background-blend-mode: soft-light, normal, normal, normal;
   background-attachment: fixed;
 }
-/* by day: a bright blue sky, a sun glow in the corner, and a warm horizon (no stars) */
 :root[data-theme='light'] .sky {
-  background-color: #86bfee;
-  background-image: radial-gradient(55% 38% at 88% 4%, rgb(255 246 214 / 0.95), transparent 62%), linear-gradient(180deg, #5aa6e6 0%, #84bdee 30%, #b0d8f5 58%, #d9ebf7 80%, #f5e8c8 100%);
+  background-color: #b9d6ef;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E"), radial-gradient(52% 36% at 86% 2%, rgb(255 244 210 / 0.95), transparent 62%), radial-gradient(60% 40% at 0% 38%, rgb(255 255 255 / 0.5), transparent 70%), linear-gradient(180deg, #8fbfe8 0%, #b4d4ef 32%, #d8e7f3 60%, #f1e8d6 100%);
+  background-blend-mode: soft-light, normal, normal, normal;
+}
+/* the things in the diary's sky */
+.diary-sky .sky-drift {
+  opacity: 0.1;
+}
+:root[data-theme='light'] .diary-sky .sky-drift {
+  opacity: 0.5;
+}
+:root[data-theme='light'] .diary-night {
+  display: none;
+}
+.diary-moon {
+  position: absolute;
+  top: 0.5rem;
+  right: 4.6rem;
+  width: 2.9rem;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  pointer-events: none;
+  opacity: 0.85;
+  background: radial-gradient(circle at 36% 32%, #fff, #e6e9fb 55%, #bcc4ea);
+  box-shadow:
+    0 0 36px 6px rgb(190 205 255 / 0.4),
+    0 0 120px 40px rgb(150 170 255 / 0.18);
+}
+.diary-aurora {
+  position: absolute;
+  left: -20%;
+  right: -20%;
+  top: -4%;
+  height: 34%;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 6%, rgb(60 210 190 / 0.2) 30%, rgb(120 120 255 / 0.24) 58%, rgb(200 120 255 / 0.1) 76%, transparent 94%);
+  filter: blur(34px);
+  transform: skewY(-7deg);
+  animation: diary-aurora 22s ease-in-out infinite alternate;
+}
+:root[data-theme='light'] .diary-aurora {
+  background: linear-gradient(100deg, transparent 6%, rgb(255 236 190 / 0.5) 34%, rgb(255 255 255 / 0.5) 58%, transparent 90%);
+}
+@keyframes diary-aurora {
+  to {
+    transform: skewY(-3deg) translateX(8%);
+    opacity: 0.7;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diary-aurora {
+    animation: none;
+  }
 }
 /* on a phone the sky is the whole screen (the workspace paints it behind the bars too) */
 @media (max-width: 767px) {
@@ -3460,6 +3512,107 @@ html[data-vt='player']::view-transition-new(root) {
   .card-glow,
   .donow-art,
   .donow-orb {
+    animation: none;
+  }
+}
+
+/* the diary's trail of paw prints: each print presses in one after another */
+.diary-paw {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: node-pop 0.5s var(--ease-out-expo) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .diary-paw {
+    animation: none;
+  }
+}
+
+/* ───────── the diary, with more in it ───────── */
+.diary-tile {
+  position: relative;
+  overflow: hidden;
+  padding: 0.7rem 0.85rem;
+  border-radius: 1.4rem;
+  border: 1px solid color-mix(in srgb, var(--dz-text) 16%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--dz-text) 14%, transparent), color-mix(in srgb, var(--dz-text) 5%, transparent));
+  backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--dz-text) 18%, transparent);
+}
+.diary-tile-glow {
+  border-color: color-mix(in srgb, var(--dz-amber) 55%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--dz-text) 18%, transparent),
+    0 0 26px -8px var(--dz-amber);
+}
+/* what Niú says (or the page of today) in a bubble with a tail towards her */
+.diary-bubble {
+  position: relative;
+  padding: 0.6rem 0.8rem;
+  border-radius: 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--dz-text) 16%, transparent);
+  background: color-mix(in srgb, var(--dz-text) 8%, transparent);
+}
+.diary-bubble::before {
+  content: '';
+  position: absolute;
+  top: 1.15rem;
+  left: -0.38rem;
+  width: 0.7rem;
+  height: 0.7rem;
+  rotate: 45deg;
+  border-left: 1px solid color-mix(in srgb, var(--dz-text) 16%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--dz-text) 16%, transparent);
+  background: color-mix(in srgb, var(--dz-text) 8%, var(--dz-paper));
+}
+.diary-today {
+  position: relative;
+  overflow: hidden;
+}
+/* the faces on the week's wave pop up one after another; today's has a light under it */
+.week-face {
+  display: block;
+  width: 2.35rem;
+  aspect-ratio: 1;
+  animation: node-pop 0.55s var(--ease-out-expo) calc(0.2s + var(--i, 0) * 0.08s) both;
+}
+.week-face-now {
+  filter: drop-shadow(0 0 10px var(--dz-amber));
+}
+.week-line {
+  stroke-dasharray: 1 0;
+}
+/* a memory, held to the page by a piece of tape */
+.memory-card::before {
+  content: '';
+  position: absolute;
+  top: -0.45rem;
+  left: 50%;
+  width: 3.2rem;
+  height: 0.95rem;
+  translate: -50% 0;
+  rotate: -3deg;
+  border-radius: 0.15rem;
+  background: color-mix(in srgb, var(--dz-amber) 50%, transparent);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .week-face {
+    animation: none;
+  }
+}
+
+/* today's stone: Niú bounces on it, waiting for you to write */
+.diary-bounce {
+  animation: diary-bounce 2.2s ease-in-out infinite;
+}
+@keyframes diary-bounce {
+  50% {
+    transform: translateY(-5px) rotate(-3deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .diary-bounce {
     animation: none;
   }
 }
