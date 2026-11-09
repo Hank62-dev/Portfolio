@@ -58,10 +58,10 @@ export const lineFor = (mood, seed = 0) => {
   return lines[Math.abs(Math.floor(seed)) % lines.length];
 };
 
-/** What she wears: a scarf from the kid stage, a backpack for the traveler, a hat for the explorer, a star for the legend. */
+/** What she wears: a sprout on her head as a baby, a scarf from the kid stage, a backpack for the traveler, a hat for the explorer, a star for the legend. */
 export const outfitOf = (stageId) => {
   const rank = STAGES.findIndex((s) => s.id === stageId);
-  return { scarf: rank >= 1, backpack: rank >= 2, hat: rank >= 3, star: rank >= 4 };
+  return { sprout: rank === 0, scarf: rank >= 1, backpack: rank >= 2, hat: rank >= 3, star: rank >= 4 };
 };
 
 /** Everything the screens need to draw and word her, from the diary pages, the focus log and the time. */

@@ -3057,3 +3057,409 @@ html[data-vt='player']::view-transition-new(root) {
     animation: none;
   }
 }
+
+/* Niú, more alive: the head tilts a little now and then, the ears twitch, the bamboo and the sprout sway */
+.pet-head {
+  transform-origin: 60px 80px;
+  animation: pet-tilt 9s ease-in-out infinite;
+}
+.pet-ear {
+  animation: pet-ear 7s ease-in-out infinite;
+}
+.pet-ear-l {
+  transform-origin: 30px 34px;
+}
+.pet-ear-r {
+  transform-origin: 90px 34px;
+  animation-delay: -3.4s;
+}
+.pet-leaf {
+  transform-origin: 94px 99px;
+  animation: pet-leaf 3.6s ease-in-out infinite alternate;
+}
+.pet-sprout {
+  transform-origin: 60px 14px;
+  animation: pet-leaf 2.8s ease-in-out infinite alternate;
+}
+.pet-aura {
+  animation: wx-breathe 3.4s ease-in-out infinite alternate;
+  transform-origin: 60px 62px;
+}
+@keyframes pet-tilt {
+  0%,
+  42%,
+  100% {
+    transform: rotate(0);
+  }
+  50%,
+  62% {
+    transform: rotate(3.2deg);
+  }
+  74%,
+  86% {
+    transform: rotate(-2.6deg);
+  }
+}
+@keyframes pet-ear {
+  0%,
+  86%,
+  100% {
+    transform: rotate(0);
+  }
+  90% {
+    transform: rotate(-9deg);
+  }
+  94% {
+    transform: rotate(4deg);
+  }
+}
+@keyframes pet-leaf {
+  to {
+    transform: rotate(7deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pet-head,
+  .pet-ear,
+  .pet-leaf,
+  .pet-sprout,
+  .pet-aura {
+    animation: none;
+  }
+}
+
+/* ───────── Niú's card on the home screen ───────── */
+.pet-scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 120% at 12% 60%, hsl(var(--pet-h) 80% 60% / 0.2), transparent 70%),
+    radial-gradient(40% 80% at 96% 0%, hsl(var(--pet-h) 80% 60% / 0.1), transparent 70%);
+}
+.pet-scene i {
+  position: absolute;
+  bottom: -0.5rem;
+  left: var(--x);
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 9999px;
+  background: hsl(var(--pet-h) 90% 72%);
+  box-shadow: 0 0 10px hsl(var(--pet-h) 95% 70%);
+  opacity: 0;
+  animation: pet-mote 9s ease-in infinite var(--d);
+}
+@keyframes pet-mote {
+  15% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(1.2rem, -9rem);
+  }
+}
+/* where she stands: a soft round light and a little pedestal of the same colour */
+.pet-aura-disc {
+  position: absolute;
+  inset: -8% -14% 0;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, hsl(var(--pet-h) 85% 66% / 0.42), hsl(var(--pet-h) 85% 66% / 0.12) 62%, transparent 78%);
+  animation: wx-breathe 4s ease-in-out infinite alternate;
+}
+.pet-pedestal {
+  position: absolute;
+  inset: auto 6% -0.35rem;
+  height: 0.9rem;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, hsl(var(--pet-h) 70% 55% / 0.55), transparent);
+  filter: blur(2px);
+}
+.pet-medal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem 0.2rem 0.45rem;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--pet-h) 60% 55% / 0.45);
+  background: hsl(var(--pet-h) 70% 55% / 0.14);
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-bone);
+}
+.pet-dot {
+  display: block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 9999px;
+  background: hsl(var(--pet-h) 85% 60%);
+  box-shadow: 0 0 8px hsl(var(--pet-h) 90% 60%);
+  animation: wx-breathe 1.8s ease-in-out infinite alternate;
+}
+/* what she says, in a bubble that has a tail towards her and arrives with a small pop */
+.pet-bubble {
+  position: relative;
+  display: block;
+  padding: 0.6rem 0.85rem;
+  border-radius: 1.1rem;
+  border: 1px solid hsl(var(--pet-h) 40% 55% / 0.3);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-wash) 9%, transparent), color-mix(in srgb, var(--color-wash) 3%, transparent));
+  font-size: var(--text-fine);
+  line-height: 1.4;
+  color: var(--color-bone);
+  transform-origin: 0 50%;
+  animation: bubble-pop 0.5s var(--ease-out-expo) both;
+}
+.pet-bubble::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -0.4rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  translate: 0 -50%;
+  rotate: 45deg;
+  border-left: 1px solid hsl(var(--pet-h) 40% 55% / 0.3);
+  border-bottom: 1px solid hsl(var(--pet-h) 40% 55% / 0.3);
+  background: color-mix(in srgb, var(--color-ink-1) 80%, hsl(var(--pet-h) 40% 50%));
+  border-bottom-left-radius: 0.2rem;
+}
+@keyframes bubble-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateX(-6px);
+  }
+}
+/* the five stages as stepping stones on a rail */
+.pet-stone {
+  display: grid;
+  width: 1.55rem;
+  height: 1.55rem;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 9999px;
+  border: 1.5px dashed color-mix(in srgb, var(--color-bone) 28%, transparent);
+  color: var(--color-bone-faint);
+}
+.pet-stone[data-state='done'] {
+  border: 1.5px solid transparent;
+  color: #fff;
+  background: hsl(var(--pet-h) 55% 42%);
+}
+.pet-stone[data-state='now'] {
+  border: 1.5px solid hsl(var(--pet-h) 85% 62%);
+  color: var(--color-bone);
+  background: hsl(var(--pet-h) 70% 55% / 0.22);
+  box-shadow:
+    0 0 0 3px hsl(var(--pet-h) 80% 60% / 0.18),
+    0 0 14px hsl(var(--pet-h) 90% 60% / 0.55);
+}
+.pet-rail {
+  display: block;
+  height: 0.28rem;
+  min-width: 0.6rem;
+  flex: 1;
+  margin-inline: 0.3rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--color-bone) 12%, transparent);
+}
+.pet-rail i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, hsl(var(--pet-h) 60% 50%), hsl(calc(var(--pet-h) + 40) 80% 66%));
+  transition: width 0.9s var(--ease-out-expo);
+}
+.pet-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line);
+  background: color-mix(in srgb, var(--color-wash) 5%, transparent);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--color-bone-dim);
+}
+@media (prefers-reduced-motion: reduce) {
+  .pet-scene i,
+  .pet-aura-disc,
+  .pet-dot,
+  .pet-bubble {
+    animation: none;
+  }
+}
+
+/* ───────── the three cards at the top of Today ───────── */
+.numeral-tint {
+  /* the gradient only paints inside the box, which is taller than the digits and pulled back with a negative margin */
+  display: inline-block;
+  padding-block: 0.14em 0.08em;
+  margin-block: -0.14em -0.08em;
+  background: linear-gradient(180deg, var(--color-bone) 35%, color-mix(in srgb, var(--color-bone) 40%, hsl(var(--card-hue) 78% 50%)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.card-glow {
+  position: absolute;
+  top: -3rem;
+  right: -3rem;
+  width: 11rem;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(closest-side, hsl(var(--card-hue) 80% 62% / 0.3), transparent);
+  animation: wx-breathe 6s ease-in-out infinite alternate;
+}
+/* the do-now card: rings in its corner, turning very slowly, and a light behind them */
+.donow-art {
+  position: absolute;
+  top: -7rem;
+  right: -7rem;
+  width: 22rem;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  pointer-events: none;
+  border: 1px dashed hsl(var(--card-hue) 45% 50% / 0.35);
+  box-shadow:
+    0 0 0 2.4rem hsl(var(--card-hue) 60% 60% / 0.05),
+    0 0 0 4.8rem hsl(var(--card-hue) 60% 60% / 0.03);
+  animation: sun-turn 140s linear infinite;
+}
+.donow-orb {
+  position: absolute;
+  bottom: -5rem;
+  left: -4rem;
+  width: 16rem;
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: radial-gradient(closest-side, hsl(var(--card-hue) 80% 62% / 0.22), transparent);
+  animation: wx-breathe 8s ease-in-out infinite alternate;
+}
+.urgency {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--color-bone-dim);
+}
+.urgency[data-tone='danger'] {
+  border-color: color-mix(in srgb, var(--color-danger) 45%, transparent);
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger);
+}
+.urgency[data-tone='signal'] {
+  border-color: color-mix(in srgb, var(--color-signal) 45%, transparent);
+  background: var(--color-signal-soft);
+  color: var(--color-signal);
+}
+.urgency[data-tone='warn'] {
+  border-color: color-mix(in srgb, var(--color-warn) 45%, transparent);
+  background: color-mix(in srgb, var(--color-warn) 12%, transparent);
+  color: var(--color-warn);
+}
+/* a task: a card of its own with an edge in the colour of its urgency */
+.task-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem 0.7rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--color-line);
+  background: color-mix(in srgb, var(--color-ink-0) 38%, transparent);
+  backdrop-filter: blur(6px);
+  transition:
+    transform 0.3s var(--ease-out-expo),
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+.task-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--rail, var(--color-line-strong));
+}
+.task-row[data-state='overdue'] {
+  --rail: var(--color-danger);
+}
+.task-row[data-state='today'] {
+  --rail: var(--color-signal);
+}
+.task-row[data-state='soon'] {
+  --rail: var(--color-warn);
+}
+.task-row:hover {
+  transform: translateY(-1px);
+  border-color: var(--color-line-strong);
+  background: color-mix(in srgb, var(--color-ink-0) 55%, transparent);
+}
+/* a habit still to water: its plant, its name and its streak */
+.habit-chip {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.4rem;
+  height: 2.3rem;
+  padding: 0 0.8rem 0 0.35rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line-strong);
+  background: color-mix(in srgb, var(--color-ink-0) 40%, transparent);
+  font-size: var(--text-fine);
+  color: var(--color-bone-dim);
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.3s var(--ease-out-expo);
+}
+.habit-chip:hover {
+  color: var(--color-bone);
+  border-color: var(--color-signal);
+}
+.habit-chip:active {
+  transform: scale(0.95);
+}
+.spark-bar {
+  border-radius: 0.5rem 0.5rem 0.2rem 0.2rem;
+  background: color-mix(in srgb, var(--color-bone) 22%, transparent);
+}
+.spark-today {
+  background: linear-gradient(to top, var(--color-signal), color-mix(in srgb, var(--color-signal) 55%, #fff));
+  box-shadow: 0 0 16px color-mix(in srgb, var(--color-signal) 60%, transparent);
+}
+.money-delta {
+  padding: 0.12rem 0.5rem;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+}
+.money-delta[data-way='above'] {
+  color: var(--color-warn);
+  background: color-mix(in srgb, var(--color-warn) 14%, transparent);
+}
+.money-delta[data-way='below'] {
+  color: var(--color-ok);
+  background: color-mix(in srgb, var(--color-ok) 14%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-glow,
+  .donow-art,
+  .donow-orb {
+    animation: none;
+  }
+}

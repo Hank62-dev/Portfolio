@@ -42,6 +42,12 @@ export const habitsForToday = (habits, now = new Date()) => {
   return { total: live.length, done: live.length - pending.length, pending };
 };
 
+/** How many tasks were finished today (the demo ones do not count): what the ring of the do-now card fills with. */
+export const doneToday = (cards, now = new Date()) => {
+  const key = dayKey(now);
+  return cards.filter((c) => c.column === 'done' && !c.sample && c.updatedAt && dayKey(new Date(c.updatedAt)) === key).length;
+};
+
 /** What was spent today (money out only) and how many lines it took. */
 export const spentToday = (entries, now = new Date()) => {
   const key = dayKey(now);
@@ -88,6 +94,7 @@ export const buildToday = ({ cards = [], courses = [], habits = [], entries = []
   return {
     tasks,
     deadlines,
+    doneToday: doneToday(cards, now),
     habits: habitState,
     spent: spentToday(entries, now),
     inboxCount: inbox.length,

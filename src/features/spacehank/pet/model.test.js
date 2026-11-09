@@ -22,10 +22,10 @@ describe('growing up', () => {
   });
 
   it('dresses her more as she grows', () => {
-    expect(outfitOf('baby')).toEqual({ scarf: false, backpack: false, hat: false, star: false });
+    expect(outfitOf('baby')).toEqual({ sprout: true, scarf: false, backpack: false, hat: false, star: false });
     expect(outfitOf('kid')).toMatchObject({ scarf: true, backpack: false });
     expect(outfitOf('traveler')).toMatchObject({ scarf: true, backpack: true, hat: false });
-    expect(outfitOf('legend')).toEqual({ scarf: true, backpack: true, hat: true, star: true });
+    expect(outfitOf('legend')).toEqual({ sprout: false, scarf: true, backpack: true, hat: true, star: true });
   });
 });
 

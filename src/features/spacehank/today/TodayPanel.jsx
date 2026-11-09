@@ -23,7 +23,7 @@ const at = (i) => ({ '--i': i });
 export default function TodayPanel({ onTab, onNotify }) {
   const data = useLifeData();
   const today = buildToday(data);
-  const { tasks, deadlines, habits: habitState, spent, nudges } = today;
+  const { tasks, deadlines, doneToday, habits: habitState, spent, nudges } = today;
   const week = spendLast7(data.entries);
   const key = dayKey();
 
@@ -55,7 +55,7 @@ export default function TodayPanel({ onTab, onNotify }) {
 
       {/* a bento: the feature card is the tall one, with habits and money beside it (one under the other on a phone) */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
-        <DoNowCard tasks={tasks} deadlines={deadlines} onFinish={finish} onTab={onTab} className="rise col-span-2 md:col-span-4 md:row-span-2" style={at(step + 1)} />
+        <DoNowCard tasks={tasks} deadlines={deadlines} doneToday={doneToday} onFinish={finish} onTab={onTab} className="rise col-span-2 md:col-span-4 md:row-span-2" style={at(step + 1)} />
         <HabitsCard state={habitState} onTick={tick} onTab={onTab} className="rise col-span-2 md:col-span-2" style={at(step + 2)} />
         <MoneyCard spent={spent} week={week} onTab={onTab} className="rise col-span-2 md:col-span-2" style={at(step + 3)} />
       </div>

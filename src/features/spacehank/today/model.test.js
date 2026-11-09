@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildToday, spendLast7, spentToday, tasksForToday } from './model';
+import { buildToday, doneToday, spendLast7, spentToday, tasksForToday } from './model';
 
 const NOW = new Date(2026, 10, 7, 21, 0); // Saturday evening
 const card = (title, column, due = '', extra = {}) => ({ id: title, title, column, due, ...extra });
@@ -79,5 +79,13 @@ describe('the whole screen', () => {
   it('has no nudge on a calm morning', () => {
     const calm = buildToday({ ...data, cards: [], inbox: [], courses: [], habits: [], now: new Date(2026, 10, 7, 9, 0) });
     expect(calm.nudges).toEqual([]);
+  });
+});
+
+describe('what was finished today', () => {
+  it('counts the tasks moved to done today, and not the older or the demo ones', () => {
+    const cards = [card('a', 'done', '', { updatedAt: at(7, 9) }), card('b', 'done', '', { updatedAt: at(6, 9) }), card('c', 'done', '', { updatedAt: at(7, 10), sample: true }), card('d', 'backlog', '', { updatedAt: at(7, 11) }), card('e', 'done', '', { updatedAt: at(7, 20) })];
+    expect(doneToday(cards, NOW)).toBe(2);
+    expect(buildToday({ cards, now: NOW }).doneToday).toBe(2);
   });
 });
