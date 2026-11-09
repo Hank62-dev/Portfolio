@@ -64,10 +64,10 @@ export default function Garden({ items, head }) {
 
       {head}
 
-      <div className="garden-scene min-h-[12.5rem]">
-        <p className="relative z-[3] inline-block max-w-[75%] rounded-full border border-white/20 bg-black/25 px-3 py-1.5 font-mono text-[0.7rem] text-white/90 backdrop-blur-md">{gardenLine(done, plants.length)}</p>
+      <div className="garden-scene flex flex-col gap-3">
+        <p className="relative z-[3] max-w-[85%] self-start rounded-full border border-white/20 bg-black/25 px-3 py-1.5 font-mono text-[0.7rem] text-white/90 backdrop-blur-md">{gardenLine(done, plants.length)}</p>
 
-        <ul className="garden-plants no-scrollbar absolute inset-x-0 bottom-3 flex items-end justify-start gap-2 overflow-x-auto" aria-label={tr('Habits')}>
+        <ul className="garden-plants no-scrollbar flex items-end justify-start gap-2 overflow-x-auto pt-2 pb-3" aria-label={tr('Habits')}>
           {plants.map((plant) => (
             <li key={plant.id} className="plant-tile relative w-[5.25rem] shrink-0 first:ml-auto last:mr-auto" data-state={plant.doneToday ? 'done' : plant.wilting ? 'wilting' : 'waiting'} style={{ '--h': plant.hue }}>
               {rain[plant.id] && (

@@ -124,6 +124,7 @@ export const vi7 = {
   'days in your diary': 'ngày có viết nhật ký',
   'Average mood {0} of 5': 'Tâm trạng trung bình {0}/5',
   'FROM HANK': 'LỜI TỪ HANK',
+  Wind: 'Gió',
   'SEVEN DAYS': 'BẢY NGÀY',
   'Day by day': 'Từng ngày một',
   'Every glow is something you did.': 'Mỗi ô sáng là một điều bạn đã làm.',
