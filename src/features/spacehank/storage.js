@@ -5,9 +5,9 @@ import { isDemo } from './demo/mode';
 
 // the demo keeps its made-up data in a database of its own, so it can never touch the owner's real one
 const name = () => (isDemo() ? 'hank62-demo' : 'hank62-workspace');
-const VERSION = 9;
-// tracks / playlists / images / prompts / notes / photos (a diary's pictures) hold records; blobs / covers hold the raw files, keyed by the owner id.
-const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos', 'photos', 'content', 'income', 'deals', 'settings', 'chats', 'chatMsgs', 'shows', 'listens', 'inbox', 'outbox'];
+const VERSION = 10;
+// tracks / playlists / images / prompts / notes / photos (a diary's pictures) / drawings (the Paint tab's, with their layers as PNG blobs) hold records; blobs / covers hold the raw files, keyed by the owner id.
+const STORES = ['tracks', 'blobs', 'covers', 'playlists', 'images', 'prompts', 'notes', 'tasks', 'expenses', 'budgets', 'courses', 'cards', 'habits', 'memos', 'photos', 'content', 'income', 'deals', 'settings', 'chats', 'chatMsgs', 'shows', 'listens', 'inbox', 'outbox', 'drawings'];
 
 // The stores that are kept in step across devices (see ./sync). The music library is not: its files are too big. `outbox` is the
 // list of changes this device has not sent yet.

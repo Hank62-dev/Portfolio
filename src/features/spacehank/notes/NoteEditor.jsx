@@ -34,6 +34,7 @@ import { Badge, Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { MOODS, tagsOf, textToHtml, titleOf } from './notes';
 import { togglePin, updateNote } from './library';
+import NotePictures from './NotePictures';
 import ScrollTopButton from './ScrollTopButton';
 import { locale, tr } from '../lang';
 
@@ -333,6 +334,8 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
               ))}
             </div>
           )}
+
+          {!note.day && <NotePictures note={note} />}
 
           <div className={clsx('rich mx-auto w-full rounded-2xl border border-line bg-ink-1 px-6 py-8 shadow-[0_30px_80px_-40px_rgb(var(--shadow-rgb)/0.9)] focus-within:border-line-strong sm:px-12', full ? 'min-h-[calc(100dvh-9rem)] max-w-5xl' : 'min-h-[60vh] max-w-3xl')}>
             <EditorContent editor={editor} />

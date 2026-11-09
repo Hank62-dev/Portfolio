@@ -1,4 +1,4 @@
-import { Activity, BookHeart, CalendarDays, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, Headphones, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Orbit, Palette, Sprout, Terminal, Wallet, Rocket } from 'lucide-react';
+import { Activity, BookHeart, CalendarDays, BrainCircuit, Boxes, FolderOpen, Gamepad2, GraduationCap, Headphones, HeartPulse, Kanban, LayoutDashboard, Mic, Music2, NotebookPen, Brush, Orbit, Palette, Sprout, Terminal, Wallet, Rocket } from 'lucide-react';
 import { tr } from './lang';
 
 export const NAV_SECTIONS = ['WORKSPACE', 'KNOWLEDGE', 'CREATE', 'LIFE'];
@@ -17,6 +17,7 @@ export const NAVIGATION = [
   { id: 'memory', label: tr('Memory Stream'), icon: Activity, section: 'KNOWLEDGE', blurb: tr('What happened, in order'), keywords: 'timeline events log history' },
   { id: 'studio', label: tr('Image Studio'), icon: Palette, section: 'CREATE', blurb: tr('Pictures and brand'), keywords: 'image picture generate brand colours palette tokens design' },
   { id: 'creator', label: tr('Creator Lab'), icon: Rocket, section: 'CREATE', badge: 'NEW', blurb: tr('Content and income'), keywords: 'creator content tiktok discord money income sponsor clients freelance hooks script teleprompter deals quote pricing' },
+  { id: 'paint', label: tr('Paint'), icon: Brush, section: 'CREATE', badge: 'NEW', blurb: tr('Draw with layers'), keywords: 'paint draw drawing sketch brush pen layers canvas picture annotate ve vẽ hoa tranh' },
   { id: 'music', label: tr('Hank Music'), icon: Music2, section: 'CREATE', blurb: tr('Your songs, offline'), keywords: 'songs player library playlist audio listen' },
   { id: 'podcast', label: tr('Podcast'), icon: Headphones, section: 'CREATE', badge: 'NEW', blurb: tr('Shows you follow'), keywords: 'podcast listen audio episodes shows radio nghe' },
   { id: 'calendar', label: tr('Calendar'), icon: CalendarDays, section: 'LIFE', blurb: tr('Events, deadlines, agenda'), keywords: 'calendar agenda schedule events google lich lịch sự kiện hạn deadline thang tuan month week' },
@@ -47,6 +48,7 @@ const HUES = {
   memos: 332, // dusty rose
   memory: 178, // deep teal
   studio: 304, // plum
+  paint: 340, // rose madder
   creator: 22, // persimmon
   music: 42, // brass
   podcast: 286, // violet

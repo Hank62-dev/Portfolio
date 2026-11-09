@@ -52,6 +52,9 @@ export const togglePin = async (id) => {
 };
 
 export const deleteNote = async (id) => {
+  // the pictures a note holds (a diary page's, a drawing sent from Paint) go with it
+  const held = notesStore.get().notes.find((n) => n.id === id)?.photos ?? [];
+  await Promise.all(held.map((photo) => storage.photos.remove(photo).catch(() => {})));
   await storage.notes.remove(id);
   notesStore.set((s) => ({ notes: s.notes.filter((n) => n.id !== id) }));
 };

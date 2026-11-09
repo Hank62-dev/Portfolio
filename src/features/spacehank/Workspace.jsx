@@ -65,6 +65,7 @@ const MemosView = lazy(() => import('./views/MemosView'));
 const PodcastView = lazy(() => import('./views/PodcastView'));
 const GamesView = lazy(() => import('./views/GamesView'));
 const DiaryView = lazy(() => import('./views/DiaryView'));
+const PaintView = lazy(() => import('./views/PaintView'));
 
 const KIND_ICON = { note: NotebookPen, task: CheckCircle2, spending: Coins, memo: Mic, habit: Sprout, study: GraduationCap, event: CalendarDays };
 
@@ -328,6 +329,7 @@ export default function Workspace({
     wallet: <WalletView />,
     play: <GamesView />,
     diary: <DiaryView onNotify={onNotify} />,
+    paint: <PaintView onNotify={onNotify} />,
     shell: <ShellView ctx={shell} />,
     pulse: <PulseView owner />,
   };

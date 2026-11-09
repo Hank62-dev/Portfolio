@@ -3616,3 +3616,9 @@ html[data-vt='player']::view-transition-new(root) {
     animation: none;
   }
 }
+
+/* Paint: the sliders for the size of the line and the opacity of a layer take the accent colour */
+.paint-range {
+  accent-color: var(--color-signal);
+  height: 1.5rem;
+}

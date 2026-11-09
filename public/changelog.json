@@ -1,5 +1,11 @@
 [
   {
+    "id": "paint",
+    "date": "2026-11-09",
+    "vi": "Tab Vẽ mới (kiểu Paint): vẽ nhiều lớp với bút, bút dạ quang, tẩy, đổ màu, lấy màu, đường thẳng, mũi tên, hình chữ nhật, hình tròn, chữ, dời lớp; thu phóng và kéo bằng chuột hoặc hai ngón tay; hoàn tác và làm lại; vẽ lên một bức ảnh. Tranh tự lưu trong thư viện của trình duyệt, có thể gửi vào ghi chú mới hoặc nhật ký hôm nay.",
+    "en": "A new Paint tab: draw in layers with a pen, highlighter, eraser, fill, colour picker, line, arrow, rectangle, ellipse, text and a layer mover; zoom and move with the mouse or two fingers; undo and redo; draw over a picture. Drawings save themselves in a library in the browser and can be sent to a new note or to today's diary."
+  },
+  {
     "id": "calendar",
     "date": "2026-11-08",
     "vi": "Tab Lịch mới: nối Google Calendar hai chiều (xem, thêm, sửa, xoá sự kiện), xem theo tháng, tuần hoặc lịch trình cùng hạn nộp, kỳ thi và việc có ngày. Agenda của Study Hub vẫn giữ nguyên, và màn Hôm nay có mục Sắp tới.",
