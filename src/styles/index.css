@@ -3622,3 +3622,9 @@ html[data-vt='player']::view-transition-new(root) {
   accent-color: var(--color-signal);
   height: 1.5rem;
 }
+
+/* Constellation's full-screen sky: the page column normally isolates its stacking, which would keep the sky under the
+   tab bar and the players; while the sky fills the screen that column lets it rise above them. */
+.isolate:has([data-expanded]) {
+  isolation: auto;
+}

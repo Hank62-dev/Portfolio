@@ -1,5 +1,23 @@
 [
   {
+    "id": "constellation-redo",
+    "date": "2026-11-09",
+    "vi": "Constellation làm lại: mỗi ghi chú là một tiểu hành tinh tròn phát sáng theo màu tag, có hố, có bóng sáng tối và xoay chậm; tìm ngay trên bản đồ, xem toàn màn hình, thẻ có tag và ghi chú được nối, sắp xếp danh sách, cùng phím tắt.",
+    "en": "Constellation is redone: each note is a round asteroid glowing in its tag colour, with craters, light and shade and a slow spin; find one on the map, a full-screen view, a card with its tags and links, a sortable list, and keys."
+  },
+  {
+    "id": "search-debounce",
+    "date": "2026-11-09",
+    "vi": "Mọi ô tìm kiếm giờ chỉ tìm khi bạn ngừng gõ 400ms nên mượt hơn, xoá ô là kết quả biến mất ngay. Bỏ hai nút Tuỳ chỉnh và Mở văn phòng công ty trên bầu trời màn hình chính.",
+    "en": "Every search box now searches once you pause typing for 400 ms, so it stays smooth, and clearing it clears the results at once. The Customise and Open company floor buttons are gone from the home screen's sky."
+  },
+  {
+    "id": "podcast-redo",
+    "date": "2026-11-09",
+    "vi": "Podcast làm lại: thanh phát theo bạn sang mọi tab, hẹn giờ tắt, nút đóng tập; mục Tập mới gom tập mới từ các chương trình bạn theo dõi, ảnh bìa có nhãn số tập mới; trang chương trình có nút nghe tiếp hoặc nghe tập mới nhất, lọc tập chưa nghe, tìm tập, đánh dấu đã nghe; tìm podcast ra kết quả ngay khi gõ.",
+    "en": "Podcasts are redone: a player bar that follows you to every tab, a sleep timer and a close button; New episodes gathers the latest from the shows you follow, with a badge on their covers; a show's page plays the newest or carries on, filters what is not heard, searches its episodes and marks them heard; the directory searches as you type."
+  },
+  {
     "id": "paint",
     "date": "2026-11-09",
     "vi": "Tab Vẽ mới (kiểu Paint): vẽ nhiều lớp với bút, bút dạ quang, tẩy, đổ màu, lấy màu, đường thẳng, mũi tên, hình chữ nhật, hình tròn, chữ, dời lớp; thu phóng và kéo bằng chuột hoặc hai ngón tay; hoàn tác và làm lại; vẽ lên một bức ảnh. Tranh tự lưu trong thư viện của trình duyệt, có thể gửi vào ghi chú mới hoặc nhật ký hôm nay.",

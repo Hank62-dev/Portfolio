@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, Crosshair, Hand, Minus, Plus, RotateCcw, Search, Sparkles, X } from 'lucide-react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Crosshair, Hand, Link2, Maximize2, Minimize2, Minus, Plus, RotateCcw, Search, X } from 'lucide-react';
 import { Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
-import { PageHead } from '../components/Page';
+import { PageHead, Segmented } from '../components/Page';
 import { buildGraph, radiusOf, stepLayout } from '../notes/graph';
 import { deleteNote, loadNotes, notesStore } from '../notes/library';
 import { useReadableNotes } from '../diary/useLock';
-import { excerpt } from '../notes/notes';
+import { excerpt, hueOf } from '../notes/notes';
 import { useStore } from '../store';
 import { tr } from '../lang';
 import { useDebounce } from '../../../hooks/useDebounce';
@@ -49,6 +49,9 @@ export default function ConstellationView({ onOpenNote }) {
   const [query, setQuery] = useState('');
   const search = useDebounce(query);
   const [touched, setTouched] = useState(false);
+  const [expanded, setExpanded] = useState(false); // the sky fills the whole screen
+  const [order, setOrder] = useState('linked'); // how the list of stars is sorted: 'linked' | 'az' | 'alone'
+  const searchBox = useRef(null);
 
   useEffect(() => {
     void loadNotes();
@@ -87,6 +90,25 @@ export default function ConstellationView({ onOpenNote }) {
     f.fitView?.();
   }, [tag]);
 
+  // what is searched lights up in the sky: the other stars dim, and the view frames the ones that match
+  useEffect(() => {
+    const f = frame.current;
+    const q = search.trim().toLowerCase();
+    f.match = q ? new Set(graph.nodes.filter((n) => n.title.toLowerCase().includes(q)).map((n) => n.id)) : null;
+    f.dirty = true;
+    if (q && f.match.size) f.fitView?.();
+  }, [search, graph]);
+
+  // the full-screen sky: Escape closes it, and the page behind does not scroll
+  useEffect(() => {
+    if (!expanded) return undefined;
+    const before = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = before;
+    };
+  }, [expanded]);
+
   useEffect(() => {
     const el = canvas.current;
     if (!el) return undefined;
@@ -117,7 +139,7 @@ export default function ConstellationView({ onOpenNote }) {
       else f.goal = goal;
     };
     const fit = () => {
-      const pool = f.nodes.filter((n) => !f.tag || n.tags.includes(f.tag));
+      const pool = f.nodes.filter((n) => (!f.tag || n.tags.includes(f.tag)) && (!f.match?.size || f.match.has(n.id)));
       if (!pool.length) return;
       const xs = pool.map((n) => n.x);
       const ys = pool.map((n) => n.y);
@@ -246,7 +268,7 @@ export default function ConstellationView({ onOpenNote }) {
       ctx.scale(f.view.k, f.view.k);
       const sk = Math.sqrt(f.view.k);
       const near = neighbours();
-      const isDim = (n) => (f.selected && !near.has(n.id)) || (f.tag && !n.tags.includes(f.tag));
+      const isDim = (n) => (f.selected && !near.has(n.id)) || (f.tag && !n.tags.includes(f.tag)) || (!f.selected && f.match && !f.match.has(n.id));
 
       // every star keeps a few values that glide towards where they should be: hover, selected, dimmed, shown
       f.nodes.forEach((n, i) => {
@@ -269,13 +291,13 @@ export default function ConstellationView({ onOpenNote }) {
         if (!a || !b) continue;
         e.lit = (e.lit ?? 0) + ((f.selected && (e.a === f.selected || e.b === f.selected) ? 1 : 0) - (e.lit ?? 0)) * ease(170);
         const dimmed = Math.max(a.a.dim, b.a.dim);
-        const alpha = Math.min(a.life, b.life) * ((0.16 + e.weight * 0.05) * (1 - 0.7 * dimmed) + 0.6 * e.lit);
+        const alpha = Math.min(a.life, b.life) * ((0.1 + e.weight * 0.03) * (1 - 0.7 * dimmed) + 0.5 * e.lit);
         const bend = a.id < b.id ? 0.12 : -0.12;
         const cx = (a.px + b.px) / 2 - (b.py - a.py) * bend;
         const cy = (a.py + b.py) / 2 + (b.px - a.px) * bend;
         const line = ctx.createLinearGradient(a.px, a.py, b.px, b.py);
-        line.addColorStop(0, `hsl(${a.hue} 85% 74% / ${alpha})`);
-        line.addColorStop(1, `hsl(${b.hue} 85% 74% / ${alpha})`);
+        line.addColorStop(0, `hsl(${a.hue} 35% 78% / ${alpha})`);
+        line.addColorStop(1, `hsl(${b.hue} 35% 78% / ${alpha})`);
         ctx.strokeStyle = line;
         ctx.lineWidth = (0.9 + e.weight * 0.3 + e.lit) / sk;
         ctx.lineCap = 'round';
@@ -300,42 +322,132 @@ export default function ConstellationView({ onOpenNote }) {
         }
       }
 
-      for (const n of [...f.nodes].sort((p, q) => p.a.sel + p.a.hover - (q.a.sel + q.a.hover))) {
+      // Each note is a small round asteroid in its tag's colour, glowing in that colour too: its craters and grit are laid out once from its id
+      // (so each looks its own and never changes), it is lit from the upper left so it has form, and it turns slowly.
+      // The glow breathes a little and brightens under the pointer or when chosen.
+      const rockOf = (n) => {
+        f.rocks ??= new Map();
+        let rock = f.rocks.get(n.id);
+        if (rock) return rock;
+        let seed = [...n.id].reduce((h, ch) => Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0, 2166136261);
+        const rnd = () => {
+          seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+          return seed / 4294967296;
+        };
+        const craters = Array.from({ length: 3 + Math.floor(rnd() * 4) }, () => ({ angle: rnd() * Math.PI * 2, dist: Math.sqrt(rnd()) * 0.62, size: 0.07 + rnd() * 0.16 }));
+        const grit = Array.from({ length: 14 }, () => ({ angle: rnd() * Math.PI * 2, dist: Math.sqrt(rnd()) * 0.8, size: 0.02 + rnd() * 0.035, light: rnd() < 0.5 }));
+        rock = { craters, grit, turn: rnd() * Math.PI * 2, spin: (rnd() < 0.5 ? -1 : 1) * (0.00004 + rnd() * 0.00008) };
+        f.rocks.set(n.id, rock);
+        return rock;
+      };
+      const traceRock = (size) => {
+        ctx.beginPath();
+        ctx.arc(0, 0, size, 0, Math.PI * 2);
+      };
+      // zoomed out, a rock shrinks less than the map does, so a far view still shows rocks and not specks
+      const grow = 1 / Math.sqrt(Math.min(1, f.view.k));
+      for (const n of f.nodes) {
         const a = n.a;
-        const r = radiusOf(n) * (0.55 + 0.45 * n.life) * (1 + 0.22 * a.hover + 0.12 * a.sel);
         const lift = a.hover + a.sel;
-        ctx.globalAlpha = n.life * (1 - 0.7 * a.dim);
-        const breathe = calm ? 1 : 0.88 + 0.12 * Math.sin(time / 850 + n.x);
-        const reach = r * (4.4 + 1.2 * lift);
-        const halo = ctx.createRadialGradient(n.px, n.py, 0, n.px, n.py, reach);
-        halo.addColorStop(0, `hsl(${n.hue} 95% 70% / ${0.5 * breathe + 0.2 * lift})`);
-        halo.addColorStop(0.45, `hsl(${n.hue} 95% 68% / 0.12)`);
-        halo.addColorStop(1, `hsl(${n.hue} 95% 70% / 0)`);
-        ctx.fillStyle = halo;
+        const size = radiusOf(n) * grow * 1.15 * (0.55 + 0.45 * n.life) * (1 + 0.18 * a.hover + 0.1 * a.sel);
+        const rock = rockOf(n);
+        const angle = rock.turn + (calm ? 0 : time * rock.spin);
+        ctx.globalAlpha = n.life * (1 - 0.75 * a.dim);
+
+        const breathe = calm ? 1 : 0.88 + 0.12 * Math.sin(time / 1400 + n.x * 0.05);
+        const reach = size * (2.6 + 0.9 * lift);
+        const glow = ctx.createRadialGradient(n.px, n.py, size * 0.7, n.px, n.py, reach);
+        glow.addColorStop(0, `hsl(${n.hue} 85% 66% / ${0.34 * breathe + 0.22 * lift})`);
+        glow.addColorStop(0.45, `hsl(${n.hue} 85% 62% / ${0.1 + 0.08 * lift})`);
+        glow.addColorStop(1, `hsl(${n.hue} 85% 60% / 0)`);
+        ctx.fillStyle = glow;
         ctx.beginPath();
         ctx.arc(n.px, n.py, reach, 0, Math.PI * 2);
         ctx.fill();
-        const core = ctx.createRadialGradient(n.px - r * 0.3, n.py - r * 0.3, r * 0.1, n.px, n.py, r);
-        core.addColorStop(0, `hsl(${n.hue} 95% 94%)`);
-        core.addColorStop(1, `hsl(${n.hue} 85% 68%)`);
-        ctx.fillStyle = core;
-        ctx.beginPath();
-        ctx.arc(n.px, n.py, r, 0, Math.PI * 2);
+
+        ctx.save();
+        ctx.translate(n.px, n.py);
+        ctx.rotate(angle);
+        traceRock(size);
+        ctx.fillStyle = `hsl(${n.hue} 62% ${52 + 8 * lift}%)`;
         ctx.fill();
-        if (a.sel > 0.02) {
-          ctx.strokeStyle = `rgb(236 230 218 / ${0.9 * a.sel})`;
-          ctx.lineWidth = 1.4 / sk;
+        ctx.clip();
+        for (const g of rock.grit) {
+          ctx.fillStyle = g.light ? `hsl(${n.hue} 80% 82% / 0.3)` : `hsl(${n.hue} 60% 22% / 0.3)`;
           ctx.beginPath();
-          ctx.arc(n.px, n.py, r + 4 + 2 * (1 - a.sel), 0, Math.PI * 2);
+          ctx.arc(Math.cos(g.angle) * g.dist * size, Math.sin(g.angle) * g.dist * size, g.size * size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        for (const c of rock.craters) {
+          const cx = Math.cos(c.angle) * c.dist * size;
+          const cy = Math.sin(c.angle) * c.dist * size;
+          const cr = c.size * size;
+          ctx.fillStyle = `hsl(${n.hue} 55% 24% / 0.75)`;
+          ctx.beginPath();
+          ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `hsl(${n.hue} 80% 80% / 0.4)`;
+          ctx.beginPath();
+          ctx.arc(cx + cr * 0.25, cy + cr * 0.25, cr * 0.7, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = `hsl(${n.hue} 55% 34% / 0.9)`;
+          ctx.beginPath();
+          ctx.arc(cx - cr * 0.08, cy - cr * 0.08, cr * 0.62, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        // back to the screen's own axes, so the light always comes from the upper left however the rock has turned
+        ctx.rotate(-angle);
+        const light = ctx.createRadialGradient(-size * 0.5, -size * 0.55, size * 0.02, -size * 0.2, -size * 0.2, size * 1.25);
+        light.addColorStop(0, `hsl(${n.hue} 90% 92% / 0.6)`);
+        light.addColorStop(0.32, `hsl(${n.hue} 90% 85% / 0.08)`);
+        light.addColorStop(0.58, `hsl(${n.hue} 60% 12% / 0.22)`);
+        light.addColorStop(1, `hsl(${n.hue} 60% 8% / 0.85)`);
+        ctx.fillStyle = light;
+        ctx.fillRect(-size * 1.4, -size * 1.4, size * 2.8, size * 2.8);
+        ctx.restore();
+        // a thin bright rim where the light catches the upper-left edge
+        ctx.beginPath();
+        ctx.arc(n.px, n.py, size, 0, Math.PI * 2);
+        const rim = ctx.createLinearGradient(n.px - size, n.py - size, n.px + size * 0.4, n.py + size * 0.4);
+        rim.addColorStop(0, `hsl(${n.hue} 90% 85% / ${0.6 + 0.3 * lift})`);
+        rim.addColorStop(0.5, `hsl(${n.hue} 90% 85% / 0)`);
+        ctx.strokeStyle = rim;
+        ctx.lineWidth = Math.max(0.6, size * 0.06);
+        ctx.stroke();
+      }
+
+      // the chosen rock is marked as on a star chart: four ticks and a slowly turning dashed ring around it
+      for (const n of f.nodes) {
+        const a = n.a;
+        if (a.sel < 0.02) continue;
+        const r = radiusOf(n) * grow * 1.15 * (1 + 0.1 * a.sel);
+        const ring = r * 1.25 + 6 / sk + 5 * (1 - a.sel);
+        ctx.globalAlpha = n.life * a.sel;
+        ctx.strokeStyle = 'rgb(236 230 218 / 0.85)';
+        ctx.lineWidth = 1.2 / sk;
+        ctx.setLineDash([4 / sk, 5 / sk]);
+        ctx.beginPath();
+        ctx.arc(n.px, n.py, ring, calm ? 0 : time / 4000, (calm ? 0 : time / 4000) + Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.lineWidth = 1.6 / sk;
+        for (let q = 0; q < 4; q += 1) {
+          const angle = (q * Math.PI) / 2 + Math.PI / 4;
+          const from = ring + 3 / sk;
+          const to = ring + 10 / sk;
+          ctx.beginPath();
+          ctx.moveTo(n.px + Math.cos(angle) * from, n.py + Math.sin(angle) * from);
+          ctx.lineTo(n.px + Math.cos(angle) * to, n.py + Math.sin(angle) * to);
           ctx.stroke();
-          if (!calm) {
-            // a ripple that leaves the star every couple of seconds
-            const phase = (time % 2400) / 2400;
-            ctx.strokeStyle = `hsl(${n.hue} 95% 80% / ${(1 - phase) * 0.55 * a.sel})`;
-            ctx.beginPath();
-            ctx.arc(n.px, n.py, r + 6 + phase * 22, 0, Math.PI * 2);
-            ctx.stroke();
-          }
+        }
+        if (!calm) {
+          // a faint pulse of light leaves the star every couple of seconds
+          const phase = (time % 2600) / 2600;
+          ctx.strokeStyle = `hsl(${n.hue} 95% 82% / ${(1 - phase) * 0.4})`;
+          ctx.lineWidth = 1 / sk;
+          ctx.beginPath();
+          ctx.arc(n.px, n.py, ring + phase * 26, 0, Math.PI * 2);
+          ctx.stroke();
         }
       }
       ctx.globalAlpha = 1;
@@ -351,15 +463,16 @@ export default function ConstellationView({ onOpenNote }) {
         const important = n.id === f.selected || n.id === f.hover;
         const text = n.title.length > 26 ? `${n.title.slice(0, 25)}…` : n.title;
         const width = ctx.measureText(text).width;
-        const y = n.py + radiusOf(n) * (1 + 0.12 * n.a.sel) + 15 / sk;
-        const box = [n.px - width / 2 - 5 / sk, y - 13 / sk, n.px + width / 2 + 5 / sk, y + 5 / sk];
+        const x = n.px;
+        const y = n.py + radiusOf(n) * grow * 1.15 * (1 + 0.1 * n.a.sel) + 14 / sk;
+        const box = [x - width / 2 - 5 / sk, y - 13 / sk, x + width / 2 + 5 / sk, y + 5 / sk];
         let want = n.life > 0.6 && n.a.dim < 0.5 && (important || (f.selected && near.has(n.id)) || f.view.k > 0.55);
         if (want && !important && placed.some((p) => box[0] < p[2] && box[2] > p[0] && box[1] < p[3] && box[3] > p[1])) want = false;
         if (want) placed.push(box);
         n.a.label += ((want ? 1 : 0) - n.a.label) * ease(150);
         if (n.a.label > 0.02) {
           ctx.fillStyle = `rgb(236 230 218 / ${0.92 * n.a.label * n.life})`;
-          ctx.fillText(text, n.px, y);
+          ctx.fillText(text, x, y);
         }
       }
       ctx.shadowBlur = 0;
@@ -496,52 +609,163 @@ export default function ConstellationView({ onOpenNote }) {
     frame.current.dirty = true;
   };
 
-  const tags = useMemo(() => [...new Set(graph.nodes.flatMap((n) => n.tags))].sort(), [graph]);
+  // the tags, the most used first, with how many stars carry each
+  const tags = useMemo(() => {
+    const count = new Map();
+    for (const n of graph.nodes) for (const t of n.tags) count.set(t, (count.get(t) ?? 0) + 1);
+    return [...count.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name, n]) => ({ name, n }));
+  }, [graph]);
   const picked = notes.find((n) => n.id === selected);
   const pickedNode = graph.nodes.find((n) => n.id === selected);
   const linked = useMemo(() => {
     if (!selected) return [];
-    const ids = graph.edges.filter((e) => e.a === selected || e.b === selected).map((e) => (e.a === selected ? e.b : e.a));
-    return graph.nodes.filter((n) => ids.includes(n.id));
+    const ids = new Set(graph.edges.filter((e) => e.a === selected || e.b === selected).map((e) => (e.a === selected ? e.b : e.a)));
+    return graph.nodes.filter((n) => ids.has(n.id)).sort((a, b) => b.degree - a.degree);
   }, [graph, selected]);
-  const stars = useMemo(() => [...graph.nodes].sort((a, b) => b.degree - a.degree || b.words - a.words), [graph]);
+  const lonely = useMemo(() => graph.nodes.filter((n) => n.degree === 0).length, [graph]);
+  const stars = useMemo(() => {
+    const list = [...graph.nodes];
+    if (order === 'az') return list.sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+    if (order === 'alone') return list.filter((n) => n.degree === 0).sort((a, b) => b.words - a.words);
+    return list.sort((a, b) => b.degree - a.degree || b.words - a.words);
+  }, [graph, order]);
   const shownStars = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q ? stars.filter((n) => n.title.toLowerCase().includes(q)) : stars;
   }, [stars, search]);
+  const matchCount = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return q ? graph.nodes.filter((n) => n.title.toLowerCase().includes(q)).length : null;
+  }, [graph, search]);
+
+  /** Goes to the star before or after the chosen one, in the order of the list: a walk through the sky. */
+  const step = (by) => {
+    if (!shownStars.length) return;
+    const at = shownStars.findIndex((n) => n.id === selected);
+    setSelected(shownStars[at < 0 ? 0 : (at + by + shownStars.length) % shownStars.length].id);
+  };
+
+  // the keys: / searches, + and - zoom, 0 frames everything, F fills the screen, the arrows walk from star to star, Escape steps back
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const typing = e.target.closest?.('input, textarea, select, [contenteditable="true"]');
+      if (e.key === 'Escape') {
+        if (e.target === searchBox.current) {
+          if (query) setQuery('');
+          else searchBox.current.blur();
+        } else if (typing) return;
+        else if (selected) setSelected(null);
+        else if (expanded) setExpanded(false);
+        else if (tag) setTag('');
+        else return;
+        e.preventDefault();
+        return;
+      }
+      if (typing || e.target.closest?.('[role="dialog"]')) return;
+      if (e.key === '/') searchBox.current?.focus();
+      else if (e.key === '+' || e.key === '=') zoom(1.25);
+      else if (e.key === '-') zoom(0.8);
+      else if (e.key === '0') fit();
+      else if (e.key === 'f' || e.key === 'F') setExpanded((now) => !now);
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') step(1);
+      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') step(-1);
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
   const removeSamples = async () => {
     for (const n of notes.filter((x) => x.sample)) await deleteNote(n.id);
     setSelected(null);
   };
   const sparse = loaded && notes.length < 1; // one note is already a star
+  const chip = 'rounded-full border px-2.5 py-1 font-mono text-[0.68rem] transition-colors';
+  const glass = 'border border-wash/10 bg-shade/55 backdrop-blur-md';
 
-  const card = picked && (
-    <section key={picked.id} className="animate-fade-in rounded-3xl border border-line bg-ink-1 p-5 shadow-[0_30px_70px_-40px_rgb(var(--shadow-rgb)/0.95)]" data-selected>
-      <div className="flex items-start justify-between gap-3">
-        <span className="flex items-center gap-2 font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">
-          <i className="size-2 rounded-full" style={{ background: `hsl(${pickedNode?.hue ?? 30} 90% 70%)` }} aria-hidden="true" /> {tr('Selected star')}
+  const card = picked && pickedNode && (
+    <section key={picked.id} className="animate-fade-in max-h-[48dvh] overflow-y-auto overscroll-contain rounded-3xl border border-line bg-ink-1/95 p-4 max-sm:max-h-[40dvh] shadow-[0_30px_70px_-40px_rgb(var(--shadow-rgb)/0.95)] backdrop-blur-xl sm:p-5" data-selected>
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-2 font-mono text-[0.66rem] tracking-[0.12em] text-bone-faint uppercase">
+          <i className="size-2 shrink-0 rounded-full" style={{ background: `hsl(${pickedNode.hue} 90% 70%)`, boxShadow: `0 0 10px hsl(${pickedNode.hue} 90% 70%)` }} aria-hidden="true" />
+          {pickedNode.day ? tr('Journal') : tr('Note')}
+          {shownStars.length > 1 && shownStars.some((n) => n.id === selected) && (
+            <span className="tracking-normal normal-case">
+              · {shownStars.findIndex((n) => n.id === selected) + 1}/{shownStars.length}
+            </span>
+          )}
         </span>
-        <button type="button" onClick={() => setSelected(null)} aria-label={tr('Close')} className="-mt-1 -mr-1 grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/5 hover:text-bone">
-          <X size={15} aria-hidden="true" />
-        </button>
+        <span className="-mr-1 flex shrink-0 items-center">
+          {shownStars.length > 1 && (
+            <>
+              <button type="button" onClick={() => step(-1)} aria-label={tr('Previous star')} title={tr('Previous star')} className="grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/5 hover:text-bone">
+                <ChevronLeft size={16} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={() => step(1)} aria-label={tr('Next star')} title={tr('Next star')} className="grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/5 hover:text-bone">
+                <ChevronRight size={16} aria-hidden="true" />
+              </button>
+            </>
+          )}
+          <button type="button" onClick={() => setSelected(null)} aria-label={tr('Close')} className="grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/5 hover:text-bone">
+            <X size={15} aria-hidden="true" />
+          </button>
+        </span>
       </div>
-      <h2 className="mt-2 font-display text-h3 leading-tight text-bone">{pickedNode?.title}</h2>
-      <p className="mt-2 line-clamp-3 text-fine leading-relaxed text-bone-dim">{excerpt(picked.text.replace(/^.*\n/, '') || picked.text, '', 200)}</p>
-      {linked.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {linked.slice(0, 8).map((n) => (
-            <button key={n.id} type="button" onClick={() => setSelected(n.id)} className="rounded-full border border-line px-2.5 py-1 font-mono text-[0.68rem] text-bone-dim hover:border-signal hover:text-bone">
-              {n.title}
+      <h2 className="mt-1.5 line-clamp-2 font-display text-h3 leading-tight text-bone max-sm:text-[1.35rem]">{pickedNode.title}</h2>
+      <p className="mt-1 font-mono text-[0.68rem] text-bone-faint">
+        {tr('{0} words', pickedNode.words)} · {pickedNode.degree === 1 ? tr('1 thread') : tr('{0} threads', pickedNode.degree)}
+      </p>
+      <p className="mt-2.5 line-clamp-3 text-fine leading-relaxed text-bone-dim max-sm:mt-2 max-sm:line-clamp-2">{excerpt(picked.text.replace(/^.*\n/, '') || picked.text, '', 200)}</p>
+      {pickedNode.tags.length > 0 && (
+        <div className="no-scrollbar mt-3 flex gap-1.5 max-sm:overflow-x-auto sm:flex-wrap">
+          {pickedNode.tags.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => {
+                setTag(t);
+                setSelected(null);
+              }}
+              title={tr('Show only #{0}', t)}
+              className={clsx(chip, 'shrink-0 border-transparent text-bone hover:brightness-125')}
+              style={{ background: `hsl(${hueOf(t)} 70% 55% / 0.2)` }}
+            >
+              #{t}
             </button>
           ))}
         </div>
+      )}
+      {linked.length > 0 ? (
+        <div className="mt-4">
+          <h3 className="mb-1.5 font-mono text-[0.62rem] tracking-[0.12em] text-bone-faint uppercase">{tr('Connected to ({0})', linked.length)}</h3>
+          <div className="no-scrollbar flex gap-1.5 max-sm:overflow-x-auto sm:flex-wrap">
+            {linked.slice(0, 10).map((n) => (
+              <button key={n.id} type="button" onClick={() => setSelected(n.id)} onMouseEnter={() => lookAt(n.id)} onMouseLeave={() => lookAt(null)} className={clsx(chip, 'inline-flex max-w-full shrink-0 items-center gap-1.5 border-line text-bone-dim hover:border-signal hover:text-bone max-sm:max-w-[14rem]')}>
+                <i className="size-1.5 shrink-0 rounded-full" style={{ background: `hsl(${n.hue} 90% 70%)` }} aria-hidden="true" />
+                <span className="truncate">{n.title}</span>
+              </button>
+            ))}
+            {linked.length > 10 && <span className="shrink-0 px-1 py-1 font-mono text-[0.68rem] text-bone-faint">{tr('+{0} more', linked.length - 10)}</span>}
+          </div>
+        </div>
+      ) : (
+        <p className="mt-3 text-fine text-bone-faint">{tr('A lone star: give it a tag or a [[link]] to join it to the others.')}</p>
       )}
       <Button size="sm" className="mt-4 w-full sm:w-auto" onClick={() => onOpenNote(picked.id)}>
         {tr('Open the note')} <ArrowUpRight size={14} aria-hidden="true" />
       </Button>
     </section>
   );
+
+  const controls = [
+    [tr('Zoom in'), Plus, () => zoom(1.25), '+'],
+    [tr('Zoom out'), Minus, () => zoom(0.8), '−'],
+    [tr('Fit to view'), Crosshair, fit, '0'],
+    [tr('Reset star positions'), RotateCcw, relax, ''],
+  ];
+  const fullLabel = expanded ? tr('Exit full screen') : tr('Full screen');
 
   return (
     <div className="flex flex-col gap-5">
@@ -554,40 +778,77 @@ export default function ConstellationView({ onOpenNote }) {
       </PageHead>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="dark-island relative overflow-hidden rounded-3xl border border-line bg-[#07070a]">
-          <canvas ref={canvas} className="block h-[min(66dvh,600px)] min-h-[340px] w-full cursor-grab touch-none max-sm:h-[62dvh]" aria-label={tr('A map of your notes. Use the list beside it for a keyboard-friendly version.')} data-sky />
+        <div className={clsx('dark-island overflow-hidden bg-[#07070a]', expanded ? 'fixed inset-0 z-[80]' : 'relative self-start rounded-3xl border border-line')} data-expanded={expanded ? '' : undefined}>
+          <canvas ref={canvas} className={clsx('block w-full cursor-grab touch-none', expanded ? 'h-[100dvh]' : 'h-[min(66dvh,600px)] min-h-[340px] max-sm:h-[62dvh]')} aria-label={tr('A map of your notes. Use the list beside it for a keyboard-friendly version.')} data-sky />
 
-          <div className="pointer-events-none absolute top-3 left-3 flex flex-col items-start gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-wash/10 bg-shade/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-dim backdrop-blur">
+          {/* top left: find a star (the ones that match light up), and what the sky holds */}
+          <div className="absolute top-3 right-16 left-3 flex flex-col items-start gap-2 sm:right-auto sm:w-72">
+            <label className={clsx(glass, 'flex h-10 w-full items-center gap-2 rounded-full px-3.5 transition-colors focus-within:border-signal/60')}>
+              <Search size={14} className="shrink-0 text-bone-faint" aria-hidden="true" />
+              <input
+                ref={searchBox}
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && shownStars[0]) {
+                    setSelected(shownStars[0].id);
+                    e.currentTarget.blur();
+                  }
+                }}
+                placeholder={tr('Find a star')}
+                aria-label={tr('Find a star')}
+                className="min-w-0 flex-1 bg-transparent text-fine text-bone placeholder:text-bone-faint focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden"
+              />
+              {query ? (
+                <>
+                  {matchCount !== null && <small className={clsx('shrink-0 font-mono text-[0.64rem]', matchCount ? 'text-bone-faint' : 'text-danger')}>{matchCount}</small>}
+                  <button type="button" onClick={() => setQuery('')} aria-label={tr('Clear the search')} className="shrink-0 text-bone-faint hover:text-bone">
+                    <X size={14} aria-hidden="true" />
+                  </button>
+                </>
+              ) : (
+                <kbd className="shrink-0 rounded border border-wash/15 px-1.5 font-mono text-[0.6rem] text-bone-faint max-md:hidden">/</kbd>
+              )}
+            </label>
+            <span className={clsx(glass, 'pointer-events-none inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[0.68rem] text-bone-dim')}>
               <b className="font-medium text-bone">{graph.nodes.length}</b> {graph.nodes.length === 1 ? tr('star') : tr('stars')} <i className="size-1 rounded-full bg-bone-faint" aria-hidden="true" /> <b className="font-medium text-bone">{graph.edges.length}</b> {graph.edges.length === 1 ? tr('thread') : tr('threads')}
             </span>
-            {!touched && !selected && !sparse && (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-wash/10 bg-shade/45 px-3 py-1.5 font-mono text-[0.68rem] text-bone-faint backdrop-blur" data-hint>
+            {!touched && !selected && !sparse && !query && (
+              <span className={clsx(glass, 'pointer-events-none inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[0.68rem] text-bone-faint')} data-hint>
                 <Hand size={12} aria-hidden="true" /> {tr('Drag a star to move it, tap to read')}
               </span>
             )}
           </div>
 
-          <div className="absolute top-3 right-3 flex flex-col gap-1.5">
-            {[
-              [tr('Zoom in'), Plus, () => zoom(1.25)],
-              [tr('Zoom out'), Minus, () => zoom(0.8)],
-              [tr('Fit to view'), Crosshair, fit],
-              [tr('Reset star positions'), RotateCcw, relax],
-            ].map(([label, Icon, run]) => (
-              <button key={label} type="button" aria-label={label} onClick={run} className="grid size-10 place-items-center rounded-full border border-wash/10 bg-shade/45 text-bone-dim backdrop-blur transition-colors hover:text-bone active:scale-95 sm:size-9">
-                <Icon size={15} aria-hidden="true" />
-              </button>
-            ))}
+          {/* top right: the camera controls in one column, and the full-screen switch below them */}
+          <div className="absolute top-3 right-3 flex flex-col items-center gap-2">
+            <div className={clsx(glass, 'flex flex-col overflow-hidden rounded-full')}>
+              {controls.map(([label, Icon, run, key]) => (
+                <button key={label} type="button" aria-label={label} title={key ? `${label} (${key})` : label} onClick={run} className="grid size-10 place-items-center text-bone-dim transition-colors hover:bg-wash/10 hover:text-bone active:scale-90 sm:size-9">
+                  <Icon size={15} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+            <button type="button" aria-label={fullLabel} title={`${fullLabel} (F)`} aria-pressed={expanded} onClick={() => setExpanded(!expanded)} className={clsx(glass, 'grid size-10 place-items-center rounded-full text-bone-dim transition-colors hover:text-bone active:scale-90 sm:size-9')}>
+              {expanded ? <Minimize2 size={15} aria-hidden="true" /> : <Maximize2 size={15} aria-hidden="true" />}
+            </button>
           </div>
 
-          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3">
-            {picked && <div className="lg:hidden">{card}</div>}
+          {/* bottom: the chosen star's card (beside the sky on a wide screen, unless the sky fills the screen), else the tags */}
+          <div className={clsx('absolute inset-x-0 bottom-0 flex flex-col gap-2 p-3', expanded && 'pb-[calc(0.75rem+env(safe-area-inset-bottom))]')}>
+            {picked && <div className={expanded ? 'sm:max-w-md' : 'lg:hidden'}>{card}</div>}
             {tags.length > 0 && !picked && (
-              <div className="flex flex-wrap gap-1.5 max-sm:[&>button:nth-child(n+7)]:hidden" role="group" aria-label={tr('Filter by tag')}>
-                {tags.slice(0, 14).map((t) => (
-                  <button key={t} type="button" aria-pressed={tag === t} onClick={() => setTag(tag === t ? '' : t)} className={clsx('rounded-full border px-3 py-1 font-mono text-[0.7rem] backdrop-blur transition-colors', tag === t ? 'border-transparent bg-bone text-ink-0' : 'border-wash/10 bg-shade/45 text-bone-dim hover:text-bone')}>
-                    #{t}
+              <div className="no-scrollbar -mx-3 flex gap-1.5 overflow-x-auto px-3 [mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-24px),transparent)]" role="group" aria-label={tr('Filter by tag')}>
+                {tag && (
+                  <button type="button" onClick={() => setTag('')} className={clsx(chip, glass, 'inline-flex shrink-0 items-center gap-1 text-bone')}>
+                    <X size={11} aria-hidden="true" /> {tr('All')}
+                  </button>
+                )}
+                {tags.map(({ name, n }) => (
+                  <button key={name} type="button" aria-pressed={tag === name} onClick={() => setTag(tag === name ? '' : name)} className={clsx(chip, 'inline-flex shrink-0 items-center gap-1.5 backdrop-blur-md', tag === name ? 'border-transparent bg-bone text-ink-0' : 'border-wash/10 bg-shade/55 text-bone-dim hover:text-bone')}>
+                    <i className="size-1.5 rounded-full" style={{ background: `hsl(${hueOf(name)} 90% 70%)` }} aria-hidden="true" />#{name}
+                    <span className={clsx('text-[0.6rem]', tag === name ? 'text-ink-0/60' : 'text-bone-faint')}>{n}</span>
                   </button>
                 ))}
               </div>
@@ -606,27 +867,40 @@ export default function ConstellationView({ onOpenNote }) {
 
         <aside className="flex flex-col gap-3" aria-label={tr('Stars')}>
           {picked && <div className="max-lg:hidden">{card}</div>}
-          <section className="min-h-0 rounded-3xl border border-line bg-ink-1 p-3">
-            <div className="flex items-center justify-between gap-2 px-2 pt-1 pb-2">
-              <h2 className="font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{tr('All stars')}</h2>
-              <small className="font-mono text-[0.64rem] text-bone-faint">{tr('threads')}</small>
+          <section className="flex min-h-0 flex-col gap-2 rounded-3xl border border-line bg-ink-1 p-3">
+            <div className="flex items-center justify-between gap-2 px-2 pt-1">
+              <h2 className="truncate font-mono text-[0.68rem] tracking-[0.12em] text-bone-faint uppercase">{search.trim() ? tr('Matching “{0}”', search.trim()) : tr('All stars')}</h2>
+              <small className="font-mono text-[0.64rem] text-bone-faint">{shownStars.length}</small>
             </div>
-            <label className="relative mb-2 block">
-              <Search size={14} className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-bone-faint" aria-hidden="true" />
-              <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={tr('Find a star')} aria-label={tr('Find a star')} className="h-10 w-full rounded-full border border-line bg-ink-2 pr-4 pl-9 text-fine text-bone placeholder:text-bone-faint focus-visible:border-signal focus-visible:outline-none" />
-            </label>
-            <ul className="flex max-h-72 flex-col gap-0.5 overflow-y-auto">
+            <div className="px-1">
+              <Segmented
+                label={tr('Sort the stars')}
+                value={order}
+                onChange={setOrder}
+                options={[
+                  { id: 'linked', label: tr('Most linked') },
+                  { id: 'az', label: tr('A–Z') },
+                  { id: 'alone', label: lonely ? tr('Alone ({0})', lonely) : tr('Alone') },
+                ]}
+                round
+              />
+            </div>
+            <ul className="flex max-h-[26rem] flex-col gap-0.5 overflow-y-auto">
               {shownStars.map((n) => (
                 <li key={n.id}>
                   <button type="button" onClick={() => setSelected(n.id === selected ? null : n.id)} onMouseEnter={() => lookAt(n.id)} onMouseLeave={() => lookAt(null)} onFocus={() => lookAt(n.id)} onBlur={() => lookAt(null)} aria-pressed={n.id === selected} className={clsx('flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-fine transition-colors hover:bg-wash/5', n.id === selected ? 'bg-wash/10 text-bone' : 'text-bone-dim')}>
                     <i className="size-2 shrink-0 rounded-full" style={{ background: `hsl(${n.hue} 90% 70%)` }} aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate">{n.title}</span>
-                    <small className="font-mono text-[0.64rem] text-bone-faint">{n.degree}</small>
+                    <small className="inline-flex items-center gap-1 font-mono text-[0.64rem] text-bone-faint" title={n.degree === 1 ? tr('1 thread') : tr('{0} threads', n.degree)}>
+                      {n.degree}
+                      <Link2 size={10} aria-hidden="true" />
+                    </small>
                   </button>
                 </li>
               ))}
-              {!shownStars.length && <li className="px-2 py-3 font-mono text-fine text-bone-faint">{stars.length ? tr('No star matches.') : tr('No notes yet.')}</li>}
+              {!shownStars.length && <li className="px-2 py-3 font-mono text-fine text-bone-faint">{search.trim() ? tr('No star matches.') : order === 'alone' && graph.nodes.length ? tr('Every star is joined to another.') : tr('No notes yet.')}</li>}
             </ul>
+            <p className="px-2 pb-1 font-mono text-[0.6rem] text-bone-faint max-md:hidden">{tr('/ find · ← → walk · + − zoom · 0 fit · F full screen')}</p>
           </section>
         </aside>
       </div>
