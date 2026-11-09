@@ -2616,3 +2616,22 @@ html[data-vt='player']::view-transition-new(root) {
     transform: translateX(var(--slide, 0px));
   }
 }
+
+/* The heartbeat on the home screen's command card: a bright stretch of the line runs along it, over the faint whole line. */
+.ecg-pulse {
+  stroke-dasharray: 0.16 1;
+  stroke-dashoffset: 0.16;
+  animation: ecg-run 2.8s linear infinite;
+  filter: drop-shadow(0 0 4px currentColor);
+}
+@keyframes ecg-run {
+  to {
+    stroke-dashoffset: -1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ecg-pulse {
+    animation: none;
+    stroke-dasharray: none;
+  }
+}
