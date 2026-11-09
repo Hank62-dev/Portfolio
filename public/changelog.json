@@ -1,5 +1,11 @@
 [
   {
+    "id": "diary-notebook",
+    "date": "2026-11-09",
+    "vi": "Đọc lại nhật ký giờ như mở một cuốn sổ: gáy lò xo, giấy kẻ dòng có lề đỏ, chữ viết tay, ảnh dán băng keo, tâm trạng đóng như con dấu. Lật trang trước, trang sau bằng mũi tên, vuốt ngang hoặc phím ← →.",
+    "en": "Reading a diary page now opens a notebook: a spiral, ruled paper with a red margin, handwriting, taped-on photos and the mood as a stamp. Turn to the page before or after with the arrows, a sideways swipe or ← →."
+  },
+  {
     "id": "login-lockout",
     "date": "2026-11-09",
     "vi": "Đăng nhập an toàn hơn: sai mật khẩu 4 lần đầu không sao, sau đó bị khoá 30 giây và mỗi lần sai tiếp lại khoá gấp đôi, tối đa 1 giờ. Màn hình đăng nhập báo còn mấy lần thử và đếm ngược thời gian khoá.",

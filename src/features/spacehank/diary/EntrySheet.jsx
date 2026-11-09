@@ -1,57 +1,129 @@
-import { PenLine } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronLeft, ChevronRight, PenLine } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import MoodFace from './MoodFace';
 import PhotoViewer from './PhotoViewer';
-import { bodyOf, dayLabel, moodWord } from './model';
-import { PaperSheet, SheetClose, SoftButton, Thumb } from './ui';
+import { bodyOf, dayLabel, moodWord, parseDay } from './model';
+import { PaperSheet, SheetClose } from './ui';
 import { usePhoto } from './photos';
 import { tr } from '../lang';
 
-/** A big picture inside a page being read. Tapping it opens it full screen. */
-function Photo({ id, onOpen }) {
+// a picture taped onto the page: each one leans its own way, the same way every time it is opened
+const TILTS = [-3, 2.5, -1.5, 3.5, -2.5, 1.5];
+
+/** A photo stuck on the page with a strip of tape. Tapping it opens it full screen. */
+function Polaroid({ id, index, single, onOpen }) {
   const url = usePhoto(id);
   return (
-    <button type="button" onClick={onOpen} aria-label={tr('Xem ảnh lớn')} className="block w-full cursor-zoom-in overflow-hidden rounded-3xl bg-[color:var(--dz-photo)] transition-transform active:scale-[0.99]">
-      {url && <img src={url} alt={tr('Ảnh kỷ niệm')} className="max-h-80 w-full object-cover" />}
+    <button type="button" onClick={onOpen} aria-label={tr('Xem ảnh lớn')} className="nb-photo cursor-zoom-in" style={{ '--tilt': `${TILTS[index % TILTS.length]}deg` }} data-single={single || undefined}>
+      <span className="nb-tape" aria-hidden="true" />
+      <span className="nb-photo-frame">{url && <img src={url} alt={tr('Ảnh kỷ niệm')} />}</span>
     </button>
   );
 }
 
-/** Reading one day's page again. `label` is a line above the date ("Một tuần trước"), for pages brought back as memories. */
-export default function EntrySheet({ entry, label, onClose, onEdit }) {
+const SPIRAL = Array.from({ length: 11 });
+
+/**
+ * Reading one day's page again, as a page of a spiral notebook: ruled lines, a margin, the words in handwriting, the photos
+ * taped on. `days` are the written days, oldest first, so the arrows (or a swipe, or ← →) turn to the page before or after.
+ * `label` is a line above the date ("Một tuần trước"), for pages brought back as memories.
+ */
+export default function EntrySheet({ entry, label, days = [], onTurn, onClose, onEdit }) {
   const body = bodyOf(entry.text);
   const photos = entry.photos ?? [];
   const [viewing, setViewing] = useState(null); // the picture open full screen
+  const [turn, setTurn] = useState(''); // which way the last page turned, for the animation
+  const at = days.indexOf(entry.day);
+  const before = at > 0 ? days[at - 1] : null;
+  const after = at >= 0 && at < days.length - 1 ? days[at + 1] : null;
+  const year = parseDay(entry.day).getFullYear();
+
+  const go = (day, way) => {
+    if (!day || !onTurn) return;
+    setTurn(way);
+    setViewing(null);
+    onTurn(day);
+  };
+
+  // ← → turn the pages while the notebook is open (not while a photo is shown full screen)
+  const keys = useRef(null);
+  keys.current = (event) => {
+    if (viewing !== null || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (event.key === 'ArrowLeft') go(before, 'back');
+    if (event.key === 'ArrowRight') go(after, 'next');
+  };
+  useEffect(() => {
+    const listen = (event) => keys.current(event);
+    window.addEventListener('keydown', listen);
+    return () => window.removeEventListener('keydown', listen);
+  }, []);
+
+  // a sideways swipe turns the page too; an up-down one is left to the sheet (pulling it down puts it away)
+  const swipe = useRef(null);
+  const touchStart = (event) => {
+    const t = event.touches[0];
+    swipe.current = { x: t.clientX, y: t.clientY };
+  };
+  const touchEnd = (event) => {
+    const from = swipe.current;
+    swipe.current = null;
+    if (!from) return;
+    const t = event.changedTouches[0];
+    const dx = t.clientX - from.x;
+    const dy = t.clientY - from.y;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    if (dx < 0) go(after, 'next');
+    else go(before, 'back');
+  };
+
   return (
-    <PaperSheet open onClose={onClose} title={tr('Nhật ký {0}', dayLabel(entry.day))} description={tr('Đọc lại trang nhật ký.')}>
-      <article className="flex flex-col gap-4 px-5 pt-2 pb-5" data-entry>
-        <header className="flex items-start justify-between gap-3">
-          <div>
-            {label && <p className="font-display text-[1.2rem] leading-none text-[color:var(--dz-amber)]">{label}</p>}
-            <h2 className="font-display text-[2rem] leading-tight text-[color:var(--dz-text)]">{dayLabel(entry.day)}</h2>
-            {entry.mood && (
-              <p className="mt-1 flex items-center gap-2 font-body text-[0.95rem] text-[color:var(--dz-text-2)]">
-                <MoodFace mood={entry.mood} size={30} /> {moodWord(entry.mood)}
-              </p>
-            )}
+    <PaperSheet open surface="notebook" onClose={onClose} title={tr('Nhật ký {0}', dayLabel(entry.day))} description={tr('Đọc lại trang nhật ký.')}>
+      <div className="nb-spiral" aria-hidden="true">
+        {SPIRAL.map((_, i) => (
+          <span key={i} />
+        ))}
+      </div>
+      <article key={entry.day} className="nb-page" data-turn={turn || undefined} onTouchStart={touchStart} onTouchEnd={touchEnd} data-entry>
+        <header className="nb-head">
+          <div className="min-w-0">
+            {label && <p className="nb-label">{label}</p>}
+            <h2 className="nb-date">{dayLabel(entry.day)}</h2>
+            <p className="nb-year">{year}</p>
           </div>
-          <SheetClose />
+          <div className="flex shrink-0 items-start gap-1">
+            {entry.mood && (
+              <span className="nb-stamp" title={moodWord(entry.mood)}>
+                <MoodFace mood={entry.mood} size={34} />
+                <span>{moodWord(entry.mood)}</span>
+              </span>
+            )}
+            <SheetClose />
+          </div>
         </header>
-        {photos.length === 1 && <Photo id={photos[0]} onOpen={() => setViewing(0)} />}
-        {photos.length > 1 && (
-          <div className="flex flex-wrap gap-2">
+
+        {photos.length > 0 && (
+          <div className="nb-photos" data-count={photos.length}>
             {photos.map((id, index) => (
-              <button key={id} type="button" onClick={() => setViewing(index)} aria-label={tr('Xem ảnh lớn')} className="cursor-zoom-in rounded-2xl transition-transform active:scale-[0.96]">
-                <Thumb id={id} size={92} />
-              </button>
+              <Polaroid key={id} id={id} index={index} single={photos.length === 1} onOpen={() => setViewing(index)} />
             ))}
           </div>
         )}
-        {body ? <p className="font-display text-[1.3rem] leading-relaxed whitespace-pre-wrap text-[color:var(--dz-text)]">{body}</p> : <p className="font-body text-[0.98rem] text-[color:var(--dz-text-3)]">{tr('Trang này chưa có chữ nào, chỉ có một dấu chân.')}</p>}
-        <footer className="flex gap-2 pt-1">
-          <SoftButton tone="soft" className="flex-1" onClick={onEdit}>
-            <PenLine size={16} aria-hidden="true" /> {tr('Sửa trang này')}
-          </SoftButton>
+
+        <div className="nb-lines">{body ? <p className="nb-words">{body}</p> : <p className="nb-words nb-empty">{tr('Trang này chưa có chữ nào, chỉ có một dấu chân.')}</p>}</div>
+
+        <footer className="nb-foot">
+          <button type="button" className="nb-turn" onClick={() => go(before, 'back')} disabled={!before} aria-label={tr('Trang trước')}>
+            <ChevronLeft size={18} aria-hidden="true" />
+          </button>
+          <div className="flex flex-col items-center gap-1.5">
+            <button type="button" className="nb-edit" onClick={onEdit}>
+              <PenLine size={15} aria-hidden="true" /> {tr('Sửa trang này')}
+            </button>
+            {at >= 0 && days.length > 1 && <span className="nb-number">{tr('Trang {0} trên {1}', at + 1, days.length)}</span>}
+          </div>
+          <button type="button" className="nb-turn" onClick={() => go(after, 'next')} disabled={!after} aria-label={tr('Trang kế tiếp')}>
+            <ChevronRight size={18} aria-hidden="true" />
+          </button>
         </footer>
       </article>
       {viewing !== null && <PhotoViewer ids={photos} start={viewing} onClose={() => setViewing(null)} />}

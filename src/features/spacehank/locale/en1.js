@@ -216,4 +216,7 @@ export const en1 = {
   'Ra chơi': 'Break Room',
   'Type it the way you would say it: “ăn trưa 45k”, “grab 38 nghìn”, “lương 8tr”. It works out the amount and the category.': 'Type it the way you would say it: “lunch 45k”, “grab 38k”, “salary 8m”. It works out the amount and the category.',
   'ăn trưa 45k': 'lunch 45k',
+  'Trang trước': 'Previous page',
+  'Trang kế tiếp': 'Next page',
+  'Trang {0} trên {1}': 'Page {0} of {1}',
 };

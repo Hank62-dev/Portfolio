@@ -16,7 +16,7 @@ import { useDiaryLocked } from '../diary/useLock';
 import WeekWave from '../diary/WeekWave';
 import Writer from '../diary/Writer';
 import { Thumb, SoftButton } from '../diary/ui';
-import { bodyOf, dayLabel, encouragement, entryOf, excerptOf, journeyDays, journeyStats, memories, milestonesOf, moodWord, shortLabel, weekMoods } from '../diary/model';
+import { bodyOf, dayLabel, encouragement, entryOf, excerptOf, journeyDays, journeyStats, memories, milestonesOf, moodWord, shortLabel, weekMoods, writtenDays } from '../diary/model';
 import Pet from '../pet/Pet';
 import { usePet } from '../pet/usePet';
 import { useStore } from '../store';
@@ -69,6 +69,7 @@ export default function DiaryView({ onNotify }) {
   }, [locked]);
 
   const entry = sheet ? entryOf(notes, sheet.day) : null;
+  const pages = useMemo(() => writtenDays(notes), [notes]); // the notebook's pages, oldest first
 
   if (locked) {
     return (
@@ -216,7 +217,7 @@ export default function DiaryView({ onNotify }) {
 
       {settings && <LockSettings onClose={() => setSettings(false)} onNotify={onNotify} />}
       {sheet?.mode === 'write' && <Writer key={`w-${sheet.day}`} day={sheet.day} entry={entry} onClose={() => setSheet(null)} onNotify={onNotify} />}
-      {sheet?.mode === 'read' && entry && <EntrySheet key={`r-${sheet.day}`} entry={entry} label={sheet.label} onClose={() => setSheet(null)} onEdit={() => write(sheet.day)} />}
+      {sheet?.mode === 'read' && entry && <EntrySheet key="read" entry={entry} label={sheet.label} days={pages} onTurn={(day) => read(day)} onClose={() => setSheet(null)} onEdit={() => write(sheet.day)} />}
     </div>
   );
 }

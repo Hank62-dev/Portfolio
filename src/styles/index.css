@@ -1163,6 +1163,289 @@ input[data-own-clear]::-webkit-search-decoration {
   --dz-paper-shadow: rgb(40 90 150 / 0.4);
 }
 
+/* ---- The diary's notebook ----
+   Reading a page again opens a spiral notebook: cream paper with blue rules and a red margin, the words in handwriting,
+   photos taped on. The paper stays paper by night too, only a little dimmer, so its ink and buttons have their own roles. */
+.notebook {
+  --nb-paper: #fbf6e8;
+  --nb-paper-edge: #efe5cc;
+  --nb-rule: rgb(84 124 184 / 0.26);
+  --nb-margin: rgb(214 86 86 / 0.5);
+  --nb-ink: #22324f;
+  --nb-ink-soft: #5b6680;
+  --nb-pencil: #8a8f9c;
+  --nb-line-h: 2rem;
+  --dz-text: #22324f;
+  --dz-text-2: #3d4b66;
+  --dz-text-3: #687389;
+  --dz-soft: #efe4c6;
+  --dz-soft-hover: #e6d7b0;
+  --dz-on-soft: #3a3020;
+  --dz-photo: #e6dcc0;
+  --dz-handle: #c8b88c;
+  --dz-amber: #a85c14;
+  color-scheme: light;
+  color: var(--nb-ink);
+  background: linear-gradient(to right, var(--nb-paper-edge), var(--nb-paper) 1.2rem) var(--nb-paper);
+  border: 1px solid #e2d5b3;
+  box-shadow: 0 1px 0 #fff inset, 0 24px 50px -20px rgb(10 20 40 / 0.6), 4px 4px 0 -1px #efe6cf, 8px 8px 0 -2px #e4d8b8;
+  border-radius: 0.9rem 0.9rem 0 0;
+}
+@media (min-width: 768px) {
+  .notebook {
+    border-radius: 0.9rem;
+  }
+}
+:root:not([data-theme='light']) .notebook {
+  --nb-paper: #f1e9d4;
+  --nb-paper-edge: #e3d7b9;
+}
+
+/* the coil along the top: punched holes with a wire through each */
+.nb-spiral {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: space-around;
+  flex-shrink: 0;
+  padding: 0.55rem 1.4rem 0.35rem;
+  background: linear-gradient(var(--nb-paper) 70%, transparent);
+}
+.nb-spiral span {
+  position: relative;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: #3b3a36;
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.6), 0 1px 0 rgb(255 255 255 / 0.8);
+}
+.nb-spiral span::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0.3rem;
+  width: 0.36rem;
+  height: 1.25rem;
+  transform: translateX(-50%) rotate(8deg);
+  border-radius: 0.3rem;
+  background: linear-gradient(to right, #7c818a, #e9ecf0 45%, #9ea3ab 70%, #6b7079);
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.35);
+}
+.notebook > span[aria-hidden='true'] {
+  display: none; /* the sheet's grab handle: the coil is the handle here */
+}
+
+.nb-page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 0.6rem 1.25rem 1.25rem 3.4rem;
+  transform-origin: left center;
+}
+/* the red margin, top to bottom */
+.nb-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 2.5rem;
+  border-left: 1.5px solid var(--nb-margin);
+  box-shadow: 3px 0 0 -1.5px var(--nb-margin);
+  pointer-events: none;
+}
+.nb-page[data-turn='next'] {
+  animation: nb-turn-next 0.42s var(--ease-out-expo) both;
+}
+.nb-page[data-turn='back'] {
+  animation: nb-turn-back 0.42s var(--ease-out-expo) both;
+}
+@keyframes nb-turn-next {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateY(-14deg) translateX(1.5rem);
+  }
+}
+@keyframes nb-turn-back {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateY(14deg) translateX(-1.5rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nb-page[data-turn] {
+    animation: none;
+  }
+}
+
+.nb-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.nb-label {
+  font-family: var(--font-hand);
+  font-size: 1.05rem;
+  line-height: 1.2;
+  color: var(--dz-amber);
+}
+.nb-date {
+  font-family: var(--font-hand);
+  font-size: 1.9rem;
+  line-height: 1.1;
+  color: var(--nb-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--nb-margin);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3rem;
+}
+.nb-year {
+  margin-top: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: var(--nb-pencil);
+}
+/* the mood, inked on like a rubber stamp */
+.nb-stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.35rem 0.45rem 0.3rem;
+  border: 2px dashed rgb(168 92 20 / 0.55);
+  border-radius: 0.8rem;
+  transform: rotate(6deg);
+  font-family: var(--font-hand);
+  font-size: 0.8rem;
+  line-height: 1;
+  color: #a85c14;
+}
+
+.nb-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem 0.75rem;
+  padding: 0.4rem 0.1rem 0.2rem;
+}
+.nb-photo {
+  position: relative;
+  width: calc(50% - 0.4rem);
+  padding: 0.45rem 0.45rem 1.4rem;
+  background: #fffdf8;
+  box-shadow: 0 6px 14px -6px rgb(40 30 10 / 0.45), 0 0 0 1px rgb(0 0 0 / 0.04);
+  transform: rotate(var(--tilt));
+  transition: transform 0.25s var(--ease-out-expo);
+}
+.nb-photo[data-single] {
+  width: 86%;
+  margin-inline: auto;
+}
+.nb-photo:hover,
+.nb-photo:focus-visible {
+  transform: rotate(0deg) scale(1.02);
+}
+.nb-photo-frame {
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--dz-photo);
+}
+.nb-photo[data-single] .nb-photo-frame {
+  aspect-ratio: 4 / 3;
+}
+.nb-photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.nb-tape {
+  position: absolute;
+  top: -0.55rem;
+  left: 50%;
+  width: 3.6rem;
+  height: 1.1rem;
+  transform: translateX(-50%) rotate(calc(var(--tilt) * -1.4));
+  background: rgb(240 222 160 / 0.72);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+  clip-path: polygon(3% 0, 97% 4%, 100% 50%, 96% 100%, 2% 96%, 0 50%);
+}
+
+/* the words sit on the rules: the lines are drawn behind the text, one per line of handwriting, and run on a few more */
+.nb-lines {
+  min-height: calc(var(--nb-line-h) * 6);
+  background-image: linear-gradient(to bottom, transparent calc(var(--nb-line-h) - 1px), var(--nb-rule) calc(var(--nb-line-h) - 1px));
+  background-size: 100% var(--nb-line-h);
+}
+.nb-words {
+  font-family: var(--font-hand);
+  font-size: 1.28rem;
+  line-height: var(--nb-line-h);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--nb-ink);
+  padding-top: 1px;
+}
+.nb-empty {
+  color: var(--nb-pencil);
+}
+
+.nb-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+.nb-turn {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  color: var(--nb-ink-soft);
+  border: 1px solid #e0d3ae;
+  background: #fffaf0;
+  transition: background-color 0.2s, opacity 0.2s, transform 0.2s;
+}
+.nb-turn:hover:not(:disabled) {
+  background: var(--dz-soft);
+}
+.nb-turn:active:not(:disabled) {
+  transform: scale(0.94);
+}
+.nb-turn:disabled {
+  opacity: 0.3;
+}
+.nb-edit {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 1.2rem;
+  border-radius: 999px;
+  background: var(--nb-ink);
+  color: #fbf6e8;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: transform 0.2s, background-color 0.2s;
+}
+.nb-edit:hover {
+  background: #2e4166;
+}
+.nb-edit:active {
+  transform: scale(0.96);
+}
+.nb-number {
+  font-family: var(--font-hand);
+  font-size: 0.95rem;
+  color: var(--nb-pencil);
+}
+
 /* ---- Loading ----
    A skeleton is a block with a soft band of light that sweeps across it. The band is drawn on top of whatever background colour
    the block has, so a skeleton on a glass or a coloured surface keeps its own look. */
