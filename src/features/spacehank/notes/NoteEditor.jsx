@@ -22,6 +22,7 @@ import {
   Minimize2,
   Minus,
   Pin,
+  StickyNote,
   PinOff,
   Quote,
   Redo2,
@@ -34,6 +35,8 @@ import { Badge, Button } from '../../../design-system';
 import { clsx } from '../../../lib/format';
 import { MOODS, tagsOf, textToHtml, titleOf } from './notes';
 import { togglePin, updateNote } from './library';
+import { stickies, toggleFloat } from './stickies';
+import { useStore } from '../store';
 import NotePictures from './NotePictures';
 import ScrollTopButton from './ScrollTopButton';
 import { locale, tr } from '../lang';
@@ -285,11 +288,16 @@ export default function NoteEditor({ note, related, onOpen, onBack, onDelete }) 
     []
   );
 
-  // full screen, pin and delete: in the top row, and on a wide screen at the head of the side column, which stays in view as the note scrolls (in full screen too)
+  const floating = useStore(stickies, (s) => s.list.some((x) => x.id === note.id));
+
+  // full screen, float, pin and delete: in the top row, and on a wide screen at the head of the side column, which stays in view as the note scrolls (in full screen too)
   const actions = (
     <>
       <Button variant="secondary" size="icon" aria-label={full ? tr('Exit full screen') : tr('Full screen')} title={full ? tr('Exit full screen') : tr('Full screen')} onClick={full ? leaveFull : enterFull}>
         {full ? <Minimize2 size={14} aria-hidden="true" /> : <Maximize2 size={14} aria-hidden="true" />}
+      </Button>
+      <Button variant={floating ? 'primary' : 'secondary'} size="icon" aria-label={floating ? tr('Take off the screen') : tr('Float on the screen')} title={floating ? tr('Take off the screen') : tr('Float on the screen, as a sticky note over every tab')} aria-pressed={floating} onClick={() => toggleFloat(note.id)}>
+        <StickyNote size={14} aria-hidden="true" />
       </Button>
       <Button variant="secondary" size="icon" aria-label={note.pinned ? tr('Unpin') : tr('Pin')} onClick={() => togglePin(note.id)}>
         {note.pinned ? <PinOff size={14} aria-hidden="true" /> : <Pin size={14} aria-hidden="true" />}

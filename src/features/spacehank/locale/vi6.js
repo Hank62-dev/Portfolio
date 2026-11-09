@@ -118,6 +118,24 @@ export const vi6 = {
   'Pause the podcast': 'Tạm dừng podcast',
   'Resume the podcast': 'Phát tiếp podcast',
 
+  // sticky notes
+  'Take off the screen': 'Gỡ khỏi màn hình',
+  'Float on the screen': 'Ghim lên màn hình',
+  'Float on the screen, as a sticky note over every tab': 'Ghim lên màn hình thành giấy nhớ, hiện trên mọi tab',
+  'Write here…': 'Viết ở đây…',
+  'Sticky note text': 'Nội dung giấy nhớ',
+  'Sticky note: {0}': 'Giấy nhớ: {0}',
+  'New sticky note': 'Giấy nhớ mới',
+  'Change colour': 'Đổi màu',
+  Unfold: 'Mở ra',
+  Fold: 'Thu gọn',
+  'Open in Second Brain': 'Mở trong Second Brain',
+  'Take off the screen (the note is kept)': 'Gỡ khỏi màn hình (ghi chú vẫn được giữ)',
+  'Sticky notes': 'Giấy nhớ',
+  'Back into the app': 'Đưa về lại app',
+  'Float over other apps': 'Nổi trên các ứng dụng khác',
+  'Float over other apps (while this tab stays open)': 'Nổi trên các ứng dụng khác (khi tab này còn mở)',
+
   // speech to text for voice memos
   'AI transcribe': 'AI chép lời',
   'Write it down with AI': 'Viết lại lời nói bằng AI',

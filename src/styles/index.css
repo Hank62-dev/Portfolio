@@ -3628,3 +3628,21 @@ html[data-vt='player']::view-transition-new(root) {
 .isolate:has([data-expanded]) {
   isolation: auto;
 }
+
+/* Sticky notes: the note editor's text, sized for a small square of paper. */
+.sticky-body .rich-body {
+  min-height: 100%;
+  line-height: 1.55;
+}
+.sticky-body .rich-body h1 {
+  font-size: 1.2rem;
+}
+.sticky-body .rich-body h2 {
+  font-size: 1.05rem;
+}
+.sticky-body .rich-body h3 {
+  font-size: 0.95rem;
+}
+.sticky-body .rich-body > * + * {
+  margin-top: 0.45em;
+}

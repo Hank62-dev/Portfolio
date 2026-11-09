@@ -1,5 +1,11 @@
 [
   {
+    "id": "sticky-notes",
+    "date": "2026-11-09",
+    "vi": "Giấy nhớ nổi: ghim ghi chú lên màn hình, hiện trên mọi tab; kéo, đổi cỡ, đổi màu, thu gọn, viết ngay trên giấy. Trên Chrome/Edge máy tính, bật giấy ra thành cửa sổ nổi trên cả ứng dụng khác. Tạo nhanh bằng Ctrl+K.",
+    "en": "Sticky notes: float a note over every tab; drag, resize, recolour, fold it and write on it. On Chrome or Edge on a computer, pop it out to float over other apps too. Make one fast with Ctrl+K."
+  },
+  {
     "id": "constellation-redo",
     "date": "2026-11-09",
     "vi": "Constellation làm lại: mỗi ghi chú là một tiểu hành tinh tròn phát sáng theo màu tag, có hố, có bóng sáng tối và xoay chậm; tìm ngay trên bản đồ, xem toàn màn hình, thẻ có tag và ghi chú được nối, sắp xếp danh sách, cùng phím tắt.",

@@ -1,7 +1,7 @@
 import { tr } from './lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookHeart, CalendarDays, Headphones, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
+import { BookHeart, CalendarDays, Headphones, StickyNote, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
 import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useInstall } from './hooks/useInstall';
@@ -24,7 +24,9 @@ import { lifeSnapshot, loadLife } from './today/useLifeData';
 import { lifeDocs, searchEverything } from './search/model';
 import { GUEST_HOME, guestCan } from './demo/mode';
 import PrivateTab from './components/PrivateTab';
-import { sendIntent } from './notes/library';
+import { createNote, loadNotes, sendIntent } from './notes/library';
+import StickyLayer from './notes/StickyLayer';
+import { floatNote, stickies } from './notes/stickies';
 import { useShellContext, playMood } from './hooks/useShellContext';
 import { missions } from './missions/store';
 import { newCard } from './missions/model';
@@ -175,9 +177,17 @@ export default function Workspace({
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  // a sticky note: a fresh note that floats on the screen at once, over whichever tab is open
+  const newSticky = useCallback(async () => {
+    await loadNotes();
+    floatNote((await createNote('')).id);
+  }, []);
+  const stickyCount = useStore(stickies, (s) => s.list.length);
+
   const commands = useMemo(() => {
     const list = [
       { id: 'capture', label: tr('Quick capture'), hint: tr('Action'), icon: Inbox, keywords: 'inbox add note task expense receipt write ghi nhanh', run: () => openCapture() },
+      { id: 'sticky', label: tr('New sticky note'), hint: tr('Action'), icon: StickyNote, keywords: 'sticky post-it float note screen pin ghim giấy dán', run: newSticky },
       { id: 'customise', label: tr('Choose which places to show'), hint: tr('Appearance'), icon: SlidersHorizontal, keywords: 'modules hide show tabs menu customise customize', run: openModules },
       ...visibleNav.map((item) => ({ id: `go-${item.id}`, label: tr('Go to {0}', item.label), hint: tr('Navigate'), icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
       { id: 'new-task', label: tr('New task for an agent'), hint: tr('Action'), icon: Plus, keywords: 'dispatch assign', run: () => setTaskOpen(true) },
@@ -218,7 +228,7 @@ export default function Workspace({
       );
     }
     return list;
-  }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing, podFront, podPlaying, mode, setMode, visibleNav]);
+  }, [agents, app, hasTrack, music, newSticky, onNotify, onPause, onSelect, onTab, paused, playing, podFront, podPlaying, mode, setMode, visibleNav]);
 
   // what matches in everything that is kept, as rows for the palette
   const searchData = useCallback(
@@ -387,6 +397,7 @@ export default function Workspace({
           </div>
           {sharing && <ShareSheet onDone={doneSharing} onNotify={onNotify} />}
           <CaptureSheet onNotify={onNotify} onTab={onTab} />
+          {stickyCount > 0 && <StickyLayer onOpenNote={(id) => { sendIntent('notes', { open: id }); onTab('notes'); }} />}
           <ModulesSheet />
           {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
