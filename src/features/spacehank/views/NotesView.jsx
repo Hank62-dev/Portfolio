@@ -14,6 +14,7 @@ import { useMediaQuery } from '../../../hooks/useMediaQuery';
 import { PageHead, Segmented } from '../components/Page';
 import { useFab } from '../fab';
 import { useStore } from '../store';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const Markdown = lazy(() => import('../components/Markdown'));
 const NoteEditor = lazy(() => import('../notes/NoteEditor'));
@@ -115,6 +116,7 @@ export default function NotesView() {
   const [scope, setScope] = useState('all');
   const [layout, setLayout] = useState('grid');
   const [query, setQuery] = useState('');
+  const search = useDebounce(query);
   const [tag, setTag] = useState('');
   const [question, setQuestion] = useDraft(asked, 'question');
   const [answer] = useDraft(asked, 'answer');
@@ -164,8 +166,8 @@ export default function NotesView() {
     if (scope === 'pinned') base = base.filter((n) => n.pinned);
     if (scope === 'journal') base = base.filter((n) => n.day);
     if (tag) base = base.filter((n) => tagsOf(n.text).includes(tag));
-    return query.trim() ? searchNotes(base, query, 60).map((r) => r.note) : base;
-  }, [notes, query, tag, scope]);
+    return search.trim() ? searchNotes(base, search, 60).map((r) => r.note) : base;
+  }, [notes, search, tag, scope]);
   const current = notes.find((n) => n.id === selected);
   const streak = useMemo(() => journalStreak(notes), [notes]);
   const totalWords = useMemo(() => notes.reduce((n, note) => n + words(note.text), 0), [notes]);
@@ -191,11 +193,11 @@ export default function NotesView() {
   const phone = !useMediaQuery('(min-width: 768px)');
   const gridView = layout === 'grid' || phone;
   const pinnedNotes = visible.filter((n) => n.pinned);
-  const groups = scope === 'all' && !query.trim() && pinnedNotes.length > 0 && pinnedNotes.length < visible.length;
+  const groups = scope === 'all' && !search.trim() && pinnedNotes.length > 0 && pinnedNotes.length < visible.length;
   const list = (items) => (
     <ul className={clsx(gridView ? 'columns-2 gap-2.5 xl:columns-3 xl:gap-3' : 'flex flex-col gap-2')} aria-label={tr('Notes')}>
       {items.map((note) => (
-        <NoteCard key={note.id} note={note} query={query} onOpen={setSelected} grid={gridView} />
+        <NoteCard key={note.id} note={note} query={search} onOpen={setSelected} grid={gridView} />
       ))}
     </ul>
   );

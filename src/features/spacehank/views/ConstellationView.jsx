@@ -9,6 +9,7 @@ import { useReadableNotes } from '../diary/useLock';
 import { excerpt } from '../notes/notes';
 import { useStore } from '../store';
 import { tr } from '../lang';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 // roomier than the default, so the stars and their names have space
 const SPACING = { repulsion: 5200, rest: 130 };
@@ -46,6 +47,7 @@ export default function ConstellationView({ onOpenNote }) {
   const [selected, setSelected] = useState(null);
   const [tag, setTag] = useState('');
   const [query, setQuery] = useState('');
+  const search = useDebounce(query);
   const [touched, setTouched] = useState(false);
 
   useEffect(() => {
@@ -504,9 +506,9 @@ export default function ConstellationView({ onOpenNote }) {
   }, [graph, selected]);
   const stars = useMemo(() => [...graph.nodes].sort((a, b) => b.degree - a.degree || b.words - a.words), [graph]);
   const shownStars = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = search.trim().toLowerCase();
     return q ? stars.filter((n) => n.title.toLowerCase().includes(q)) : stars;
-  }, [stars, query]);
+  }, [stars, search]);
 
   const removeSamples = async () => {
     for (const n of notes.filter((x) => x.sample)) await deleteNote(n.id);

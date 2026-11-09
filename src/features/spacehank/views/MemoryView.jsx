@@ -4,6 +4,7 @@ import { clsx } from '../../../lib/format';
 import { spacehankConfig } from '../config';
 import { groupRuns } from '../model/memory';
 import { tr } from '../lang';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 // the tone of an event, from what the agent did
 const TONE = {
@@ -73,6 +74,7 @@ function Row({ group, open, onToggle }) {
 export default function MemoryView({ events }) {
   const [agent, setAgent] = useState('');
   const [query, setQuery] = useState('');
+  const search = useDebounce(query);
   const [openKey, setOpenKey] = useState(null);
 
   const agents = useMemo(() => {
@@ -82,8 +84,8 @@ export default function MemoryView({ events }) {
   }, [events]);
 
   const shown = useMemo(
-    () => events.filter((e) => (!agent || e.name === agent) && (!query.trim() || `${e.name} ${e.action} ${e.text}`.toLowerCase().includes(query.toLowerCase()))),
-    [events, agent, query]
+    () => events.filter((e) => (!agent || e.name === agent) && (!search.trim() || `${e.name} ${e.action} ${e.text}`.toLowerCase().includes(search.trim().toLowerCase()))),
+    [events, agent, search]
   );
   const groups = useMemo(() => groupRuns(shown), [shown]);
   const latest = events[0];

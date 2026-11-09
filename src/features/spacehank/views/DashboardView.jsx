@@ -54,7 +54,7 @@ export default function DashboardView({ agents, events, connected, onTab, onNoti
   const active = connected ? agents.filter(isWorking).length : 0;
   return (
     <div className="relative isolate flex flex-col gap-6">
-      <SkyHero owner={isOwner} onTab={onTab} onCustomise={openModules} onNotify={onNotify} />
+      <SkyHero owner={isOwner} onNotify={onNotify} />
       <TodayPanel onTab={onTab} onNotify={onNotify} />
       <Launcher onTab={onTab} />
       <PetCard onTab={onTab} />

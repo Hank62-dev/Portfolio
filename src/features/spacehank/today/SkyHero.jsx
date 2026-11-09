@@ -1,4 +1,4 @@
-import { Boxes, Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, CloudSun, SlidersHorizontal, Sun } from 'lucide-react';
+import { Cloud, CloudDrizzle, CloudFog, CloudLightning, CloudRain, CloudSnow, CloudSun, Sun } from 'lucide-react';
 import { useBriefing } from '../hooks/useBriefing';
 import { greetingFor, owner as me } from '../config';
 import { CONDITION_TEXT } from '../model/weather';
@@ -8,14 +8,12 @@ import { skyOf } from './sky';
 
 const ICONS = { clear: Sun, partly: CloudSun, cloudy: Cloud, fog: CloudFog, drizzle: CloudDrizzle, rain: CloudRain, snow: CloudSnow, storm: CloudLightning };
 
-const GLASS = 'inline-flex h-9 items-center gap-2 rounded-full border border-white/25 bg-white/15 px-3.5 font-mono text-[0.76rem] text-white backdrop-blur-md transition-colors hover:bg-white/25 active:scale-95';
-
 /**
  * The top of the home screen: a sky that is the real sky of this hour and this weather (the colours glide through the day, the
  * sun rises and sets, stars come out at night, clouds grey it when it is overcast), with the greeting set large over it.
  * The words always sit on a dark scrim, so they read in the light theme as well.
  */
-export default function SkyHero({ owner = true, onTab, onCustomise, onNotify }) {
+export default function SkyHero({ owner = true, onNotify }) {
   const { weather } = useBriefing({ owner });
   const now = new Date();
   const hour = now.getHours() + now.getMinutes() / 60;
@@ -62,14 +60,6 @@ export default function SkyHero({ owner = true, onTab, onCustomise, onNotify }) 
       <div className="sky-content rise">
         <div className="mb-auto flex items-start justify-between gap-3">
           <span className="font-mono text-[0.7rem] tracking-[0.16em] text-white/75 uppercase">{date}</span>
-          <div className="flex items-center gap-2">
-            <button type="button" className={`${GLASS} max-md:hidden`} onClick={onCustomise}>
-              <SlidersHorizontal size={14} aria-hidden="true" /> {tr('Customise')}
-            </button>
-            <button type="button" className={GLASS} onClick={() => onTab('space')}>
-              <Boxes size={14} aria-hidden="true" /> {tr('Open company floor')}
-            </button>
-          </div>
         </div>
 
         <div>

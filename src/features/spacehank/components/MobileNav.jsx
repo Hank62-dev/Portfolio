@@ -9,6 +9,7 @@ import { ThemePills } from './ThemeMenu';
 import AppIcon from './AppIcon';
 import { NAVIGATION } from '../navigation';
 import { bySection, openModules, useNav } from '../modules';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const matches = (item, q) => !q || `${item.label} ${item.section} ${item.keywords ?? ''}`.toLowerCase().includes(q);
 
@@ -28,7 +29,8 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
   const scroller = useRef(null);
   const [more, setMore] = useState(false); // there is more of the list below
   const [query, setQuery] = useState('');
-  const q = query.trim().toLowerCase();
+  const search = useDebounce(query);
+  const q = search.trim().toLowerCase();
   const visible = useNav();
   const found = visible.filter((item) => matches(item, q));
   const pinned = PINNED.map((id) => NAVIGATION.find((item) => item.id === id));
@@ -188,7 +190,7 @@ export default function MobileNav({ tab, onTab, guest, app, onNotify, onLogout, 
             )}
             {!found.length && (
               <p className="py-8 text-center font-mono text-fine text-bone-faint" role="status">
-                {tr('Nothing here called “')}{query.trim()}{tr('”. Try “notes”, “money” or “play”.')}
+                {tr('Nothing here called “')}{search.trim()}{tr('”. Try “notes”, “money” or “play”.')}
               </p>
             )}
 

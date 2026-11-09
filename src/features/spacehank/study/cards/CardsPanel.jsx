@@ -15,6 +15,7 @@ import Session from './Session';
 import { cardState, clozeFront, deckStats, dueIn, forecast, searchCards, sessionCards } from './states';
 import { isDemo } from '../../demo/mode';
 import { tr } from '../../lang';
+import { useDebounce } from '../../../../hooks/useDebounce';
 
 const STATE_TONE = { new: 'signal', learning: 'warn', mature: 'ok' };
 const STATE_NAME = { new: 'New', learning: 'Learning', mature: 'Mature' };
@@ -90,6 +91,7 @@ export default function CardsPanel() {
   const [deck, setDeck] = useState('all');
   const { ref: deckRow, marker: deckMarker } = useSlider(deck, 'rounded-full bg-bone');
   const [query, setQuery] = useState('');
+  const search = useDebounce(query);
   const [shown, setShown] = useState(PAGE);
   const [session, setSession] = useState(null); // { key, cards }
   const [editor, setEditor] = useState(null); // null, {} (new) or a card
@@ -105,7 +107,7 @@ export default function CardsPanel() {
   const now = Date.now();
   const stats = useMemo(() => deckStats(inDeck, now), [inDeck, now]);
   const counts = useMemo(() => forecast(inDeck, 7), [inDeck]);
-  const found = useMemo(() => searchCards(inDeck, query).sort((a, b) => a.due - b.due), [inDeck, query]);
+  const found = useMemo(() => searchCards(inDeck, search).sort((a, b) => a.due - b.due), [inDeck, search]);
   const nextDue = inDeck.filter((c) => c.due > now).sort((a, b) => a.due - b.due)[0];
   const today = answeredOn(log);
   const run = studyStreak(log);

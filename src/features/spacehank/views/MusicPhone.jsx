@@ -52,6 +52,7 @@ import { canMorph } from '../motion/transition';
 import { useSlider } from '../components/useSlider';
 import { useStore } from '../store';
 import { tr } from '../lang';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 /** Songs / Albums / Artists / Playlists as large titles, with an underline that glides to the chosen one. */
 function ShelfTitles({ shelf, onPick }) {
@@ -371,6 +372,7 @@ export default function MusicPhone() {
   const [section, setSection] = useState('home');
   const [shelf, setShelf] = useState('songs');
   const [query, setQuery] = useState('');
+  const search = useDebounce(query);
   const [page, setPage] = useState(null); // { kind, key }
   const [notice, setNotice] = useState('');
   const [dj, setDj] = useState({ busy: false, note: '', error: '', text: '' });
@@ -414,7 +416,7 @@ export default function MusicPhone() {
   }, [tracks]);
   const played = tracks.some((t) => t.playedAt);
   const genres = useMemo(() => [...new Set(tracks.map((t) => t.genre).filter(Boolean))], [tracks]);
-  const results = useMemo(() => (query.trim() ? tracks.filter((t) => matches(t, query)) : []), [tracks, query]);
+  const results = useMemo(() => (search.trim() ? tracks.filter((t) => matches(t, search)) : []), [tracks, search]);
   const sectionIndex = SECTIONS.findIndex((s) => s.id === section);
 
   const add = async (files) => {
@@ -615,7 +617,7 @@ export default function MusicPhone() {
                   ))}
                 </ul>
               ) : (
-                <p className="px-5 py-6 font-mono text-fine text-bone-faint">{tr('Nothing matches “')}{query.trim()}”.</p>
+                <p className="px-5 py-6 font-mono text-fine text-bone-faint">{tr('Nothing matches “')}{search.trim()}”.</p>
               )}
             </section>
           ) : (

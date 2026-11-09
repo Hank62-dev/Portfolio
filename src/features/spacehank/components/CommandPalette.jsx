@@ -10,6 +10,7 @@ import { library } from '../music/library';
 import { playTrack } from '../music/player';
 import { useStore } from '../store';
 import { tr } from '../lang';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const MAX_TRACKS = 6;
 const ASK_ID = 'ask-hank';
@@ -30,6 +31,8 @@ const IDLE = { status: 'idle' };
  */
 export default function CommandPalette({ open, onOpenChange, commands, music, onInterpret, onRun, onSearch, onAnswer, onCapture }) {
   const [query, setQuery] = useState('');
+  // what is searched: the typed words once typing pauses, so the list (and the search through everything kept) does not redo itself on every key
+  const search = useDebounce(query);
   const [active, setActive] = useState(0);
   const [ask, setAsk] = useState(IDLE); // idle | thinking | confirm | refused
   const list = useRef(null);
@@ -46,12 +49,12 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
   }, [open]);
 
   const results = useMemo(() => {
-    const found = filterCommands(commands, query);
+    const found = filterCommands(commands, search);
     let all = found;
-    if (music && query.trim().length >= 2) {
+    if (music && search.trim().length >= 2) {
       const songs = filterCommands(
         tracks.map((t) => ({ id: `track-${t.id}`, label: t.title, hint: t.artist || tr('Song'), keywords: `${t.album} ${t.genre}`, track: t })),
-        query,
+        search,
         MAX_TRACKS
       ).map((song) => ({
         id: song.id,
@@ -62,17 +65,17 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
       }));
       all = [...found, ...songs];
     }
-    const typed = query.trim();
+    const typed = search.trim();
     if (onSearch && typed.length >= 2) all = [...all, ...onSearch(typed)];
     if (onCapture && typed.length >= 3) all = [...all, { id: CAPTURE_ID, label: tr('Add "{0}" to your Inbox', typed), hint: tr('Capture'), icon: Inbox }];
     const top = [];
     if (onAnswer && looksLikeQuestion(typed)) top.push({ id: ASK_DATA_ID, label: tr('Ask about my data: {0}', typed), hint: tr('AI'), icon: MessageCircleQuestion });
     // a whole sentence is most likely a request, so offer Hank first
-    if (onInterpret && looksLikeRequest(query)) top.push({ id: ASK_ID, label: tr('Ask Hank: {0}', typed), hint: tr('AI'), icon: Sparkles });
+    if (onInterpret && looksLikeRequest(search)) top.push({ id: ASK_ID, label: tr('Ask Hank: {0}', typed), hint: tr('AI'), icon: Sparkles });
     return [...top, ...all];
-  }, [commands, query, music, tracks, onInterpret, onSearch, onAnswer, onCapture]);
+  }, [commands, search, music, tracks, onInterpret, onSearch, onAnswer, onCapture]);
 
-  useEffect(() => setActive(0), [query]);
+  useEffect(() => setActive(0), [search]);
   useEffect(() => {
     list.current?.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: 'nearest' });
   }, [active]);
@@ -84,7 +87,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
   const interpret = async () => {
     setAsk({ status: 'thinking' });
     try {
-      const outcome = await onInterpret(query.trim());
+      const outcome = await onInterpret(search.trim());
       setAsk(outcome.ok ? { status: 'confirm', parsed: outcome } : { status: 'refused', say: outcome.say });
     } catch (error) {
       setAsk({ status: 'refused', say: error.message });
@@ -94,7 +97,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
   const answer = async () => {
     setAsk({ status: 'answering' });
     try {
-      const reply = await onAnswer(query.trim());
+      const reply = await onAnswer(search.trim());
       setAsk({ status: 'answer', text: reply.answer });
     } catch (error) {
       setAsk({ status: 'refused', say: error.message });
@@ -118,7 +121,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
     }
     if (command.id === CAPTURE_ID) {
       onOpenChange(false);
-      window.setTimeout(() => onCapture(query.trim()), 0);
+      window.setTimeout(() => onCapture(search.trim()), 0);
       return;
     }
     onOpenChange(false);
@@ -187,7 +190,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
           {ask.status === 'idle' ? (
             <ul ref={list} id="palette-list" role="listbox" aria-label={tr('Results')} className="relative max-h-[50vh] overflow-y-auto p-2">
               {bar && results.length > 0 && <span aria-hidden="true" className="palette-bar pointer-events-none absolute inset-x-2 top-0 rounded-sm bg-ink-3" style={{ height: bar.height, transform: `translateY(${bar.top}px)` }} />}
-              {results.length === 0 && <li className="px-3 py-6 text-center font-mono text-fine text-bone-faint">{tr('Nothing matches "')}{query}".</li>}
+              {results.length === 0 && <li className="px-3 py-6 text-center font-mono text-fine text-bone-faint">{tr('Nothing matches "')}{search}".</li>}
               {results.map((command, index) => {
                 const Icon = command.icon;
                 return (

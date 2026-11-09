@@ -55,6 +55,7 @@ import { useSlider } from '../components/useSlider';
 import { storageEstimate } from '../storage';
 import { useStore } from '../store';
 import { tr } from '../lang';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 const SHELVES = [
   { id: 'songs', label: tr('Songs') },
@@ -103,6 +104,7 @@ function MusicDesktop() {
   const [shelf, setShelf] = useState('songs');
   const [sheet, setSheet] = useState(null); // { kind, key } the collection open in the drawer
   const [query, setQuery] = useState('');
+  const search = useDebounce(query);
   const [searching, setSearching] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -187,14 +189,14 @@ function MusicDesktop() {
 
   // what the drawer shows
   const drawer = useMemo(() => {
-    if (query.trim()) return { title: tr('Results for “{0}”', query.trim()), tracks: tracks.filter((t) => matches(t, query)) };
+    if (search.trim()) return { title: tr('Results for “{0}”', search.trim()), tracks: tracks.filter((t) => matches(t, search)) };
     if (!sheet) return null;
     if (sheet.kind === 'liked') return { title: 'Liked', tracks: liked, liked: true };
     if (sheet.kind === 'album') return { title: sheet.key, sub: tr('Album'), tracks: tracks.filter((t) => t.album === sheet.key) };
     if (sheet.kind === 'artist') return { title: sheet.key, sub: tr('Artist'), tracks: tracks.filter((t) => t.artist === sheet.key) };
     const p = playlists.find((x) => x.id === sheet.key);
     return p ? { title: p.name, sub: tr('Playlist'), tracks: p.trackIds.map((id) => byId.get(id)).filter(Boolean), playlist: p } : null;
-  }, [query, sheet, tracks, liked, playlists, byId]);
+  }, [search, sheet, tracks, liked, playlists, byId]);
 
   const items = useMemo(() => {
     if (shelf === 'songs') return tracks.map((t) => ({ key: t.id, track: t }));
