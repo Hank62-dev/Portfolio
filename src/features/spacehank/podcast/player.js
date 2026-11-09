@@ -29,6 +29,9 @@ export const podcast = createStore({
   duration: 0,
   rate: savedRate(),
   error: '',
+  front: false, // the episode, not the music, is what was played last: the bar at the bottom is the podcast's
+  sleepAt: 0, // when the sleep timer stops the episode (ms), or 0
+  sleepMinutes: 0,
 });
 
 let audio = null;
@@ -105,7 +108,7 @@ const element = () => {
     if (Math.abs(audio.currentTime - lastSaved) >= SAVE_EVERY) save();
   });
   audio.addEventListener('playing', () => {
-    podcast.set({ playing: true, loading: false, error: '' });
+    podcast.set({ playing: true, loading: false, error: '', front: true });
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
   });
   audio.addEventListener('pause', () => {
@@ -120,7 +123,7 @@ const element = () => {
     podcast.set({ playing: false });
     save(true);
   });
-  audio.addEventListener('error', () => podcast.set({ playing: false, loading: false, error: tr('This episode could not be played. Its host may have moved it, or does not allow it here.') }));
+  audio.addEventListener('error', () => podcast.get().episode && podcast.set({ playing: false, loading: false, error: tr('This episode could not be played. Its host may have moved it, or does not allow it here.') }));
   return audio;
 };
 
@@ -129,6 +132,7 @@ music.subscribe(() => {
   if (!music.get().playing) return;
   bindSystemKeys();
   if (audio && podcast.get().playing) audio.pause();
+  if (podcast.get().front) podcast.set({ front: false });
 });
 
 if (typeof document !== 'undefined') {
@@ -136,7 +140,7 @@ if (typeof document !== 'undefined') {
   window.addEventListener('pagehide', () => podcast.get().episode && save());
 }
 
-/** Plays an episode of a show, carrying on from where it was left. `show` is { id, title, image }. */
+/** Plays an episode of a show, carrying on from where it was left. `show` is { id, title, image, feedUrl? }. */
 export const playEpisode = async (show, episode) => {
   const el = element();
   const current = podcast.get().episode;
@@ -146,7 +150,7 @@ export const playEpisode = async (show, episode) => {
   const entry = listens.store.get().items.find((item) => item.id === listenId(show.id, episode.guid));
   startFrom = startAt(entry);
   lastSaved = startFrom;
-  podcast.set({ show: { id: show.id, title: show.title, image: show.image }, episode: { guid: episode.guid, title: episode.title, audio: episode.audio, image: episode.image || '', duration: episode.duration || 0 }, playing: false, loading: true, time: startFrom, duration: episode.duration || 0, error: '' });
+  podcast.set({ show: { id: show.id, title: show.title, image: show.image, feedUrl: show.feedUrl || '' }, episode: { guid: episode.guid, title: episode.title, audio: episode.audio, image: episode.image || '', duration: episode.duration || 0 }, playing: false, loading: true, time: startFrom, duration: episode.duration || 0, error: '' });
   el.src = episode.audio;
   el.playbackRate = podcast.get().rate;
   claimKeys();
@@ -189,4 +193,43 @@ export const setRate = (rate) => {
   } catch {
     /* the speed lasts until the page closes */
   }
+};
+
+/** Marks an episode heard (or not heard again), without playing it. `show` is { id, title, image }. */
+export const setHeard = async (show, episode, done) => {
+  await listens.load();
+  const length = episode.duration || 0;
+  const record = listenRecord({ show, episode, time: done ? length : 0, duration: length, done });
+  const known = listens.store.get().items.find((entry) => entry.id === record.id);
+  await listens.put({ createdAt: Date.now(), ...known, ...record, done, position: done ? record.position : 0, updatedAt: Date.now() });
+};
+
+let sleepTimer = 0;
+/** Stops the episode after `minutes` (0 turns the timer off). */
+export const setSleep = (minutes) => {
+  clearTimeout(sleepTimer);
+  if (!minutes) return podcast.set({ sleepAt: 0, sleepMinutes: 0 });
+  podcast.set({ sleepAt: Date.now() + minutes * 60000, sleepMinutes: minutes });
+  sleepTimer = setTimeout(() => {
+    podcast.set({ sleepAt: 0, sleepMinutes: 0 });
+    toggle(false);
+  }, minutes * 60000);
+};
+
+/** Puts the episode away: remembers where it got to, stops it, and gives the bar and the media keys back to the music. */
+export const close = () => {
+  if (!podcast.get().episode) return;
+  save();
+  setSleep(0);
+  if (audio) {
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+  }
+  podcast.set({ show: null, episode: null, playing: false, loading: false, time: 0, duration: 0, error: '', front: false });
+  if (typeof navigator !== 'undefined' && 'mediaSession' in navigator) {
+    navigator.mediaSession.metadata = null;
+    navigator.mediaSession.playbackState = 'none';
+  }
+  bindSystemKeys();
 };

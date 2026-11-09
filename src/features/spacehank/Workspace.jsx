@@ -1,7 +1,7 @@
 import { tr } from './lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookHeart, CalendarDays, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
+import { BookHeart, CalendarDays, Headphones, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
 import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../design-system';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { useInstall } from './hooks/useInstall';
@@ -36,6 +36,9 @@ import Fab from './components/Fab';
 import FocusWidget from './components/FocusWidget';
 import ShareSheet from './components/ShareSheet';
 import NowPlayingBar from './music/NowPlayingBar';
+import PodcastBar from './podcast/PodcastBar';
+import { close as closePodcast, podcast, toggle as togglePodcast } from './podcast/player';
+import { podcastUi } from './podcast/ui';
 import { useNotifications } from './notifications/useNotifications';
 import { showPlayer } from './music/morph';
 import { useCardGlow } from './motion/useCardGlow';
@@ -115,6 +118,10 @@ export default function Workspace({
   const hasTrack = useStore(player, (s) => Boolean(s.trackId));
   const playing = useStore(player, (s) => s.playing);
   const trackCount = useStore(library, (s) => s.tracks.length);
+  // an episode that was played after the music takes the bar at the bottom; on the Podcast tab only once its own player is scrolled away
+  const podFront = useStore(podcast, (s) => Boolean(s.episode) && s.front);
+  const podPlaying = useStore(podcast, (s) => s.playing);
+  const podCardVisible = useStore(podcastUi, (s) => s.cardVisible);
   const music = true;
   const app = useInstall();
   useNotifications({ guest, connected, agents, onTab });
@@ -196,6 +203,13 @@ export default function Workspace({
         run: () => (app.canInstall ? app.install() : onNotify?.(tr('On iPhone: tap Share, then Add to Home Screen'))),
       });
     }
+    if (podFront) {
+      list.push(
+        { id: 'podcast-toggle', label: podPlaying ? tr('Pause the podcast') : tr('Resume the podcast'), hint: tr('Podcast'), icon: podPlaying ? Pause : Play, keywords: 'episode listen', run: () => togglePodcast() },
+        { id: 'podcast-open', label: tr('Open the podcast'), hint: tr('Podcast'), icon: Headphones, run: () => onTab('podcast') },
+        { id: 'podcast-close', label: tr('Stop and close the episode'), hint: tr('Podcast'), icon: Pause, run: closePodcast }
+      );
+    }
     if (music && hasTrack) {
       list.push(
         { id: 'music-toggle', label: playing ? tr('Pause the music') : tr('Resume the music'), hint: tr('Music'), icon: playing ? Pause : Play, keywords: 'play song', run: togglePlay },
@@ -204,7 +218,7 @@ export default function Workspace({
       );
     }
     return list;
-  }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing, mode, setMode, visibleNav]);
+  }, [agents, app, hasTrack, music, onNotify, onPause, onSelect, onTab, paused, playing, podFront, podPlaying, mode, setMode, visibleNav]);
 
   // what matches in everything that is kept, as rows for the palette
   const searchData = useCallback(
@@ -360,7 +374,7 @@ export default function Workspace({
             {/* the tab's colour, glowing in the top corner behind the bar and the page alike, so the bar is not a band of its own */}
             {!SKY_TABS.includes(tab) && <span aria-hidden="true" className="tab-glow" />}
             <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} onCapture={(event) => openCapture('', event)} />
-            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (music && hasTrack ? 'pb-60' : 'pb-36') : music && hasTrack && tab !== 'music' && 'pb-28')}>
+            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (podFront || (music && hasTrack) ? 'pb-60' : 'pb-36') : podFront ? 'pb-28' : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
               <div key={tab} className={clsx(nav.way === 'forward' ? 'page-from-right' : nav.way === 'back' ? 'page-from-left' : 'animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
                 <Suspense fallback={<PageLoading />}>{page}</Suspense>
@@ -377,8 +391,9 @@ export default function Workspace({
           {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}
-          {phone && <Fab raised={hasTrack} />}
-          {music && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => (phone ? showPlayer(() => onTab('music')) : onTab('music'))} lifted={phone} rail={rail} />}
+          {phone && <Fab raised={hasTrack || podFront} />}
+          {podFront && !(tab === 'podcast' && podCardVisible) && <PodcastBar onOpen={() => onTab('podcast')} lifted={phone} rail={rail} />}
+          {music && !podFront && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => (phone ? showPlayer(() => onTab('music')) : onTab('music'))} lifted={phone} rail={rail} />}
           <CommandPalette
             open={paletteOpen}
             onOpenChange={setPaletteOpen}

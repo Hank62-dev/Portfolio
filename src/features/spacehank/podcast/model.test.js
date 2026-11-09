@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RATES, clock, listenRecord, startAt, fraction, hashId, isFinished, lengthWords, listenId, nextRate, progressOf, publishedLabel, rateLabel, showId, unfinished } from './model';
+import { RATES, clock, filterEpisodes, freshCount, latestAcross, listenRecord, nextSleep, startAt, fraction, hashId, isFinished, lengthWords, listenId, nextRate, progressOf, publishedLabel, rateLabel, showId, unfinished } from './model';
 
 describe('ids', () => {
   it('are stable, different for different texts, and safe to use as a record id', () => {
@@ -96,5 +96,43 @@ describe('the record kept for an episode', () => {
     expect(startAt({ position: 3, done: false })).toBe(0);
     expect(startAt({ position: 900, done: true })).toBe(0);
     expect(startAt(null)).toBe(0);
+  });
+});
+
+describe('what is new', () => {
+  const now = Date.UTC(2026, 10, 9, 12);
+  const day = 86400000;
+  const show = { id: 'show-a', title: 'A', image: '' };
+  const other = { id: 'show-b', title: 'B', image: '' };
+  const ep = (guid, ago) => ({ guid, title: `Episode ${guid}`, audio: `https://x/${guid}.mp3`, published: now - ago * day, duration: 1800 });
+  const heard = [
+    { id: listenId('show-a', 'a2'), done: true, position: 1800, duration: 1800 },
+    { id: listenId('show-b', 'b1'), done: false, position: 600, duration: 1800 },
+    { id: listenId('show-b', 'b2'), done: false, position: 4, duration: 1800 },
+  ];
+
+  it('puts the newest unheard episodes of every show together, newest first', () => {
+    const feeds = [
+      { show, episodes: [ep('a1', 1), ep('a2', 2), ep('a3', 40)] },
+      { show: other, episodes: [ep('b1', 0), ep('b2', 3)] },
+    ];
+    expect(latestAcross(feeds, heard, { now }).map((item) => item.episode.guid)).toEqual(['a1', 'b2']);
+    expect(latestAcross(feeds, [], { now, limit: 2 }).map((item) => item.episode.guid)).toEqual(['b1', 'a1']);
+  });
+
+  it('counts the episodes of the last week not listened to yet', () => {
+    expect(freshCount('show-a', [ep('a1', 1), ep('a2', 2), ep('a3', 9)], heard, { now })).toBe(1);
+    expect(freshCount('show-a', undefined, heard, { now })).toBe(0);
+  });
+
+  it('filters a show’s episodes by what is not heard and by words of the title', () => {
+    const episodes = [ep('a1', 1), ep('a2', 2), { ...ep('a3', 3), title: 'Tập đặc biệt: Hà Nội' }];
+    expect(filterEpisodes(episodes, heard, 'show-a', { only: 'new' }).map((e) => e.guid)).toEqual(['a1', 'a3']);
+    expect(filterEpisodes(episodes, heard, 'show-a', { term: 'hà nội' }).map((e) => e.guid)).toEqual(['a3']);
+    expect(filterEpisodes(episodes, heard, 'show-a', { term: '  ' })).toHaveLength(3);
+  });
+
+  it('goes round the sleep timer', () => {
+    expect([nextSleep(0), nextSleep(15), nextSleep(60), nextSleep(20)]).toEqual([15, 30, 0, 30]);
   });
 });

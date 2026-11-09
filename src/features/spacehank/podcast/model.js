@@ -90,3 +90,39 @@ export const listenRecord = ({ show, episode, time, duration, done = false, at =
 
 /** Where to carry on from: a little before where it was left, or the start for something new or already finished. */
 export const startAt = (entry) => (entry && !entry.done && entry.position > 5 ? Math.max(0, entry.position - 3) : 0);
+
+/** Minutes the sleep timer can be set to; the button goes round them, and 0 is off. */
+export const SLEEP_STEPS = [0, 15, 30, 45, 60];
+export const nextSleep = (minutes) => SLEEP_STEPS.find((value) => value > minutes) ?? 0;
+
+const DAY = 86400000;
+/** Whether an episode is still worth showing as new: not heard, and not already in "continue listening". */
+const untouched = (listens, show, guid) => {
+  const entry = progressOf(listens, show, guid);
+  return !entry || (!entry.done && entry.position < 15);
+};
+
+/**
+ * The newest episodes of the shows that are followed, all together, newest first: the "new episodes" row. `feeds` is
+ * [{ show: { id, title, image }, episodes }], each feed newest first as the server sends it.
+ */
+export const latestAcross = (feeds, listens, { limit = 8, days = 30, now = Date.now() } = {}) =>
+  feeds
+    .flatMap(({ show, episodes }) => (episodes ?? []).slice(0, 5).map((episode) => ({ show, episode })))
+    .filter(({ show, episode }) => episode.published > 0 && now - episode.published <= days * DAY && untouched(listens, show.id, episode.guid))
+    .sort((a, b) => b.episode.published - a.episode.published)
+    .slice(0, limit);
+
+/** How many episodes of a show came out in the last week and have not been listened to: the badge on its cover. */
+export const freshCount = (show, episodes, listens, { days = 7, now = Date.now() } = {}) =>
+  (episodes ?? []).filter((episode) => episode.published > 0 && now - episode.published <= days * DAY && untouched(listens, show, episode.guid)).length;
+
+/** The episodes of a show to list: all of them or only those not heard yet, and those whose title has the words searched for. */
+export const filterEpisodes = (episodes, listens, show, { only = 'all', term = '' } = {}) => {
+  const words = term.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return episodes.filter((episode) => {
+    if (only === 'new' && progressOf(listens, show, episode.guid)?.done) return false;
+    const title = String(episode.title).toLowerCase();
+    return words.every((word) => title.includes(word));
+  });
+};
