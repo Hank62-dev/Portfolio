@@ -1,5 +1,11 @@
 [
   {
+    "id": "lyrics-finder",
+    "date": "2026-11-09",
+    "vi": "Tìm lời bài hát giỏi hơn với nhạc Việt: tìm không dấu, đọc được tên bài từ file tải từ video (tên trong ngoặc kép, nằm ở album, kèm MV/Official), và lấy lời cho bản cover hay bản MV dài hơn (hiện lời không chạy theo nhịp).",
+    "en": "Lyrics are found far more often for Vietnamese songs: the search goes without accents, names are read from video-site files (in quotes, in the album, with MV or Official), and covers or longer MV cuts get their words, untimed."
+  },
+  {
     "id": "sticky-notes",
     "date": "2026-11-09",
     "vi": "Giấy nhớ nổi: ghim ghi chú lên màn hình, hiện trên mọi tab; kéo, đổi cỡ, đổi màu, thu gọn, viết ngay trên giấy. Trên Chrome/Edge máy tính, bật giấy ra thành cửa sổ nổi trên cả ứng dụng khác. Tạo nhanh bằng Ctrl+K.",

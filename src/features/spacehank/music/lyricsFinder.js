@@ -19,11 +19,15 @@ export class LyricsError extends Error {
   }
 }
 
-/** "Yêu Một Người Có Lẽ (cover, ft. Hziaa)" -> "Yêu Một Người Có Lẽ": brackets and a trailing "- Topic" say nothing about the song. */
+/** "Yêu Một Người Có Lẽ (cover, ft. Hziaa)" -> "Yêu Một Người Có Lẽ": brackets, quotes, a track number and tails like "- Topic", "| Official MV" say nothing about the song. */
 export const cleanTitle = (title) =>
   String(title ?? '')
     .replace(/[([{（【][^)\]}）】]*[)\]}）】]/gu, ' ')
+    .replace(/\s+[|｜].*$/u, '')
+    .replace(/^\s*\d{1,3}\s*[.)-]\s+/u, '')
     .replace(/\s+-\s+(topic|official.*|lyrics?.*)$/iu, '')
+    .replace(/\s+(official\s+)?(m\/?v|music\s+video|lyrics?\s+video|audio|visualizer)\s*$/iu, '')
+    .replace(/["“”„«»]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -32,7 +36,7 @@ export const artistNames = (artist) =>
   String(artist ?? '')
     .replace(/\s+-\s+topic$/iu, '')
     .replace(/vevo$/iu, '')
-    .split(/\s*[,&;]\s*|\s+(?:and|và|x|ft\.?|feat\.?|featuring)\s+/iu) // an \"x\" is a separator only between two names: \"X Japan\" stays whole
+    .split(/\s*[,&;/]\s*|\s+(?:and|và|x|ft\.?|feat\.?|featuring)\s+/iu) // an \"x\" is a separator only between two names: \"X Japan\" stays whole
     .map((name) => norm(name))
     .filter(Boolean);
 
@@ -44,36 +48,131 @@ export const norm = (text) =>
     .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
 
-/** How well a LRCLIB record fits the song, 0 (not at all) to about 100. Below `ENOUGH` it is not used. */
-export const score = (record, wanted) => {
-  const title = norm(cleanTitle(record.trackName ?? record.name));
-  const want = norm(wanted.title);
-  if (!title || !want) return 0;
-  let points = 0;
-  if (title === want) points += 50;
-  else if (title.includes(want) || want.includes(title)) points += 25;
-  else return 0;
+/** The same without accents ("Em Đừng Khóc" -> "em dung khoc"): how a title is typed in a hurry, and what the search understands. */
+export const fold = (text) =>
+  norm(text)
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/đ/g, 'd')
+    .normalize('NFC');
 
+const accented = (text) => norm(text) !== fold(text);
+
+/** Whether a piece of a name is only the artists: every name in it is one of `artists` (and there is at least one). */
+const isArtists = (piece, artists) => {
+  const names = artistNames(piece).map(fold);
+  const known = artists.map(fold);
+  return names.length > 0 && names.every((name) => known.some((a) => a === name || a.includes(name) || name.includes(a)));
+};
+
+const pieces = (text) =>
+  cleanTitle(text)
+    .split(/\s+[-–—]\s+/u)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+/**
+ * What the song may be called, best guess first, from a track's tags. Files from video sites put the name in odd places:
+ * '"SỚM MUỘN THÌ" - Nhâm Phương Nam x …' (in quotes), "Em Đừng Khóc - Chillies (Official Music Video)" in the album with
+ * the artist as the title, "GHÉ QUA - Dick x PC x Tofu" in the album with the singers as the title. The parts that are only
+ * artists are dropped (and returned as `artists`, so they count when a record is scored).
+ */
+export const titleCandidates = (track) => {
+  const rawTitle = String(track?.title ?? '');
+  const artists = artistNames(track?.artist);
+  const extra = [];
+  const out = [];
+  const add = (name) => {
+    const clean = cleanTitle(name);
+    if (clean && !out.some((have) => fold(have) === fold(clean))) out.push(clean);
+  };
+  const keep = (text, known) => {
+    const parts = pieces(text);
+    const songs = parts.filter((part) => !isArtists(part, known));
+    for (const part of parts) if (!songs.includes(part)) extra.push(...artistNames(part));
+    return parts.length > 1 ? songs : parts;
+  };
+
+  const quoted = rawTitle.match(/["“]([^"”]{2,80})["”]/u)?.[1];
+  const titleParts = keep(rawTitle, artists);
+  const titleIsArtists = !quoted && (isArtists(cleanTitle(rawTitle), artists));
+  // the album says "Song - Singers" and the title is those singers: the title is the artists, the song is in the album
+  const albumParts = pieces(track?.album);
+  const albumNamesTitle = albumParts.length > 1 && albumParts.some((part) => fold(part) === fold(cleanTitle(rawTitle)));
+  const fromAlbum = albumParts.length > 1 ? keep(track.album, [...artists, ...artistNames(cleanTitle(rawTitle))]) : [];
+
+  if (quoted) {
+    add(quoted);
+    extra.push(...artistNames(rawTitle.replace(/["“][^"”]*["”]/u, '').replace(/^\s*[-–—]\s*/u, '')));
+  }
+  if (titleIsArtists || albumNamesTitle) {
+    fromAlbum.forEach(add);
+    if (albumNamesTitle) extra.push(...artistNames(cleanTitle(rawTitle)));
+  }
+  if (!quoted) titleParts.forEach(add);
+  if (!titleIsArtists && !albumNamesTitle && fromAlbum.length && !out.length) fromAlbum.forEach(add);
+  if (!out.length) add(rawTitle);
+  const allArtists = [...new Set([...artists, ...extra.filter(Boolean)])];
+  const titles = out.filter((name) => !isArtists(name, allArtists));
+  return { titles: titles.length ? titles : out.slice(0, 1), artists: allArtists };
+};
+
+const titleFit = (record, want) => {
+  let best = 0;
+  for (const part of [cleanTitle(record.trackName ?? record.name), ...pieces(record.trackName ?? record.name)]) {
+    const title = norm(part);
+    const wanted = norm(want);
+    if (!title || !wanted) continue;
+    const loose = !accented(part) || !accented(want); // one side was typed without accents: compare without them
+    let points = 0;
+    if (title === wanted) points = 50;
+    else if (loose && fold(title) === fold(wanted)) points = 40;
+    else if (title.includes(wanted) || wanted.includes(title)) points = 25;
+    else if (loose && (fold(title).includes(fold(wanted)) || fold(wanted).includes(fold(title)))) points = 20;
+    best = Math.max(best, points);
+  }
+  return best;
+};
+
+/**
+ * How well a LRCLIB record fits the song, 0 (not at all) to about 100; below `ENOUGH` it is not used. `wanted` is
+ * { title, duration, artists, cover }. A record of another length is still taken when the artist matches (or the song is a
+ * cover), but only for its words: its timestamps would not line up, so `loose` comes back true and the words are shown untimed.
+ */
+export const fit = (record, wanted) => {
+  const points0 = titleFit(record, wanted.title);
+  if (!points0) return { points: 0, loose: false };
+  let points = points0;
+  let loose = false;
+  const names = artistNames(record.artistName).map(fold);
+  const artist = wanted.artists.length > 0 && names.some((name) => wanted.artists.some((a) => fold(a).includes(name) || name.includes(fold(a))));
+  if (artist) points += 15;
   if (wanted.duration > 0 && record.duration > 0) {
     const gap = Math.abs(record.duration - wanted.duration);
     if (gap <= 2) points += 30;
     else if (gap <= 5) points += 15;
-    else return 0; // a different cut of the song: its timestamps would not line up
+    else if (artist || wanted.cover) loose = true; // another cut of the same song: the words, without their timing
+    else return { points: 0, loose: false };
   }
-
-  const names = artistNames(record.artistName);
-  if (wanted.artists.length && names.some((name) => wanted.artists.some((a) => a.includes(name) || name.includes(a)))) points += 15;
-  if (record.syncedLyrics) points += 10;
-  else if (record.plainLyrics) points += 3;
-  return points;
+  if (record.syncedLyrics && !loose) points += 10;
+  else if (record.plainLyrics || record.syncedLyrics) points += 3;
+  return { points, loose };
 };
+export const score = (record, wanted) => fit(record, wanted).points;
 export const ENOUGH = 45;
 
-const textOf = (record) => {
+const untimed = (lrc) =>
+  String(lrc ?? '')
+    .split(/\r?\n/)
+    .map((line) => line.replace(/\[[^\]]*\]/g, '').trim())
+    .filter(Boolean)
+    .join('\n');
+
+const textOf = (record, loose = false) => {
   if (record.instrumental) return { lyrics: '', synced: false, instrumental: true };
   const synced = String(record.syncedLyrics ?? '').trim();
-  if (synced) return { lyrics: synced, synced: true, instrumental: false };
-  const plain = String(record.plainLyrics ?? '').trim();
+  if (synced && !loose) return { lyrics: synced, synced: true, instrumental: false };
+  const plain = String(record.plainLyrics ?? '').trim() || untimed(synced);
   return plain ? { lyrics: plain, synced: false, instrumental: false } : null;
 };
 
@@ -83,10 +182,11 @@ const textOf = (record) => {
  * `lyrics` is LRC text when the words are timed (synced), plain text otherwise, and '' for an instrumental.
  */
 export const findLyrics = async (track, { fetchImpl = fetch, sleep = wait, signal } = {}) => {
-  const title = cleanTitle(track?.title);
-  if (!title) return null;
+  const { titles, artists } = titleCandidates(track);
+  const title = titles[0];
+  if (!title || !cleanTitle(track?.title)) return null;
   const duration = Math.round(Number(track.duration) || 0);
-  const wanted = { title, duration, artists: artistNames(track.artist) };
+  const cover = /\bcover\b/iu.test(`${track.title ?? ''} ${track.album ?? ''}`);
   const headers = { 'Lrclib-Client': CLIENT };
 
   const call = async (path, params) => {
@@ -113,34 +213,40 @@ export const findLyrics = async (track, { fetchImpl = fetch, sleep = wait, signa
       }
     }
   };
-  const result = (record) => {
-    const found = textOf(record);
+  const result = (record, loose = false) => {
+    const found = textOf(record, loose);
     return found && { ...found, from: { id: record.id, title: record.trackName ?? record.name, artist: record.artistName } };
   };
 
   // 1. the exact signature (the service itself insists on a length within 2 seconds)
-  if (wanted.artists.length && duration >= 1 && duration <= 3600) {
-    const record = await call('/get', {
-      track_name: title,
-      artist_name: String(track.artist).replace(/\s+-\s+topic$/iu, ''),
-      ...(track.album ? { album_name: track.album } : {}),
-      duration: String(duration),
-    });
+  const artistTag = String(track.artist ?? '').replace(/\s+-\s+topic$/iu, '');
+  if (artistTag && duration >= 1 && duration <= 3600) {
+    const record = await call('/get', { track_name: title, artist_name: artistTag, ...(track.album ? { album_name: track.album } : {}), duration: String(duration) });
     const found = record && result(record);
     if (found) return found;
     await sleep(300);
   }
 
-  // 2. a search by name, with the artist first and then without it, keeping only records that fit
-  const queries = [...new Set([wanted.artists[0] ? `${title} ${wanted.artists[0]}` : '', title].filter(Boolean))];
-  for (const q of queries) {
+  // 2. a search by name. The search does not understand accents ("em đừng khóc" finds nothing, "em dung khoc" finds the
+  //    song), so the name goes without them first, with the artist and then alone; the name as written comes last.
+  const queries = [];
+  for (const name of titles.slice(0, 2)) {
+    if (artists[0]) queries.push(`${fold(name)} ${fold(artists[0])}`);
+    queries.push(fold(name));
+  }
+  if (accented(title)) queries.push(norm(title));
+  let best = null;
+  for (const q of [...new Set(queries)].slice(0, 5)) {
     const records = await call('/search', { q });
-    const best = (Array.isArray(records) ? records : [])
-      .map((record) => ({ record, points: score(record, wanted) }))
-      .filter(({ points, record }) => points >= ENOUGH && (record.instrumental || record.syncedLyrics || record.plainLyrics))
-      .sort((a, b) => b.points - a.points)[0];
-    if (best) return result(best.record);
+    for (const record of Array.isArray(records) ? records : []) {
+      if (!(record.instrumental || record.syncedLyrics || record.plainLyrics)) continue;
+      for (const name of titles) {
+        const { points, loose } = fit(record, { title: name, duration, artists, cover });
+        if (points >= ENOUGH && (!best || points > best.points)) best = { record, points, loose };
+      }
+    }
+    if (best && best.points >= 80) break; // right title, length and artist: no need to look further
     await sleep(300);
   }
-  return null;
+  return best ? result(best.record, best.loose) : null;
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { LyricsError, artistNames, cleanTitle, findLyrics, score } from './lyricsFinder';
+import { LyricsError, artistNames, cleanTitle, findLyrics, fit, fold, score, titleCandidates } from './lyricsFinder';
 
 const json = (body, status = 200, headers = {}) => ({ ok: status < 400, status, headers: { get: (name) => headers[name] ?? null }, json: async () => body });
 const record = (extra = {}) => ({ id: 1, trackName: 'Dạo Gần Đây', artistName: 'HIEUTHUHAI', albumName: 'x', duration: 205, instrumental: false, plainLyrics: 'plain words', syncedLyrics: '[00:01.00] timed words', ...extra });
@@ -16,18 +16,42 @@ describe('reading a song\'s name', () => {
   });
 });
 
+describe('names from video sites', () => {
+  it('finds the song where such files hide it', () => {
+    expect(titleCandidates({ title: 'Dick x PC x Tofu', artist: 'BẠN CÓ TÀI MÀ', album: 'GHÉ QUA - Dick x PC x Tofu' })).toMatchObject({ titles: ['GHÉ QUA'] });
+    expect(titleCandidates({ title: '"SỚM MUỘN THÌ" - Nhâm Phương Nam x HUSLANG Robber' }).titles[0]).toBe('SỚM MUỘN THÌ');
+    expect(titleCandidates({ title: '"SỚM MUỘN THÌ" - Nhâm Phương Nam x HUSLANG Robber' }).artists).toEqual(['nhâm phương nam', 'huslang robber']);
+    expect(titleCandidates({ title: 'Chillies (Official Music Video)', artist: 'Chillies', album: 'Em Đừng Khóc - Chillies (Official Music Video)' }).titles).toEqual(['Em Đừng Khóc']);
+    expect(titleCandidates({ title: 'Sơn Tùng M-TP - Chúng Ta Của Tương Lai | Official MV', artist: 'Sơn Tùng M-TP' }).titles).toEqual(['Chúng Ta Của Tương Lai']);
+    expect(titleCandidates({ title: '01. Ngày Mai Em Đi MV', artist: 'Lê Hiếu' }).titles).toEqual(['Ngày Mai Em Đi']);
+    expect(titleCandidates({ title: 'Dạo Gần Đây', artist: 'HIEUTHUHAI' }).titles).toEqual(['Dạo Gần Đây']);
+  });
+  it('folds accents away for the search', () => {
+    expect(fold('Em Đừng Khóc')).toBe('em dung khoc');
+  });
+});
+
 describe('scoring a record', () => {
   const wanted = { title: 'Dạo Gần Đây', duration: 205, artists: ['hieuthuhai'] };
   it('likes the right title, length and artist, and prefers timed words', () => {
     expect(score(record(), wanted)).toBe(50 + 30 + 15 + 10);
     expect(score(record({ syncedLyrics: null }), wanted)).toBe(50 + 30 + 15 + 3);
   });
-  it('refuses another title, or a cut of the song that is a different length', () => {
+  it('refuses another title, or a song of another length by someone else', () => {
     expect(score(record({ trackName: 'Something else' }), wanted)).toBe(0);
-    expect(score(record({ duration: 176 }), wanted)).toBe(0);
+    expect(score(record({ duration: 176, artistName: 'Someone else' }), wanted)).toBe(0);
   });
-  it('keeps accents significant, so different Vietnamese words are different songs', () => {
-    expect(score(record({ trackName: 'Dao Gan Day' }), wanted)).toBe(0);
+  it('keeps accents significant between two accented titles, but takes a title typed without them', () => {
+    expect(score(record({ trackName: 'Đào Gân Đáy' }), wanted)).toBe(0);
+    expect(score(record({ trackName: 'Dao Gan Day' }), wanted)).toBe(40 + 30 + 15 + 10);
+  });
+  it('takes another cut of the song by the same artist (or a cover) for its words only, untimed', () => {
+    expect(fit(record({ duration: 240 }), wanted)).toEqual({ points: 50 + 15 + 3, loose: true });
+    expect(fit(record({ duration: 240, artistName: 'Someone else' }), wanted).points).toBe(0);
+    expect(fit(record({ duration: 240, artistName: 'Someone else' }), { ...wanted, cover: true }).loose).toBe(true);
+  });
+  it('matches a record whose name carries the artist and a video tail', () => {
+    expect(score(record({ trackName: 'Dạo Gần Đây - HIEUTHUHAI (Official Music Video)' }), wanted)).toBe(50 + 30 + 15 + 10);
   });
 });
 
@@ -41,6 +65,12 @@ describe('finding lyrics', () => {
     expect(url).toContain('https://lrclib.net/api/get?');
     expect(url).toContain('duration=205');
     expect(init.headers['Lrclib-Client']).toMatch(/Hank62/);
+  });
+
+  it('searches without accents first, since the service finds nothing with them', async () => {
+    const fetchImpl = vi.fn().mockResolvedValueOnce(json({}, 404)).mockResolvedValue(json([record()]));
+    await findLyrics(track, { fetchImpl, sleep });
+    expect(decodeURIComponent(fetchImpl.mock.calls[1][0]).replace(/\+/g, ' ')).toContain('q=dao gan day hieuthuhai');
   });
 
   it('falls back to a search and picks the best fitting record', async () => {

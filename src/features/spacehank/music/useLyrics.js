@@ -4,6 +4,8 @@ import { attachOnlineLyrics, markLyricsChecked } from './library';
 
 // A song that was searched and found nothing is searched again after a week, in case someone has added it to LRCLIB since.
 const RECHECK_MS = 7 * 24 * 60 * 60 * 1000;
+// the finder learned to read names from video sites and to search without accents on this day: every song it missed before gets another try
+const FINDER_SINCE = Date.UTC(2026, 10, 9, 12);
 const PAUSE_MS = 350; // the service asks for a short pause between requests
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -25,7 +27,7 @@ export const wantsLookup = (track, now = Date.now()) =>
   !track.sample && // the built-in synthesised songs are not on any lyrics site
   !hasLyrics(track) &&
   !track.instrumental &&
-  now - (track.lyricsCheckedAt ?? 0) > RECHECK_MS &&
+  (now - (track.lyricsCheckedAt ?? 0) > RECHECK_MS || (track.lyricsCheckedAt ?? 0) < FINDER_SINCE) &&
   !asking.has(track.id) &&
   !failed.has(track.id) &&
   (typeof navigator === 'undefined' || navigator.onLine !== false);
