@@ -1,5 +1,11 @@
 [
   {
+    "id": "lighter-start",
+    "date": "2026-11-09",
+    "vi": "App mở nhẹ hơn: trình soạn thảo của giấy nhớ chỉ tải khi có giấy nhớ trên màn hình, và bản cập nhật lại được lưu sẵn để dùng khi không có mạng.",
+    "en": "The app starts lighter: the sticky notes' editor loads only when a sticky is on screen, and updates are again kept ready for use offline."
+  },
+  {
     "id": "lyrics-finder",
     "date": "2026-11-09",
     "vi": "Tìm lời bài hát giỏi hơn với nhạc Việt: tìm không dấu, đọc được tên bài từ file tải từ video (tên trong ngoặc kép, nằm ở album, kèm MV/Official), và lấy lời cho bản cover hay bản MV dài hơn (hiện lời không chạy theo nhịp).",

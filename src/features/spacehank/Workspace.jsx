@@ -25,7 +25,6 @@ import { lifeDocs, searchEverything } from './search/model';
 import { GUEST_HOME, guestCan } from './demo/mode';
 import PrivateTab from './components/PrivateTab';
 import { createNote, loadNotes, sendIntent } from './notes/library';
-import StickyLayer from './notes/StickyLayer';
 import { floatNote, stickies } from './notes/stickies';
 import { useShellContext, playMood } from './hooks/useShellContext';
 import { missions } from './missions/store';
@@ -68,6 +67,8 @@ const PulseView = lazy(() => import('./views/PulseView'));
 const ShellView = lazy(() => import('./views/ShellView'));
 const MemosView = lazy(() => import('./views/MemosView'));
 const PodcastView = lazy(() => import('./views/PodcastView'));
+// the sticky notes carry the rich text editor, so they load only once there is a sticky to show
+const StickyLayer = lazy(() => import('./notes/StickyLayer'));
 const GamesView = lazy(() => import('./views/GamesView'));
 const DiaryView = lazy(() => import('./views/DiaryView'));
 const PaintView = lazy(() => import('./views/PaintView'));
@@ -397,7 +398,11 @@ export default function Workspace({
           </div>
           {sharing && <ShareSheet onDone={doneSharing} onNotify={onNotify} />}
           <CaptureSheet onNotify={onNotify} onTab={onTab} />
-          {stickyCount > 0 && <StickyLayer onOpenNote={(id) => { sendIntent('notes', { open: id }); onTab('notes'); }} />}
+          {stickyCount > 0 && (
+            <Suspense fallback={null}>
+              <StickyLayer onOpenNote={(id) => { sendIntent('notes', { open: id }); onTab('notes'); }} />
+            </Suspense>
+          )}
           <ModulesSheet />
           {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
