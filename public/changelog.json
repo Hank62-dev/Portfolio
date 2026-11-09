@@ -1,5 +1,11 @@
 [
   {
+    "id": "diary-notebook-page",
+    "date": "2026-11-09",
+    "vi": "Cả trang Nhật ký giờ là một cuốn sổ: giấy kẻ dòng, lề đỏ, gáy lò xo, tiêu đề viết tay, các con số là giấy nhớ dán lệch. Viết nhật ký cũng ngay trên dòng kẻ, chọn tâm trạng như đóng dấu, ảnh dán băng keo.",
+    "en": "The whole Diary is now a notebook: ruled paper, a red margin, a spiral, handwritten headings and the numbers on crooked sticky notes. Writing goes straight onto the rules too, the mood is picked like a stamp and photos are taped on."
+  },
+  {
     "id": "diary-notebook",
     "date": "2026-11-09",
     "vi": "Đọc lại nhật ký giờ như mở một cuốn sổ: gáy lò xo, giấy kẻ dòng có lề đỏ, chữ viết tay, ảnh dán băng keo, tâm trạng đóng như con dấu. Lật trang trước, trang sau bằng mũi tên, vuốt ngang hoặc phím ← →.",

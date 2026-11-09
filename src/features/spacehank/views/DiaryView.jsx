@@ -8,6 +8,7 @@ import { loadNotes, notesStore } from '../notes/library';
 import { dayKey } from '../notes/notes';
 import DiaryLock from '../diary/DiaryLock';
 import EntrySheet from '../diary/EntrySheet';
+import { Spiral } from '../diary/notebook';
 import Journey from '../diary/Journey';
 import LockSettings from '../diary/LockSettings';
 import { diaryLock, lockDiary } from '../diary/lock';
@@ -34,7 +35,7 @@ const Tile = ({ label, icon: Icon, children, glow }) => (
   </div>
 );
 
-/** Nhật ký: a diary written a day at a time and walked as a journey. The pages are journal notes, so Second Brain shows them too. */
+/** Nhật ký: a diary written a day at a time and walked as a journey, on the pages of a spiral notebook. The pages are journal notes, so Second Brain shows them too. */
 export default function DiaryView({ onNotify }) {
   const { notes, loaded, error } = useStore(notesStore);
   const pet = usePet();
@@ -73,7 +74,8 @@ export default function DiaryView({ onNotify }) {
 
   if (locked) {
     return (
-      <div data-sky className="sky -mx-5 -mt-4 min-h-[80vh] px-4 py-6 md:mx-0 md:mt-0 md:rounded-[2rem] md:px-8 md:py-10" data-diary>
+      <div className="diary-book -mx-5 -mt-4 min-h-[80vh] py-6 pr-4 pl-9 md:mx-auto md:mt-0 md:max-w-[42rem] md:py-10 md:pr-8 md:pl-14" data-diary>
+        <Spiral />
         <div className="mx-auto w-full max-w-[34rem]">
           <DiaryLock />
         </div>
@@ -82,13 +84,8 @@ export default function DiaryView({ onNotify }) {
   }
 
   return (
-    <div data-sky className="sky diary-sky relative isolate -mx-5 -mt-4 min-h-[80vh] overflow-hidden px-4 py-6 md:mx-0 md:mt-0 md:rounded-[2rem] md:px-8 md:py-10" data-diary>
-      <span className="diary-aurora" aria-hidden="true" />
-      <span className="sky-stars diary-night" aria-hidden="true" />
-      <span className="diary-moon diary-night" aria-hidden="true" />
-      <span className="sky-drift a" aria-hidden="true" />
-      <span className="sky-drift b" aria-hidden="true" />
-      <span className="sky-drift c" aria-hidden="true" />
+    <div className="diary-book isolate -mx-5 -mt-4 min-h-[80vh] overflow-hidden py-6 pr-4 pl-9 md:mx-auto md:mt-0 md:max-w-[42rem] md:py-10 md:pr-8 md:pl-14" data-diary>
+      <Spiral />
       <div className="relative mx-auto flex w-full max-w-[34rem] flex-col gap-5">
         <header className="flex items-start justify-between gap-3 px-1">
           <div>

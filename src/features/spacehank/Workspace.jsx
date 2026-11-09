@@ -366,7 +366,7 @@ export default function Workspace({
   return (
     <SoftContext.Provider value>
       <TooltipProvider>
-        <div ref={shellRef} className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', tab === 'diary' && phone && 'sky', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab) }}>
+        <div ref={shellRef} className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab) }}>
           {!phone && (
             <Sidebar
               tab={tab}

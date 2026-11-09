@@ -4,24 +4,8 @@ import MoodFace from './MoodFace';
 import PhotoViewer from './PhotoViewer';
 import { bodyOf, dayLabel, moodWord, parseDay } from './model';
 import { PaperSheet, SheetClose } from './ui';
-import { usePhoto } from './photos';
+import { Polaroid, Spiral } from './notebook';
 import { tr } from '../lang';
-
-// a picture taped onto the page: each one leans its own way, the same way every time it is opened
-const TILTS = [-3, 2.5, -1.5, 3.5, -2.5, 1.5];
-
-/** A photo stuck on the page with a strip of tape. Tapping it opens it full screen. */
-function Polaroid({ id, index, single, onOpen }) {
-  const url = usePhoto(id);
-  return (
-    <button type="button" onClick={onOpen} aria-label={tr('Xem ảnh lớn')} className="nb-photo cursor-zoom-in" style={{ '--tilt': `${TILTS[index % TILTS.length]}deg` }} data-single={single || undefined}>
-      <span className="nb-tape" aria-hidden="true" />
-      <span className="nb-photo-frame">{url && <img src={url} alt={tr('Ảnh kỷ niệm')} />}</span>
-    </button>
-  );
-}
-
-const SPIRAL = Array.from({ length: 11 });
 
 /**
  * Reading one day's page again, as a page of a spiral notebook: ruled lines, a margin, the words in handwriting, the photos
@@ -78,11 +62,7 @@ export default function EntrySheet({ entry, label, days = [], onTurn, onClose, o
 
   return (
     <PaperSheet open surface="notebook" onClose={onClose} title={tr('Nhật ký {0}', dayLabel(entry.day))} description={tr('Đọc lại trang nhật ký.')}>
-      <div className="nb-spiral" aria-hidden="true">
-        {SPIRAL.map((_, i) => (
-          <span key={i} />
-        ))}
-      </div>
+      <Spiral />
       <article key={entry.day} className="nb-page" data-turn={turn || undefined} onTouchStart={touchStart} onTouchEnd={touchEnd} data-entry>
         <header className="nb-head">
           <div className="min-w-0">
@@ -104,7 +84,7 @@ export default function EntrySheet({ entry, label, days = [], onTurn, onClose, o
         {photos.length > 0 && (
           <div className="nb-photos" data-count={photos.length}>
             {photos.map((id, index) => (
-              <Polaroid key={id} id={id} index={index} single={photos.length === 1} onOpen={() => setViewing(index)} />
+              <Polaroid key={id} id={id} index={index} size={photos.length === 1 ? 'single' : 'half'} onOpen={() => setViewing(index)} />
             ))}
           </div>
         )}

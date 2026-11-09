@@ -1039,69 +1039,6 @@ input[data-own-clear]::-webkit-search-decoration {
   }
 }
 
-/* "Nhật ký": the sky over a trail. By night: deep blue to a dusk-lit horizon, with a moon, stars and a slow aurora (real elements in the
-   screen, since on a phone this class paints the whole shell). By day: a pale clear morning with a warm sun glow. A fine grain over both. */
-.sky {
-  background-color: #0a1330;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E"), radial-gradient(70% 42% at 86% 0%, rgb(120 150 255 / 0.3), transparent 66%), radial-gradient(64% 40% at 6% 30%, rgb(255 160 110 / 0.12), transparent 70%), linear-gradient(180deg, #091230 0%, #0f1f48 28%, #17305f 55%, #264677 78%, #5f6a8e 92%, #a4806f 100%);
-  background-blend-mode: soft-light, normal, normal, normal;
-  background-attachment: fixed;
-}
-:root[data-theme='light'] .sky {
-  background-color: #b9d6ef;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E"), radial-gradient(52% 36% at 86% 2%, rgb(255 244 210 / 0.95), transparent 62%), radial-gradient(60% 40% at 0% 38%, rgb(255 255 255 / 0.5), transparent 70%), linear-gradient(180deg, #8fbfe8 0%, #b4d4ef 32%, #d8e7f3 60%, #f1e8d6 100%);
-  background-blend-mode: soft-light, normal, normal, normal;
-}
-/* the things in the diary's sky */
-.diary-sky .sky-drift {
-  opacity: 0.1;
-}
-:root[data-theme='light'] .diary-sky .sky-drift {
-  opacity: 0.5;
-}
-:root[data-theme='light'] .diary-night {
-  display: none;
-}
-.diary-moon {
-  position: absolute;
-  top: 0.5rem;
-  right: 4.6rem;
-  width: 2.9rem;
-  aspect-ratio: 1;
-  border-radius: 9999px;
-  pointer-events: none;
-  opacity: 0.85;
-  background: radial-gradient(circle at 36% 32%, #fff, #e6e9fb 55%, #bcc4ea);
-  box-shadow:
-    0 0 36px 6px rgb(190 205 255 / 0.4),
-    0 0 120px 40px rgb(150 170 255 / 0.18);
-}
-.diary-aurora {
-  position: absolute;
-  left: -20%;
-  right: -20%;
-  top: -4%;
-  height: 34%;
-  pointer-events: none;
-  background: linear-gradient(100deg, transparent 6%, rgb(60 210 190 / 0.2) 30%, rgb(120 120 255 / 0.24) 58%, rgb(200 120 255 / 0.1) 76%, transparent 94%);
-  filter: blur(34px);
-  transform: skewY(-7deg);
-  animation: diary-aurora 22s ease-in-out infinite alternate;
-}
-:root[data-theme='light'] .diary-aurora {
-  background: linear-gradient(100deg, transparent 6%, rgb(255 236 190 / 0.5) 34%, rgb(255 255 255 / 0.5) 58%, transparent 90%);
-}
-@keyframes diary-aurora {
-  to {
-    transform: skewY(-3deg) translateX(8%);
-    opacity: 0.7;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .diary-aurora {
-    animation: none;
-  }
-}
 /* on a phone the sky is the whole screen (the workspace paints it behind the bars too) */
 @media (max-width: 767px) {
   [data-sky] {
@@ -1166,7 +1103,8 @@ input[data-own-clear]::-webkit-search-decoration {
 /* ---- The diary's notebook ----
    Reading a page again opens a spiral notebook: cream paper with blue rules and a red margin, the words in handwriting,
    photos taped on. The paper stays paper by night too, only a little dimmer, so its ink and buttons have their own roles. */
-.notebook {
+.notebook,
+.diary-book {
   --nb-paper: #fbf6e8;
   --nb-paper-edge: #efe5cc;
   --nb-rule: rgb(84 124 184 / 0.26);
@@ -1184,6 +1122,16 @@ input[data-own-clear]::-webkit-search-decoration {
   --dz-photo: #e6dcc0;
   --dz-handle: #c8b88c;
   --dz-amber: #a85c14;
+  --dz-danger: #b3261e;
+  --dz-danger-bg: #f6d6cf;
+  --dz-text-4: #7c8597;
+  --dz-soft-2: #efe4c6;
+  --dz-field: #fffdf7;
+  --dz-trail: #8b93a5;
+  --dz-chip: rgb(34 50 79 / 0.88);
+  --dz-paper: #fffdf7;
+  --dz-paper-line: #e6dab9;
+  --dz-paper-shadow: rgb(70 50 15 / 0.32);
   color-scheme: light;
   color: var(--nb-ink);
   background: linear-gradient(to right, var(--nb-paper-edge), var(--nb-paper) 1.2rem) var(--nb-paper);
@@ -1192,13 +1140,88 @@ input[data-own-clear]::-webkit-search-decoration {
   border-radius: 0.9rem 0.9rem 0 0;
 }
 @media (min-width: 768px) {
-  .notebook {
+  .notebook,
+  .diary-book {
     border-radius: 0.9rem;
   }
 }
-:root:not([data-theme='light']) .notebook {
+:root:not([data-theme='light']) .notebook,
+:root:not([data-theme='light']) .diary-book {
   --nb-paper: #f1e9d4;
   --nb-paper-edge: #e3d7b9;
+}
+
+/* The diary page itself is the notebook too: the same paper, ruled all the way down with the red margin, the coil at the top.
+   What sits on it is paper as well: slips (.paper), sticky notes for the numbers, the headings in handwriting. */
+.diary-book {
+  position: relative;
+  /* the rules start under the heading: a band of bare paper covers the top of them */
+  background:
+    linear-gradient(to right, var(--nb-paper-edge), var(--nb-paper) 1.2rem) 0 0 / 100% 9.5rem no-repeat,
+    linear-gradient(to bottom, transparent calc(var(--nb-line-h) - 1px), var(--nb-rule) calc(var(--nb-line-h) - 1px)) 0 0 / 100% var(--nb-line-h),
+    linear-gradient(to right, var(--nb-paper-edge), var(--nb-paper) 1.2rem) var(--nb-paper);
+  box-shadow: 0 24px 50px -24px rgb(10 20 40 / 0.55), 4px 4px 0 -1px #efe6cf, 8px 8px 0 -2px #e4d8b8;
+}
+.diary-book::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 1.6rem;
+  border-left: 1.5px solid var(--nb-margin);
+  box-shadow: 3px 0 0 -1.5px var(--nb-margin);
+  pointer-events: none;
+}
+@media (min-width: 768px) {
+  .diary-book::before {
+    left: 2.4rem;
+  }
+}
+.diary-book .nb-spiral {
+  position: relative;
+  margin: -1.1rem -0.5rem 0.4rem;
+  background: none;
+}
+.diary-book .skeleton {
+  background-color: rgb(34 50 79 / 0.08) !important;
+}
+.diary-book .font-display {
+  font-family: var(--font-hand);
+}
+.diary-book .paper {
+  background: var(--dz-paper);
+  border: 1px solid var(--dz-paper-line);
+  box-shadow: 0 8px 16px -10px var(--dz-paper-shadow);
+  backdrop-filter: none;
+}
+/* the three numbers are sticky notes, each its own colour and a little crooked */
+.diary-book .diary-tile {
+  border: 0;
+  border-radius: 0.2rem;
+  background: #fff1a8;
+  backdrop-filter: none;
+  box-shadow: 0 10px 14px -10px rgb(70 50 15 / 0.45), inset 0 -10px 14px -12px rgb(120 90 20 / 0.25);
+  rotate: -1.5deg;
+}
+.diary-book .diary-tile:nth-child(2) {
+  background: #ffd6c9;
+  rotate: 1.2deg;
+}
+.diary-book .diary-tile:nth-child(3) {
+  background: #cfe8d4;
+  rotate: -0.6deg;
+}
+.diary-book .diary-tile-glow {
+  box-shadow: 0 10px 14px -10px rgb(70 50 15 / 0.45), 0 0 0 2px rgb(168 92 20 / 0.35);
+}
+.diary-book [data-week] {
+  background: var(--dz-paper);
+  border: 1px solid var(--dz-paper-line);
+  box-shadow: 0 8px 16px -10px var(--dz-paper-shadow);
+  backdrop-filter: none;
+}
+.diary-book .week-face-now {
+  filter: drop-shadow(0 0 6px rgb(168 92 20 / 0.55));
 }
 
 /* the coil along the top: punched holes with a wire through each */
@@ -1332,6 +1355,7 @@ input[data-own-clear]::-webkit-search-decoration {
 }
 .nb-photo {
   position: relative;
+  display: block;
   width: calc(50% - 0.4rem);
   padding: 0.45rem 0.45rem 1.4rem;
   background: #fffdf8;
@@ -1339,27 +1363,186 @@ input[data-own-clear]::-webkit-search-decoration {
   transform: rotate(var(--tilt));
   transition: transform 0.25s var(--ease-out-expo);
 }
-.nb-photo[data-single] {
+.nb-photo[data-size='single'] {
   width: 86%;
   margin-inline: auto;
 }
+.nb-photo[data-size='small'] {
+  width: 5.6rem;
+  padding: 0.3rem 0.3rem 0.95rem;
+}
 .nb-photo:hover,
-.nb-photo:focus-visible {
+.nb-photo:focus-within {
   transform: rotate(0deg) scale(1.02);
 }
 .nb-photo-frame {
   display: block;
+  width: 100%;
   aspect-ratio: 1;
   overflow: hidden;
   background: var(--dz-photo);
 }
-.nb-photo[data-single] .nb-photo-frame {
+.nb-photo[data-size='single'] .nb-photo-frame {
   aspect-ratio: 4 / 3;
 }
 .nb-photo-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+.nb-photo-remove {
+  position: absolute;
+  top: -0.45rem;
+  right: -0.45rem;
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--nb-ink);
+  color: #fbf6e8;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+}
+/* an empty frame waiting for a picture */
+.nb-photo-add {
+  display: grid;
+  place-items: center;
+  width: 5.6rem;
+  height: 6.55rem;
+  border: 2px dashed #cdbd92;
+  border-radius: 0.2rem;
+  color: var(--nb-ink-soft);
+  transform: rotate(1.5deg);
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.nb-photo-add:hover:not(:disabled) {
+  border-color: #a85c14;
+  color: #a85c14;
+  transform: rotate(0deg);
+}
+.nb-photo-add:disabled {
+  opacity: 0.5;
+}
+.nb-photos[data-writing] {
+  align-items: flex-end;
+}
+.nb-photos[data-writing]:not(:has(.nb-photo)) {
+  padding-top: 0;
+}
+
+/* writing: how the day felt, picked like ticking a box in pencil */
+.nb-moods {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.nb-ask {
+  margin-bottom: 0.4rem;
+  font-family: var(--font-hand);
+  font-size: 1.3rem;
+  line-height: 1.2;
+  color: var(--nb-ink-soft);
+}
+.nb-mood {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.35rem 0.1rem 0.3rem;
+  border: 2px solid transparent;
+  border-radius: 0.8rem;
+  font-family: var(--font-hand);
+  font-size: 0.85rem;
+  line-height: 1;
+  color: var(--nb-pencil);
+  opacity: 0.75;
+  transition: transform 0.2s var(--ease-out-expo), opacity 0.2s, border-color 0.2s, color 0.2s;
+}
+.nb-mood:hover {
+  opacity: 1;
+}
+.nb-mood:active {
+  transform: scale(0.92);
+}
+/* the one picked gets the stamp's dashed ring, tilted, as on the page when it is read */
+.nb-mood[aria-pressed='true'] {
+  opacity: 1;
+  color: #a85c14;
+  border-style: dashed;
+  border-color: rgb(168 92 20 / 0.6);
+  transform: rotate(-4deg) scale(1.05);
+}
+
+/* the words go straight onto the rules: the lines scroll with the text, one per line of handwriting */
+.nb-write {
+  display: block;
+  width: 100%;
+  min-height: calc(var(--nb-line-h) * 6);
+  resize: none;
+  border: 0;
+  padding: 1px 0 0;
+  outline: none;
+  background-color: transparent;
+  background-image: linear-gradient(to bottom, transparent calc(var(--nb-line-h) - 1px), var(--nb-rule) calc(var(--nb-line-h) - 1px));
+  background-size: 100% var(--nb-line-h);
+  background-attachment: local;
+  font-family: var(--font-hand);
+  font-size: 1.28rem;
+  line-height: var(--nb-line-h);
+  color: var(--nb-ink);
+  caret-color: #a85c14;
+}
+.nb-write::placeholder {
+  color: var(--nb-pencil);
+  opacity: 0.8;
+}
+.nb-write:focus-visible {
+  box-shadow: none;
+}
+/* the prompts are pencilled in the margin of the day: tap one to start the page with it */
+.nb-prompt {
+  padding: 0.15rem 0;
+  text-align: left;
+  font-family: var(--font-hand);
+  font-size: 1rem;
+  line-height: 1.3;
+  color: var(--nb-ink-soft);
+  text-decoration: underline dotted rgb(91 102 128 / 0.5);
+  text-underline-offset: 0.25rem;
+  transition: color 0.2s;
+}
+.nb-prompt::before {
+  content: '+ ';
+  color: #a85c14;
+}
+.nb-prompt:hover {
+  color: var(--nb-ink);
+}
+.nb-discard {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 1rem;
+  border-radius: 999px;
+  border: 1px solid #e0d3ae;
+  background: #fffaf0;
+  color: var(--nb-ink-soft);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: background-color 0.2s, color 0.2s;
+}
+.nb-discard[data-confirm] {
+  border-color: transparent;
+  background: var(--dz-danger-bg);
+  color: var(--dz-danger);
+}
+.nb-discard:disabled,
+.nb-edit:disabled {
+  opacity: 0.5;
 }
 .nb-tape {
   position: absolute;
@@ -1434,10 +1617,10 @@ input[data-own-clear]::-webkit-search-decoration {
   font-weight: 600;
   transition: transform 0.2s, background-color 0.2s;
 }
-.nb-edit:hover {
+.nb-edit:hover:not(:disabled) {
   background: #2e4166;
 }
-.nb-edit:active {
+.nb-edit:active:not(:disabled) {
   transform: scale(0.96);
 }
 .nb-number {
