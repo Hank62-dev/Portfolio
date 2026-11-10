@@ -154,13 +154,13 @@ export default function PulseView({ owner }) {
             {repos.map((r) => {
               const run = runTone(r.run);
               return (
-                <Tile key={r.name} data-repo={r.name}>
+                <Tile key={r.full ?? r.name} data-repo={r.name}>
                   <div className="flex items-start gap-3">
                     <GitBranch size={18} className="mt-0.5 shrink-0 text-bone-faint" aria-hidden="true" />
                     <div className="min-w-0 flex-1 leading-tight">
                       <h3 className="truncate text-body font-medium text-bone">
                         <a href={r.url} target="_blank" rel="noopener noreferrer" className="hover:text-signal">
-                          {r.name}
+                          {r.own === false ? r.full : r.name}
                         </a>
                       </h3>
                       <p className="mt-0.5 line-clamp-1 text-fine text-bone-dim">{r.description || tr('No description')}</p>
@@ -177,7 +177,8 @@ export default function PulseView({ owner }) {
                     <span className="inline-flex items-center gap-1">
                       <CircleDot size={11} aria-hidden="true" /> {r.issues}
                     </span>
-                    <span className="ml-auto">{tr('pushed')} {timeAgo(r.pushed)}</span>
+                    {r.own === false && <Badge>{tr('Contributor')}</Badge>}
+                    <span className="ml-auto">{tr(r.own === false ? 'active' : 'pushed')} {timeAgo(r.pushed)}</span>
                   </div>
                   {r.commits.length > 0 && (
                     <ul className="mt-3 flex flex-col gap-1.5 border-t border-line pt-3">

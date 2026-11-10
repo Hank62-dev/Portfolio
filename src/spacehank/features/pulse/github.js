@@ -56,6 +56,7 @@ const get = async (path, fetchImpl) => {
 
 const slim = (repo) => ({
   name: repo.name,
+  full: repo.full_name ?? repo.name,
   url: repo.html_url,
   description: repo.description ?? '',
   language: repo.language ?? '',
@@ -65,33 +66,62 @@ const slim = (repo) => ({
   fork: Boolean(repo.fork),
 });
 
+// starring or forking someone's repository is not working on it
+const PASSIVE = new Set(['WatchEvent', 'ForkEvent']);
+
+/** The repositories the person last worked on (pushes, pull requests, reviews, issues…), newest first, each once, with when. */
+export const activeRepos = (events) => {
+  const seen = new Map();
+  for (const event of Array.isArray(events) ? events : []) {
+    const full = event?.repo?.name;
+    if (!full || PASSIVE.has(event.type) || seen.has(full)) continue;
+    seen.set(full, event.created_at);
+  }
+  return [...seen].map(([full, at]) => ({ full, at }));
+};
+
+const CACHE_VERSION = 2;
+
 /**
- * The newest repositories with their latest commits and the status of their latest workflow run. One call for the
- * list and two per repository, cached for ten minutes, to stay inside GitHub's allowance for anonymous requests.
+ * The repositories the person was most recently active in, their own or anyone's (from their public events), filled up
+ * with their newest own repositories when there were fewer; each with the person's latest commits there and the status
+ * of its latest workflow run. Cached for ten minutes, to stay inside GitHub's allowance for anonymous requests.
  */
 export const loadGithub = async ({ user = GITHUB_USERNAME, limit = 4, fetchImpl = fetch, storage = globalThis.sessionStorage, now = Date.now } = {}) => {
   try {
     const cached = JSON.parse(storage?.getItem(CACHE_KEY) ?? 'null');
-    if (cached && cached.user === user && now() - cached.at < CACHE_MS) return cached.data;
+    if (cached && cached.v === CACHE_VERSION && cached.user === user && now() - cached.at < CACHE_MS) return cached.data;
   } catch {
     /* an unreadable cache is simply ignored */
   }
-  const repos = (await get(`/users/${user}/repos?sort=pushed&per_page=12`, fetchImpl)).filter((r) => !r.fork).slice(0, limit).map(slim);
+  const mine = (full) => full.split('/')[0].toLowerCase() === user.toLowerCase();
+  const active = activeRepos(await get(`/users/${user}/events/public?per_page=100`, fetchImpl).catch(() => [])).slice(0, limit);
+  const details = await Promise.all(active.map(({ full }) => get(`/repos/${full}`, fetchImpl).then(slim).catch(() => null)));
+  let repos = active.map((a, i) => details[i] && { ...details[i], active: a.at }).filter(Boolean);
+  if (repos.length < limit) {
+    const taken = new Set(repos.map((r) => r.full.toLowerCase()));
+    const own = (await get(`/users/${user}/repos?sort=pushed&per_page=12`, fetchImpl)).filter((r) => !r.fork).map(slim);
+    repos = [...repos, ...own.filter((r) => !taken.has(`${user}/${r.name}`.toLowerCase()) && !taken.has(r.full.toLowerCase()))].slice(0, limit);
+  }
   const data = await Promise.all(
     repos.map(async (repo) => {
+      const full = repo.full.includes('/') ? repo.full : `${user}/${repo.name}`;
       const [commits, runs] = await Promise.all([
-        get(`/repos/${user}/${repo.name}/commits?per_page=3`, fetchImpl).catch(() => []),
-        get(`/repos/${user}/${repo.name}/actions/runs?per_page=1`, fetchImpl).catch(() => ({ workflow_runs: [] })),
+        get(`/repos/${full}/commits?per_page=3${mine(full) ? '' : `&author=${encodeURIComponent(user)}`}`, fetchImpl).catch(() => []),
+        get(`/repos/${full}/actions/runs?per_page=1`, fetchImpl).catch(() => ({ workflow_runs: [] })),
       ]);
       return {
         ...repo,
+        full,
+        own: mine(full),
+        pushed: repo.active ?? repo.pushed,
         commits: commits.map((c) => ({ sha: c.sha.slice(0, 7), message: c.commit.message.split('\n')[0], at: c.commit.author.date, url: c.html_url })),
         run: runs.workflow_runs?.[0] ? { status: runs.workflow_runs[0].status, conclusion: runs.workflow_runs[0].conclusion, url: runs.workflow_runs[0].html_url } : null,
       };
     })
   );
   try {
-    storage?.setItem(CACHE_KEY, JSON.stringify({ user, at: now(), data }));
+    storage?.setItem(CACHE_KEY, JSON.stringify({ v: CACHE_VERSION, user, at: now(), data }));
   } catch {
     /* storage is blocked: it is simply fetched again next time */
   }

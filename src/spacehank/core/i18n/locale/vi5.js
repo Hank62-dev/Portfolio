@@ -434,4 +434,6 @@ export const vi5 = {
   'Which topics do you want to hear about?': 'Bạn muốn nghe về chủ đề nào?',
   'No credential': 'Không có thông tin xác thực',
   'No proof': 'Không có bằng chứng',
+  Contributor: 'Đóng góp',
+  active: 'hoạt động',
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { healthTone, loadGithub, ping, runTone, timeAgo } from './github';
+import { activeRepos, healthTone, loadGithub, ping, runTone, timeAgo } from './github';
 
 const NOW = Date.UTC(2026, 10, 2, 12);
 
@@ -59,6 +59,30 @@ describe('loadGithub', () => {
     const calls = fetchImpl.mock.calls.length;
     await loadGithub({ user: 'me', fetchImpl, storage, now: () => 2000 });
     expect(fetchImpl.mock.calls.length).toBe(calls);
+  });
+
+  it("puts first the repositories the person was last active in (anyone's), then fills with their own", async () => {
+    const events = [
+      { type: 'PushEvent', repo: { name: 'org/tool' }, created_at: '2026-11-02T10:00:00Z' },
+      { type: 'WatchEvent', repo: { name: 'big/starred' }, created_at: '2026-11-02T09:00:00Z' },
+      { type: 'PullRequestEvent', repo: { name: 'org/tool' }, created_at: '2026-11-01T10:00:00Z' },
+      { type: 'IssueCommentEvent', repo: { name: 'me/a' }, created_at: '2026-11-01T08:00:00Z' },
+    ];
+    const urls = [];
+    const fetch2 = vi.fn(async (url) => {
+      urls.push(url);
+      if (url.includes('/events/public')) return json(events);
+      if (url.endsWith('/repos/org/tool')) return json({ name: 'tool', full_name: 'org/tool', html_url: 't', fork: false, pushed_at: '2026-11-02T11:00:00Z' });
+      if (url.endsWith('/repos/me/a')) return json({ name: 'a', full_name: 'me/a', html_url: 'u', fork: false });
+      if (url.includes('/repos?')) return json([{ name: 'a', full_name: 'me/a', fork: false }, { name: 'b', full_name: 'me/b', fork: false }, { name: 'c', full_name: 'me/c', fork: false }]);
+      if (url.includes('/commits')) return json([]);
+      return json({ workflow_runs: [] });
+    });
+    const data = await loadGithub({ user: 'me', limit: 3, fetchImpl: fetch2, storage: memory() });
+    expect(data.map((r) => [r.full, r.own])).toEqual([['org/tool', false], ['me/a', true], ['me/b', true]]);
+    expect(data[0].pushed).toBe('2026-11-02T10:00:00Z'); // when the person was active there, not anyone's last push
+    expect(urls).toContain('https://api.github.com/repos/org/tool/commits?per_page=3&author=me'); // only their commits in someone else's repo
+    expect(activeRepos(events).map((r) => r.full)).toEqual(['org/tool', 'me/a']);
   });
 
   it('explains a rate limit', async () => {

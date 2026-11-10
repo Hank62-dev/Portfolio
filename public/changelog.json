@@ -1,5 +1,12 @@
 [
   {
+    "id": "pulse-activity",
+    "version": "1.25.0",
+    "date": "2026-11-10",
+    "vi": "Dev Pulse giờ hiện 4 repo bạn hoạt động gần nhất trên GitHub, kể cả repo của người khác mà bạn đóng góp (kèm commit của chính bạn ở đó), không chỉ repo của riêng bạn.",
+    "en": "Dev Pulse now shows the 4 repositories you were most recently active in on GitHub, including others' repos you contribute to (with your own commits there), not only your own."
+  },
+  {
     "id": "quiet-internal",
     "version": "1.24.2",
     "internal": true,
