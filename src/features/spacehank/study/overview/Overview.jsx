@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { BookOpenCheck, CalendarClock, Check, ChevronDown, Flag, KanbanSquare, ListChecks, Pencil, Plus, Sparkles } from 'lucide-react';
-import { Badge, Button } from '../../../../design-system';
-import { clsx } from '../../../../lib/format';
+import { Badge, Button } from '../../../../shared/ui';
+import { clsx } from '../../../../shared/lib/format';
 import { useFab } from '../../fab';
 import { Segmented } from '../../components/Page';
 import { countdown } from '../model';

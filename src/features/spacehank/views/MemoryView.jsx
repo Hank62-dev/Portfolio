@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react';
 import { BrainCircuit, ChevronDown, Search } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { spacehankConfig } from '../config';
 import { groupRuns } from '../model/memory';
 import { tr } from '../lang';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 // the tone of an event, from what the agent did
 const TONE = {

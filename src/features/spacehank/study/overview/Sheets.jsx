@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BookOpenCheck, Check, CalendarClock, Plus, Trash2, X } from 'lucide-react';
-import { Button, DatePicker, Dialog, Input, Select } from '../../../../design-system';
-import { clsx } from '../../../../lib/format';
+import { Button, DatePicker, Dialog, Input, Select } from '../../../../shared/ui';
+import { clsx } from '../../../../shared/lib/format';
 import { Segmented } from '../../components/Page';
 import { courses, flashcards } from '../store';
 import { PRIORITIES, atOfInput, deleteItem, inputOfAt, newItem, newStep, saveItem } from '../planner';

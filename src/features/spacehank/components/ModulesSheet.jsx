@@ -1,6 +1,6 @@
 import { Check, Lock } from 'lucide-react';
-import { Dialog } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Dialog } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { CORE, bySection, modules, modulesUi, setVisible } from '../modules';
 import { NAVIGATION, tabAccent } from '../navigation';
 import { useStore } from '../store';

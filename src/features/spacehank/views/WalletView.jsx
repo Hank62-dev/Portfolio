@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Banknote, Bus, Check, ChevronLeft, ChevronRight, CircleEllipsis, Download, Gamepad2, GraduationCap, HeartPulse, House, Plus, ShoppingBag, Sparkles, Target, Trash2, TrendingDown, TrendingUp, Utensils, Wallet as WalletIcon } from 'lucide-react';
-import { Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { PageHead, Segmented, Tile } from '../components/Page';
 import { useFab } from '../fab';
 import { useStore } from '../store';

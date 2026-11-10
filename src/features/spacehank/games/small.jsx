@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bird, Fish, Flame, Hammer, Hand, Heart, Leaf, Moon, RotateCcw, Scissors, Star, Sun } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { BAU_CUA, HANDS, duel, rollDice, settle, shuffle } from './logic';
 import { Doodle, INK, InkBox, InkButton, Note, RED, Score } from './ink';
 import { useBest } from './shared';

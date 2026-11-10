@@ -1,8 +1,8 @@
 import { tr } from '../lang';
 import { useMemo, useState } from 'react';
 import { Clapperboard, ListPlus, Lightbulb, Send, Sparkles, Trophy, Wand2 } from 'lucide-react';
-import { Button, DatePicker, Input, Select, Textarea, pushToast } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, DatePicker, Input, Select, Textarea, pushToast } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { generateContent } from '../api/owner';
 import { createDraft, startJob, useDraft, useJob } from '../jobs';
 import { Segmented } from '../components/Page';

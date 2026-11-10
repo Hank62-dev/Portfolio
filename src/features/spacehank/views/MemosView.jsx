@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AudioLines, Download, Ellipsis, Languages, ListChecks, Mic, NotebookPen, Pause, Play, ScrollText, Sparkles, Square, Trash2 } from 'lucide-react';
-import { Badge, Button, Menu } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, Menu } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { PageHead, Segmented } from '../components/Page';
 import { organizeText } from '../api/owner';
 import { addManyToInbox } from '../inbox/file';

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, Check, CloudOff } from 'lucide-react';
-import { Ring } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Ring } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { syncNow } from '../sync';
 import { useSyncStatus } from '../sync/useSync';
 import { tr } from '../lang';

@@ -80,7 +80,7 @@ describe('every screen, as it was before the refactor', async () => {
 
   for (const path of PAGES) {
     it(`the portfolio page ${path} opens with the same parts`, async () => {
-      const [{ default: AppRoutes }, { LangProvider }, { ThemeProvider }] = await Promise.all([import('@/routes/AppRoutes'), import('@/lib/i18n'), import('@/lib/theme')]);
+      const [{ default: AppRoutes }, { LangProvider }, { ThemeProvider }] = await Promise.all([import('@/app/AppRoutes'), import('@/portfolio/i18n'), import('@/shared/lib/theme')]);
       const html = draw(
         <LangProvider>
           <ThemeProvider>

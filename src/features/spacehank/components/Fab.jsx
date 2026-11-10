@@ -1,4 +1,4 @@
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { fabStore } from '../fab';
 import { useStore } from '../store';
 

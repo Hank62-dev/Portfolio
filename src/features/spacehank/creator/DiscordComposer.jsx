@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Send } from 'lucide-react';
-import { Button, Select, Textarea, pushToast } from '../../../design-system';
+import { Button, Select, Textarea, pushToast } from '../../../shared/ui';
 import { discordChannels, postToDiscord } from '../api/owner';
 import { Label } from './ui';
 import { tr } from '../lang';

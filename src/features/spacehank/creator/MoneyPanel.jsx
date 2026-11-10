@@ -1,8 +1,8 @@
 import { locale, tr } from '../lang';
 import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, ChartColumn, ChartPie, Check, CheckCircle2, Info, Plus, Receipt, Sparkles, Target, Trash2, Trophy } from 'lucide-react';
-import { Button, Dialog, Input, Select } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, Dialog, Input, Select } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { useFab } from '../fab';
 import { useStore } from '../store';
 import { SOURCES, bySource, earningsByPiece, goalProgress, insights, monthKeyOf, monthTotal, newIncome, sourceLabel, trend, vnd, vndShort } from './model';

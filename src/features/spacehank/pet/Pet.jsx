@@ -1,4 +1,4 @@
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 
 // Niú, drawn in a 120 by 120 box: a little panda sitting down, a big round head with fluffy cheeks, big dark eye patches and
 // a white V on its chest. Its face follows its mood; what it wears follows how far it has grown. The animations (a slow bob,

@@ -1,7 +1,7 @@
 import { tr } from '../lang';
 import { useEffect, useRef, useState } from 'react';
 import { Heart, ListMusic, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { useStore } from '../store';
 import Cover, { useCoverTint } from './Cover';
 import { musicUi } from './ui';

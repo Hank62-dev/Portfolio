@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { BookHeart, ImagePlus, NotebookPen, Plus, Trash2 } from 'lucide-react';
-import { Button, EmptyState, Skeleton } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, EmptyState, Skeleton } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { PageHead } from '../components/Page';
 import { locale, tr } from '../lang';
 import Pet from '../pet/Pet';

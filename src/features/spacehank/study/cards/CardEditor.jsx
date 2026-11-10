@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Check, Plus, Trash2 } from 'lucide-react';
-import { Button, Dialog, Select, Textarea } from '../../../../design-system';
+import { Button, Dialog, Select, Textarea } from '../../../../shared/ui';
 import { newFlashcard } from '../model';
 import { flashcards } from '../store';
 import { clozeFront, hasCloze, wrapBlank } from './states';

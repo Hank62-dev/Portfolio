@@ -1,4 +1,4 @@
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 
 // The look of "Ra chơi": a school notebook on a wooden desk, drawn in blue ballpoint. One SVG filter (#pen) makes every
 // outline wobble a little, so boxes, boats and doodles all look drawn by hand rather than by a computer.

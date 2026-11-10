@@ -1,4 +1,4 @@
-import { profile } from '../../data/profile';
+import { profile } from '../../shared/profile';
 import { tr } from './lang';
 
 // Everything deployment-specific or tunable about /spacehank lives here.

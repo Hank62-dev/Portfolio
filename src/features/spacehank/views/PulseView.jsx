@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BrainCircuit, CircleDot, ExternalLink, GitBranch, GitCommitHorizontal, Globe, RefreshCw, Server, Star } from 'lucide-react';
-import { Badge, Button, Skeleton } from '../../../design-system';
-import { clsx } from '../../../lib/format';
-import { SITE_URL, GITHUB_USERNAME } from '../../../data/profile';
+import { Badge, Button, Skeleton } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
+import { SITE_URL, GITHUB_USERNAME } from '../../../shared/profile';
 import { aiUsage } from '../api/owner';
 import { Figure, PageHead, Tile } from '../components/Page';
 import { spacehankConfig } from '../config';

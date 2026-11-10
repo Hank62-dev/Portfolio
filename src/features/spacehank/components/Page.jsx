@@ -1,4 +1,4 @@
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { useSlider } from './useSlider';
 
 /** The heading every tab opens with: a small label, a serif title with an italic accent word, and room for actions. */

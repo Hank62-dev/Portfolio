@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Headphones, LoaderCircle, Moon, Pause, Play, RotateCcw, RotateCw } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { useStore } from '../store';
 import { tr } from '../lang';
 import { clock, nextRate, nextSleep, rateLabel } from './model';

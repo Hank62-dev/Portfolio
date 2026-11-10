@@ -1,8 +1,8 @@
 import { locale, tr } from '../lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Download, FileUp, Flame, LayoutGrid, List as ListIcon, Pin, Plus, Search, Sparkles, Upload, X } from 'lucide-react';
-import { Badge, Button, Loading, Menu, Skeleton, SkeletonLines } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, Loading, Menu, Skeleton, SkeletonLines } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { askNotes } from '../api/owner';
 import { createDraft, startJob, useDraft, useJob } from '../jobs';
 import { MOODS, excerpt, hueOf, journalStreak, moodSeries, searchNotes, tagsOf, textToHtml, titleOf } from '../notes/notes';
@@ -10,11 +10,11 @@ import { createNote, deleteNote, exportNotes, importFiles, intents, loadNotes, n
 import { IMPORT_ACCEPT } from '../notes/readers';
 import { ensureUnlocked, readable } from '../diary/lock';
 import { useReadableNotes } from '../diary/useLock';
-import { useMediaQuery } from '../../../hooks/useMediaQuery';
+import { useMediaQuery } from '../../../shared/hooks/useMediaQuery';
 import { PageHead, Segmented } from '../components/Page';
 import { useFab } from '../fab';
 import { useStore } from '../store';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 const Markdown = lazy(() => import('../components/Markdown'));
 const NoteEditor = lazy(() => import('../notes/NoteEditor'));

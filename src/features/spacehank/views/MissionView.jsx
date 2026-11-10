@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Bot, CalendarDays, Check, CircleCheck, Hourglass, Inbox, ListChecks, MoreHorizontal, Plus, Sparkles, Trash2, X } from 'lucide-react';
-import { Badge, Button, DatePicker, Dialog, Input, Menu, Select, Textarea } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, DatePicker, Dialog, Input, Menu, Select, Textarea } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { PageHead, Segmented } from '../components/Page';
 import { useFab } from '../fab';
 import { COLUMNS, dueLabel, dueState, inColumn, moveCard, newCard, progress } from '../missions/model';

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { canUsePointerFx } from '../../../hooks/useMotion';
+import { canUsePointerFx } from '../../../shared/hooks/useMotion';
 
 /**
  * A soft light under the pointer on every card (an element with data-card), drawn as a hairline of light along its border.

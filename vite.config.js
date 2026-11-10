@@ -41,7 +41,7 @@ const bundledMusic = () => ({
 })
 
 // The newest entry of public/changelog.json when this copy is built: it is how the app knows which changes it already has, so a
-// newer copy can say what is new (see src/lib/appUpdate.js).
+// newer copy can say what is new (see src/shared/lib/appUpdate.js).
 const latestChange = (() => {
   try {
     return JSON.parse(readFileSync(resolve(__dirname, 'public/changelog.json'), 'utf8'))[0]?.id ?? ''
@@ -62,7 +62,7 @@ export default defineConfig({
     // The workspace can be installed as an app. The service worker keeps the shell and every page the visitor has
     // opened, so it still opens offline; the API calls (realtime, RAG, AI) are never cached.
     VitePWA({
-      // a new version waits until the visitor taps "Update" (see src/lib/appUpdate.js); registration is done there, not injected
+      // a new version waits until the visitor taps "Update" (see src/shared/lib/appUpdate.js); registration is done there, not injected
       registerType: 'prompt',
       injectRegister: false,
       manifest: {

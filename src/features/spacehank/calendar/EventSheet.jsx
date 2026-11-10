@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Check, ExternalLink, Repeat, Trash2 } from 'lucide-react';
-import { Button, DatePicker, Dialog, Input, Select, Textarea, pushToast } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, DatePicker, Dialog, Input, Select, Textarea, pushToast } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { tr } from '../lang';
 import { draftOf, draftReady, inputOf } from './model';
 import { removeEvent, saveEvent } from './store';

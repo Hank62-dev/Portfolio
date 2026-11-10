@@ -1,8 +1,8 @@
 import { tr } from '../lang';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AlertTriangle, ArrowUpRight, Check, FileJson, FileSpreadsheet, FileText, FolderOpen, Trash2, Upload } from 'lucide-react';
-import { Button, Ring } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, Ring } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { deleteDocument, listDocuments, uploadDocument } from '../api/rag';
 import { spacehankConfig } from '../config';
 import { PageHead } from '../components/Page';

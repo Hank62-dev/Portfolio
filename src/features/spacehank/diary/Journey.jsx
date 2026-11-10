@@ -1,6 +1,6 @@
 import { tr } from '../lang';
 import { PenLine } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import Pet from '../pet/Pet';
 import MoodFace, { MOOD_COLORS } from './MoodFace';
 import { bodyOf, excerptOf, moodWord, monthLabel, shortLabel } from './model';

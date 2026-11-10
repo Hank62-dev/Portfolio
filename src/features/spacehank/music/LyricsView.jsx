@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Maximize2, Minimize2, Scan } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { useHistoryLayer } from '../hooks/useHistoryLayer';
 import { useStore } from '../store';
 import { useCoverTint } from './Cover';

@@ -1,5 +1,5 @@
 import { tr } from '../lang';
-import { pushToast } from '../../../design-system';
+import { pushToast } from '../../../shared/ui';
 import { isDemo } from '../demo/mode';
 import { createStore } from '../store';
 import { KIND_IDS, kindOf } from './kinds';

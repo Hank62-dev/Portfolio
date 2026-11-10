@@ -1,7 +1,7 @@
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import { clsx } from '../../../lib/format';
-import { useSheetDrag } from '../../../design-system/useSheetDrag';
+import { clsx } from '../../../shared/lib/format';
+import { useSheetDrag } from '../../../shared/ui/useSheetDrag';
 import { usePhoto } from './photos';
 import { tr } from '../lang';
 

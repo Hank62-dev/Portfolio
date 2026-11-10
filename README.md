@@ -36,10 +36,10 @@ All content is data; no component needs touching for routine updates.
 
 | To change…                         | Edit                                   |
 | ---------------------------------- | -------------------------------------- |
-| Profile facts, socials, email      | `src/data/profile.js`                  |
-| Projects, lab items, archive rows  | `src/data/projects.js`                 |
-| Headlines and interface text (EN/VI) | `src/data/copy.js`                   |
-| Colours, type scale, spacing, breakpoints, keyframes | `src/styles/index.css` (`@theme`) |
+| Profile facts, socials, email      | `src/shared/profile.js`                  |
+| Projects, lab items, archive rows  | `src/portfolio/data/projects.js`                 |
+| Headlines and interface text (EN/VI) | `src/portfolio/data/copy.js`                   |
+| Colours, type scale, spacing, breakpoints, keyframes | `src/shared/styles/index.css` (`@theme`) |
 
 A project is `{ slug, tier, name, year, kind, tagline, summary, role?, decisions[], layers, links[], cover }`.
 `tier` is `featured` (home list + case page), `lab` (Lab section + case page) or `archive` (table row).
@@ -78,7 +78,7 @@ If a source fails the page shows only what it has — it never fills in numbers.
 
 ## Styling
 
-Everything is Tailwind utility classes in the JSX; there are no CSS Modules. `src/styles/index.css` holds:
+Everything is Tailwind utility classes in the JSX; there are no CSS Modules. `src/shared/styles/index.css` holds:
 
 - **`@theme`** — the design tokens as utilities: `bg-ink-1`, `text-bone-dim`, `text-signal`, `font-display`, `text-h2`, `px-gutter`, `py-section`, `ease-out-expo`, `animate-marquee` …
 - **Breakpoints** — `xs 560`, `sm 640`, `md 760`, `nav 860` (where the menu collapses), `lg 1000`, `xl 1100`. Note `md` is 760, not Tailwind's default 768.

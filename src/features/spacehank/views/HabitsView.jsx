@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Apple, Bike, BookOpen, Brain, Check, ChevronDown, Coffee, Droplets, Dumbbell, Flame, Footprints, Moon, Music2, Pencil, PenLine, Plus, Sparkles, Sprout, Trash2 } from 'lucide-react';
-import { Badge, Button, Dialog, Input } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, Dialog, Input } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { PageHead } from '../components/Page';
 import { HABIT_ICONS, dayKey, gardenLine, gardenWeek, heatmap, longestStreak, moodLift, newHabit, nextStage, rate, stageOf, stageProgress, streak, todoFirst, toggleDay, weekStrip } from '../habits/model';
 import Garden from '../habits/Garden';

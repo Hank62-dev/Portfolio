@@ -1,8 +1,8 @@
 import { tr } from '../lang';
 import { useEffect, useState } from 'react';
 import { ChevronRight, Command, Pause, PencilLine, Play, Plus, Search } from 'lucide-react';
-import { Avatar, Badge, Button, Tooltip } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Avatar, Badge, Button, Tooltip } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import NotificationBell from '../notifications/NotificationBell';
 import { LangMenu } from './LangSwitch';
 import { ThemeMenu } from './ThemeMenu';

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Flame } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { focusLog } from '../focus/log';
 import { hoursMinutes, summarize } from '../focus/stats';
 import { useStore } from '../store';

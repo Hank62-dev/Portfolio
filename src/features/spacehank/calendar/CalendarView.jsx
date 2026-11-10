@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { BookOpenCheck, CalendarDays, CalendarPlus, Check, ChevronLeft, ChevronRight, Inbox, ListChecks, MapPin, Plus, RefreshCw, Rows3, SquareKanban, Unplug } from 'lucide-react';
-import { Button, pushToast } from '../../../design-system';
-import { dateLocale } from '../../../design-system/words';
-import { clsx } from '../../../lib/format';
+import { Button, pushToast } from '../../../shared/ui';
+import { dateLocale } from '../../../shared/ui/words';
+import { clsx } from '../../../shared/lib/format';
 import { Segmented, PageHead } from '../components/Page';
 import { useFab } from '../fab';
 import { tr } from '../lang';

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, RotateCcw, Undo2, X } from 'lucide-react';
-import { Button } from '../../../../design-system';
-import { clsx } from '../../../../lib/format';
+import { Button } from '../../../../shared/ui';
+import { clsx } from '../../../../shared/lib/format';
 import { useHistoryLayer } from '../../hooks/useHistoryLayer';
 import { useStore } from '../../store';
 import { GRADES, nextLabels, review } from '../model';

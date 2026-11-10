@@ -31,8 +31,8 @@ import {
   Trash2,
   Undo2,
 } from 'lucide-react';
-import { Badge, Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { MOODS, tagsOf, textToHtml, titleOf } from './notes';
 import { togglePin, updateNote } from './library';
 import { stickies, toggleFloat } from './stickies';

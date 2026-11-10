@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BookHeart, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, Coins, Mic, NotebookPen, Sprout } from 'lucide-react';
-import { Card, Eyebrow } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Card, Eyebrow } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { dayLabel, shiftDay } from '../diary/model';
 import { dayKey } from '../habits/model';
 import { locale, tr } from '../lang';

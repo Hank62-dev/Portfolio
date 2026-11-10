@@ -5,7 +5,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { TaskItem, TaskList } from '@tiptap/extension-list';
 import { Placeholder } from '@tiptap/extensions';
 import { ArrowUpRight, ChevronDown, ChevronUp, Palette, PictureInPicture2, Undo2, X } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { useStore } from '../store';
 import { tr } from '../lang';
 import { useReadableNotes } from '../diary/useLock';

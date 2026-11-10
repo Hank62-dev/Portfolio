@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BellOff, CalendarClock, Layers, Pause, Play, RotateCcw, Sparkles, Timer } from 'lucide-react';
-import { Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { MODES, dismiss, focus, pause, reset, setMode, start } from '../focus/store';
 import FocusStats from '../components/FocusStats';
 import { Figure, PageHead, Segmented, Tile } from '../components/Page';

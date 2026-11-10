@@ -1,8 +1,8 @@
 import { tr } from '../lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookmarkPlus, Download, Heart, ImagePlus, LockKeyhole, Palette, RotateCcw, Shapes, Sparkles, Trash2, Wand2 } from 'lucide-react';
-import { Badge, Button, Loading, Skeleton } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, Loading, Skeleton } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { Segmented } from '../components/Page';
 import { aiUsage, base64ToBlob, generateImage } from '../api/owner';
 import { createDraft, startJob, useDraft, useJob } from '../jobs';

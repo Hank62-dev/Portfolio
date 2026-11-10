@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { ArrowRight, Compass, Download, Map as MapIcon, ShieldAlert, Store, Upload, Database } from 'lucide-react';
-import { Button, pushToast } from '../../../design-system';
+import { Button, pushToast } from '../../../shared/ui';
 import { useSyncStatus } from '../sync/useSync';
 import { buildBackup, parseBackup } from './backup';
 import { content, creatorSettings, deals, income, setSetting } from './store';

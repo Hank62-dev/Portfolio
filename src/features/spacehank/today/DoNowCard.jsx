@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, Check, PartyPopper, Plus } from 'lucide-react';
-import { Badge, Button, Card, Eyebrow } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, Card, Eyebrow } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { dueLabel } from '../missions/model';
 import { useJustCompleted } from '../motion/hooks';
 import { Burst, DrawnTick, Leave, ProgressRing } from '../motion/Pieces';

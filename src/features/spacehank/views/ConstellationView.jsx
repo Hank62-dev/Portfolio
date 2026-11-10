@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, ChevronLeft, ChevronRight, Crosshair, Hand, Link2, Maximize2, Minimize2, Minus, Plus, RotateCcw, Search, X } from 'lucide-react';
-import { Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { PageHead, Segmented } from '../components/Page';
 import { buildGraph, radiusOf, stepLayout } from '../notes/graph';
 import { deleteNote, loadNotes, notesStore } from '../notes/library';
@@ -9,7 +9,7 @@ import { useReadableNotes } from '../diary/useLock';
 import { excerpt, hueOf } from '../notes/notes';
 import { useStore } from '../store';
 import { tr } from '../lang';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 // roomier than the default, so the stars and their names have space
 const SPACING = { repulsion: 5200, rest: 130 };

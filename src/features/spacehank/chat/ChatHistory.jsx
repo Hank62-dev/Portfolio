@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, Pencil, Trash2 } from 'lucide-react';
-import { Dialog, Dots } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Dialog, Dots } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { useStore } from '../store';
 import { groupChats, summaryOf } from './model';
 import { chatMsgs, chats, deleteChat, openChat, renameChat, view } from './store';

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { pushToast } from '../../../design-system';
+import { pushToast } from '../../../shared/ui';
 import { fetchSession, login as apiLogin, logout as apiLogout, openSocket, sendTask } from '../api/realtime';
 import { spacehankConfig } from '../config';
 import { isLocalServer } from '../model/realtime';

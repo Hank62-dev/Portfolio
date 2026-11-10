@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, ChevronLeft, Headphones, LoaderCircle, Pause, Play, Plus, RotateCcw, Search, Sparkles, Undo2, X } from 'lucide-react';
-import { Button, Skeleton } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, Skeleton } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { podcastSearch } from '../api/owner';
 import { PageHead, Segmented } from '../components/Page';
 import { Cover, PlayButton, RateButton, Seek, SkipButton, SleepButton } from '../podcast/Controls';
@@ -12,7 +12,7 @@ import { listens, shows } from '../podcast/store';
 import { openShow, podcastUi } from '../podcast/ui';
 import { useStore } from '../store';
 import { tr } from '../lang';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 // Podcasts: follow shows found in the directory, see what is new across them, listen, and carry on where you left off.
 // The feed is read by the server (a browser cannot read most of them); the audio is played straight from the podcast's

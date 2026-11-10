@@ -35,7 +35,7 @@ import {
   Type,
   Undo2,
 } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { tr } from '../lang';
 import { PaintEngine } from './engine';
 import { PALETTE, fitView, zoomAt } from './model';

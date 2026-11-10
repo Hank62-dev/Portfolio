@@ -1,8 +1,8 @@
 import { tr } from '../lang';
 import { useEffect, useRef, useState } from 'react';
 import { Backpack, BookHeart, Check, Compass, Crown, Flame, GraduationCap, Sprout, Timer } from 'lucide-react';
-import { Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import Pet from '../pet/Pet';
 import { STAGES, TAP_LINES } from '../pet/model';
 import { usePet } from '../pet/usePet';

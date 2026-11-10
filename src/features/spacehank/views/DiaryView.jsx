@@ -2,7 +2,7 @@ import Flame from '../diary/Flame';
 import { tr } from '../lang';
 import { useEffect, useMemo, useState } from 'react';
 import { BookHeart, CalendarDays, Lock, PawPrint, PenLine, ShieldCheck, Sparkles } from 'lucide-react';
-import { Loading, Skeleton } from '../../../design-system';
+import { Loading, Skeleton } from '../../../shared/ui';
 import { useFab } from '../fab';
 import { loadNotes, notesStore } from '../notes/library';
 import { dayKey } from '../notes/notes';

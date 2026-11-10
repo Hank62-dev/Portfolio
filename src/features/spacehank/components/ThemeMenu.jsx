@@ -1,7 +1,7 @@
 import { Moon, SunMedium, SunMoon } from 'lucide-react';
-import { Menu } from '../../../design-system';
-import { clsx } from '../../../lib/format';
-import { useTheme } from '../../../lib/theme';
+import { Menu } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
+import { useTheme } from '../../../shared/lib/theme';
 import { tr } from '../lang';
 
 /** The three ways to choose the look: light, dark, or auto (light by day, dark by night, following the clock). */

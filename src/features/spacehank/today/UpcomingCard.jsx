@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { ArrowUpRight, MapPin } from 'lucide-react';
-import { Card, Eyebrow } from '../../../design-system';
-import { dateLocale } from '../../../design-system/words';
+import { Card, Eyebrow } from '../../../shared/ui';
+import { dateLocale } from '../../../shared/ui/words';
 import { dayKey } from '../habits/model';
 import { tr } from '../lang';
 import { modules } from '../modules';

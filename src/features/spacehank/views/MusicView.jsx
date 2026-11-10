@@ -27,9 +27,9 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
-import { Button, Menu } from '../../../design-system';
-import { useMediaQuery } from '../../../hooks/useMediaQuery';
-import { clsx } from '../../../lib/format';
+import { Button, Menu } from '../../../shared/ui';
+import { useMediaQuery } from '../../../shared/hooks/useMediaQuery';
+import { clsx } from '../../../shared/lib/format';
 import { djPick } from '../api/owner';
 import Cover, { useCoverTint } from '../music/Cover';
 import {
@@ -55,7 +55,7 @@ import { useSlider } from '../components/useSlider';
 import { storageEstimate } from '../storage';
 import { useStore } from '../store';
 import { tr } from '../lang';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 const SHELVES = [
   { id: 'songs', label: tr('Songs') },

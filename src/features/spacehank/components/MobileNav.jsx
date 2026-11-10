@@ -3,13 +3,13 @@ import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ChevronDown, Download, LockKeyhole, LogOut, MoreHorizontal, RotateCcw, Search, SlidersHorizontal, X } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { LangPills } from './LangSwitch';
 import { ThemePills } from './ThemeMenu';
 import AppIcon from './AppIcon';
 import { NAVIGATION } from '../navigation';
 import { bySection, openModules, useNav } from '../modules';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 const matches = (item, q) => !q || `${item.label} ${item.section} ${item.keywords ?? ''}`.toLowerCase().includes(q);
 

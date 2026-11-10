@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, CornerDownLeft } from 'lucide-react';
-import { Dots } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Dots } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { complete, parseLine, runLine } from '../shell/commands';
 import { tr } from '../lang';
 

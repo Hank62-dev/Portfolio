@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Check, Copy, Download } from 'lucide-react';
-import { Badge, Button, Card, CardHeader, Select } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, Card, CardHeader, Select } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { COLORS, FONTS, contrast, rate, toCss, toJson, toTailwind } from './brand';
 import { tr } from '../lang';
 

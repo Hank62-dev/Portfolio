@@ -1,5 +1,5 @@
 import { BellOff, Pause, Play, X } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { dismiss, focus, pause, reset, start } from '../focus/store';
 import { useStore } from '../store';
 import { clock } from '../study/model';

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { NotebookPen, Sparkles, X } from 'lucide-react';
-import { Button } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { swipeAxis } from '../motion/swipe';
 import { tr } from '../lang';
 import { Chart, Chips, Emblem, Figure, Items, Ring } from './StoryParts';

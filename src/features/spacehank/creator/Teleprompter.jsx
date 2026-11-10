@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FlipHorizontal2, Minus, Pause, Play, Plus, RotateCcw, X } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { useHistoryLayer } from '../hooks/useHistoryLayer';
 import { prompterLines, speakSeconds } from './model';
 import { tr } from '../lang';

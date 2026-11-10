@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, Flame, Layers, Play, Plus, Search, Sparkles } from 'lucide-react';
-import { Badge, Button, Input, pushToast } from '../../../../design-system';
-import { clsx } from '../../../../lib/format';
+import { Badge, Button, Input, pushToast } from '../../../../shared/ui';
+import { clsx } from '../../../../shared/lib/format';
 import { useSlider } from '../../components/useSlider';
 import { useFab } from '../../fab';
 import { loadNotes } from '../../notes/library';
@@ -15,7 +15,7 @@ import Session from './Session';
 import { cardState, clozeFront, deckStats, dueIn, forecast, searchCards, sessionCards } from './states';
 import { isDemo } from '../../demo/mode';
 import { tr } from '../../lang';
-import { useDebounce } from '../../../../hooks/useDebounce';
+import { useDebounce } from '../../../../shared/hooks/useDebounce';
 
 const STATE_TONE = { new: 'signal', learning: 'warn', mature: 'ok' };
 const STATE_NAME = { new: 'New', learning: 'Learning', mature: 'Mature' };

@@ -1,9 +1,9 @@
 import SyncStatus from './SyncStatus';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Download, LockKeyhole, LogOut, PanelLeftClose, PanelLeftOpen, RotateCcw, SlidersHorizontal } from 'lucide-react';
-import { Avatar, Badge, Tooltip } from '../../../design-system';
-import { clsx } from '../../../lib/format';
-import Logo from '../../../components/ui/Logo';
+import { Avatar, Badge, Tooltip } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
+import Logo from '../../../shared/ui/Logo';
 import { owner } from '../config';
 import { bySection, openModules, useNav } from '../modules';
 import { tr } from '../lang';

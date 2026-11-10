@@ -1,7 +1,7 @@
 import { Check, Copy } from 'lucide-react';
 import { useId, useState } from 'react';
-import { Button, pushToast } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, pushToast } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { tr } from '../lang';
 
 /** Copies a text and says so. Falls back quietly when the browser will not allow it. */

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 
 /** A circle that fills to `value` (0..1) when it appears and glides when the value changes. Put an icon or a number inside. */
 export function ProgressRing({ value, size = 56, stroke = 4, children, className, label }) {

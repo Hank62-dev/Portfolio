@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowUp, BookOpen, BrainCircuit, Check, Copy, FileSearch, Gauge, Globe, History, Lightbulb, Newspaper, SquarePen } from 'lucide-react';
-import { Badge, Dots, Loading, Ring, Skeleton, TextShimmer } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Dots, Loading, Ring, Skeleton, TextShimmer } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import ChatHistory from '../chat/ChatHistory';
 import { messagesOf } from '../chat/model';
 import { askHank, chatMsgs, chats, loadChats, startNewChat, view } from '../chat/store';

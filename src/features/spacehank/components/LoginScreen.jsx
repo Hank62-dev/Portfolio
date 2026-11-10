@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import Logo from '../../../components/ui/Logo';
-import { Button, Card, ErrorState, Eyebrow, Field, Input, Loading, Skeleton } from '../../../design-system';
+import Logo from '../../../shared/ui/Logo';
+import { Button, Card, ErrorState, Eyebrow, Field, Input, Loading, Skeleton } from '../../../shared/ui';
 import { tr } from '../lang';
 
 const messageFor = (error) => {

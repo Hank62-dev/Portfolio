@@ -4,7 +4,7 @@ import { Copy, LogOut, RotateCcw, Share2, Shuffle } from 'lucide-react';
 import { randomFleet } from './battleship';
 import { Board } from './BattleBoard';
 import { Captain, INK, InkBox, InkButton, Note, RED } from './ink';
-import { Loading, Skeleton } from '../../../design-system';
+import { Loading, Skeleton } from '../../../shared/ui';
 import { describeShot, inviteLink, normalizeCode, saveName, savedName, statusOf, useBattle } from './online';
 import { useBest } from './shared';
 

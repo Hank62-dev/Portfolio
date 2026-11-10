@@ -1,7 +1,7 @@
 import { tr } from '../lang';
 import { useMemo, useState } from 'react';
 import { Hash, Megaphone, ShieldCheck } from 'lucide-react';
-import { Input } from '../../../design-system';
+import { Input } from '../../../shared/ui';
 import { useStore } from '../store';
 import DiscordComposer from './DiscordComposer';
 import { BLUEPRINT_KINDS, blueprintFor, blueprintText } from './model';

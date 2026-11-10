@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { CornerDownLeft, Inbox, MessageCircleQuestion, Music2, Search, Sparkles } from 'lucide-react';
-import { Button, Loading, SkeletonLines } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, Loading, SkeletonLines } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { filterCommands } from '../model/commands';
 import { looksLikeRequest } from '../model/nlcommands';
 import { looksLikeQuestion } from '../search/model';
@@ -10,7 +10,7 @@ import { library } from '../music/library';
 import { playTrack } from '../music/player';
 import { useStore } from '../store';
 import { tr } from '../lang';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 const MAX_TRACKS = 6;
 const ASK_ID = 'ask-hank';

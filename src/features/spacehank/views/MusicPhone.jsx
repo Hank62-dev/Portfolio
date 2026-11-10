@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSheetDrag } from '../../../design-system/useSheetDrag';
+import { useSheetDrag } from '../../../shared/ui/useSheetDrag';
 import { useHistoryLayer } from '../hooks/useHistoryLayer';
 import {
   ChevronDown,
@@ -27,8 +27,8 @@ import {
   Upload,
   X,
 } from 'lucide-react';
-import { Button, Menu } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, Menu } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { djPick } from '../api/owner';
 import { greetingFor, owner } from '../config';
 import Cover, { useCoverTint } from '../music/Cover';
@@ -52,7 +52,7 @@ import { canMorph } from '../motion/transition';
 import { useSlider } from '../components/useSlider';
 import { useStore } from '../store';
 import { tr } from '../lang';
-import { useDebounce } from '../../../hooks/useDebounce';
+import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 /** Songs / Albums / Artists / Playlists as large titles, with an underline that glides to the chosen one. */
 function ShelfTitles({ shelf, onPick }) {

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { Button, Dots } from '../../../design-system';
+import { Button, Dots } from '../../../shared/ui';
 import { useStore } from '../store';
 import { lyricPrefs } from './lyricModes';
 import { setLyrics } from './library';

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Heart, MoreHorizontal, Trash2 } from 'lucide-react';
-import { Menu } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Menu } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { useStore } from '../store';
 import Cover from './Cover';
 import { addToPlaylist, createPlaylist, formatTime, removeTracks, toggleFavorite } from './library';

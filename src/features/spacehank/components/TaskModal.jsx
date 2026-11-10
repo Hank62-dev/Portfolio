@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, Send } from 'lucide-react';
-import { Avatar, Badge, Button, Dialog, DialogClose, Field, Select, Textarea } from '../../../design-system';
+import { Avatar, Badge, Button, Dialog, DialogClose, Field, Select, Textarea } from '../../../shared/ui';
 import { DEFAULT_AGENT_ID } from '../model/agents';
 import { tr } from '../lang';
 

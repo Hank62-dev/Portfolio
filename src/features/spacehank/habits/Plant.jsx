@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { tr } from '../lang';
 
 // A leaf that points to the right from its stem (0,0); it is turned and sized where it is used.

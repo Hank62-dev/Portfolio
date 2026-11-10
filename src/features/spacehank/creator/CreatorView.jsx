@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowDownRight, ArrowUpRight, BookOpenText, CircleDollarSign, Clapperboard, Coins, Handshake, KanbanSquare, Lightbulb, MessageCircle, Target } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { PageHead, Segmented } from '../components/Page';
 import { useStore } from '../store';
 import DealsPanel from './DealsPanel';

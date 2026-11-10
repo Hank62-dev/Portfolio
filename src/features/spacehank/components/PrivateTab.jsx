@@ -1,6 +1,6 @@
 import { tr } from '../lang';
 import { Lock } from 'lucide-react';
-import { Button } from '../../../design-system';
+import { Button } from '../../../shared/ui';
 import { NAVIGATION } from '../navigation';
 
 // One line on what is behind each private tab: enough to know it exists, not enough to see how it looks.

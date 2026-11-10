@@ -1,6 +1,6 @@
 import { tr } from '../lang';
 import { useEffect, useRef } from 'react';
-import { useUpdate } from '../../../lib/appUpdate';
+import { useUpdate } from '../../../shared/lib/appUpdate';
 import { calendarBetween } from '../api/owner';
 import { habits } from '../habits/store';
 import { demoSchedule } from '../model/demo';

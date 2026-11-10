@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { Badge, Button, Dialog, Select, Textarea } from '../../../../design-system';
+import { Badge, Button, Dialog, Select, Textarea } from '../../../../shared/ui';
 import { generateCards } from '../../api/owner';
 import { titleOf } from '../../notes/notes';
 import { newFlashcard } from '../model';

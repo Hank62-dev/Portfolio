@@ -1,7 +1,7 @@
 import { tr } from '../lang';
 import { useEffect, useMemo, useState } from 'react';
 import { Check, NotebookPen, Palette, Trash2 } from 'lucide-react';
-import { Button, Dialog, Skeleton } from '../../../design-system';
+import { Button, Dialog, Skeleton } from '../../../shared/ui';
 import { createNote, sendIntent } from '../notes/library';
 import { textToHtml } from '../notes/notes';
 import { clearShare, readShare } from '../share/inbox';

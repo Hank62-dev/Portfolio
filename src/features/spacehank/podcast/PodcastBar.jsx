@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { useStore } from '../store';
 import { tr } from '../lang';
 import { Cover, PlayButton, RateButton, Seek, SkipButton, SleepButton } from './Controls';

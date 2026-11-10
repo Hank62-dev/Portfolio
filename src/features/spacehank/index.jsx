@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import LoginScreen, { AuthLoading, ServerUnreachable } from './components/LoginScreen';
-import { Toast } from '../../design-system';
+import { Toast } from '../../shared/ui';
 import { DEMO_URL, GUEST_HOME, WORKSPACE_URL, isDemo } from './demo/mode';
 import { resetDemo, seedDemo } from './demo/seed';
 import { useDemo } from './hooks/useDemo';

@@ -18,8 +18,8 @@ import {
   Timer,
   Wind,
 } from 'lucide-react';
-import { Badge, Button, Card, Eyebrow, Skeleton } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, Card, Eyebrow, Skeleton } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { aiNote } from '../api/owner';
 import { createDraft, startJob, useDraft, useJob } from '../jobs';
 import { spacehankConfig } from '../config';

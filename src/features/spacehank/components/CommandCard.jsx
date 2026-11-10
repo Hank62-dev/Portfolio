@@ -1,6 +1,6 @@
 import { Boxes, MessageCircle } from 'lucide-react';
-import { Avatar, Badge, Button, Card, Eyebrow } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Avatar, Badge, Button, Card, Eyebrow } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { tr } from '../lang';
 
 /** One figure of the strip: a big number over its label. */

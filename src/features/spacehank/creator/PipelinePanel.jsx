@@ -1,8 +1,8 @@
 import { locale, tr } from '../lang';
 import { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, CalendarClock, Check, Plus, Trash2 } from 'lucide-react';
-import { Badge, Button, DatePicker, Dialog, Input, Textarea } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, DatePicker, Dialog, Input, Textarea } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { useFab } from '../fab';
 import { useStore } from '../store';
 import DiscordComposer from './DiscordComposer';

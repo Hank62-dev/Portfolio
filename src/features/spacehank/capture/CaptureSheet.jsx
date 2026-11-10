@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Camera, Check, Inbox as InboxIcon, Mic } from 'lucide-react';
-import { Button, Dialog } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Button, Dialog } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { readReceipt } from '../api/owner';
 import { addToInbox, fileItem } from '../inbox/file';
 import { inbox } from '../inbox/store';

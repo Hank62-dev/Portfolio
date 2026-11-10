@@ -54,7 +54,7 @@ describe('every text, as it was before the translations were folded into one', (
   });
 
   it("the portfolio's copy is the same in both languages", async () => {
-    const { copy } = await import('@/data/copy');
+    const { copy } = await import('@/portfolio/data/copy');
     const seen = { copyEn: hash(copy.en), copyVi: hash(copy.vi) };
     if (RECORD) console.log('copy', JSON.stringify(seen));
     else expect(seen).toEqual({ copyEn: EXPECTED.copyEn, copyVi: EXPECTED.copyVi });

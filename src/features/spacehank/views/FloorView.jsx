@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrainCircuit, MessageCircle, Network, Users } from 'lucide-react';
-import { Badge, Button, Card, Eyebrow, Loading, PageHeader, Skeleton, Stat } from '../../../design-system';
+import { Badge, Button, Card, Eyebrow, Loading, PageHeader, Skeleton, Stat } from '../../../shared/ui';
 import { isWorking } from '../model/agents';
 import { ROOMS } from '../scene/layout';
 import { tr } from '../lang';

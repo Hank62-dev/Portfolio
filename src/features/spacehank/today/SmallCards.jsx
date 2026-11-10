@@ -1,6 +1,6 @@
 import { Flame, Sprout } from 'lucide-react';
-import { Card, Eyebrow } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Card, Eyebrow } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { stageOf } from '../habits/model';
 import Plant from '../habits/Plant';
 import { useArrived, useCountUp, useJustCompleted } from '../motion/hooks';

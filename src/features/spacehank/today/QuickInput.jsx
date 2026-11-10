@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Plus } from 'lucide-react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { flyToInbox } from '../capture/fly';
 import { openCapture } from '../capture/ui';
 import { addToInbox } from '../inbox/file';

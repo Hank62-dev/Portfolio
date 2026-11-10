@@ -1,4 +1,4 @@
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { tabAccent } from '../navigation';
 
 /**

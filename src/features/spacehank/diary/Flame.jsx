@@ -1,4 +1,4 @@
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 
 /** How big the flame is for a streak: 1 for a few days, 2 from a week, 3 from a month. */
 export const flameLevel = (days) => (days >= 30 ? 3 : days >= 7 ? 2 : 1);

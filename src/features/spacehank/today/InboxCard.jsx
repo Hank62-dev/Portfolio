@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Inbox as InboxIcon, Sparkles, Trash2 } from 'lucide-react';
-import { Button, Card, CardHeader } from '../../../design-system';
+import { Button, Card, CardHeader } from '../../../shared/ui';
 import { Leave } from '../motion/Pieces';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { organizeText } from '../api/owner';
 import { addManyToInbox, fileItem } from '../inbox/file';
 import { KINDS, categoryLabel, kindLabel } from '../inbox/model';

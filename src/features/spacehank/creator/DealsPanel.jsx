@@ -1,8 +1,8 @@
 import { locale, tr } from '../lang';
 import { useEffect, useMemo, useState } from 'react';
 import { Calculator, CalendarClock, Check, FileText, Plus, Sparkles, Trash2 } from 'lucide-react';
-import { Badge, Button, DatePicker, Dialog, Input, Select, Textarea, pushToast } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Badge, Button, DatePicker, Dialog, Input, Select, Textarea, pushToast } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { generatePitch } from '../api/owner';
 import { useFab } from '../fab';
 import { Segmented } from '../components/Page';

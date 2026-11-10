@@ -1,6 +1,6 @@
 import { Languages } from 'lucide-react';
-import { Menu } from '../../../design-system';
-import { clsx } from '../../../lib/format';
+import { Menu } from '../../../shared/ui';
+import { clsx } from '../../../shared/lib/format';
 import { LANGS, getLang, setLang, tr } from '../lang';
 
 const NAMES = { vi: 'Tiếng Việt', en: 'English' };

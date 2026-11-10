@@ -1,6 +1,6 @@
 // Dev Pulse's data: GitHub's public API (it allows browser requests), and a simple reachability check for the services.
 
-import { GITHUB_USERNAME } from '../../../data/profile';
+import { GITHUB_USERNAME } from '../../../shared/profile';
 import { locale, tr } from '../lang';
 
 const API = 'https://api.github.com';

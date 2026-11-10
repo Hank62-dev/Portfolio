@@ -1,6 +1,6 @@
 import { ArrowUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { clsx } from '../../../lib/format';
+import { clsx } from '../../../shared/lib/format';
 import { player } from '../music/player';
 import { useStore } from '../store';
 import { tr } from '../lang';

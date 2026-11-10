@@ -28,7 +28,7 @@ describe('contrast', () => {
 });
 
 describe('the kit matches the stylesheet', () => {
-  const css = fs.readFileSync(new URL('../../../styles/index.css', import.meta.url), 'utf8');
+  const css = fs.readFileSync(new URL('../../../shared/styles/index.css', import.meta.url), 'utf8');
 
   it('has every colour at the same value as the @theme token', () => {
     for (const { name, hex } of COLORS) {
