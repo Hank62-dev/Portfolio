@@ -1,4 +1,5 @@
 import { tr } from '../../core/i18n/lang';
+import { dayKey } from '../../../shared/lib/date';
 // Habit Garden as plain functions: streaks, how big a plant has grown, the heatmap, and what a habit does to your mood.
 // A habit keeps `days`: the 'YYYY-MM-DD' strings on which it was done.
 
@@ -8,7 +9,7 @@ const addDays = (date, n) => {
   return d;
 };
 
-export const dayKey = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+export { dayKey };
 
 export const HABIT_ICONS = ['sprout', 'book', 'run', 'water', 'mind', 'write', 'music', 'sleep', 'walk', 'eat', 'ride', 'coffee'];
 

@@ -1,5 +1,6 @@
 import { createStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
+import { clamp } from '../../../shared/lib/math';
 
 // How lyrics are shown. Timed lyrics have five looks; the choice and the text size are remembered on this device.
 
@@ -42,7 +43,6 @@ export const setLyricPrefs = (patch) => {
 /** One size up or down (clamped at the ends). */
 export const stepSize = (size, delta) => SIZES[Math.max(0, Math.min(SIZES.length - 1, SIZES.indexOf(size) + delta))];
 
-const clamp = (value, low = 0, high = 1) => Math.max(low, Math.min(high, value));
 
 /**
  * How far through its line the song is (0 to 1), for the karaoke fill. A line is not sung until the next one starts: a long gap

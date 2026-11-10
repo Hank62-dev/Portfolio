@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowUpRight, ChevronLeft, ChevronRight, Crosshair, Hand, Link2, Maximize2, Minimize2, Minus, Plus, RotateCcw, Search, X } from 'lucide-react';
 import { Button } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
+import { clamp } from '../../../shared/lib/math';
 import { PageHead, Segmented } from '../../ui/Page';
 import { buildGraph, radiusOf, stepLayout } from './graph';
 import { deleteNote, loadNotes, notesStore } from './library';
@@ -13,7 +14,6 @@ import { useDebounce } from '../../../shared/hooks/useDebounce';
 
 // roomier than the default, so the stars and their names have space
 const SPACING = { repulsion: 5200, rest: 130 };
-const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const easeOut = (t) => 1 - (1 - t) ** 3;
 // where the user dropped stars, kept in this browser only
 const SPOTS = 'spacehank.constellation';

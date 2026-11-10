@@ -1,4 +1,5 @@
 import { locale } from '../../core/i18n/lang';
+import { dayKey } from '../../../shared/lib/date';
 // Notes as plain data and plain functions: what a note's title and tags are, how a search ranks them, and the
 // numbers behind the journal's mood chart. Nothing here touches the browser, so all of it is tested.
 
@@ -79,8 +80,7 @@ export const excerpt = (text, query, length = 120) => {
 };
 
 /** 'YYYY-MM-DD' for a date, in the viewer's own time zone. */
-export const dayKey = (date = new Date()) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+export { dayKey };
 
 const addDays = (date, n) => {
   const d = new Date(date);
