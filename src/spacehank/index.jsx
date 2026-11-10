@@ -1,24 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import LoginScreen, { AuthLoading, ServerUnreachable } from './components/LoginScreen';
+import LoginScreen, { AuthLoading, ServerUnreachable } from './layout/LoginScreen';
 import { Toast } from '../shared/ui';
-import { DEMO_URL, GUEST_HOME, WORKSPACE_URL, isDemo } from './demo/mode';
-import { resetDemo, seedDemo } from './demo/seed';
-import { useDemo } from './hooks/useDemo';
-import { useRealtime } from './hooks/useRealtime';
-import { startSync } from './sync';
-import { useAppViewport } from './hooks/useAppViewport';
-import { DEFAULT_AGENT_ID } from './model/agents';
-import { spacehankConfig } from './config';
-import { DEFAULT_TAB, NAVIGATION } from './navigation';
+import { DEMO_URL, GUEST_HOME, WORKSPACE_URL, isDemo } from './core/demo/mode';
+import { resetDemo, seedDemo } from './app/demo/seed';
+import { useDemo } from './app/demo/useDemo';
+import { useRealtime } from './core/realtime/useRealtime';
+import { startSync } from './core/sync';
+import { useAppViewport } from './core/hooks/useAppViewport';
+import { DEFAULT_AGENT_ID } from './core/agents';
+import { spacehankConfig } from './core/config';
+import { DEFAULT_TAB, NAVIGATION } from './core/navigation';
 
 // the open tab lives in the address (/spacehank?tab=notes), which is also what an installed app's shortcuts use
 const tabOf = (params, fallback) => {
   const wanted = params.get('tab');
   return NAVIGATION.some((item) => item.id === wanted) ? wanted : fallback;
 };
-import Workspace from './Workspace';
-import { tr } from './lang';
+import Workspace from './app/Workspace';
+import { tr } from './core/i18n/lang';
 
 export default function SpaceHank() {
   useAppViewport(); // the workspace is an app: the page cannot be pinched to zoom

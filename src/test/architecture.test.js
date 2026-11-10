@@ -82,6 +82,14 @@ const cycles = () => {
 const RULES = [
   { area: 'src/shared/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/spacehank/'] },
   { area: 'src/portfolio/', mayNotImport: ['src/app/', 'src/spacehank/'] },
+  // SpaceHank, from the bottom up: core (stores, storage, sync, api, i18n…) < ui < features < layout < app
+  { area: 'src/spacehank/core/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/spacehank/ui/', 'src/spacehank/features/', 'src/spacehank/layout/', 'src/spacehank/app/'] },
+  { area: 'src/spacehank/ui/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/spacehank/features/', 'src/spacehank/layout/', 'src/spacehank/app/'] },
+  { area: 'src/spacehank/features/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/spacehank/layout/', 'src/spacehank/app/'] },
+  { area: 'src/spacehank/layout/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/spacehank/app/'] },
+  { area: 'src/spacehank/app/', mayNotImport: ['src/app/', 'src/portfolio/'] },
+  // the server shares a few plain files with the app (a game's rules, the Vietnamese texts, the reminder rules), never a screen
+  { area: 'server/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/shared/', 'src/spacehank/app/', 'src/spacehank/layout/', 'src/spacehank/ui/'] },
 ];
 
 const areaOf = (file) => RULES.find((rule) => file.startsWith(rule.area))?.area ?? null;

@@ -1,0 +1,220 @@
+import Flame from './Flame';
+import { tr } from '../../core/i18n/lang';
+import { useEffect, useMemo, useState } from 'react';
+import { BookHeart, CalendarDays, Lock, PawPrint, PenLine, ShieldCheck, Sparkles } from 'lucide-react';
+import { Loading, Skeleton } from '../../../shared/ui';
+import { useFab } from '../../core/fab';
+import { loadNotes, notesStore } from '../notes/library';
+import { dayKey } from '../notes/notes';
+import DiaryLock from './DiaryLock';
+import EntrySheet from './EntrySheet';
+import { Spiral } from './notebook';
+import Journey from './Journey';
+import LockSettings from './LockSettings';
+import { diaryLock, lockDiary } from './lock';
+import MoodFace from './MoodFace';
+import { useDiaryLocked } from './useLock';
+import WeekWave from './WeekWave';
+import Writer from './Writer';
+import { Thumb, SoftButton } from './ui';
+import { bodyOf, dayLabel, encouragement, entryOf, excerptOf, journeyDays, journeyStats, memories, milestonesOf, moodWord, shortLabel, weekMoods, writtenDays } from './model';
+import Pet from '../pet/Pet';
+import { usePet } from '../pet/usePet';
+import { useStore } from '../../core/store';
+
+const PAGE = 21; // days shown at first, and how many more each time
+
+const Pill = ({ children }) => <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--dz-text)]/15 px-3.5 py-1.5 font-body text-[0.95rem] leading-none text-[color:var(--dz-text)] backdrop-blur">{children}</span>;
+
+/** A number of the journey on a glass tile: what it counts over a big number. */
+const Tile = ({ label, icon: Icon, children, glow }) => (
+  <div className={`diary-tile${glow ? ' diary-tile-glow' : ''}`}>
+    <Icon size={44} strokeWidth={1.4} className="absolute right-2 bottom-1.5 text-[color:var(--dz-text)] opacity-[0.13]" aria-hidden="true" />
+    <p className="font-mono text-[0.6rem] tracking-[0.14em] text-[color:var(--dz-text-3)] uppercase">{label}</p>
+    <b className="mt-1 flex items-center gap-1.5 font-display text-[2.1rem] leading-none font-normal text-[color:var(--dz-text)] tabular-nums">{children}</b>
+  </div>
+);
+
+/** Nhật ký: a diary written a day at a time and walked as a journey, on the pages of a spiral notebook. The pages are journal notes, so Second Brain shows them too. */
+export default function DiaryView({ onNotify }) {
+  const { notes, loaded, error } = useStore(notesStore);
+  const pet = usePet();
+  const [shown, setShown] = useState(PAGE);
+  const [sheet, setSheet] = useState(null); // { mode: 'write' | 'read', day, label? }
+  const [settings, setSettings] = useState(false);
+  const locked = useDiaryLocked();
+  const lockOn = useStore(diaryLock, (s) => s.enabled);
+  const today = dayKey();
+
+  useEffect(() => {
+    void loadNotes();
+  }, []);
+
+  const stats = useMemo(() => journeyStats(notes, today), [notes, today]);
+  const { days, more } = useMemo(() => journeyDays(notes, today, { days: shown }), [notes, today, shown]);
+  const marks = useMemo(() => milestonesOf(notes), [notes]);
+  const week = useMemo(() => weekMoods(notes, today), [notes, today]);
+  const remembered = useMemo(() => memories(notes, today), [notes, today]);
+  const todayEntry = days[0]?.entry ?? null;
+
+  const write = (day) => setSheet({ mode: 'write', day });
+  const read = (day, label) => setSheet({ mode: 'read', day, label });
+  useFab(locked ? null : { label: tr('Viết nhật ký hôm nay'), icon: PenLine, onPress: () => write(today) });
+
+  // a locked diary closes whatever was open on it (a page being written is kept as a draft)
+  useEffect(() => {
+    if (locked) {
+      setSheet(null);
+      setSettings(false);
+    }
+  }, [locked]);
+
+  const entry = sheet ? entryOf(notes, sheet.day) : null;
+  const pages = useMemo(() => writtenDays(notes), [notes]); // the notebook's pages, oldest first
+
+  if (locked) {
+    return (
+      <div className="diary-book -mx-5 -mt-4 min-h-[80vh] py-6 pr-4 pl-9 md:mx-auto md:mt-0 md:max-w-[42rem] md:py-10 md:pr-8 md:pl-14" data-diary>
+        <Spiral />
+        <div className="mx-auto w-full max-w-[34rem]">
+          <DiaryLock />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="diary-book isolate -mx-5 -mt-4 min-h-[80vh] overflow-hidden py-6 pr-4 pl-9 md:mx-auto md:mt-0 md:max-w-[42rem] md:py-10 md:pr-8 md:pl-14" data-diary>
+      <Spiral />
+      <div className="relative mx-auto flex w-full max-w-[34rem] flex-col gap-5">
+        <header className="flex items-start justify-between gap-3 px-1">
+          <div>
+            <h1 className="flex items-center gap-2.5 font-display text-[2.6rem] leading-none text-[color:var(--dz-text)]">
+              {tr('Hành trình của bạn')}
+              <PawPrint size={26} className="rotate-[18deg] text-[color:var(--dz-amber)]" aria-hidden="true" />
+            </h1>
+            <p className="mt-1 font-body text-[1rem] text-[color:var(--dz-text)]/85">{tr('Mỗi ngày một dấu chân, mỗi dấu chân một kỷ niệm.')}</p>
+          </div>
+          <div className="flex shrink-0 gap-2 pt-1">
+            {lockOn && (
+              <button type="button" onClick={() => lockDiary({ quiet: true })} aria-label={tr('Khoá nhật ký ngay')} className="grid size-10 place-items-center rounded-full border border-[color:var(--dz-text)]/25 bg-[color:var(--dz-text)]/10 text-[color:var(--dz-text)] backdrop-blur active:scale-90" data-lock-now>
+                <Lock size={17} aria-hidden="true" />
+              </button>
+            )}
+            <button type="button" onClick={() => setSettings(true)} aria-label={tr('Cài đặt khoá nhật ký')} className="grid size-10 place-items-center rounded-full border border-[color:var(--dz-text)]/25 bg-[color:var(--dz-text)]/10 text-[color:var(--dz-text)] backdrop-blur active:scale-90" data-lock-settings-open>
+              <ShieldCheck size={17} aria-hidden="true" />
+            </button>
+          </div>
+        </header>
+
+        {!loaded ? (
+          <Loading label={tr('Đang mở nhật ký')} className="flex flex-col gap-4">
+            <Skeleton className="h-40 rounded-3xl bg-[color:var(--dz-text)]/15" />
+            <Skeleton className="h-12 rounded-full bg-[color:var(--dz-text)]/10" />
+            <Skeleton className="h-72 rounded-3xl bg-[color:var(--dz-text)]/10" />
+          </Loading>
+        ) : error ? (
+          <p className="paper rounded-3xl p-5 font-body text-[1rem]" role="alert">
+            {error}
+          </p>
+        ) : (
+          <>
+            {/* today */}
+            <section className="paper diary-today flex items-center gap-3.5 rounded-[2rem] p-4" aria-label={tr('Hôm nay')} data-today>
+              <div className="relative w-[6.4rem] shrink-0" style={{ '--pet-h': 38 }}>
+                <span className="pet-aura-disc" aria-hidden="true" />
+                <div className="relative">
+                  <Pet mood={pet.mood} outfit={pet.outfit} size="100%" label={tr('{0}, bạn đồng hành', pet.name)} />
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-mono text-[0.66rem] tracking-[0.12em] text-[color:var(--dz-text-3)] uppercase">{dayLabel(today)}</p>
+                {todayEntry ? (
+                  <button type="button" onClick={() => read(today)} className="diary-bubble mt-1.5 flex w-full items-start gap-2 text-left">
+                    {todayEntry.mood && <MoodFace mood={todayEntry.mood} size={34} />}
+                    <span className="min-w-0 flex-1 font-display text-[1.2rem] leading-snug text-[color:var(--dz-text)]">{excerptOf(bodyOf(todayEntry.text), 90) || moodWord(todayEntry.mood) || tr('Một dấu chân không lời.')}</span>
+                  </button>
+                ) : (
+                  <p className="diary-bubble mt-1.5 font-body text-[1rem] leading-snug text-[color:var(--dz-text)]">{encouragement({ written: false, streak: stats.streak, total: stats.total, hour: new Date().getHours() })}</p>
+                )}
+                <SoftButton className="mt-3 min-h-10 px-4 text-[0.88rem]" tone={todayEntry ? 'soft' : 'fill'} onClick={() => write(today)} data-write-today>
+                  <PenLine size={15} aria-hidden="true" /> {todayEntry ? tr('Viết thêm') : tr('Viết nhật ký hôm nay')}
+                </SoftButton>
+              </div>
+            </section>
+
+            {/* numbers */}
+            {stats.total > 0 ? (
+              <div className="grid grid-cols-3 gap-2.5" aria-label={tr('Hành trình đến giờ')}>
+                <Tile label={tr('Ngày thứ')} icon={CalendarDays}>{stats.day}</Tile>
+                <Tile label={tr('ngày liền')} icon={Sparkles} glow={stats.streak > 0}>
+                  {stats.streak > 0 && <Flame days={stats.streak} />}
+                  {stats.streak}
+                </Tile>
+                <Tile label={tr('trang')} icon={BookHeart}>{stats.total}</Tile>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2 px-1" aria-label={tr('Hành trình đến giờ')}>
+                <Pill>{tr('Trang đầu tiên đang chờ bạn')}</Pill>
+              </div>
+            )}
+
+            {/* the week */}
+            {stats.total > 0 && (
+              <section className="rounded-3xl bg-[color:var(--dz-text)]/12 p-3.5 backdrop-blur" aria-label={tr('Tâm trạng 7 ngày gần đây')} data-week>
+                <p className="mb-1 px-1 font-display text-[1.2rem] leading-none text-[color:var(--dz-text)]">{tr('7 ngày gần đây')}</p>
+                <WeekWave week={week} todayKey={today} />
+              </section>
+            )}
+
+            {/* memories */}
+            {remembered.length > 0 && (
+              <section aria-label={tr('Kỷ niệm')} data-memories>
+                <h2 className="mb-2 px-1 font-display text-[1.5rem] leading-none text-[color:var(--dz-text)]">{tr('Kỷ niệm')}</h2>
+                <ul className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pt-3 pb-2">
+                  {remembered.map(({ ago, label, entry: page }) => (
+                    <li key={ago} className="w-60 shrink-0 snap-start">
+                      <button type="button" onClick={() => read(page.day, label)} className="paper memory-card relative flex h-full w-full flex-col gap-1.5 rounded-3xl p-3.5 text-left transition-transform active:scale-[0.97]">
+                        <span className="font-display text-[1.2rem] leading-none text-[color:var(--dz-amber)]">{label}</span>
+                        <span className="font-mono text-[0.62rem] tracking-[0.08em] text-[color:var(--dz-text-3)] uppercase">{shortLabel(page.day)}</span>
+                        <span className="flex items-start gap-2">
+                          <span className="line-clamp-3 min-w-0 flex-1 font-body text-[0.9rem] leading-snug text-[color:var(--dz-text)]">{excerptOf(bodyOf(page.text), 110) || moodWord(page.mood) || tr('Một dấu chân không lời.')}</span>
+                          {page.photos?.[0] && <Thumb id={page.photos[0]} size={52} />}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {/* the road */}
+            <section aria-label={tr('Hành trình')} className="pt-1">
+              <h2 className="mb-3 flex items-center gap-2 px-1 font-display text-[1.5rem] leading-none text-[color:var(--dz-text)]">
+                <PawPrint size={22} className="rotate-[18deg] text-[color:var(--dz-amber)]" aria-hidden="true" /> {tr('Con đường')}
+              </h2>
+              <Journey days={days} marks={marks} pet={pet} todayKey={today} onOpen={(day) => read(day)} onWrite={write} />
+              {more ? (
+                <div className="mt-4 flex justify-center">
+                  <SoftButton tone="glass" onClick={() => setShown((count) => count + PAGE)}>
+                    {tr('Đi ngược về những ngày trước')}
+                  </SoftButton>
+                </div>
+              ) : (
+                stats.first && (
+                  <p className="mt-4 text-center font-display text-[1.3rem] text-[color:var(--dz-text)]" data-start>
+                    {tr('Khởi hành từ')} {dayLabel(stats.first).toLowerCase()}
+                  </p>
+                )
+              )}
+            </section>
+          </>
+        )}
+      </div>
+
+      {settings && <LockSettings onClose={() => setSettings(false)} onNotify={onNotify} />}
+      {sheet?.mode === 'write' && <Writer key={`w-${sheet.day}`} day={sheet.day} entry={entry} onClose={() => setSheet(null)} onNotify={onNotify} />}
+      {sheet?.mode === 'read' && entry && <EntrySheet key="read" entry={entry} label={sheet.label} days={pages} onTurn={(day) => read(day)} onClose={() => setSheet(null)} onEdit={() => write(sheet.day)} />}
+    </div>
+  );
+}

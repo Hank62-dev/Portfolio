@@ -12,9 +12,9 @@ const hash = (value) => createHash('sha256').update(JSON.stringify(value)).diges
 const trIn = async (lang) => {
   vi.resetModules();
   globalThis.__HANK_LANG__ = lang;
-  const { tr } = await import('@/spacehank/lang');
-  const { vi: viTable } = await import('@/spacehank/locale/vi');
-  const { en: enTable } = await import('@/spacehank/locale/en');
+  const { tr } = await import('@/spacehank/core/i18n/lang');
+  const { vi: viTable } = await import('@/spacehank/core/i18n/locale/vi');
+  const { en: enTable } = await import('@/spacehank/core/i18n/locale/en');
   const keys = [...new Set([...Object.keys(viTable), ...Object.keys(enTable)])].sort();
   return { tr, keys, out: Object.fromEntries(keys.map((k) => [k, tr(k)])) };
 };
@@ -62,7 +62,7 @@ describe('every text, as it was before the translations were folded into one', (
 
   it("Hank RAG's keyed texts (rag.*, chat.*) are the same in both languages", async () => {
     vi.resetModules();
-    const { default: i18n } = await import('@/spacehank/i18n');
+    const { default: i18n } = await import('@/spacehank/core/i18n/i18n');
     const keys = Object.keys(i18n.getResourceBundle('en', 'translation')).sort();
     const say = async (lang) => {
       await i18n.changeLanguage(lang);
