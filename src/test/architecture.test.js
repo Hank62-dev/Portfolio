@@ -79,7 +79,10 @@ const cycles = () => {
  * The layers. `area` names a part of the tree by its path; `mayNotImport` lists the areas it must not reach into. An import
  * inside the same area is always fine. Tests are left out: a test may reach whatever it checks.
  */
-const RULES = [];
+const RULES = [
+  { area: 'src/shared/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/features/'] },
+  { area: 'src/portfolio/', mayNotImport: ['src/app/', 'src/features/'] },
+];
 
 const areaOf = (file) => RULES.find((rule) => file.startsWith(rule.area))?.area ?? null;
 const isTest = (file) => /\.test\.(m?jsx?)$/.test(file) || file.startsWith('src/test/');
