@@ -2,17 +2,10 @@ import { useState } from 'react';
 import { Bell, ChevronDown, RefreshCw, Sparkles, X } from 'lucide-react';
 import { applyUpdate, dismissNews, enableNotices, later, noticePermission, useUpdate } from '../shared/lib/appUpdate';
 import { changeText } from '../shared/lib/changelog';
+import { storedLang } from '../shared/i18n/language';
 
-// The page's language: the workspace keeps it under `lang` (the same choice the portfolio makes), else the browser's own.
-const vietnamese = () => {
-  try {
-    const saved = localStorage.getItem('lang');
-    if (saved === 'vi' || saved === 'en') return saved === 'vi';
-  } catch {
-    /* storage is blocked: the browser's language decides */
-  }
-  return typeof navigator !== 'undefined' && /^vi/i.test(navigator.language ?? '');
-};
+// The page's language: the one the site and the workspace share (`lang`), else the browser's own.
+const vietnamese = () => storedLang() === 'vi';
 
 const copy = (vi) =>
   vi

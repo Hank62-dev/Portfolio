@@ -1,36 +1,26 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { i18n } from '../shared/i18n/i18n';
+import { LANGS, storeLang, storedLang } from '../shared/i18n/language';
 import { copy } from './data/copy';
 
-const STORAGE_KEY = 'lang';
-const SUPPORTED = ['en', 'vi'];
-
-const readInitial = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (SUPPORTED.includes(saved)) return saved;
-  } catch {
-    /* storage unavailable — fall through */
-  }
-  return navigator.language?.toLowerCase().startsWith('vi') ? 'vi' : 'en';
-};
+// The portfolio's words are a whole page of content per language (data/copy.js), read as one object (`c`). It holds
+// formatters as well as text (c.stack.used(3)), which i18next's JSON-only texts cannot keep, so it is read as it is; the
+// language itself is the app's one choice (shared/i18n), and switching it here, in place, switches i18next too.
 
 const LangContext = createContext(null);
 
 export const LangProvider = ({ children }) => {
-  const [lang, setLangState] = useState(readInitial);
+  const [lang, setLangState] = useState(storedLang);
 
   useEffect(() => {
     document.documentElement.lang = lang;
   }, [lang]);
 
   const setLang = useCallback((next) => {
-    if (!SUPPORTED.includes(next)) return;
+    if (!LANGS.includes(next)) return;
     setLangState(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      /* ignore */
-    }
+    storeLang(next);
+    void i18n.changeLanguage(next);
   }, []);
 
   const value = useMemo(

@@ -1,6 +1,9 @@
-import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { addTexts, i18n } from '../../../shared/i18n/i18n';
 import { getLang } from './lang';
+
+// Hank RAG's keyed texts (rag.*, chat.*), read with react-i18next's useTranslation(): the default namespace of the app's one
+// i18next (see shared/i18n), in the workspace's language.
 
 const vi = {
   'rag.channel': 'HANK / KÊNH RIÊNG',
@@ -82,13 +85,9 @@ const en = {
   'rag.fromKnowledge': 'From what Hank knows',
 };
 
-if (!i18n.isInitialized) {
-  i18n.use(initReactI18next).init({
-    resources: { en: { translation: en }, vi: { translation: vi } },
-    lng: getLang(),
-    fallbackLng: 'en',
-    interpolation: { escapeValue: false },
-  });
-}
+// react-i18next's hooks read the app's one i18next (it is the only part that renders with them)
+initReactI18next.init(i18n);
+addTexts('translation', { en, vi });
+if (i18n.language !== getLang()) void i18n.changeLanguage(getLang());
 
 export default i18n;

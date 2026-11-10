@@ -6,7 +6,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 // file stays small: RECORD_I18N=1 prints them again, to compare and to find which part moved.
 
 const RECORD = Boolean(globalThis.process?.env.RECORD_I18N);
-const hash = (value) => createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 16);
+// functions count too (the portfolio's copy holds formatters), by their source
+const hash = (value) => createHash('sha256').update(JSON.stringify(value, (k, v) => (typeof v === 'function' ? `fn:${v}` : v))).digest('hex').slice(0, 16);
 
 // SpaceHank's tr(): every key either table knows, in each language (the language is chosen once, as the module loads)
 const trIn = async (lang) => {
@@ -23,8 +24,8 @@ const EXPECTED = {
   trKeys: 2526,
   trEn: '7fcb13565f7d83d5',
   trVi: '7f846a2e22139526',
-  copyEn: '2f01cc9e76859d63',
-  copyVi: 'f0a17c79389849e5',
+  copyEn: 'e8aac7cc682f8bf1',
+  copyVi: '4ba19a1cece43452',
   ragEn: 'f16801d9891a1899',
   ragVi: '65bca26aa76f8a4f',
 };
@@ -58,6 +59,17 @@ describe('every text, as it was before the translations were folded into one', (
     const seen = { copyEn: hash(copy.en), copyVi: hash(copy.vi) };
     if (RECORD) console.log('copy', JSON.stringify(seen));
     else expect(seen).toEqual({ copyEn: EXPECTED.copyEn, copyVi: EXPECTED.copyVi });
+  });
+
+  it("the shared components' few words follow the language kept on the device, read each time", async () => {
+    vi.resetModules();
+    const { word, dateLocale } = await import('@/shared/ui/words');
+    expect([word('Close'), word('Pick a date'), word('Not in the table'), dateLocale()]).toEqual(['Close', 'Pick a date', 'Not in the table', undefined]);
+    vi.stubGlobal('localStorage', { getItem: (k) => (k === 'lang' ? 'vi' : null), setItem: () => {} });
+    expect([word('Close'), word('Pick a date'), word('Not in the table'), dateLocale()]).toEqual(['Đóng', 'Chọn ngày', 'Not in the table', 'vi-VN']);
+    vi.stubGlobal('localStorage', { getItem: () => { throw new Error('blocked'); }, setItem: () => {} });
+    expect(word('Close')).toBe('Close');
+    vi.unstubAllGlobals();
   });
 
   it("Hank RAG's keyed texts (rag.*, chat.*) are the same in both languages", async () => {
