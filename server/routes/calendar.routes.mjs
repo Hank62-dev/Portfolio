@@ -3,7 +3,7 @@ import { HttpError } from '../http/http.mjs';
 // The owner's Google Calendar (see services/gcal.mjs), and the calendar the briefing reads.
 // Each handler is `(req, res)`; `ctx` is what app.mjs gives every group (see createApp).
 export const calendarRoutes = ({ config, json, redirect, readJson, requireAuth, query, calendar, google }) => ({
-  // ---- the owner's Google Calendar (see gcal.mjs). Changes are POSTs, so the CORS list stays as short as it is.
+  // ---- the owner's Google Calendar (see services/gcal.mjs). Changes are POSTs, so the CORS list stays as short as it is.
   'GET /api/calendar/status': async (req, res) => {
     requireAuth(req);
     json(res, 200, await google.status());

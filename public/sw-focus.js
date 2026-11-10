@@ -55,7 +55,7 @@ self.addEventListener('periodicsync', (event) => {
 });
 
 // ---- a push from the server ---------------------------------------------------------------------------------------
-// The server (server/push.mjs) sends reminders even when the app is closed. If the app is open in front it already shows
+// The server (server/services/push.mjs) sends reminders even when the app is closed. If the app is open in front it already shows
 // them itself, so it is only told; otherwise the phone's own screen shows it. Tapping it goes to the tab it is about.
 
 self.addEventListener('push', (event) => {

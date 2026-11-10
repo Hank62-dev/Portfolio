@@ -776,7 +776,7 @@
 
 /* ───────────────────────── Scroll reveal ─────────────────────────
    Behaviour that depends on <html class="js"> and on state classes added at runtime
-   (see hooks/useReveal.js). Content is only hidden when JS is running. */
+   (see src/portfolio/hooks/useReveal.js). Content is only hidden when JS is running. */
 @layer components {
   .js [data-reveal] {
     opacity: 0;

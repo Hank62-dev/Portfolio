@@ -23,7 +23,7 @@ export const loadConfig = (env = process.env) => {
     // Cross-site cookies (Vercel -> Render) need SameSite=None, which browsers only accept with Secure.
     secureCookie: normalizedOrigin.startsWith('https://'),
     workdir: env.SPACEHANK_WORKDIR || process.cwd(),
-    // a short access token, and a long refresh token that renews it (see auth.mjs)
+    // a short access token, and a long refresh token that renews it (see services/auth.mjs)
     accessTtlMs: 30 * MINUTE,
     refreshTtlMs: 30 * 24 * HOUR,
     sessionSecret: env.SPACEHANK_SESSION_SECRET || '', // empty: the tokens are signed with a key made from the password
@@ -42,7 +42,7 @@ export const loadConfig = (env = process.env) => {
       dailyLimit: Number(env.AI_DAILY_LIMIT || 60),
     },
     calendarIcsUrl: env.CALENDAR_ICS_URL || '',
-    // The owner's Google Calendar through Google's own API (see gcal.mjs). The redirect address is the one set on the OAuth client
+    // The owner's Google Calendar through Google's own API (see services/gcal.mjs). The redirect address is the one set on the OAuth client
     // in Google Cloud: this server's /api/calendar/google/callback. The key seals the refresh token in the database; without one
     // of its own it falls back to the key that signs sign-in tokens.
     google: {
@@ -79,7 +79,7 @@ export const loadConfig = (env = process.env) => {
       heavy: { max: 40, windowMs: MINUTE },
       auth: { max: 40, windowMs: MINUTE },
     },
-    // shared with the Hank RAG service, which only answers a request that carries a ticket signed with it (see ragToken.mjs)
+    // shared with the Hank RAG service, which only answers a request that carries a ticket signed with it (see services/ragToken.mjs)
     ragTokenSecret: env.RAG_TOKEN_SECRET || '',
   };
 };

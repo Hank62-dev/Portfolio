@@ -1,5 +1,12 @@
 [
   {
+    "id": "architecture",
+    "version": "1.24.1",
+    "date": "2026-11-10",
+    "vi": "Sắp xếp lại toàn bộ mã nguồn cho gọn và dễ bảo trì hơn: mọi tính năng vẫn y như cũ. Các ngôn ngữ giờ dùng chung một thư viện dịch, và tài liệu nội bộ của công ty không còn nằm trong kho mã.",
+    "en": "The whole code base is reorganised to be tidier and easier to look after: every feature works exactly as before. Both languages now share one translation library, and the company's internal documents are no longer kept in the code."
+  },
+  {
     "id": "versions",
     "version": "1.24.0",
     "date": "2026-11-10",

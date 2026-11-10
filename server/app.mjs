@@ -52,7 +52,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
     if (!sync) throw new HttpError(503, 'Sync is not set up: add DATABASE_URL (a Postgres address) to the realtime service.');
     return sync;
   };
-  // reminders that reach a device with the app closed (see push.mjs); off without a database and VAPID keys
+  // reminders that reach a device with the app closed (see services/push.mjs); off without a database and VAPID keys
   const push = createPush({ db, sync, calendar, vapid: config.push, zone: config.push.zone, send: sendPush });
   push.start();
   const query = (req) => new URL(req.url, 'http://localhost').searchParams;

@@ -34,11 +34,11 @@ npm run lint && npm test   # before every deploy
 
 All content is data; no component needs touching for routine updates.
 
-| To change…                         | Edit                                   |
-| ---------------------------------- | -------------------------------------- |
-| Profile facts, socials, email      | `src/shared/profile.js`                  |
-| Projects, lab items, archive rows  | `src/portfolio/data/projects.js`                 |
-| Headlines and interface text (EN/VI) | `src/portfolio/data/copy.js`                   |
+| To change…                                           | Edit                                     |
+| ---------------------------------------------------- | ---------------------------------------- |
+| Profile facts, socials, email                        | `src/shared/profile.js`                  |
+| Projects, lab items, archive rows                    | `src/portfolio/data/projects.js`         |
+| Headlines and interface text (EN/VI)                 | `src/portfolio/data/copy.js`             |
 | Colours, type scale, spacing, breakpoints, keyframes | `src/shared/styles/index.css` (`@theme`) |
 
 A project is `{ slug, tier, name, year, kind, tagline, summary, role?, decisions[], layers, links[], cover }`.
@@ -49,25 +49,17 @@ leave out what you cannot verify. Old numeric ids (`/projects/1`) still resolve.
 
 ## Structure
 
+How the code is laid out, which layer may import which, and the conventions: [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
 ```
-src/
-├── components/
-│   ├── common/    Navbar, Footer, Button, SectionTitle, LangToggle, ScrollProgress
-│   └── ui/        Tag, ProjectMark, Marquee, CountUp
-├── data/          profile, projects, copy                             (content, no JSX)
-├── hooks/         useGithub, useReveal, useActiveSection, usePageMeta, useMotion (pointer effects)
-├── layouts/       MainLayout (skip link, scroll management)
-├── lib/           i18n context, formatting, contribution maths, scroll helper
-├── pages/         Home, ProjectDetail, NotFound
-├── routes/        AppRoutes
-├── sections/      Hero, Work, Stack, Lab, About, Activity, Contact    (one folder per home section)
-├── services/      githubService                                       (the only network code)
-└── styles/        index.css (Tailwind entry: @theme tokens, custom variants/utilities, reveal + reduced-motion rules)
+src/app/         start-up, routes, layout                 src/portfolio/   the public site (pages, sections, scene, data)
+src/shared/      design system, i18n, lib, styles          src/spacehank/   the workspace (core, ui, features, layout, app)
+server/          the realtime server (http, services, routes)
 ```
 
 ## GitHub data
 
-`services/githubService.js` reads the public GitHub REST API and the third-party
+`src/portfolio/services/githubService.js` reads the public GitHub REST API and the third-party
 [github-contributions-api](https://github-contributions-api.jogruber.de) once per visit, validates and trims the payloads,
 and caches the snapshot in `localStorage` for one hour (unauthenticated GitHub limit: 60 requests/hour/IP).
 If a source fails the page shows only what it has — it never fills in numbers.

@@ -1,7 +1,7 @@
 // Sync of the owner's personal data across devices (see services/sync.mjs).
 // Each handler is `(req, res)`; `ctx` is what app.mjs gives every group (see createApp).
 export const syncRoutes = ({ config, json, bytes, readJson, readBytes, requireAuth, query, hub, sync, needSync }) => ({
-  // ---- sync of the owner's personal data (see sync.mjs)
+  // ---- sync of the owner's personal data (see services/sync.mjs)
   'GET /api/sync/status': async (req, res) => {
     requireAuth(req);
     if (!sync) return json(res, 200, { enabled: false });
