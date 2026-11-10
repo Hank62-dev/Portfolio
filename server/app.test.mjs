@@ -3,7 +3,7 @@ import WebSocket from 'ws';
 import { createApp } from './app.mjs';
 import { createAuth, lockoutMs } from './auth.mjs';
 import { loadConfig } from './config.mjs';
-import { randomFleet } from '../src/features/spacehank/games/battleship.js';
+import { randomFleet } from '../src/spacehank/games/battleship.js';
 
 const ORIGIN = 'https://hank.example';
 const PASSWORD = 'correct horse battery staple';

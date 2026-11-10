@@ -6,7 +6,7 @@ import ProjectDetail from '../portfolio/pages/ProjectDetail';
 import NotFound from '../portfolio/pages/NotFound';
 
 // three.js / R3F / markdown only load when someone opens /spacehank.
-const SpaceHank = lazy(() => import('../features/spacehank'));
+const SpaceHank = lazy(() => import('../spacehank'));
 
 const SpaceHankFallback = () => (
   <div className="grid min-h-screen place-items-center bg-ink-0 font-mono text-fine text-bone-dim">Loading workspace…</div>

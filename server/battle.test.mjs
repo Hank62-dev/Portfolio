@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createBattle } from './battle.mjs';
-import { SIZE, randomFleet } from '../src/features/spacehank/games/battleship.js';
+import { SIZE, randomFleet } from '../src/spacehank/games/battleship.js';
 
 // A stand-in for a WebSocket: what the server sends is kept, and `say` plays a message from the player.
 const fake = () => {

@@ -1,12 +1,12 @@
 import webpush from 'web-push';
-import { vi } from '../src/features/spacehank/locale/vi.js';
-import { plainT, reminders } from '../src/features/spacehank/notifications/rules.js';
+import { vi } from '../src/spacehank/locale/vi.js';
+import { plainT, reminders } from '../src/spacehank/notifications/rules.js';
 import { HttpError } from './http.mjs';
 
 // Web Push: reminders that reach a phone or a computer even when the app is closed. The browser gives the app a
 // "subscription" (an address at its push service plus two keys); the app hands it to this server, and the server, which is
 // the one thing that is awake, looks at the owner's synced data once a minute and sends what is due. The rules for what is
-// worth a nudge are the very file the app uses (src/features/spacehank/notifications/rules.js), so the two always agree.
+// worth a nudge are the very file the app uses (src/spacehank/notifications/rules.js), so the two always agree.
 //
 // It needs the database (the data to look at, and a place to remember subscriptions and what was already sent) and a set of
 // VAPID keys (the server's identity towards push services). Without either it is simply off.

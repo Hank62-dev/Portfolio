@@ -1,5 +1,5 @@
 import { randomBytes, randomInt } from 'node:crypto';
-import { FLEET, SIZE, blankShots, shoot, validateFleet } from '../src/features/spacehank/games/battleship.js';
+import { FLEET, SIZE, blankShots, shoot, validateFleet } from '../src/spacehank/games/battleship.js';
 
 // Online sea battle for two. The server keeps the rooms and is the referee: it holds both fleets, checks every shot, and only
 // ever tells a player what they are allowed to know (their own boats, and the boats of the other fleet that have sunk).

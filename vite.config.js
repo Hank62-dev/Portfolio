@@ -82,7 +82,7 @@ export default defineConfig({
           { name: 'Hank Music', short_name: 'Music', url: '/spacehank?tab=music' },
         ],
         // "Share" in another app lists Hank62: what is shared is caught by the service worker (public/sw-focus.js) and offered
-        // to Second Brain or Image Studio (src/features/spacehank/share)
+        // to Second Brain or Image Studio (src/spacehank/share)
         share_target: {
           action: '/spacehank/share',
           method: 'POST',

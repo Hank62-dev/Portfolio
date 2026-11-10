@@ -49,7 +49,7 @@ Quyết định chính: **WebView tải thẳng trang web đang chạy trên Ver
 - Đánh đổi: mở app lúc không có mạng sẽ không có giao diện nếu service worker chưa cache. Service worker hiện đã precache nên phần lớn vẫn mở được; cần kiểm tra thực tế.
 - Phương án dự phòng nếu cần chạy offline hoàn toàn: nhét bản build vào APK (origin sẽ là `https://localhost`), lúc đó phải cho server nhận thêm origin thứ hai và xử lý lại cookie. Không làm trừ khi cần.
 
-Phần mã web phải biết mình đang chạy trong app hay trong trình duyệt. Dự kiến một lớp mỏng `platform` (ví dụ `src/features/spacehank/platform.js`) với các hàm như `notifyAt(time, text)`, `playBackground(track)`, `pushWidgetData(data)`. Trên web nó rơi về cách làm hiện tại; trong app nó gọi plugin. Nhờ vậy bản web không bị phá và không phải rẽ nhánh khắp nơi.
+Phần mã web phải biết mình đang chạy trong app hay trong trình duyệt. Dự kiến một lớp mỏng `platform` (ví dụ `src/spacehank/platform.js`) với các hàm như `notifyAt(time, text)`, `playBackground(track)`, `pushWidgetData(data)`. Trên web nó rơi về cách làm hiện tại; trong app nó gọi plugin. Nhờ vậy bản web không bị phá và không phải rẽ nhánh khắp nơi.
 
 ## 4. Từng tính năng gốc
 

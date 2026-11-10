@@ -80,8 +80,8 @@ const cycles = () => {
  * inside the same area is always fine. Tests are left out: a test may reach whatever it checks.
  */
 const RULES = [
-  { area: 'src/shared/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/features/'] },
-  { area: 'src/portfolio/', mayNotImport: ['src/app/', 'src/features/'] },
+  { area: 'src/shared/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/spacehank/'] },
+  { area: 'src/portfolio/', mayNotImport: ['src/app/', 'src/spacehank/'] },
 ];
 
 const areaOf = (file) => RULES.find((rule) => file.startsWith(rule.area))?.area ?? null;

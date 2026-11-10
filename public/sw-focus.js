@@ -106,7 +106,7 @@ self.addEventListener('notificationclick', (event) => {
 
 // ---- sharing into the app ---------------------------------------------------------------------------------------
 // The manifest lists /spacehank/share as a share target. When another app shares text, a link or pictures to Hank62, the
-// phone POSTs them here. They are kept in a cache for the page to pick up (src/features/spacehank/share/inbox.js), and the
+// phone POSTs them here. They are kept in a cache for the page to pick up (src/spacehank/share/inbox.js), and the
 // app opens as /spacehank?share=1 where the person chooses where they go.
 
 const SHARE_CACHE = 'hank62-share';
