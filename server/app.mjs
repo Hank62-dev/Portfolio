@@ -12,9 +12,17 @@ import { createHub } from './services/hub.mjs';
 import { createLimiter } from './http/limits.mjs';
 import { createPodcasts } from './services/podcasts.mjs';
 import { createPush } from './services/push.mjs';
-import { RAG_TOKEN_TTL_MS, mintRagToken } from './services/ragToken.mjs';
 import { createSync } from './services/sync.mjs';
 import { createTaskService } from './services/tasks.mjs';
+import { systemRoutes } from './routes/system.routes.mjs';
+import { authRoutes } from './routes/auth.routes.mjs';
+import { pushRoutes } from './routes/push.routes.mjs';
+import { aiRoutes } from './routes/ai.routes.mjs';
+import { syncRoutes } from './routes/sync.routes.mjs';
+import { creatorRoutes } from './routes/creator.routes.mjs';
+import { ragRoutes } from './routes/rag.routes.mjs';
+import { podcastsRoutes } from './routes/podcasts.routes.mjs';
+import { calendarRoutes } from './routes/calendar.routes.mjs';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -70,270 +78,18 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
     }
   };
 
+  // every route, by group (see routes/): what each group reaches is in this one object
+  const ctx = { config, json, bytes, redirect, readJson, readBytes, requireAuth, query, who, auth, hub, tasks, push, ai, calendar, sync, needSync, discord, podcasts, google };
   const routes = {
-    'GET /health': (req, res) => {
-      push.nudge(); // an uptime ping that wakes a sleeping server also gets the reminders looked at
-      // nothing about the server's set-up: this answer is for anyone, an uptime monitor included
-      return json(res, 200, { ok: true });
-    },
-
-    // Asking who is signed in also renews a lapsed access token from the refresh token, so a page that wakes up after a while
-    // (or after the server slept) gets a fresh session in the same call.
-    'GET /api/auth/session': (req, res) => {
-      if (auth.isAuthorized(req)) return json(res, 200, { authenticated: true });
-      const renewed = auth.refresh(req);
-      if (renewed.ok) return json(res, 200, { authenticated: true }, { 'Set-Cookie': renewed.cookies });
-      return json(res, 200, { authenticated: false });
-    },
-
-    'POST /api/auth/refresh': (req, res) => {
-      const renewed = auth.refresh(req);
-      if (!renewed.ok) return json(res, 401, { authenticated: false }, { 'Set-Cookie': auth.clearCookies() });
-      return json(res, 200, { authenticated: true }, { 'Set-Cookie': renewed.cookies });
-    },
-
-    'POST /api/auth/login': async (req, res) => {
-      const input = await readJson(req, config.maxBodyBytes);
-      const result = auth.login(who(req), input.password);
-      // still locked out: the password was not tried. A wrong one that starts a lockout says so, with how long it lasts.
-      if (result.locked) return json(res, 429, { error: 'Too many attempts', retryAfterSeconds: result.retryAfterSeconds }, { 'Retry-After': String(result.retryAfterSeconds) });
-      if (!result.ok) {
-        const lockedFor = result.retryAfterSeconds ? { 'Retry-After': String(result.retryAfterSeconds) } : {};
-        return json(res, 401, { error: 'Invalid password', retryAfterSeconds: result.retryAfterSeconds ?? 0, attemptsLeft: result.attemptsLeft ?? 0 }, lockedFor);
-      }
-      return json(res, 200, { authenticated: true }, { 'Set-Cookie': result.cookies });
-    },
-
-    'POST /api/auth/logout': (req, res) => {
-      json(res, 200, { authenticated: false }, { 'Set-Cookie': auth.clearCookies() });
-    },
-
-    'GET /api/state': (req, res) => {
-      requireAuth(req);
-      json(res, 200, hub.snapshot());
-    },
-
-    'POST /api/tasks': async (req, res) => {
-      requireAuth(req);
-      json(res, 201, tasks.create(await readJson(req, config.maxBodyBytes)));
-    },
-
-    // ---- Web Push (see push.mjs): the app asks for the key, subscribes this device, and can send itself a test
-    'GET /api/push/key': (req, res) => {
-      requireAuth(req);
-      json(res, 200, { enabled: push.enabled, publicKey: push.publicKey });
-    },
-
-    'POST /api/push/subscribe': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await push.subscribe(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'POST /api/push/unsubscribe': async (req, res) => {
-      requireAuth(req);
-      const body = await readJson(req, config.maxBodyBytes);
-      json(res, 200, await push.unsubscribe(body.endpoint));
-    },
-
-    'POST /api/push/test': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await push.sendTest());
-    },
-
-    // Owner-only helpers. Each is behind the session and the origin check, and the AI ones share a daily budget.
-    'GET /api/ai/usage': (req, res) => {
-      requireAuth(req);
-      json(res, 200, { ...ai.usage(), calendar: calendar.configured });
-    },
-
-    'POST /api/ai/dj': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.dj(await readJson(req, config.maxAiBodyBytes)));
-    },
-
-    'POST /api/ai/note': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.note(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'POST /api/ai/ask': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.ask(await readJson(req, config.maxAiBodyBytes)));
-    },
-
-    'POST /api/ai/cards': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.cards(await readJson(req, config.maxAiBodyBytes)));
-    },
-
-    'POST /api/ai/organize': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.organize(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'POST /api/ai/receipt': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.receipt(await readJson(req, 2 * 1024 * 1024)));
-    },
-
-    'POST /api/ai/review': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.review(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'POST /api/ai/command': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.command(await readJson(req, config.maxBodyBytes)));
-    },
-
-    // ---- sync of the owner's personal data (see sync.mjs)
-    'GET /api/sync/status': async (req, res) => {
-      requireAuth(req);
-      if (!sync) return json(res, 200, { enabled: false });
-      return json(res, 200, { enabled: true, ...(await sync.usage()), maxBlobBytes: config.sync.maxBlobBytes });
-    },
-
-    'GET /api/sync/pull': async (req, res) => {
-      requireAuth(req);
-      const params = query(req);
-      json(res, 200, await needSync().pull(params.get('since'), params.get('limit')));
-    },
-
-    'POST /api/sync/push': async (req, res) => {
-      requireAuth(req);
-      const body = await readJson(req, 2 * 1024 * 1024);
-      const result = await needSync().push(body.changes);
-      if (result.applied) hub.broadcast({ type: 'sync' }); // the other devices pull at once
-      json(res, 200, result);
-    },
-
-    'PUT /api/sync/blob': async (req, res) => {
-      requireAuth(req);
-      const params = query(req);
-      const data = await readBytes(req, config.sync.maxBlobBytes);
-      json(res, 200, await needSync().putBlob({ store: params.get('store'), id: params.get('id'), mime: req.headers['content-type'], data, updatedAt: params.get('at') }));
-    },
-
-    'GET /api/sync/blob': async (req, res) => {
-      requireAuth(req);
-      const params = query(req);
-      const file = await needSync().getBlob({ store: params.get('store'), id: params.get('id') });
-      bytes(res, 200, file.data, file.mime);
-    },
-
-    // a recording (WAV) in the body, the language in the query: the words come back as text
-    'POST /api/ai/transcribe': async (req, res) => {
-      requireAuth(req);
-      const data = await readBytes(req, config.maxAudioBytes);
-      json(res, 200, await ai.transcribe({ data, language: query(req).get('lang') }));
-    },
-
-    'POST /api/ai/content': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.content(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'POST /api/ai/pitch': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.pitch(await readJson(req, config.maxBodyBytes)));
-    },
-
-    // Posting to the owner's own Discord server through a webhook kept on the server (see discord.mjs).
-    'GET /api/discord/channels': (req, res) => {
-      requireAuth(req);
-      json(res, 200, discord.channels());
-    },
-
-    'POST /api/discord/post': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await discord.post(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'POST /api/ai/image': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await ai.image(await readJson(req, config.maxBodyBytes)));
-    },
-
-    // A ticket the browser shows to the Hank RAG service, which answers nobody without one (see ragToken.mjs)
-    'POST /api/rag/token': (req, res) => {
-      requireAuth(req);
-      if (!config.ragTokenSecret) return json(res, 200, { enabled: false, token: '', expiresIn: 0 });
-      json(res, 200, { enabled: true, token: mintRagToken({ secret: config.ragTokenSecret }), expiresIn: Math.floor(RAG_TOKEN_TTL_MS / 1000) });
-    },
-
-    // Podcasts: the directory search, and a podcast's episodes read from its own feed (see podcasts.mjs)
-    'GET /api/podcasts/search': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await podcasts.search(query(req).get('q')));
-    },
-
-    'GET /api/podcasts/feed': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await podcasts.feed(query(req).get('url')));
-    },
-
-    // ---- the owner's Google Calendar (see gcal.mjs). Changes are POSTs, so the CORS list stays as short as it is.
-    'GET /api/calendar/status': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await google.status());
-    },
-
-    'POST /api/calendar/google/connect': (req, res) => {
-      requireAuth(req);
-      json(res, 200, { url: google.authUrl() });
-    },
-
-    // Google sends the browser here; the signed state proves the sign-in was started by the owner, so no cookie is needed.
-    'GET /api/calendar/google/callback': async (req, res) => {
-      const params = query(req);
-      const back = (result) => redirect(res, `${config.origin}/spacehank?tab=calendar&google=${result}`);
-      if (params.get('error')) return back('denied');
-      try {
-        await google.connect({ code: params.get('code'), state: params.get('state') });
-        return back('connected');
-      } catch (error) {
-        if (!(error instanceof HttpError)) console.error('Google sign-in failed:', error);
-        return back('failed');
-      }
-    },
-
-    'POST /api/calendar/google/disconnect': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await google.disconnect());
-    },
-
-    'POST /api/calendar/google/select': async (req, res) => {
-      requireAuth(req);
-      const body = await readJson(req, config.maxBodyBytes);
-      json(res, 200, { calendars: await google.select(body.ids) });
-    },
-
-    'GET /api/calendar/events': async (req, res) => {
-      requireAuth(req);
-      const params = query(req);
-      json(res, 200, { events: await google.range(new Date(params.get('from') ?? ''), new Date(params.get('to') ?? '')) });
-    },
-
-    'POST /api/calendar/events/create': async (req, res) => {
-      requireAuth(req);
-      json(res, 201, await google.create(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'POST /api/calendar/events/update': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await google.update(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'POST /api/calendar/events/delete': async (req, res) => {
-      requireAuth(req);
-      json(res, 200, await google.remove(await readJson(req, config.maxBodyBytes)));
-    },
-
-    'GET /api/briefing/calendar': async (req, res) => {
-      requireAuth(req);
-      const { searchParams } = new URL(req.url, 'http://localhost');
-      json(res, 200, await calendar.between(new Date(searchParams.get('from') ?? ''), new Date(searchParams.get('to') ?? '')));
-    },
+    ...systemRoutes(ctx),
+    ...authRoutes(ctx),
+    ...pushRoutes(ctx),
+    ...aiRoutes(ctx),
+    ...syncRoutes(ctx),
+    ...creatorRoutes(ctx),
+    ...ragRoutes(ctx),
+    ...podcastsRoutes(ctx),
+    ...calendarRoutes(ctx),
   };
 
   const server = http.createServer(async (req, res) => {

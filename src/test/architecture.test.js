@@ -88,6 +88,10 @@ const RULES = [
   { area: 'src/spacehank/features/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/spacehank/layout/', 'src/spacehank/app/'] },
   { area: 'src/spacehank/layout/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/spacehank/app/'] },
   { area: 'src/spacehank/app/', mayNotImport: ['src/app/', 'src/portfolio/'] },
+  // the server, from the bottom up: http (reading and answering) < services (the work) < routes < app.mjs
+  { area: 'server/http/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/shared/', 'src/spacehank/app/', 'src/spacehank/layout/', 'src/spacehank/ui/', 'server/services/', 'server/routes/', 'server/app.mjs', 'server/index.mjs'] },
+  { area: 'server/services/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/shared/', 'src/spacehank/app/', 'src/spacehank/layout/', 'src/spacehank/ui/', 'server/routes/', 'server/app.mjs', 'server/index.mjs'] },
+  { area: 'server/routes/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/shared/', 'src/spacehank/app/', 'src/spacehank/layout/', 'src/spacehank/ui/', 'server/app.mjs', 'server/index.mjs'] },
   // the server shares a few plain files with the app (a game's rules, the Vietnamese texts, the reminder rules), never a screen
   { area: 'server/', mayNotImport: ['src/app/', 'src/portfolio/', 'src/shared/', 'src/spacehank/app/', 'src/spacehank/layout/', 'src/spacehank/ui/'] },
 ];
