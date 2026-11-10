@@ -41,6 +41,31 @@ describe('what is new', () => {
   });
 });
 
+describe('internal updates', () => {
+  const mixed = [
+    { id: 'refactor', version: '1.3.1', internal: true, vi: 'Sắp xếp lại code', en: 'Code reorganised' },
+    { id: 'feature', version: '1.3.0', vi: 'Tính năng', en: 'A feature' },
+    { id: 'tests', version: '1.2.1', internal: true, vi: 'Thêm test', en: 'More tests' },
+    { id: 'older', version: '1.2.0', vi: 'Cũ', en: 'Older' },
+  ];
+
+  it('are never shown in what is new', () => {
+    expect(newerThan(mixed, 'older').map((e) => e.id)).toEqual(['feature']);
+    expect(newerThan(mixed, 'gone').map((e) => e.id)).toEqual(['feature', 'older']);
+  });
+
+  it('still mark the place an app is at, so it is not taken for an app far behind', () => {
+    expect(newerThan(mixed, 'tests').map((e) => e.id)).toEqual(['feature']);
+    expect(newerThan(mixed, 'feature')).toEqual([]);
+    expect(newerThan(mixed, 'older', 6, 'refactor').map((e) => e.id)).toEqual(['feature']);
+  });
+
+  it('leave an update that is only internal with nothing to say', () => {
+    expect(newerThan(mixed.slice(0, 2), 'feature')).toEqual([]);
+    expect(cleanChanges([{ id: 'x', en: 'y', internal: 'yes' }])[0].internal).toBe(false);
+  });
+});
+
 describe('versions', () => {
   it('reads and orders major.minor.patch', () => {
     expect(parseVersion('1.23.0')).toEqual([1, 23, 0]);

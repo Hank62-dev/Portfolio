@@ -107,4 +107,5 @@ Before a deploy: `npm run lint && npm test && npm run build` (the build fails wh
 
 Every commit to `main` that changes the app adds an entry at the top of `public/changelog.json`
 (`{ id, version, date, vi, en }`) and bumps `version` in `package.json` to match: a feature moves the middle number, a fix
-the last. The update notice reads that file to say what a new version brings.
+the last. The update notice reads that file to say what a new version brings. A change nobody using the app would
+notice (a refactor, tests, docs) is marked `"internal": true`: it keeps its version but is never shown.
