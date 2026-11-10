@@ -2,7 +2,7 @@ import { tr } from '../../core/i18n/lang';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { spacehankConfig } from '../../core/config';
 
-// The online sea battle's connection. The server (server/battle.mjs) keeps the room and is the referee; this hook opens a
+// The online sea battle's connection. The server (server/services/battle.mjs) keeps the room and is the referee; this hook opens a
 // WebSocket to it, remembers which seat in which room is yours so a phone that slept or lost signal can sit back down,
 // and hands the screen the room as the server describes it.
 

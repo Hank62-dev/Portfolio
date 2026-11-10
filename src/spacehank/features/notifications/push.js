@@ -4,7 +4,7 @@ import { createStore } from '../../core/store';
 import { center, permission, sendTest, setPush } from './center';
 
 // Web Push from the server, on this device: subscribing to it, and what the settings page needs to show. The server side is
-// server/push.mjs; the worker that shows what arrives is public/sw-focus.js.
+// server/services/push.mjs; the worker that shows what arrives is public/sw-focus.js.
 
 export const pushState = createStore({ checked: false, available: false, subscribed: false, busy: false, error: '' });
 

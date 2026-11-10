@@ -1,4 +1,4 @@
-import { HttpError } from './http.mjs';
+import { HttpError } from '../http/http.mjs';
 
 // Posting to the owner's OWN Discord server through a webhook (Discord's supported way for an app to post; no bot or user token,
 // no automation of an account). The webhook address is a secret, so it lives on the server and the page only ever sees the

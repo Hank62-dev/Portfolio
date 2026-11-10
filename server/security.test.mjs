@@ -2,12 +2,12 @@ import { createHmac } from 'node:crypto';
 import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from './app.mjs';
-import { createAuth, hashPassword, verifyPassword } from './auth.mjs';
+import { createAuth, hashPassword, verifyPassword } from './services/auth.mjs';
 import { loadConfig } from './config.mjs';
-import { clientKey } from './http.mjs';
-import { createLimiter } from './limits.mjs';
-import { mintRagToken } from './ragToken.mjs';
-import { createSync, safeMime } from './sync.mjs';
+import { clientKey } from './http/http.mjs';
+import { createLimiter } from './http/limits.mjs';
+import { mintRagToken } from './services/ragToken.mjs';
+import { createSync, safeMime } from './services/sync.mjs';
 
 const ORIGIN = 'https://hank.example';
 const PASSWORD = 'correct horse battery staple';

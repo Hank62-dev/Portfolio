@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createAi } from './ai.mjs';
-import { createDiscord, parseWebhooks } from './discord.mjs';
+import { createAi } from './services/ai.mjs';
+import { createDiscord, parseWebhooks } from './services/discord.mjs';
 
 const HOOK = 'https://discord.com/api/webhooks/123456789012345678/abcdefghijklmnopqrstuvwxyz-_ABCDEFGH';
 const geminiReply = (value) => ({ ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text: typeof value === 'string' ? value : JSON.stringify(value) }] } }] }) });

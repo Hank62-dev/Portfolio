@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 describe('the server under plain Node', () => {
-  it.each(['app', 'push', 'battle'])('loads %s.mjs with every import resolved', (name) => {
+  it.each(['app', 'services/push', 'services/battle'])('loads %s.mjs with every import resolved', (name) => {
     const url = new URL(`./${name}.mjs`, `file://${ROOT.replace(/\\/g, '/')}/server/`).href;
     expect(() => execFileSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(url)})`], { cwd: ROOT, stdio: 'pipe' })).not.toThrow();
   });

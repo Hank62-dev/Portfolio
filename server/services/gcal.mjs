@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { HttpError } from './http.mjs';
+import { HttpError } from '../http/http.mjs';
 
 // The owner's Google Calendar, read and written through Google's own API (OAuth 2.0, "offline" access).
 //

@@ -1,20 +1,20 @@
 import http from 'node:http';
 import { WebSocketServer } from 'ws';
-import { createAgents } from './agents.mjs';
-import { createAi } from './ai.mjs';
-import { createAuth } from './auth.mjs';
-import { createBattle } from './battle.mjs';
-import { createCalendar } from './calendar.mjs';
-import { createGoogleCalendar } from './gcal.mjs';
-import { createDiscord } from './discord.mjs';
-import { HttpError, clientKey, createResponder, readBytes, readJson } from './http.mjs';
-import { createHub } from './hub.mjs';
-import { createLimiter } from './limits.mjs';
-import { createPodcasts } from './podcasts.mjs';
-import { createPush } from './push.mjs';
-import { RAG_TOKEN_TTL_MS, mintRagToken } from './ragToken.mjs';
-import { createSync } from './sync.mjs';
-import { createTaskService } from './tasks.mjs';
+import { createAgents } from './services/agents.mjs';
+import { createAi } from './services/ai.mjs';
+import { createAuth } from './services/auth.mjs';
+import { createBattle } from './services/battle.mjs';
+import { createCalendar } from './services/calendar.mjs';
+import { createGoogleCalendar } from './services/gcal.mjs';
+import { createDiscord } from './services/discord.mjs';
+import { HttpError, clientKey, createResponder, readBytes, readJson } from './http/http.mjs';
+import { createHub } from './services/hub.mjs';
+import { createLimiter } from './http/limits.mjs';
+import { createPodcasts } from './services/podcasts.mjs';
+import { createPush } from './services/push.mjs';
+import { RAG_TOKEN_TTL_MS, mintRagToken } from './services/ragToken.mjs';
+import { createSync } from './services/sync.mjs';
+import { createTaskService } from './services/tasks.mjs';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 

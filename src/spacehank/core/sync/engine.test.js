@@ -1,7 +1,7 @@
 import { Buffer } from 'node:buffer';
 import { PGlite } from '@electric-sql/pglite';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { createSync } from '../../../../server/sync.mjs';
+import { createSync } from '../../../../server/services/sync.mjs';
 import { BLOB_FIELD, createEngine, decide, splitRecord, stampOf } from './engine';
 
 // Two "devices" that keep their records in memory and talk to the real sync code on a real (in-process) Postgres.

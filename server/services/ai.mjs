@@ -1,4 +1,4 @@
-import { HttpError } from './http.mjs';
+import { HttpError } from '../http/http.mjs';
 
 const HUGGING_FACE = 'https://router.huggingface.co/hf-inference/models';
 const MAX_TRACKS = 300;

@@ -1,7 +1,7 @@
 import webpush from 'web-push';
-import { vi } from '../src/spacehank/core/i18n/locale/vi.js';
-import { plainT, reminders } from '../src/spacehank/features/notifications/rules.js';
-import { HttpError } from './http.mjs';
+import { vi } from '../../src/spacehank/core/i18n/locale/vi.js';
+import { plainT, reminders } from '../../src/spacehank/features/notifications/rules.js';
+import { HttpError } from '../http/http.mjs';
 
 // Web Push: reminders that reach a phone or a computer even when the app is closed. The browser gives the app a
 // "subscription" (an address at its push service plus two keys); the app hands it to this server, and the server, which is

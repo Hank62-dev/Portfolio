@@ -1,4 +1,4 @@
-import { HttpError } from './http.mjs';
+import { HttpError } from '../http/http.mjs';
 
 // Keeps the owner's personal data (notes, diary, habits, money, Creator Lab…) in a real Postgres database so every device
 // sees the same thing. It is a plain "last edit wins" log: each record is a JSON document with the time it was last changed; a

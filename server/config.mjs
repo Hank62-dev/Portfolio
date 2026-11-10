@@ -1,4 +1,4 @@
-import { parseWebhooks } from './discord.mjs';
+import { parseWebhooks } from './services/discord.mjs';
 // Reads and validates the environment once, so the rest of the server never touches process.env.
 
 const MINUTE = 60 * 1000;

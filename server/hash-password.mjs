@@ -1,4 +1,4 @@
-import { hashPassword } from './auth.mjs';
+import { hashPassword } from './services/auth.mjs';
 
 // Makes the value for SPACEHANK_PASSWORD_HASH: `npm run spacehank:hash-password -- "the password"`.
 // Put it in the server's settings instead of SPACEHANK_PASSWORD (and remove that one). Signing in works with the same password.

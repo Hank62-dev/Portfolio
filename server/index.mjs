@@ -1,6 +1,6 @@
 import { createApp } from './app.mjs';
 import { loadConfig } from './config.mjs';
-import { openDatabase } from './database.mjs';
+import { openDatabase } from './services/database.mjs';
 
 const config = loadConfig();
 const db = await openDatabase(config);

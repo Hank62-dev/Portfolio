@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import { IDLE_TASK, workerCommand } from './agents.mjs';
-import { HttpError } from './http.mjs';
+import { HttpError } from '../http/http.mjs';
 
 const tail = (chunk) => String(chunk).trim().slice(-300);
 

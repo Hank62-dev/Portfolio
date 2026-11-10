@@ -29,7 +29,7 @@ Kiến trúc để dễ đọc: trang web (Vercel) gọi hai service trên Rende
 
 ## Việc mới làm thêm ngoài danh sách 20 điểm
 
-- **Podcast: chặn SSRF.** Server đọc feed RSS do người khác đặt địa chỉ, nên `server/safeFetch.mjs` kiểm tra địa chỉ thật mà tên miền trỏ tới **ngay lúc kết nối**: từ chối localhost, mạng riêng, địa chỉ metadata của đám mây (169.254.169.254), kiểm tra lại sau mỗi lần chuyển hướng, giới hạn dung lượng (kể cả khi nén), thời gian và cổng. Có test chứng minh.
+- **Podcast: chặn SSRF.** Server đọc feed RSS do người khác đặt địa chỉ, nên `server/http/safeFetch.mjs` kiểm tra địa chỉ thật mà tên miền trỏ tới **ngay lúc kết nối**: từ chối localhost, mạng riêng, địa chỉ metadata của đám mây (169.254.169.254), kiểm tra lại sau mỗi lần chuyển hướng, giới hạn dung lượng (kể cả khi nén), thời gian và cổng. Có test chứng minh.
 - **Ghi âm giọng nói thành chữ**: bản ghi chỉ gửi đi cho một lần gọi, không lưu lại; đi qua hạn mức AI mỗi ngày.
 
 ## Việc bạn cần làm để các bảo vệ trên có hiệu lực

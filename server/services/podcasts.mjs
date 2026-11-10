@@ -1,6 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
-import { HttpError } from './http.mjs';
-import { safeGet } from './safeFetch.mjs';
+import { HttpError } from '../http/http.mjs';
+import { safeGet } from '../http/safeFetch.mjs';
 
 // Podcasts for the owner's player. A podcast is an RSS feed that lists episodes, each with the address of an audio file.
 // A browser cannot read most feeds itself (they do not allow other sites to), so the server reads them and hands the app

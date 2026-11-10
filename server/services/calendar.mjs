@@ -1,5 +1,5 @@
 import ical from 'node-ical';
-import { HttpError } from './http.mjs';
+import { HttpError } from '../http/http.mjs';
 
 const CACHE_MS = 5 * 60 * 1000;
 const MAX_EVENTS = 25;

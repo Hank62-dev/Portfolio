@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createAi } from './ai.mjs';
-import { createApp } from './app.mjs';
+import { createApp } from '../app.mjs';
 import { createCalendar } from './calendar.mjs';
-import { loadConfig } from './config.mjs';
+import { loadConfig } from '../config.mjs';
 
 const geminiReply = (text) => ({ ok: true, status: 200, json: async () => ({ candidates: [{ content: { parts: [{ text }] } }] }) });
 const aiConfig = (extra = {}) => ({ geminiBase: 'https://gemini.test/v1beta', geminiKey: 'k', textModel: 't', imageModel: 'i', hfToken: '', hfImageModel: 'm', dailyLimit: 3, ...extra });

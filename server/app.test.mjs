@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import WebSocket from 'ws';
 import { createApp } from './app.mjs';
-import { createAuth, lockoutMs } from './auth.mjs';
+import { createAuth, lockoutMs } from './services/auth.mjs';
 import { loadConfig } from './config.mjs';
 import { randomFleet } from '../src/spacehank/features/games/battleship.js';
 

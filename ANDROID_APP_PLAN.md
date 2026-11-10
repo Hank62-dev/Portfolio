@@ -67,7 +67,7 @@ Phần mã web phải biết mình đang chạy trong app hay trong trình duy�
 ### 4.3 Thông báo do server gửi
 - Web Push **không chạy trong WebView**. Cần Firebase Cloud Messaging (miễn phí).
 - Việc phía bạn: tạo một project Firebase, thêm app Android, lấy `google-services.json` (khoảng 15 phút, trên web).
-- Việc phía mã: server (`server/push.mjs`) gửi thêm qua FCM cho thiết bị app, vẫn giữ Web Push cho người dùng trình duyệt; bảng `push_subs` thêm cột loại (`web` / `fcm`). Giữ nguyên nguyên tắc hiện tại: chỉ truy vấn khi có việc sắp đến hạn, không làm Neon/Render thức vô ích.
+- Việc phía mã: server (`server/services/push.mjs`) gửi thêm qua FCM cho thiết bị app, vẫn giữ Web Push cho người dùng trình duyệt; bảng `push_subs` thêm cột loại (`web` / `fcm`). Giữ nguyên nguyên tắc hiện tại: chỉ truy vấn khi có việc sắp đến hạn, không làm Neon/Render thức vô ích.
 - Bấm vào thông báo phải mở đúng màn hình trong app.
 - Độ khó: trung bình.
 
