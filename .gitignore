@@ -11,3 +11,5 @@ dist-ssr
 .integrations/**/.pytest_cache/
 .DS_Store
 .vite
+# private company documents for the RAG service: kept on this machine only (scripts/ingest_pegaxus.py reads them from here)
+.integrations/hank62-rag/pegaxus-document/
