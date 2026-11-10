@@ -1,0 +1,233 @@
+{
+  "screens": {
+    "Calendar": {
+      "parts": [
+        "calendar",
+        "day",
+        "day-panel",
+        "month"
+      ],
+      "heading": "Your calendar"
+    },
+    "Creator": {
+      "parts": [
+        "ideas",
+        "month-total",
+        "quick-hooks",
+        "state",
+        "today-strip",
+        "write-pack"
+      ],
+      "heading": "Creator Lab."
+    },
+    "Constellation": {
+      "parts": [
+        "hint",
+        "sky"
+      ],
+      "heading": "Your Constellation."
+    },
+    "Dashboard": {
+      "parts": [
+        "briefing",
+        "card",
+        "command",
+        "day-card",
+        "kind",
+        "launcher",
+        "launcher-toggle",
+        "pet",
+        "pet-line",
+        "pet-mood",
+        "quick-capture",
+        "sky-hero",
+        "state",
+        "today"
+      ],
+      "heading": "Good morning,Hank."
+    },
+    "Diary": {
+      "parts": [
+        "diary",
+        "lock-settings-open"
+      ],
+      "heading": "Your journey"
+    },
+    "Documents": {
+      "parts": [],
+      "heading": "Document Vault."
+    },
+    "Floor": {
+      "parts": [
+        "card"
+      ],
+      "heading": "The Agent Floor"
+    },
+    "Games": {
+      "parts": [
+        "desk"
+      ],
+      "heading": null
+    },
+    "Habits": {
+      "parts": [
+        "garden",
+        "garden-today",
+        "kind",
+        "on-sky"
+      ],
+      "heading": "Habit Garden."
+    },
+    "Memory": {
+      "parts": [],
+      "heading": "Memory Stream."
+    },
+    "Memos": {
+      "parts": [
+        "timer"
+      ],
+      "heading": "Voice Memos."
+    },
+    "Mission": {
+      "parts": [
+        "column"
+      ],
+      "heading": "Mission Board."
+    },
+    "MusicPhone": {
+      "parts": [
+        "file-input",
+        "music-phone",
+        "state"
+      ],
+      "heading": null
+    },
+    "Music": {
+      "parts": [
+        "file-input",
+        "music-phone",
+        "state"
+      ],
+      "heading": null
+    },
+    "Notes": {
+      "parts": [
+        "state"
+      ],
+      "heading": "Second Brain."
+    },
+    "Paint": {
+      "parts": [
+        "new-paint",
+        "paint"
+      ],
+      "heading": "Your drawings"
+    },
+    "Podcast": {
+      "parts": [],
+      "heading": "Pod casts."
+    },
+    "Pulse": {
+      "parts": [
+        "overall",
+        "service"
+      ],
+      "heading": "Dev Pulse."
+    },
+    "Rag": {
+      "parts": [
+        "chat-bar",
+        "chat-title",
+        "new-chat",
+        "open-history"
+      ],
+      "heading": null
+    },
+    "Shell": {
+      "parts": [
+        "shell-output"
+      ],
+      "heading": null
+    },
+    "Studio": {
+      "parts": [
+        "stage"
+      ],
+      "heading": "Image Studio."
+    },
+    "Study": {
+      "parts": [
+        "overview-empty"
+      ],
+      "heading": "Study Hub."
+    },
+    "Wallet": {
+      "parts": [
+        "figures",
+        "month"
+      ],
+      "heading": "My Wallet."
+    }
+  },
+  "pages": {
+    "/": {
+      "parts": [
+        "archive-row",
+        "contact-fade",
+        "cursor",
+        "diagram",
+        "discover",
+        "email",
+        "email-letter",
+        "fact",
+        "footer-row",
+        "glow",
+        "intro-name",
+        "lab-card",
+        "layer-panel",
+        "letter",
+        "list",
+        "logo",
+        "node",
+        "parallax",
+        "plate",
+        "portrait",
+        "preview",
+        "principle",
+        "reveal",
+        "row",
+        "row-fade",
+        "rule",
+        "seal",
+        "social",
+        "vr",
+        "wordmark"
+      ],
+      "heading": "I build systems that work, scale and last."
+    },
+    "/projects/smart-center": {
+      "parts": [
+        "cursor",
+        "discover",
+        "footer-row",
+        "intro-name",
+        "letter",
+        "logo",
+        "wordmark"
+      ],
+      "heading": "SmartCenter"
+    },
+    "/no-such-page": {
+      "parts": [
+        "cursor",
+        "discover",
+        "footer-row",
+        "intro-name",
+        "letter",
+        "logo",
+        "wordmark"
+      ],
+      "heading": "This page isn’t part of the system."
+    }
+  }
+}
