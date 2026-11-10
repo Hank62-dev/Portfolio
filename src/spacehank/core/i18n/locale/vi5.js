@@ -436,4 +436,6 @@ export const vi5 = {
   'No proof': 'Không có bằng chứng',
   Contributor: 'Đóng góp',
   active: 'hoạt động',
+  'The Tết dice game, pretend coins.': 'Trò lắc bầu cua ngày Tết, chơi bằng xu ảo.',
+  'I could not find an amount. Try: spend ăn trưa 45k': 'Mình không thấy số tiền nào. Thử: spend ăn trưa 45k',
 };

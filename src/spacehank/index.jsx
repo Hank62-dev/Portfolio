@@ -54,7 +54,7 @@ export default function SpaceHank() {
   if (!guest && authenticated === null && live.unreachable) return <ServerUnreachable apiUrl={spacehankConfig.realtimeApiUrl} />;
   if (!guest && authenticated === null) return <AuthLoading label={live.waking ? tr('Waking the server (a free server can take up to a minute)') : undefined} />;
   // a full page load, so the demo's storage and the real one are never open at the same time
-  if (!guest && !authenticated) return <LoginScreen onLogin={live.login} onGuest={() => window.location.assign(DEMO_URL)} />;
+  if (!guest && !authenticated) return <LoginScreen onLogin={live.login} />;
 
   // A guest sees the same workspace driven by a local script; the owner sees the real server.
   const { agents, events, dispatchTask } = guest ? demo : live;

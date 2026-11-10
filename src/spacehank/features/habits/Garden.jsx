@@ -69,7 +69,7 @@ export default function Garden({ items, head }) {
 
         <ul className="garden-plants no-scrollbar flex items-end justify-start gap-2 overflow-x-auto pt-2 pb-3" aria-label={tr('Habits')}>
           {plants.map((plant) => (
-            <li key={plant.id} className="plant-tile relative w-[5.25rem] shrink-0 first:ml-auto last:mr-auto" data-state={plant.doneToday ? 'done' : plant.wilting ? 'wilting' : 'waiting'} style={{ '--h': plant.hue }}>
+            <li key={plant.id} className="plant-tile relative w-[6.75rem] shrink-0 first:ml-auto last:mr-auto" data-state={plant.doneToday ? 'done' : plant.wilting ? 'wilting' : 'waiting'} style={{ '--h': plant.hue }}>
               {rain[plant.id] && (
                 <span key={rain[plant.id]} className="pointer-events-none absolute inset-x-0 top-0 h-0" aria-hidden="true">
                   {DROPS.map((dx, i) => (
@@ -85,7 +85,7 @@ export default function Garden({ items, head }) {
                 </span>
               </button>
               <span className="plant-name">
-                <span className="min-w-0 truncate">{plant.name}</span>
+                <span className="line-clamp-2 min-w-0 break-words" title={plant.name}>{plant.name}</span>
                 {plant.streak > 0 && (
                   <b className="plant-streak">
                     <Flame size={9} aria-hidden="true" />

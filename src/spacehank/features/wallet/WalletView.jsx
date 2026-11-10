@@ -26,14 +26,15 @@ function CatIcon({ id, size = 16, className = 'size-9' }) {
 /** The balance of the month as a thin line that draws itself from left to right, with a soft area under it. */
 function BalanceLine({ values, className }) {
   const arrived = useArrived();
-  if (values.length < 2) return null;
+  if (values.length < 2 || values.every((v) => v === 0)) return null; // nothing logged: no flat line to draw
   const lo = Math.min(0, ...values);
   const hi = Math.max(1, ...values);
   const x = (i) => (i / (values.length - 1)) * 100;
   const y = (v) => 30 - ((v - lo) / (hi - lo || 1)) * 26 - 2;
   const line = values.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(2)} ${y(v).toFixed(2)}`).join(' ');
   return (
-    <svg viewBox="0 0 100 30" preserveAspectRatio="none" className={className} role="img" aria-label={tr('Balance through the month')}>
+    // drawn in from the left by uncovering it (a dash on a path with a non-scaling stroke breaks the line into pieces in Chrome)
+    <svg viewBox="0 0 100 30" preserveAspectRatio="none" className={className} role="img" aria-label={tr('Balance through the month')} style={{ clipPath: arrived ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)', transition: 'clip-path 1.4s var(--ease-out-expo)' }}>
       <defs>
         <linearGradient id="balance-fill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="var(--color-signal)" stopOpacity="0.28" />
@@ -41,7 +42,7 @@ function BalanceLine({ values, className }) {
         </linearGradient>
       </defs>
       <path d={`${line} L100 30 L0 30 Z`} fill="url(#balance-fill)" style={{ opacity: arrived ? 1 : 0, transition: 'opacity 1.1s ease 0.5s' }} />
-      <path d={line} pathLength="1" fill="none" stroke="var(--color-signal)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" style={{ strokeDasharray: 1, strokeDashoffset: arrived ? 0 : 1, transition: 'stroke-dashoffset 1.4s var(--ease-out-expo)' }} />
+      <path d={line} fill="none" stroke="var(--color-signal)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }
@@ -97,7 +98,7 @@ function Donut({ parts, total }) {
   );
 }
 
-/** One slim bar per day of the month: how much was spent. */
+/** One slim bar per day of the month: how much was spent, on a square-root scale so one big day (the rent) does not flatten the rest. */
 function Days({ byDay, month }) {
   const [y, m] = month.split('-').map(Number);
   const count = new Date(y, m, 0).getDate();
@@ -109,7 +110,7 @@ function Days({ byDay, month }) {
     <div className="flex h-28 items-end gap-[3px]" role="img" aria-label={tr('Spending per day')}>
       {Array.from({ length: count }, (_, i) => {
         const v = map.get(i + 1) ?? 0;
-        return <i key={i} title={`${i + 1}: ${formatVnd(v)}`} className={clsx('block flex-1 rounded-full', v ? 'bg-gradient-to-t from-signal to-[#ffb38a]' : 'bg-line', i + 1 === today && 'ring-1 ring-bone/60')} style={{ height: arrived ? (v ? `${Math.max(8, (v / max) * 100)}%` : '5%') : '0%', transition: 'height 0.8s var(--ease-out-expo)', transitionDelay: `${i * 14}ms` }} />;
+        return <i key={i} title={`${i + 1}: ${formatVnd(v)}`} className={clsx('block flex-1 rounded-full', v ? 'bg-gradient-to-t from-signal to-[#ffb38a]' : 'bg-line', i + 1 === today && 'ring-1 ring-bone/60')} style={{ height: arrived ? (v ? `${Math.max(8, Math.sqrt(v / max) * 100)}%` : '5%') : '0%', transition: 'height 0.8s var(--ease-out-expo)', transitionDelay: `${i * 14}ms` }} />;
       })}
     </div>
   );
@@ -267,15 +268,25 @@ export default function WalletView() {
         </div>
         <div className="mt-8 grid grid-cols-3 divide-x divide-line border-t border-line pt-5">
           {[
-            ['Spent', formatVnd(spentShown), 'text-bone', TrendingDown],
-            ['Income', formatVnd(incomeShown), 'text-ok', TrendingUp],
+            ['Spent', formatVnd(spentShown), 'text-bone', TrendingDown, compact(Math.round(spentShown))],
+            ['Income', formatVnd(incomeShown), 'text-ok', TrendingUp, compact(Math.round(incomeShown))],
             ['Biggest', lead ? categoryOf(lead.category).label : '-', 'text-bone', Target],
-          ].map(([label, value, tone, Icon]) => (
+          ].map(([label, value, tone, Icon, short]) => (
             <div key={label} className="min-w-0 px-3 first:pl-0 sm:px-6">
               <small className="flex items-center gap-1.5 font-mono text-[0.64rem] tracking-[0.12em] text-bone-faint uppercase">
                 <Icon size={12} aria-hidden="true" /> {label}
               </small>
-              <b className={clsx('mt-1.5 block truncate font-display text-[clamp(1.05rem,3.6vw,1.6rem)] leading-tight font-normal tabular-nums', tone)}>{value}</b>
+              <b className={clsx('mt-1.5 block truncate font-display text-[clamp(1.05rem,3.6vw,1.6rem)] leading-tight font-normal tabular-nums', tone)} title={value}>
+                {/* a phone has a third of the width for each: the amount in short (24tr), the full one from sm up */}
+                {short ? (
+                  <>
+                    <span className="sm:hidden">{short}</span>
+                    <span className="max-sm:hidden">{value}</span>
+                  </>
+                ) : (
+                  value
+                )}
+              </b>
             </div>
           ))}
         </div>

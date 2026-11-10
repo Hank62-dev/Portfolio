@@ -133,12 +133,6 @@ const Navbar = () => {
             ))}
           </ul>
           <div className="flex items-center gap-3 max-nav:flex-wrap">
-            <Link
-              to="/spacehank?demo"
-              className="inline-flex items-center gap-2 rounded-full border border-line-strong px-3.5 py-1.5 font-mono text-fine text-bone-dim transition-colors hover:border-signal hover:text-bone"
-            >
-              <i className="size-1.5 rounded-full bg-signal" aria-hidden="true" /> {c.hero.ctaDemo}
-            </Link>
             <LangToggle />
           </div>
         </nav>

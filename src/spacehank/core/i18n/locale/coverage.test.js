@@ -48,14 +48,37 @@ describe('translations', () => {
     expect(used.size).toBeGreaterThan(1000);
   });
 
+  // Which language a text was written in is told by its marks (Vietnamese has diacritics), unless an entry says otherwise:
+  // a short Vietnamese word without marks ("trang", "Bao") has its English entry, and an English sentence holding a
+  // Vietnamese name ("the Tết dice game") has its Vietnamese one.
+  const writtenIn = (text) => (text in en && !(text in vi) ? 'vi' : text in vi && !(text in en) ? 'en' : VIET.test(text) ? 'vi' : 'en');
+
   it('has a Vietnamese entry for every English text', () => {
-    const missing = [...used].filter(([text]) => !VIET.test(text) && !(text in vi) && /[A-Za-z]{2}/.test(text)).map(([text, file]) => `${file}: ${text}`);
+    const missing = [...used].filter(([text]) => writtenIn(text) === 'en' && !(text in vi) && /[A-Za-z]{2}/.test(text)).map(([text, file]) => `${file}: ${text}`);
     expect(missing).toEqual([]);
   });
 
   it('has an English entry for every Vietnamese text', () => {
-    const missing = [...used].filter(([text]) => VIET.test(text) && !(text in en)).map(([text, file]) => `${file}: ${text}`);
+    const missing = [...used].filter(([text]) => writtenIn(text) === 'vi' && !(text in en)).map(([text, file]) => `${file}: ${text}`);
     expect(missing).toEqual([]);
+  });
+
+  // the two ways a text is taken for the wrong language, and so is never translated for the other one
+  const words = (text) => text.toLowerCase().match(/[\p{L}\d]+/gu) ?? [];
+  it('has no English text filed as Vietnamese (its "English" is the same words)', () => {
+    const wrong = Object.entries(en).filter(([text, said]) => {
+      const mine = words(text);
+      const theirs = new Set(words(said));
+      return said !== text && mine.length >= 3 && mine.filter((w) => theirs.has(w)).length / mine.length >= 0.8 && !(text in vi);
+    });
+    expect(wrong.map(([text]) => text)).toEqual([]);
+  });
+
+  // Vietnamese words that, without their marks, read as English; a Vietnamese table entry giving them back as they are is a misfire
+  const UNMARKED_VIETNAMESE = ['trang', 'bao', 'xu', 'vui', 'cn', 'anh', 'em', 'con', 'cho', 'ban', 'ngay', 'nam', 'thang', 'tuan', 'gio'];
+  it('does not give a Vietnamese word back unchanged as its own Vietnamese', () => {
+    const wrong = Object.entries(vi).filter(([text, said]) => text === said && words(text).some((w) => UNMARKED_VIETNAMESE.includes(w)) && !(text in en));
+    expect(wrong.map(([text]) => text)).toEqual([]);
   });
 
   it('never invents a {0} placeholder the text does not have', () => {

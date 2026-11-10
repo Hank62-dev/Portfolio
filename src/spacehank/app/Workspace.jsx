@@ -16,6 +16,7 @@ import Topbar from '../layout/Topbar';
 import { askNotes, interpretCommand } from '../core/api/owner';
 import { buildCatalog, validate } from '../layout/nlcommands';
 import { DEFAULT_TAB, NAVIGATION, SKY_TABS, tabHue } from '../core/navigation';
+import { signalVars } from '../core/contrast';
 import { loadModules, loadSharedModules, openModules, useNav } from '../core/modules';
 import CaptureSheet from '../features/capture/CaptureSheet';
 import { openCapture } from '../features/capture/ui';
@@ -366,7 +367,7 @@ export default function Workspace({
   return (
     <SoftContext.Provider value>
       <TooltipProvider>
-        <div ref={shellRef} className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab) }}>
+        <div ref={shellRef} className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab), ...signalVars(tabHue(tab)) }}>
           {!phone && (
             <Sidebar
               tab={tab}

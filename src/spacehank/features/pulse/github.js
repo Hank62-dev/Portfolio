@@ -80,7 +80,10 @@ export const activeRepos = (events) => {
   return [...seen].map(([full, at]) => ({ full, at }));
 };
 
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
+
+/** The newest of some ISO times (the empty ones left out). */
+const latest = (times) => times.filter(Boolean).sort().at(-1) ?? null;
 
 /**
  * The repositories the person was most recently active in, their own or anyone's (from their public events), filled up
@@ -114,7 +117,9 @@ export const loadGithub = async ({ user = GITHUB_USERNAME, limit = 4, fetchImpl 
         ...repo,
         full,
         own: mine(full),
-        pushed: repo.active ?? repo.pushed,
+        // when there was last something of theirs: their latest event, their latest commit, or (their own repo) its last push;
+        // the events feed lags and leaves out some pushes, so it alone can be months behind a commit made an hour ago
+        pushed: latest([repo.active, mine(full) && repo.pushed, commits[0]?.commit?.author?.date]),
         commits: commits.map((c) => ({ sha: c.sha.slice(0, 7), message: c.commit.message.split('\n')[0], at: c.commit.author.date, url: c.html_url })),
         run: runs.workflow_runs?.[0] ? { status: runs.workflow_runs[0].status, conclusion: runs.workflow_runs[0].conclusion, url: runs.workflow_runs[0].html_url } : null,
       };

@@ -179,7 +179,6 @@ export const vi3 = {
   'Realtime workers': 'Worker realtime',
   'Hank RAG API': 'API Hank RAG',
   'Workspace sync': 'Đồng bộ workspace',
-  trang: 'trang',
   PDF: 'PDF',
   DOCX: 'DOCX',
   TXT: 'TXT',

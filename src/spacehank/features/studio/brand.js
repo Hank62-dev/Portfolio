@@ -9,7 +9,7 @@ export const COLORS = [
   { group: 'Surface', name: 'ink-3', hex: '#1e2127', role: tr('Raised, active') },
   { group: 'Text', name: 'bone', hex: '#ece6da', role: tr('Primary text') },
   { group: 'Text', name: 'bone-dim', hex: '#a8a396', role: tr('Secondary text') },
-  { group: 'Text', name: 'bone-faint', hex: '#8a8579', role: tr('Hints, captions') },
+  { group: 'Text', name: 'bone-faint', hex: '#8f8b7f', role: tr('Hints, captions') },
   { group: 'Accent', name: 'signal', hex: '#ff5b2e', role: tr('The one accent') },
   { group: 'Status', name: 'ok', hex: '#7fd6a2', role: 'Success' },
   { group: 'Status', name: 'warn', hex: '#f0b45a', role: 'Caution' },

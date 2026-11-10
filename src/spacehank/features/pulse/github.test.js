@@ -85,6 +85,18 @@ describe('loadGithub', () => {
     expect(activeRepos(events).map((r) => r.full)).toEqual(['org/tool', 'me/a']);
   });
 
+  it("dates a repository by the newest of the person's event, commit and (their own) push", async () => {
+    const fetch3 = vi.fn(async (url) => {
+      if (url.includes('/events/public')) return json([{ type: 'CreateEvent', repo: { name: 'me/site' }, created_at: '2026-05-22T00:00:00Z' }]);
+      if (url.endsWith('/repos/me/site')) return json({ name: 'site', full_name: 'me/site', fork: false, pushed_at: '2026-11-02T08:00:00Z' });
+      if (url.includes('/repos?')) return json([]);
+      if (url.includes('/commits')) return json([{ sha: 'abcdef123', html_url: 'c', commit: { message: 'fix', author: { date: '2026-11-02T07:00:00Z' } } }]);
+      return json({ workflow_runs: [] });
+    });
+    const [site] = await loadGithub({ user: 'me', limit: 1, fetchImpl: fetch3, storage: memory() });
+    expect(site.pushed).toBe('2026-11-02T08:00:00Z'); // not the event from May the feed still had
+  });
+
   it('explains a rate limit', async () => {
     await expect(loadGithub({ user: 'me', fetchImpl: async () => json({}, 403), storage: memory() })).rejects.toThrow(/limiting requests/);
   });

@@ -163,7 +163,7 @@ export default function PulseView({ owner }) {
                           {r.own === false ? r.full : r.name}
                         </a>
                       </h3>
-                      <p className="mt-0.5 line-clamp-1 text-fine text-bone-dim">{r.description || tr('No description')}</p>
+                      {r.description && <p className="mt-0.5 line-clamp-1 text-fine text-bone-dim">{r.description}</p>}
                     </div>
                     <span className={clsx('inline-flex shrink-0 items-center gap-1.5 font-mono text-[0.72rem]', TONE_TEXT[run.tone])}>
                       <i className={clsx('size-2 rounded-full', TONE_DOT[run.tone])} aria-hidden="true" /> {run.label}

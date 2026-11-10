@@ -13,7 +13,7 @@
   /* Text: bone, with two reduced steps that still pass AA on ink-0 */
   --color-bone: #ece6da;
   --color-bone-dim: #a8a396;
-  --color-bone-faint: #8a8579;
+  --color-bone-faint: #8f8b7f;
 
   /* One accent: state, links and the occasional emphasis */
   --color-signal: #ff5b2e;
@@ -239,14 +239,14 @@
   --color-ink-3: #d8d1c2;
   --color-bone: #17140f;
   --color-bone-dim: #4d483e;
-  --color-bone-faint: #6b6558;
+  --color-bone-faint: #615b4f;
   --color-signal: #c93a0a;
   --color-signal-soft: rgb(201 58 10 / 0.12);
   --color-line: rgb(23 20 15 / 0.12);
   --color-line-strong: rgb(23 20 15 / 0.26);
-  --color-ok: #1f7a4a;
-  --color-warn: #8f5a08;
-  --color-danger: #c4382e;
+  --color-ok: #1a683f;
+  --color-warn: #815107;
+  --color-danger: #a83027;
   --shadow-pop: 0 24px 64px rgb(23 20 15 / 0.2);
   --color-wash: #17140f;
   --color-shade: #b3a88e;
@@ -261,7 +261,7 @@
   --color-ink-3: #1e2127;
   --color-bone: #ece6da;
   --color-bone-dim: #a8a396;
-  --color-bone-faint: #8a8579;
+  --color-bone-faint: #8f8b7f;
   --color-signal: hsl(var(--app-hue, 13) 100% 60%);
   --color-line: rgb(236 230 218 / 0.1);
   --color-line-strong: rgb(236 230 218 / 0.22);
@@ -890,7 +890,8 @@ input[data-own-clear]::-webkit-search-decoration {
    airy by day, and a soft glow of the hue sits in the top corner. Text colours stay with the theme, so contrast is unchanged. */
 .app-shell {
   --tab: var(--app-hue, 18);
-  --color-signal: hsl(var(--tab) 74% 61%);
+  /* the lightness is moved per hue, only as far as AA needs on every surface (spacehank/core/contrast.js sets it) */
+  --color-signal: hsl(var(--tab) 74% var(--signal-l-dark, 61%));
   --color-signal-soft: hsl(var(--tab) 74% 61% / 0.14);
   --color-ink-0: hsl(var(--tab) 10% 5.6%);
   --color-ink-1: hsl(var(--tab) 8% 7.8%);
@@ -899,7 +900,7 @@ input[data-own-clear]::-webkit-search-decoration {
   background-image: radial-gradient(75% 44% at 0% 0%, hsl(var(--tab) 55% 50% / 0.085), transparent 70%);
 }
 :root[data-theme='light'] .app-shell {
-  --color-signal: hsl(var(--tab) 68% 38%);
+  --color-signal: hsl(var(--tab) 68% var(--signal-l-light, 38%));
   --color-signal-soft: hsl(var(--tab) 68% 38% / 0.11);
   --color-ink-0: hsl(var(--tab) 24% 95.5%);
   --color-ink-1: hsl(var(--tab) 20% 92.5%);
@@ -3026,11 +3027,13 @@ html[data-vt='player']::view-transition-new(root) {
   margin: 0.2rem auto 0;
   width: fit-content;
   border: 1px solid rgb(255 255 255 / 0.2);
-  border-radius: 9999px;
-  padding: 0.12rem 0.5rem;
+  /* a long name takes two lines rather than being cut ("Read 20 minutes"), so the pill rounds less */
+  border-radius: 0.7rem;
+  padding: 0.14rem 0.5rem;
   font-family: var(--font-mono);
   font-size: 0.6rem;
-  line-height: 1.4;
+  line-height: 1.3;
+  text-align: center;
   color: rgb(255 255 255 / 0.92);
   background: rgb(0 0 0 / 0.28);
   -webkit-backdrop-filter: blur(6px);

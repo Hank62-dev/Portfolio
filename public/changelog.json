@@ -1,5 +1,12 @@
 [
   {
+    "id": "polish-contrast",
+    "version": "1.26.0",
+    "date": "2026-11-11",
+    "vi": "Chữ và màu nhấn của mọi tab đều dễ đọc hơn (đạt chuẩn tương phản AA, cả giao diện sáng). Ví gọn hơn trên điện thoại, đường số dư liền nét; tên cây không còn bị cắt; Dev Pulse ghi đúng lúc push. Sửa vài chỗ dịch sai, bỏ bản demo.",
+    "en": "Text and every tab's accent are easier to read (AA contrast, light theme too). Wallet fits phones better with an unbroken balance line; plant names are no longer cut; Dev Pulse dates pushes right. A few translations fixed; the demo is gone."
+  },
+  {
     "id": "image-fallback",
     "version": "1.25.1",
     "date": "2026-11-10",

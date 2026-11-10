@@ -122,10 +122,6 @@ const Hero = ({ github }) => {
             <Button to="/#contact" variant="ghost" onClick={jumpTo('contact')}>
               {c.hero.ctaContact}
             </Button>
-            {/* a way into the private workspace as a guest: sample data, nothing real */}
-            <Button to="/spacehank?demo" variant="link" data-cursor="demo">
-              {c.hero.ctaDemo} ↗
-            </Button>
           </div>
         </div>
 
