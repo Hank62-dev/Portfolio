@@ -1,156 +1,189 @@
 [
   {
+    "id": "versions",
+    "version": "1.24.0",
+    "date": "2026-11-10",
+    "vi": "Mỗi bản cập nhật giờ có số phiên bản (như v1.24.0): thông báo cập nhật ghi rõ bản mới là bản nào, và mỗi dòng trong Có gì mới đều kèm số phiên bản của nó.",
+    "en": "Every update now has a version number (like v1.24.0): the update notice says which version is coming, and each line of What's new carries its own."
+  },
+  {
     "id": "paint-rotate",
+    "version": "1.23.0",
     "date": "2026-11-10",
     "vi": "Paint xoay được tranh một góc vuông: nút xoay ở thanh trên (hoặc Xoay sang phải / trái trong menu) biến tranh ngang thành dọc và ngược lại, mọi lớp xoay theo, không mất nét nào và hoàn tác được.",
     "en": "Paint can turn a drawing a quarter turn: the turn button on the top bar (or Turn right / left in the menu) makes a wide drawing tall and back, every layer goes with it, nothing is lost, and it can be undone."
   },
   {
     "id": "diary-notebook-page",
+    "version": "1.22.0",
     "date": "2026-11-09",
     "vi": "Cả trang Nhật ký giờ là một cuốn sổ: giấy kẻ dòng, lề đỏ, gáy lò xo, tiêu đề viết tay, các con số là giấy nhớ dán lệch. Viết nhật ký cũng ngay trên dòng kẻ, chọn tâm trạng như đóng dấu, ảnh dán băng keo.",
     "en": "The whole Diary is now a notebook: ruled paper, a red margin, a spiral, handwritten headings and the numbers on crooked sticky notes. Writing goes straight onto the rules too, the mood is picked like a stamp and photos are taped on."
   },
   {
     "id": "diary-notebook",
+    "version": "1.21.0",
     "date": "2026-11-09",
     "vi": "Đọc lại nhật ký giờ như mở một cuốn sổ: gáy lò xo, giấy kẻ dòng có lề đỏ, chữ viết tay, ảnh dán băng keo, tâm trạng đóng như con dấu. Lật trang trước, trang sau bằng mũi tên, vuốt ngang hoặc phím ← →.",
     "en": "Reading a diary page now opens a notebook: a spiral, ruled paper with a red margin, handwriting, taped-on photos and the mood as a stamp. Turn to the page before or after with the arrows, a sideways swipe or ← →."
   },
   {
     "id": "login-lockout",
+    "version": "1.20.0",
     "date": "2026-11-09",
     "vi": "Đăng nhập an toàn hơn: sai mật khẩu 4 lần đầu không sao, sau đó bị khoá 30 giây và mỗi lần sai tiếp lại khoá gấp đôi, tối đa 1 giờ. Màn hình đăng nhập báo còn mấy lần thử và đếm ngược thời gian khoá.",
     "en": "Safer sign-in: the first 4 wrong passwords are free, then sign-in locks for 30 s and each further wrong one doubles it, up to an hour. The sign-in screen says how many tries are left and counts the lock down."
   },
   {
     "id": "lighter-start",
+    "version": "1.19.2",
     "date": "2026-11-09",
     "vi": "App mở nhẹ hơn: trình soạn thảo của giấy nhớ chỉ tải khi có giấy nhớ trên màn hình, và bản cập nhật lại được lưu sẵn để dùng khi không có mạng.",
     "en": "The app starts lighter: the sticky notes' editor loads only when a sticky is on screen, and updates are again kept ready for use offline."
   },
   {
     "id": "lyrics-finder",
+    "version": "1.19.1",
     "date": "2026-11-09",
     "vi": "Tìm lời bài hát giỏi hơn với nhạc Việt: tìm không dấu, đọc được tên bài từ file tải từ video (tên trong ngoặc kép, nằm ở album, kèm MV/Official), và lấy lời cho bản cover hay bản MV dài hơn (hiện lời không chạy theo nhịp).",
     "en": "Lyrics are found far more often for Vietnamese songs: the search goes without accents, names are read from video-site files (in quotes, in the album, with MV or Official), and covers or longer MV cuts get their words, untimed."
   },
   {
     "id": "sticky-notes",
+    "version": "1.19.0",
     "date": "2026-11-09",
     "vi": "Giấy nhớ nổi: ghim ghi chú lên màn hình, hiện trên mọi tab; kéo, đổi cỡ, đổi màu, thu gọn, viết ngay trên giấy. Trên Chrome/Edge máy tính, bật giấy ra thành cửa sổ nổi trên cả ứng dụng khác. Tạo nhanh bằng Ctrl+K.",
     "en": "Sticky notes: float a note over every tab; drag, resize, recolour, fold it and write on it. On Chrome or Edge on a computer, pop it out to float over other apps too. Make one fast with Ctrl+K."
   },
   {
     "id": "constellation-redo",
+    "version": "1.18.0",
     "date": "2026-11-09",
     "vi": "Constellation làm lại: mỗi ghi chú là một tiểu hành tinh tròn phát sáng theo màu tag, có hố, có bóng sáng tối và xoay chậm; tìm ngay trên bản đồ, xem toàn màn hình, thẻ có tag và ghi chú được nối, sắp xếp danh sách, cùng phím tắt.",
     "en": "Constellation is redone: each note is a round asteroid glowing in its tag colour, with craters, light and shade and a slow spin; find one on the map, a full-screen view, a card with its tags and links, a sortable list, and keys."
   },
   {
     "id": "search-debounce",
+    "version": "1.17.0",
     "date": "2026-11-09",
     "vi": "Mọi ô tìm kiếm giờ chỉ tìm khi bạn ngừng gõ 400ms nên mượt hơn, xoá ô là kết quả biến mất ngay. Bỏ hai nút Tuỳ chỉnh và Mở văn phòng công ty trên bầu trời màn hình chính.",
     "en": "Every search box now searches once you pause typing for 400 ms, so it stays smooth, and clearing it clears the results at once. The Customise and Open company floor buttons are gone from the home screen's sky."
   },
   {
     "id": "podcast-redo",
+    "version": "1.16.0",
     "date": "2026-11-09",
     "vi": "Podcast làm lại: thanh phát theo bạn sang mọi tab, hẹn giờ tắt, nút đóng tập; mục Tập mới gom tập mới từ các chương trình bạn theo dõi, ảnh bìa có nhãn số tập mới; trang chương trình có nút nghe tiếp hoặc nghe tập mới nhất, lọc tập chưa nghe, tìm tập, đánh dấu đã nghe; tìm podcast ra kết quả ngay khi gõ.",
     "en": "Podcasts are redone: a player bar that follows you to every tab, a sleep timer and a close button; New episodes gathers the latest from the shows you follow, with a badge on their covers; a show's page plays the newest or carries on, filters what is not heard, searches its episodes and marks them heard; the directory searches as you type."
   },
   {
     "id": "paint",
+    "version": "1.15.0",
     "date": "2026-11-09",
     "vi": "Tab Vẽ mới (kiểu Paint): vẽ nhiều lớp với bút, bút dạ quang, tẩy, đổ màu, lấy màu, đường thẳng, mũi tên, hình chữ nhật, hình tròn, chữ, dời lớp; thu phóng và kéo bằng chuột hoặc hai ngón tay; hoàn tác và làm lại; vẽ lên một bức ảnh. Tranh tự lưu trong thư viện của trình duyệt, có thể gửi vào ghi chú mới hoặc nhật ký hôm nay.",
     "en": "A new Paint tab: draw in layers with a pen, highlighter, eraser, fill, colour picker, line, arrow, rectangle, ellipse, text and a layer mover; zoom and move with the mouse or two fingers; undo and redo; draw over a picture. Drawings save themselves in a library in the browser and can be sent to a new note or to today's diary."
   },
   {
     "id": "calendar",
+    "version": "1.14.0",
     "date": "2026-11-08",
     "vi": "Tab Lịch mới: nối Google Calendar hai chiều (xem, thêm, sửa, xoá sự kiện), xem theo tháng, tuần hoặc lịch trình cùng hạn nộp, kỳ thi và việc có ngày. Agenda của Study Hub vẫn giữ nguyên, và màn Hôm nay có mục Sắp tới.",
     "en": "A new Calendar tab: two-way Google Calendar (see, add, change and delete events), as a month, a week or an agenda next to deadlines, exams and dated tasks. The Study Hub keeps its own agenda, and the Today screen has a Coming up card."
   },
   {
     "id": "paper-ink",
+    "version": "1.13.0",
     "date": "2026-11-08",
     "vi": "Giao diện Giấy và mực: màn Hôm nay có bầu trời theo giờ và thời tiết, Ví có số dư lớn và hoá đơn, vườn thói quen thành một cảnh có mưa khi tưới, ghi chú và thẻ việc như giấy gập góc, màu thẻ dịu hơn ở nền tối.",
     "en": "A Paper and Ink look: the Today screen has a sky that follows the hour and the weather, the Wallet has a big balance and a receipt, the habit garden is a scene with rain when you water, notes and task cards are folded paper, and card colours are calmer in the dark theme."
   },
   {
     "id": "motion",
+    "version": "1.12.0",
     "date": "2026-11-08",
     "vi": "Giao diện mượt hơn: chuyển tab có hướng, thanh nhạc nhỏ phóng to thành màn phát đầy đủ, biểu đồ Ví vẽ nét và số chạy lên, cây thói quen lớn lên, nhật ký có ngọn lửa theo chuỗi ngày, bảng Ctrl+K có lò xo và vạch sáng trượt, thẻ sáng theo con trỏ trên máy tính. Màn Hôm nay có vòng tiến độ, vuốt để hoàn thành việc, và tổng kết tuần dạng thẻ vuốt.",
     "en": "A smoother interface: tabs slide in a direction, the little player grows into the full one, the Wallet charts draw and its numbers count up, habit plants grow, the diary has a flame for its streak, Ctrl+K opens with a spring and a sliding highlight, and cards glow under the pointer on desktop. The Today screen has a progress ring, swipe to finish a task, and the weekly review as a story of cards."
   },
   {
     "id": "today-capture",
+    "version": "1.11.0",
     "date": "2026-11-08",
     "vi": "Màn Hôm nay mới: ghi nhanh mọi thứ vào Hộp thư đến (gõ, chụp hoá đơn), xem việc đến hạn, thói quen và chi tiêu trong ngày, dòng thời gian và tổng kết tuần do Hank viết. Có thể tắt các mục không dùng, tìm kiếm và hỏi AI trên toàn bộ dữ liệu, và tách bản ghi âm thành việc cần làm.",
     "en": "New Today screen: capture anything into the Inbox (type, or photograph a receipt), see what is due, your habits and spending, a timeline of the day and a weekly review Hank writes. You can switch off places you do not use, search and ask the AI across all your data, and turn a voice memo into to-dos."
   },
   {
     "id": "keep-working",
+    "version": "1.10.0",
     "date": "2026-11-07",
     "vi": "Tác vụ AI (tạo ảnh, viết kịch bản, hỏi ghi chú, ghi chú buổi sáng) chạy tiếp khi bạn chuyển tab và giữ lại nội dung đang soạn.",
     "en": "AI tasks (pictures, scripts, asking your notes, the morning note) keep running when you switch tabs, and what you were typing is kept."
   },
   {
     "id": "whats-new",
+    "version": "1.9.0",
     "date": "2026-11-07",
     "vi": "Thanh cập nhật cho biết bản mới có gì, và ghi chú của Hank dài cũng đọc được đủ (nút Xem thêm).",
     "en": "The update notice says what is new, and Hank's long briefing can be read in full (Read more)."
   },
   {
     "id": "security",
+    "version": "1.8.0",
     "date": "2026-11-07",
     "vi": "Bảo mật: khoá dịch vụ RAG, giới hạn đăng nhập chặt hơn, thêm header bảo mật.",
     "en": "Security: the RAG service is locked, sign-in limits are stricter, security headers added."
   },
   {
     "id": "podcast",
+    "version": "1.7.0",
     "date": "2026-11-07",
     "vi": "Tab Podcast mới: tìm, theo dõi, nghe với tốc độ tuỳ ý và nghe tiếp đúng chỗ đã dừng.",
     "en": "New Podcast tab: find and follow shows, listen at your own speed, and carry on where you stopped."
   },
   {
     "id": "memo-ai",
+    "version": "1.6.0",
     "date": "2026-11-06",
     "vi": "Voice Memos: AI chép lời bản ghi, các nút gọn hơn, dải sóng chạy theo khi phát lại.",
     "en": "Voice Memos: AI writes down recordings, tidier buttons, and the waveform follows playback."
   },
   {
     "id": "notes-view",
+    "version": "1.5.0",
     "date": "2026-11-06",
     "vi": "Ghi chú: xem toàn màn hình và có nút lên đầu trang.",
     "en": "Notes: full-screen view and a back-to-top button."
   },
   {
     "id": "notes-import",
+    "version": "1.4.0",
     "date": "2026-11-06",
     "vi": "Second Brain nhập được file .md, .docx, .xlsx, .txt, .csv, kéo thả hoặc chọn từ menu Backup.",
     "en": "Second Brain imports .md, .docx, .xlsx, .txt and .csv files, by drag and drop or from the Backup menu."
   },
   {
     "id": "diary-photos",
+    "version": "1.3.0",
     "date": "2026-11-06",
     "vi": "Nhật ký: bấm vào ảnh để xem lớn, phóng to và vuốt giữa các ảnh.",
     "en": "Diary: tap a photo to see it large, zoom, and swipe between photos."
   },
   {
     "id": "push",
+    "version": "1.2.0",
     "date": "2026-11-06",
     "vi": "Thông báo đẩy từ server: nhắc việc kể cả khi đã đóng app.",
     "en": "Push notifications from the server: reminders even when the app is closed."
   },
   {
     "id": "languages",
+    "version": "1.1.0",
     "date": "2026-11-06",
     "vi": "Toàn bộ giao diện có hai ngôn ngữ Tiếng Việt và English, đổi ở thanh trên.",
     "en": "The whole workspace comes in Vietnamese and English, switched from the top bar."
   },
   {
     "id": "creator-lab",
+    "version": "1.0.0",
     "date": "2026-11-06",
     "vi": "Creator Lab được thiết kế lại với vòng mục tiêu, biểu đồ xu hướng và bảng pipeline nhiều màu.",
     "en": "Creator Lab redesigned with a goal ring, a trend line and a coloured pipeline board."

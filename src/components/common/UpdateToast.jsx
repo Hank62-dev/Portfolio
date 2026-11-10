@@ -16,8 +16,8 @@ const vietnamese = () => {
 
 const copy = (vi) =>
   vi
-    ? { text: 'Có bản cập nhật mới', update: 'Cập nhật', later: 'Để sau', notify: 'Báo cho tôi trên màn hình điện thoại khi có bản mới', news: 'Có gì mới', hide: 'Ẩn', updated: 'Đã cập nhật. Có gì mới:', close: 'Đóng' }
-    : { text: 'A new version is ready', update: 'Update', later: 'Later', notify: 'Notify me on my phone when there is a new version', news: "What's new", hide: 'Hide', updated: "Updated. What's new:", close: 'Close' };
+    ? { text: 'Có bản cập nhật mới', update: 'Cập nhật', later: 'Để sau', notify: 'Báo cho tôi trên màn hình điện thoại khi có bản mới', news: 'Có gì mới', hide: 'Ẩn', updated: 'Đã cập nhật. Có gì mới:', updatedTo: (v) => `Đã cập nhật lên v${v}. Có gì mới:`, close: 'Đóng' }
+    : { text: 'A new version is ready', update: 'Update', later: 'Later', notify: 'Notify me on my phone when there is a new version', news: "What's new", hide: 'Hide', updated: "Updated. What's new:", updatedTo: (v) => `Updated to v${v}. What's new:`, close: 'Close' };
 
 const PANEL = 'rounded-3xl border border-line-strong bg-ink-1/95 p-4 shadow-[0_18px_40px_-14px_rgb(0_0_0/0.9)] backdrop-blur-2xl';
 const HOLDER = 'fixed top-[calc(0.75rem+env(safe-area-inset-top))] left-1/2 z-[90] flex w-[min(22rem,calc(100vw-1.5rem))] -translate-x-1/2 animate-fade-in flex-col gap-2';
@@ -29,7 +29,10 @@ function Changes({ list, vi, label }) {
       {list.map((entry) => (
         <li key={entry.id} className="flex gap-2.5 text-fine leading-snug text-bone">
           <Sparkles size={13} className="mt-0.5 shrink-0 text-signal" aria-hidden="true" />
-          <span>{changeText(entry, vi)}</span>
+          <span className="min-w-0 flex-1">
+            {entry.version && <b className="mr-1.5 inline-block rounded-full border border-line-strong px-1.5 font-mono text-[0.66rem] leading-[1.15rem] font-medium text-bone-dim tabular-nums">v{entry.version}</b>}
+            {changeText(entry, vi)}
+          </span>
         </li>
       ))}
     </ul>
@@ -53,7 +56,7 @@ export default function UpdateToast() {
         <div className={PANEL}>
           <div className="mb-3 flex items-center gap-2">
             <Sparkles size={15} className="shrink-0 text-signal" aria-hidden="true" />
-            <b className="min-w-0 flex-1 font-mono text-fine font-medium text-bone">{words.updated}</b>
+            <b className="min-w-0 flex-1 font-mono text-fine font-medium text-bone">{news[0].version ? words.updatedTo(news[0].version) : words.updated}</b>
             <button type="button" onClick={dismissNews} aria-label={words.close} className="grid size-8 shrink-0 place-items-center rounded-full text-bone-dim hover:text-bone active:scale-90">
               <X size={16} aria-hidden="true" />
             </button>
@@ -72,7 +75,10 @@ export default function UpdateToast() {
           <i className="absolute size-2.5 animate-ping rounded-full bg-signal/60 [animation-duration:2s]" />
           <i className="size-2 rounded-full bg-signal" />
         </span>
-        <span className="min-w-0 flex-1 truncate font-mono text-fine text-bone">{words.text}</span>
+        <span className="min-w-0 flex-1 truncate font-mono text-fine text-bone">
+          {words.text}
+          {changes[0]?.version && <span className="text-bone-dim"> · v{changes[0].version}</span>}
+        </span>
         {permission === 'default' && (
           <button type="button" onClick={() => enableNotices().then(setPermission)} aria-label={words.notify} title={words.notify} className="grid size-9 shrink-0 place-items-center rounded-full text-bone-dim hover:text-bone active:scale-90" data-enable-notices>
             <Bell size={15} aria-hidden="true" />
