@@ -31,7 +31,9 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now, sleep = (ms) =
   let day = today(now);
   let used = 0;
 
-  const imageProvider = ai.hfToken ? 'huggingface' : ai.geminiKey ? 'gemini' : null;
+  // who makes pictures, in the order they are asked: a failing one (no credit, model gone, key refused) hands over to the next
+  const imageProviders = [ai.hfToken && 'huggingface', ai.geminiKey && 'gemini', ai.pollinationsBase && 'pollinations'].filter(Boolean);
+  const imageProvider = imageProviders[0] ?? null;
 
   const roll = () => {
     if (day !== today(now)) {
@@ -51,9 +53,16 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now, sleep = (ms) =
     used += 1;
   };
 
+  /** Gives back the unit a call took when it brought nothing back (only pictures do this). */
+  const refund = () => {
+    if (used > 0) used -= 1;
+  };
+
   const fail = (response, what) => {
     if (response.status === 429) throw new HttpError(429, `${what} quota reached for now. Try again later.`);
     if (response.status === 401 || response.status === 403) throw new HttpError(502, `${what} rejected the server's key.`);
+    if (response.status === 402) throw new HttpError(502, `${what} has no credit left for now.`);
+    if (response.status === 404 || response.status === 410) throw new HttpError(502, `${what} no longer offers this model.`);
     throw new HttpError(502, `${what} is unavailable right now.`);
   };
 
@@ -325,40 +334,62 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now, sleep = (ms) =
     return { subject: clip(parsed.subject, 140), message };
   };
 
-  /** One picture. Returns { mime, data (base64) }. */
+  /** A picture as bytes from a service that answers with the image itself (Hugging Face, Pollinations). */
+  const fetchPicture = async (url, init, what) => {
+    let response;
+    try {
+      response = await fetchImpl(url, { ...init, signal: AbortSignal.timeout(90000) });
+    } catch {
+      throw new HttpError(502, `${what} is unreachable right now.`);
+    }
+    if (!response.ok) fail(response, what);
+    const mime = response.headers.get('content-type')?.split(';')[0] || 'image/jpeg';
+    if (!mime.startsWith('image/')) throw new HttpError(502, `${what} returned something unexpected.`);
+    return { mime, data: Buffer.from(await response.arrayBuffer()).toString('base64') };
+  };
+
+  const makers = {
+    huggingface: (wish) =>
+      fetchPicture(
+        `${HUGGING_FACE}/${ai.hfImageModel}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ai.hfToken}` }, body: JSON.stringify({ inputs: wish }) },
+        'The image service'
+      ),
+    gemini: async (wish) => {
+      const result = await gemini(ai.imageModel, {
+        contents: [{ parts: [{ text: wish }] }],
+        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
+      });
+      const part = (result?.candidates?.[0]?.content?.parts ?? []).find((p) => p.inlineData?.data);
+      if (!part) throw new HttpError(502, 'No picture came back. Try a different description.');
+      return { mime: part.inlineData.mimeType || 'image/png', data: part.inlineData.data };
+    },
+    // free and keyless; `private` keeps the picture out of its public feed
+    pollinations: (wish) => fetchPicture(`${ai.pollinationsBase}/prompt/${encodeURIComponent(wish)}?width=1024&height=1024&nologo=true&private=true`, { method: 'GET' }, 'The free image service'),
+  };
+
+  /**
+   * One picture. Returns { mime, data (base64) }. The providers are asked in turn until one makes it; it costs one unit of
+   * the daily budget, and nothing when none could.
+   */
   const image = async ({ prompt }) => {
     const wish = clip(prompt, 900);
     if (wish.length < 3) throw new HttpError(400, 'Describe the picture you want.');
     if (!imageProvider) {
       throw new HttpError(503, 'No image provider is configured: set HF_TOKEN (free) or GEMINI_API_KEY on the server.');
     }
-
-    if (imageProvider === 'huggingface') {
-      spend();
-      let response;
+    let first;
+    for (const name of imageProviders) {
       try {
-        response = await fetchImpl(`${HUGGING_FACE}/${ai.hfImageModel}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${ai.hfToken}` },
-          body: JSON.stringify({ inputs: wish }),
-          signal: AbortSignal.timeout(90000),
-        });
-      } catch {
-        throw new HttpError(502, 'The image service is unreachable right now.');
+        if (name !== 'gemini') spend(); // Gemini's own call takes its unit
+        return await makers[name](wish);
+      } catch (error) {
+        if (!(error instanceof HttpError) || error.status !== 429 || !/daily AI budget/.test(error.message)) refund();
+        else throw error; // the budget is used up: no provider may be asked
+        first ??= error;
       }
-      if (!response.ok) fail(response, 'The image service');
-      const mime = response.headers.get('content-type')?.split(';')[0] || 'image/jpeg';
-      if (!mime.startsWith('image/')) throw new HttpError(502, 'The image service returned something unexpected.');
-      return { mime, data: Buffer.from(await response.arrayBuffer()).toString('base64') };
     }
-
-    const result = await gemini(ai.imageModel, {
-      contents: [{ parts: [{ text: wish }] }],
-      generationConfig: { responseModalities: ['TEXT', 'IMAGE'] },
-    });
-    const part = (result?.candidates?.[0]?.content?.parts ?? []).find((p) => p.inlineData?.data);
-    if (!part) throw new HttpError(502, 'No picture came back. Try a different description.');
-    return { mime: part.inlineData.mimeType || 'image/png', data: part.inlineData.data };
+    throw first;
   };
 
   /**

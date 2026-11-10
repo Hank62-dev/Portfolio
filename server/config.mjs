@@ -38,7 +38,10 @@ export const loadConfig = (env = process.env) => {
       textFallbackModel: env.GEMINI_TEXT_FALLBACK_MODEL ?? 'gemini-3.5-flash-lite',
       imageModel: env.GEMINI_IMAGE_MODEL || 'gemini-2.5-flash-image',
       hfToken: env.HF_TOKEN || '',
-      hfImageModel: env.HF_IMAGE_MODEL || 'black-forest-labs/FLUX.1-schnell',
+      // FLUX.1-schnell left Hugging Face's own inference (410) in 2026; this is the text-to-image model it still runs
+      hfImageModel: env.HF_IMAGE_MODEL || 'stabilityai/stable-diffusion-3-medium-diffusers',
+      // a free picture service with no key, asked when the others fail (or alone, when neither is set); empty turns it off
+      pollinationsBase: (env.POLLINATIONS_URL ?? 'https://image.pollinations.ai').replace(/\/+$/, ''),
       dailyLimit: Number(env.AI_DAILY_LIMIT || 60),
     },
     calendarIcsUrl: env.CALENDAR_ICS_URL || '',

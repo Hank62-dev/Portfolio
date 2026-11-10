@@ -118,6 +118,35 @@ describe('images', () => {
     expect(error.message).not.toContain('secret');
   });
 
+  it('hands over to the next provider when one fails, and says why when all do', async () => {
+    const picture = { ok: true, status: 200, headers: new Headers({ 'content-type': 'image/jpeg' }), arrayBuffer: async () => Buffer.from([7]) };
+    const gone = { ok: false, status: 410, json: async () => ({}) };
+    const fetchImpl = vi.fn(async (url) => (url.startsWith('https://free.test') ? picture : gone));
+    const ai = createAi({ ai: aiConfig({ hfToken: 'hf_x', geminiKey: '', pollinationsBase: 'https://free.test' }), fetchImpl });
+    await expect(ai.image({ prompt: 'a red lighthouse' })).resolves.toEqual({ mime: 'image/jpeg', data: Buffer.from([7]).toString('base64') });
+    const asked = fetchImpl.mock.calls.at(-1)[0];
+    expect(asked).toBe('https://free.test/prompt/a%20red%20lighthouse?width=1024&height=1024&nologo=true&private=true');
+    expect(ai.usage().used).toBe(1); // the failed try cost nothing
+
+    const broke = createAi({ ai: aiConfig({ hfToken: 'hf_x', geminiKey: '' }), fetchImpl: vi.fn().mockResolvedValue({ ok: false, status: 402 }) });
+    await expect(broke.image({ prompt: 'a lighthouse' })).rejects.toMatchObject({ status: 502, message: expect.stringMatching(/no credit/) });
+    expect(broke.usage().used).toBe(0);
+  });
+
+  it('makes pictures with the free service alone when no key is set', async () => {
+    const picture = { ok: true, status: 200, headers: new Headers({ 'content-type': 'image/jpeg' }), arrayBuffer: async () => Buffer.from([1]) };
+    const ai = createAi({ ai: aiConfig({ geminiKey: '', pollinationsBase: 'https://free.test' }), fetchImpl: vi.fn().mockResolvedValue(picture) });
+    expect(ai.usage().image).toBe('pollinations');
+    await expect(ai.image({ prompt: 'a lighthouse' })).resolves.toMatchObject({ mime: 'image/jpeg' });
+  });
+
+  it('stops at the daily budget without asking anyone', async () => {
+    const fetchImpl = vi.fn();
+    const ai = createAi({ ai: aiConfig({ hfToken: 'hf_x', dailyLimit: 0, pollinationsBase: 'https://free.test' }), fetchImpl });
+    await expect(ai.image({ prompt: 'a lighthouse' })).rejects.toMatchObject({ status: 429 });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it('refuses a missing prompt and an unconfigured server', async () => {
     await expect(createAi({ ai: aiConfig(), fetchImpl: vi.fn() }).image({ prompt: ' ' })).rejects.toMatchObject({ status: 400 });
     await expect(createAi({ ai: aiConfig({ geminiKey: '' }), fetchImpl: vi.fn() }).image({ prompt: 'a lighthouse' })).rejects.toMatchObject({ status: 503 });

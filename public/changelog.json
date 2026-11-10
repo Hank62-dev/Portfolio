@@ -1,5 +1,12 @@
 [
   {
+    "id": "image-fallback",
+    "version": "1.25.1",
+    "date": "2026-11-10",
+    "vi": "Image Studio tạo ảnh lại được: khi Hugging Face hết credit hay gỡ model, ảnh được tạo bằng một dịch vụ miễn phí dự phòng. Lần tạo lỗi không còn bị trừ lượt, và lỗi báo rõ lý do hơn.",
+    "en": "Image Studio makes pictures again: when Hugging Face runs out of credit or drops a model, a free fallback service makes the picture. A failed try no longer uses up a turn, and errors say why."
+  },
+  {
     "id": "pulse-activity",
     "version": "1.25.0",
     "date": "2026-11-10",
