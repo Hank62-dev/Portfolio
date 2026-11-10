@@ -80,4 +80,8 @@ export const vi8 = {
   'Colour, size and layers': 'Màu, cỡ nét và các lớp',
   "Today's page already has {0} pictures.": 'Trang hôm nay đã có {0} ảnh rồi.',
   'This browser would not open its private storage, so drawings cannot be kept.': 'Trình duyệt này không mở được kho lưu riêng, nên không thể lưu tranh.',
+  'Turn it a quarter turn': 'Xoay một góc vuông',
+  'Turn it a quarter turn (wide ↔ tall)': 'Xoay một góc vuông (ngang ↔ dọc)',
+  'Turn right': 'Xoay sang phải',
+  'Turn left': 'Xoay sang trái',
 };

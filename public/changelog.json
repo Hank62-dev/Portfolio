@@ -1,5 +1,11 @@
 [
   {
+    "id": "paint-rotate",
+    "date": "2026-11-10",
+    "vi": "Paint xoay được tranh một góc vuông: nút xoay ở thanh trên (hoặc Xoay sang phải / trái trong menu) biến tranh ngang thành dọc và ngược lại, mọi lớp xoay theo, không mất nét nào và hoàn tác được.",
+    "en": "Paint can turn a drawing a quarter turn: the turn button on the top bar (or Turn right / left in the menu) makes a wide drawing tall and back, every layer goes with it, nothing is lost, and it can be undone."
+  },
+  {
     "id": "diary-notebook-page",
     "date": "2026-11-09",
     "vi": "Cả trang Nhật ký giờ là một cuốn sổ: giấy kẻ dòng, lề đỏ, gáy lò xo, tiêu đề viết tay, các con số là giấy nhớ dán lệch. Viết nhật ký cũng ngay trên dòng kẻ, chọn tâm trạng như đóng dấu, ảnh dán băng keo.",

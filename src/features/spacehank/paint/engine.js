@@ -287,7 +287,9 @@ export class PaintEngine {
   }
 
   step(entry, direction) {
-    if (entry.kind === 'pixels') {
+    if (entry.kind === 'rotate') {
+      this.turnAll(direction === 'undo' ? -entry.turn : entry.turn);
+    } else if (entry.kind === 'pixels') {
       const layer = this.pool.get(entry.id);
       const part = direction === 'undo' ? entry.before : entry.after;
       layer?.ctx.putImageData(part instanceof ImageData ? part : asImageData(part), entry.rect.x, entry.rect.y);
@@ -528,6 +530,49 @@ export class PaintEngine {
     }
     this.remember({ kind: 'pixels', id: layer.id, rect, before: cropData(before, rect), after: ctx.getImageData(rect.x, rect.y, rect.w, rect.h) });
     this.changed();
+  }
+
+  // ---- turning ----------------------------------------------------------------------------------------------------------
+
+  /**
+   * Turns the whole drawing a quarter turn, clockwise (`1`) or the other way (`-1`): every layer goes with it, so a wide drawing
+   * stands up tall and a tall one lies down. Nothing is lost (a quarter turn moves pixels, it does not blend them), so undo just
+   * turns it back.
+   */
+  rotate(turn = 1) {
+    if (this.op) this.cancel();
+    const way = turn < 0 ? -1 : 1;
+    this.turnAll(way);
+    this.remember({ kind: 'rotate', turn: way });
+    this.changed();
+  }
+
+  /** Turns every layer (the ones taken out too, so undo can bring them back at the right size) and swaps the sides. */
+  turnAll(way) {
+    const { width, height } = this;
+    const spare = canvasOf(width, height);
+    const spareCtx = spare.getContext('2d');
+    for (const layer of this.pool.values()) {
+      spareCtx.clearRect(0, 0, width, height);
+      spareCtx.drawImage(layer.canvas, 0, 0);
+      layer.canvas.width = height; // resizing empties the canvas; the context stays the same one
+      layer.canvas.height = width;
+      const ctx = layer.ctx;
+      ctx.save();
+      if (way > 0) {
+        ctx.translate(height, 0);
+        ctx.rotate(Math.PI / 2);
+      } else {
+        ctx.translate(0, width);
+        ctx.rotate(-Math.PI / 2);
+      }
+      ctx.drawImage(spare, 0, 0);
+      ctx.restore();
+    }
+    this.preview.width = height;
+    this.preview.height = width;
+    this.width = height;
+    this.height = width;
   }
 
   clearLayer() {

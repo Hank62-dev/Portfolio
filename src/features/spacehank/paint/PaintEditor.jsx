@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
 import {
   ArrowLeft,
@@ -27,6 +27,8 @@ import {
   Pipette,
   Plus,
   Redo2,
+  RotateCcw,
+  RotateCw,
   Slash,
   Square,
   Trash2,
@@ -286,6 +288,21 @@ export default function PaintEditor({ source, onClose, onNotify }) {
     return () => observer.disconnect();
   }, [engine, fit]);
 
+  // a quarter turn swaps the sides (by the button, or by undo and redo): show the whole drawing again the other way up
+  const shape = engine ? `${engine.width}x${engine.height}` : '';
+  const lastShape = useRef(shape);
+  useEffect(() => {
+    if (!shape || lastShape.current === shape) return;
+    lastShape.current = shape;
+    fit();
+  }, [shape, fit]);
+
+  const rotate = (turn) => {
+    setMenu(false);
+    setTextEdit(null);
+    engine?.rotate(turn);
+  };
+
   // the wheel zooms about the cursor (a trackpad pinch arrives as a wheel with Ctrl held)
   useEffect(() => {
     const stage = stageRef.current;
@@ -495,10 +512,8 @@ export default function PaintEditor({ source, onClose, onNotify }) {
   const cursor = space || engine?.tool === 'pan' ? 'grab' : engine?.tool === 'text' ? 'text' : engine?.tool === 'move' ? 'move' : 'crosshair';
   const status = { saved: tr('Saved'), saving: tr('Saving…'), dirty: tr('Unsaved') }[saved];
 
-  const hostStyle = useMemo(
-    () => (engine ? { width: engine.width, height: engine.height, transform: `translate(${view.x}px, ${view.y}px) scale(${view.k})`, background: engine.background ?? checker } : {}),
-    [engine, view]
-  );
+  // worked out every time: a quarter turn changes the drawing's sides without a new engine
+  const hostStyle = engine ? { width: engine.width, height: engine.height, transform: `translate(${view.x}px, ${view.y}px) scale(${view.k})`, background: engine.background ?? checker } : {};
 
   const picked = (id2) => {
     engine.setTool(id2);
@@ -542,6 +557,9 @@ export default function PaintEditor({ source, onClose, onNotify }) {
         <button type="button" onClick={fit} aria-label={tr('Fit to the screen')} title={tr('Fit to the screen')} className="hidden h-10 items-center gap-1.5 rounded-xl px-2.5 font-mono text-[0.72rem] text-bone-dim tabular-nums hover:bg-wash/10 hover:text-bone sm:inline-flex">
           <Maximize size={14} aria-hidden="true" /> {Math.round(view.k * 100)}%
         </button>
+        <button type="button" onClick={() => rotate(1)} disabled={!engine} aria-label={tr('Turn it a quarter turn')} title={tr('Turn it a quarter turn (wide ↔ tall)')} className="grid size-10 place-items-center rounded-xl text-bone-dim hover:bg-wash/10 hover:text-bone disabled:opacity-30" data-rotate>
+          <RotateCw size={18} aria-hidden="true" />
+        </button>
         <div className="relative" data-paint-menu>
           <button type="button" onClick={() => setMenu(!menu)} aria-label={tr('More')} aria-expanded={menu} className="grid size-10 place-items-center rounded-xl text-bone-dim hover:bg-wash/10 hover:text-bone" data-paint-more>
             <MoreHorizontal size={19} aria-hidden="true" />
@@ -549,6 +567,12 @@ export default function PaintEditor({ source, onClose, onNotify }) {
           <Menu open={menu} onClose={() => setMenu(false)}>
             <MenuItem icon={ImagePlus} onClick={() => { setMenu(false); fileRef.current?.click(); }}>
               {tr('Add a picture')}
+            </MenuItem>
+            <MenuItem icon={RotateCw} onClick={() => rotate(1)}>
+              {tr('Turn right')}
+            </MenuItem>
+            <MenuItem icon={RotateCcw} onClick={() => rotate(-1)}>
+              {tr('Turn left')}
             </MenuItem>
             <MenuItem icon={Grid3x3} onClick={() => { setGrid(!grid); setMenu(false); }}>
               {grid ? tr('Hide the grid') : tr('Show the grid')}
