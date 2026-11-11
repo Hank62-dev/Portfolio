@@ -234,9 +234,9 @@ function Core({ onCore, paused }) {
 function Astronaut({ id, color, tone }) {
   const off = tone === 'offline';
   const look = outfitOf(id);
-  // offline: the same outfit, greyed, so they are still told apart
-  const suit = off ? '#77746f' : look.suit;
-  const trim = off ? '#5b5955' : look.trim;
+  // offline they still wear their outfit (so they are told apart); only the visor and the badge go dark
+  const suit = look.suit;
+  const trim = look.trim;
   const head = HEAD_HEIGHT - 0.05;
   return (
     <group>
@@ -254,7 +254,7 @@ function Astronaut({ id, color, tone }) {
         <meshStandardMaterial color={off ? '#444444' : color} emissive={off ? '#000000' : color} emissiveIntensity={0.5} />
       </mesh>
       <RoundedBox args={[0.38, 0.42, 0.18]} radius={0.06} position={[0, 0.7, 0.24]}>
-        <meshStandardMaterial color={off ? '#5f5d59' : look.pack} roughness={0.6} />
+        <meshStandardMaterial color={look.pack} roughness={0.6} />
       </RoundedBox>
       <mesh position={[0, head, 0]}>
         <sphereGeometry args={[0.3, 28, 20]} />
@@ -283,7 +283,7 @@ function Astronaut({ id, color, tone }) {
           </mesh>
         </group>
       ))}
-      {!off && look.extra && <Extra kind={look.extra} color={look.extraColor} trim={look.trim} head={head} />}
+      {look.extra && <Extra kind={look.extra} color={look.extraColor} trim={look.trim} head={head} />}
     </group>
   );
 }

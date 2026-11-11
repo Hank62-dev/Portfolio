@@ -1,5 +1,12 @@
 [
   {
+    "id": "station-outfits-offline",
+    "version": "1.27.1",
+    "date": "2026-11-11",
+    "vi": "Đội AI trên trạm luôn mặc đúng trang phục của mình, kể cả khi đang ngoại tuyến (chỉ kính mũ và màn hình tối đi).",
+    "en": "The crew on the station always wear their own outfits, offline too (only the visor and the screen go dark)."
+  },
+  {
     "id": "space-station",
     "version": "1.27.0",
     "date": "2026-11-11",
