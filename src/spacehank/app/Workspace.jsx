@@ -11,7 +11,7 @@ import CommandPalette from '../layout/CommandPalette';
 import MobileNav from '../layout/MobileNav';
 import { THEME_CHOICES } from '../layout/ThemeMenu';
 import Sidebar from '../layout/Sidebar';
-import TaskModal from '../features/floor/TaskModal';
+import TaskModal from '../features/station/TaskModal';
 import Topbar from '../layout/Topbar';
 import { askNotes, interpretCommand } from '../core/api/owner';
 import { buildCatalog, validate } from '../layout/nlcommands';
@@ -49,7 +49,7 @@ import { toCss } from '../features/studio/brand';
 import { useStore } from '../core/store';
 import DashboardView from '../features/today/DashboardView';
 import DocumentsView from '../features/documents/DocumentsView';
-import FloorView from '../features/floor/FloorView';
+import StationView from '../features/station/StationView';
 import MemoryView from '../features/memory/MemoryView';
 
 // The markdown renderer, the music library and the studio only load when their tab is opened.
@@ -337,7 +337,7 @@ export default function Workspace({
   const shell = useShellContext({ tabs: shellTabs, agents, onTab, onNewTask });
 
   const views = {
-    space: <FloorView agents={agents} events={events} selected={selected} onSelect={onSelect} paused={paused} onTab={onTab} />,
+    space: <StationView agents={agents} events={events} selected={selected} onSelect={onSelect} paused={paused} onTask={(agentId) => setTaskOpen(agentId || true)} />,
     memory: <MemoryView events={events} />,
     studio: <StudioView />,
     rag: <RagView />,
@@ -405,7 +405,7 @@ export default function Workspace({
             </Suspense>
           )}
           <ModulesSheet />
-          {taskOpen && <TaskModal agents={agents} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
+          {taskOpen && <TaskModal agents={agents} initialAgent={typeof taskOpen === 'string' ? taskOpen : undefined} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}
           {phone && <Fab raised={hasTrack || podFront} />}

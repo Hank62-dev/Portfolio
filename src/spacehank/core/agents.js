@@ -1,5 +1,5 @@
 import { tr } from './i18n/lang';
-// The AI workforce shown on the floor. Scene coordinates live in scene/layout.js.
+// The AI crew shown on the station (features/station).
 
 export const OFFLINE_TASK = tr('Waiting for realtime telemetry');
 export const DEFAULT_AGENT_ID = 'codex';

@@ -14,7 +14,7 @@ export const spacehankConfig = {
   libraryScope: 'hank62-library',
   maxUploadBytes: 25 * 1024 * 1024,
   uploadAccept: '.pdf,.docx,.txt,.md,.csv,.json',
-  maxEvents: 40,
+  maxEvents: 200, // enough for the station's report of the day (who did what); events are small
   toastMs: 2400,
   // Where the morning briefing looks up the weather (Open-Meteo needs coordinates, not an address).
   home: { name: tr('Ho Chi Minh City'), latitude: 10.8231, longitude: 106.6297 },

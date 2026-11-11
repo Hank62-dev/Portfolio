@@ -1,5 +1,12 @@
 [
   {
+    "id": "space-station",
+    "version": "1.27.0",
+    "date": "2026-11-11",
+    "vi": "SpaceWorkAI thành trạm vũ trụ 3D: đội AI mặc đồ riêng ngồi quanh lõi điều khiển, giao việc là có tàu bay tới bàn, bấm ai thì camera bay lại gần. Thêm bảng tổng quan: ai làm gì, bao lâu, xong hay lỗi.",
+    "en": "SpaceWorkAI is now a 3D space station: the AI crew, each in their own outfit, sit round your core; a task flies to their desk; tap someone to fly in. A crew board shows who does what, for how long, done or failed."
+  },
+  {
     "id": "polish-contrast",
     "version": "1.26.0",
     "date": "2026-11-11",

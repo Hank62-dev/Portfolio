@@ -21,9 +21,9 @@ const trIn = async (lang) => {
 };
 
 const EXPECTED = {
-  trKeys: 2528,
-  trEn: '307a4c5a80c51663',
-  trVi: '48a52e5c3908199b',
+  trKeys: 2601,
+  trEn: '285875b87863364b',
+  trVi: 'abaf180034c93b6f',
   copyEn: '43d372accd600733',
   copyVi: '1dddcb73e36d760f',
   ragEn: 'f16801d9891a1899',

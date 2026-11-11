@@ -57,11 +57,15 @@
       "parts": [],
       "heading": "Document Vault."
     },
-    "Floor": {
+    "Station": {
       "parts": [
-        "card"
+        "crew-board",
+        "crew-card",
+        "mission-log",
+        "station",
+        "tone"
       ],
-      "heading": "The Agent Floor"
+      "heading": "SpaceWork AI."
     },
     "Games": {
       "parts": [

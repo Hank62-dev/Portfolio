@@ -71,7 +71,7 @@ export const loadConfig = (env = process.env) => {
     },
     maxTaskChars: 20000,
     maxTasks: 200,
-    maxEvents: 40,
+    maxEvents: 200, // the station's report reads them; events are small
     // per address: 4 wrong passwords are free, then a lockout of 30 s that doubles with each further wrong one, up to an hour,
     // forgotten a day after the last; and in all (many addresses guessing together): 50 wrong in 15 minutes stops everyone
     loginLimit: { freeFailures: 4, baseLockMs: 30 * 1000, maxLockMs: HOUR, forgetMs: 24 * HOUR, maxFailuresGlobal: 50, windowMs: 15 * MINUTE },

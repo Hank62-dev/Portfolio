@@ -1,9 +1,15 @@
 import { findAgent } from '../agents';
 
-/** Turns a server event into the shape the UI renders. */
+let unnamed = 0;
+
+/** Turns a server event into the shape the UI renders. It keeps who gave a task to whom (`from`, `to`) for the station. */
 export const toUiEvent = (event, { now = false } = {}) => {
   const agent = findAgent(event.agent);
   return {
+    id: event.id ?? `local-${(unnamed += 1)}`,
+    at: event.at,
+    ...(event.from ? { from: event.from } : {}),
+    ...(event.to ? { to: event.to } : {}),
     agentId: agent.id,
     name: agent.name,
     action: event.action,
