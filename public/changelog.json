@@ -1,5 +1,12 @@
 [
   {
+    "id": "station-decks",
+    "version": "1.31.0",
+    "date": "2026-11-11",
+    "vi": "SpaceWorkAI thành trạm nhiều khu: khu làm việc, phòng họp, khu vui chơi (bóng bàn, cà phê) và khu ngủ, nối bằng cầu kính. Ai làm thì ngồi bàn, ai rảnh thì đi chơi, họp hay ngủ; bấm tên khu để bay tới.",
+    "en": "SpaceWorkAI is a station of decks: work, a meeting room, a lounge (ping-pong, coffee) and sleeping quarters, joined by glass bridges. Whoever works sits at their desk; the rest play, meet or sleep. Tap a deck to fly there."
+  },
+  {
     "id": "station-crew-life",
     "version": "1.30.0",
     "date": "2026-11-11",

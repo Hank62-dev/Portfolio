@@ -2,15 +2,18 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { Html, OrbitControls, QuadraticBezierLine, RoundedBox, Sparkles, Stars, Trail } from '@react-three/drei';
-import { CORE, HEAD_HEIGHT, RING_RADIUS, along, anchorOf, ease, flightMid, ringSeats, statusTone } from './model';
+import { CORE, HEAD_HEIGHT, RING_RADIUS, along, ease, flightMid, ringSeats, statusTone } from './model';
 import { shortName, statusWord } from './parts';
 import { outfitOf } from './outfits';
 import { moodOf } from './banter';
 import { useBanter } from './useBanter';
+import { PODS, SIDE_ZONES, WORK_DECK, ZONES, placeCrew, roomsOf } from './layout';
+import { Bridge, LoungeDeck, MeetingDeck, SleepDeck, ZONE_COLOR, zoneName } from './Zones3D';
 import { tr } from '../../core/i18n/lang';
 
-// The station in 3D: a round deck floating among the stars, the owner's core turning in the middle, and the crew at their
-// desks round the ring. A task flies from whoever gave it to whoever takes it as a small craft with a trail, and the desk
+// The station in 3D: a round work deck floating among the stars, the owner's core turning in the middle and the crew's desks
+// round the ring; over glass bridges, a meeting room, a lounge and the sleeping quarters (Zones3D), where the crew spend the
+// time they are not working (layout.js says who is where). A task flies from whoever gave it to whoever takes it as a small craft with a trail, and the desk
 // it reaches lights up. Every shape is built here from simple geometry (no model files to download), and the scene has a
 // few lights only, for the whole of it, never one per desk (phone GPUs give up past a few dozen; see station.test.js).
 // Loaded lazily by StationView, so three.js only downloads when the tab opens.
@@ -19,7 +22,7 @@ export const FLIGHT_SECONDS = 1.8;
 const HUE = (alpha = 1) => `hsla(214, 90%, 68%, ${alpha})`;
 
 export default function Station3D({ crew, handoffs, flights, selected, onSelect, onCore, paused, phone }) {
-  // the seats only move when the crew itself changes, not on every status update (a new seat would fly the camera again)
+  // the desks only move when the crew itself changes, not on every status update
   const ids = crew.map((a) => a.id).join(',');
   const seats = useMemo(() => ringSeats(ids.split(',')), [ids]);
   // turning the view by hand stops the slow spin, until it has been left alone for a while
@@ -36,14 +39,43 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
   };
   const [lost, setLost] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  // the deck the camera looks at when nobody is chosen (null: the whole station; a phone starts on the work deck, where
+  // the whole station would be too small to read)
+  const [focus, setFocus] = useState(phone ? 'work' : null);
+  const focusOn = (zone) => {
+    onSelect(null);
+    setFocus(zone);
+  };
+
+  const nameOf = (id) => shortName(crew.find((a) => a.id === id) ?? { name: id });
+  const [placeSlot, setPlaceSlot] = useState(() => Math.floor(Date.now() / MOVE_MS));
+  useEffect(() => {
+    if (paused) return undefined;
+    const timer = setInterval(() => setPlaceSlot(Math.floor(Date.now() / MOVE_MS)), 5000);
+    return () => clearInterval(timer);
+  }, [paused]);
+  const places = useMemo(() => placeCrew(crew, placeSlot), [crew, placeSlot]);
+  const rooms = roomsOf(crew, places);
+  const { saying, talking, moodSlot } = useBanter(rooms, nameOf, paused);
+  const talks = Object.entries(saying).map(([by, line]) => ({ by, ...line }));
+  const anchor = (id) => {
+    if (id === CORE) return [0, 1.9, 0];
+    const place = places[id];
+    if (!place) return [0, 1.9, 0];
+    return [place.x, place.pose === 'lie' ? 1 : place.pose === 'stand' ? HEAD_HEIGHT + 0.75 : HEAD_HEIGHT + 0.5, place.z];
+  };
+
   const working = crew.filter((a) => statusTone(a.status) === 'busy');
   // a faint link to each crew member at work, from whoever gave them the task
   const links = working.map((agent) => ({ to: agent.id, from: handoffs.find((h) => h.to === agent.id)?.from ?? CORE, color: agent.color }));
-  // the free ones talk among themselves: who says what, and a soft line between the two
-  const freeIds = crew.filter((a) => statusTone(a.status) !== 'busy').map((a) => a.id);
-  const nameOf = (id) => shortName(crew.find((a) => a.id === id) ?? { name: id });
-  const { saying, talking, moodSlot } = useBanter(freeIds, nameOf, paused);
-  const talks = Object.entries(saying).map(([by, line]) => ({ by, ...line }));
+  const playing = crew.filter((a) => places[a.id]?.game).length === 2;
+  const pods = crew
+    .map((a) => places[a.id])
+    .filter((p) => p?.pose === 'lie')
+    .map((p) => PODS.findIndex((pod) => pod.x === p.x && pod.z === p.z));
+
+  const chosen = selected ? places[selected] : null;
+  const aim = chosen ? `spot:${selected}:${chosen.x}:${chosen.z}` : focus ? `zone:${focus}` : 'home';
 
   return (
     <>
@@ -57,10 +89,22 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
           </div>
         </div>
       )}
+      <nav className="station-zones" aria-label={tr('Decks')}>
+        <button type="button" aria-pressed={!focus && !selected} onClick={() => focusOn(null)}>
+          {tr('Whole station')}
+        </button>
+        {['work', ...SIDE_ZONES].map((zone) => (
+          <button key={zone} type="button" aria-pressed={focus === zone && !selected} style={{ '--c': ZONE_COLOR[zone] }} onClick={() => focusOn(zone)}>
+            <i aria-hidden="true" />
+            {zoneName(zone)}
+            <span className="station-zones-count">{zone === 'work' ? working.length : (rooms[zone]?.length ?? 0) + (zone === 'lounge' && playing ? 2 : 0)}</span>
+          </button>
+        ))}
+      </nav>
       <Canvas
         key={attempt}
         dpr={[1, phone ? 1.25 : 1.6]}
-        camera={{ position: home(phone).position, fov: phone ? 48 : 42 }}
+        camera={{ position: (phone ? zoneView('work', true) : home(false)).position, fov: phone ? 48 : 42 }}
         gl={{ antialias: true, powerPreference: 'high-performance' }}
         onPointerMissed={() => onSelect(null)}
         onCreated={({ gl }) =>
@@ -72,46 +116,53 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
         frameloop={paused ? 'demand' : 'always'}
       >
         <color attach="background" args={['#04050a']} />
-        <fog attach="fog" args={['#04050a', 30, 64]} />
+        <fog attach="fog" args={['#04050a', 48, 110]} />
         <ambientLight intensity={0.55} />
         <hemisphereLight args={['#bcd4ff', '#140c22', 0.7]} />
         <directionalLight position={[6, 12, 8]} intensity={1.6} color="#fff4e8" />
         <pointLight position={[0, 2.4, 0]} intensity={18} distance={13} decay={1.6} color={HUE()} />
 
-        <Stars radius={70} depth={40} count={phone ? 1800 : 3200} factor={3.2} saturation={0.4} fade speed={paused ? 0 : 0.6} />
-        <Sparkles count={phone ? 30 : 60} scale={[22, 5, 22]} position={[0, 2.5, 0]} size={2.2} speed={paused ? 0 : 0.25} opacity={0.5} color="#a9c8ff" />
+        <Stars radius={110} depth={50} count={phone ? 1800 : 3600} factor={3.6} saturation={0.4} fade speed={paused ? 0 : 0.6} />
+        <Sparkles count={phone ? 40 : 90} scale={[50, 6, 36]} position={[0, 2.5, -4]} size={2.2} speed={paused ? 0 : 0.25} opacity={0.5} color="#a9c8ff" />
         <Planet />
 
         <Deck />
         <Core onCore={onCore} paused={paused} />
+        {SIDE_ZONES.map((zone) => (
+          <Bridge key={zone} to={zone} />
+        ))}
+        <MeetingDeck onFocus={focusOn} paused={paused} />
+        <LoungeDeck onFocus={focusOn} paused={paused} playing={playing} />
+        <SleepDeck onFocus={focusOn} taken={pods} />
 
         {crew.map((agent) => {
           const seat = seats.find((s) => s.id === agent.id);
-          return (
-            <CrewSeat
+          return <Desk key={agent.id} agent={agent} seat={seat} manned={places[agent.id]?.zone === 'work'} paused={paused} onSelect={onSelect} />;
+        })}
+        {crew.map((agent) =>
+          places[agent.id] ? (
+            <CrewMember
               key={agent.id}
               agent={agent}
-              seat={seat}
+              place={places[agent.id]}
               selected={selected === agent.id}
               arriving={flights.some((f) => f.to === agent.id)}
               onSelect={onSelect}
               paused={paused}
               saying={saying[agent.id] ?? null}
               listening={talking.has(agent.id) && !saying[agent.id]}
-              mood={moodOf(agent.id, statusTone(agent.status), moodSlot)}
-              phone={phone}
+              mood={moodOf(agent.id, statusTone(agent.status), moodSlot, places[agent.id])}
+              compact={phone || (!focus && !selected)}
             />
-          );
-        })}
+          ) : null,
+        )}
 
-        {links.map((link) => {
-          const from = anchorOf(link.from, seats);
-          const to = anchorOf(link.to, seats);
-          return <Link key={`${link.from}-${link.to}`} from={from} to={to} color={link.color} paused={paused} />;
-        })}
+        {links.map((link) => (
+          <Link key={`${link.from}-${link.to}`} from={anchor(link.from)} to={anchor(link.to)} color={link.color} paused={paused} />
+        ))}
         {talks.map((talk) => {
-          const from = anchorOf(talk.by, seats);
-          const to = anchorOf(talk.to, seats);
+          const from = anchor(talk.by);
+          const to = anchor(talk.to);
           return (
             <group key={talk.key}>
               <Link from={from} to={to} color="#cfe0ff" paused={paused} />
@@ -120,21 +171,21 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
           );
         })}
         {flights.map((flight) => (
-          <Flight key={flight.key} from={anchorOf(flight.from, seats)} to={anchorOf(flight.to, seats)} color={crew.find((a) => a.id === flight.to)?.color ?? '#fff'} />
+          <Flight key={flight.key} from={anchor(flight.from)} to={anchor(flight.to)} color={crew.find((a) => a.id === flight.to)?.color ?? '#fff'} />
         ))}
 
-        <CameraRig seat={seats.find((s) => s.id === selected) ?? null} phone={phone} />
+        <CameraRig aim={aim} place={chosen} zone={focus} phone={phone} />
         <OrbitControls
           makeDefault
           enablePan={false}
           enableDamping
           dampingFactor={0.08}
           minDistance={2.5}
-          maxDistance={36}
+          maxDistance={95}
           minPolarAngle={0.25}
           maxPolarAngle={Math.PI / 2.25}
           autoRotate={!paused && !selected && !handled}
-          autoRotateSpeed={0.35}
+          autoRotateSpeed={0.25}
           target={HOME_TARGET}
           onStart={grab}
           onEnd={letGo}
@@ -144,25 +195,34 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
   );
 }
 
-/** Where the camera rests when nobody is chosen: the whole station in view. */
 // one array for good: a new one on every render would put the controls' target back each time the crew's status changes
-const HOME_TARGET = [0, 0.8, 0];
+const HOME_TARGET = [0, 0, -3];
 const SPIN_AGAIN_MS = 8000;
 const FLY_SECONDS = 2.5;
 const WHISPER_SECONDS = 1.1;
-// the deck's edge: room round the desks to walk about
-const DECK = RING_RADIUS + 2.6;
-const home = (phone) => ({ position: phone ? [0, 22, 25] : [0, 11, 17.5], target: HOME_TARGET });
+// how often the free ones get up and go somewhere else
+const MOVE_MS = 90 * 1000;
+const DECK = WORK_DECK;
+/** Where the camera rests when nothing is chosen: the whole station, all four decks, in view. */
+const home = (phone) => ({ position: phone ? [0, 64, 58] : [0, 30, 40], target: HOME_TARGET });
+
+/** Where to look at a deck from: in front of it and above, the whole of it in view. */
+const zoneView = (id, phone) => {
+  const zone = ZONES[id];
+  if (id === 'work') return { position: phone ? [0, 22, 25] : [0, 11, 17.5], target: [0, 0.8, 0] };
+  const r = zone.radius;
+  return { position: [zone.x, r * (phone ? 2.1 : 1.3) + 3.5, zone.z + r * (phone ? 2.2 : 1.6) + 3.5], target: [zone.x, 0.4, zone.z] };
+};
 
 /**
- * Flies the camera to the chosen crew member (close, a little to one side and above, so their outfit and face show over the
- * desk), and back to the whole station when nobody is chosen. Once it gets there it lets go, so the view can be turned again.
+ * Flies the camera to the chosen crew member wherever they are (close, in front and a little to one side, so their outfit and
+ * face show), to a deck when one is picked, and back to the whole station otherwise. Once it gets there it lets go, so the
+ * view can be turned again; grabbing the view on the way stops the flight there.
  */
-function CameraRig({ seat, phone }) {
+function CameraRig({ aim, place, zone, phone }) {
   const { camera, controls } = useThree();
   const goal = useRef(null);
-  const moved = useRef(false);
-  // the hand wins: grabbing the view while the camera is still flying stops the flight there
+  const first = useRef(true);
   useEffect(() => {
     if (!controls) return undefined;
     const stop = () => (goal.current = null);
@@ -170,24 +230,39 @@ function CameraRig({ seat, phone }) {
     return () => controls.removeEventListener('start', stop);
   }, [controls]);
   useEffect(() => {
-    if (seat) {
-      // in front of them and well to one side, over the desk's corner: face, outfit and screen all in view
-      const side = seat.angle + 0.7;
-      const r = RING_RADIUS - 3;
-      const position = new Vector3(r * Math.sin(side), phone ? 4.2 : 3.6, r * Math.cos(side));
-      const target = new Vector3(seat.x, HEAD_HEIGHT - 0.35, seat.z);
+    // the first view is where the canvas starts: no flight
+    if (first.current) {
+      first.current = false;
+      if (aim === 'home') return;
+      if (aim === 'zone:work' && phone) {
+        // the canvas starts there, only the controls still look at the whole station's middle
+        goal.current = { position: camera.position.clone(), target: new Vector3(...zoneView('work', true).target), left: FLY_SECONDS };
+        return;
+      }
+    }
+    if (place) {
+      // they face back toward the centre of their room; the camera stands in front of them, turned a little to the side
+      const fx = -Math.sin(place.angle);
+      const fz = -Math.cos(place.angle);
+      const turn = 0.6;
+      const dx = fx * Math.cos(turn) + fz * Math.sin(turn);
+      const dz = -fx * Math.sin(turn) + fz * Math.cos(turn);
+      const lying = place.pose === 'lie';
+      const far = lying ? 3.2 : 4.6;
+      const position = new Vector3(place.x + dx * far, phone || lying ? 4.2 : 3.6, place.z + dz * far);
+      const target = new Vector3(place.x, lying ? 0.6 : HEAD_HEIGHT - 0.35, place.z);
       // on a wide screen their card opens on the right of the station, so the view slides right and they stand left of it;
       // on a phone the card sits at the bottom, so the view looks a little lower and they stand above it
       const right = target.clone().sub(position).cross(new Vector3(0, 1, 0)).normalize();
       const shift = phone ? new Vector3(0, -0.55, 0) : right.multiplyScalar(1.05);
       goal.current = { position: position.add(shift), target: target.add(shift), left: FLY_SECONDS };
-      moved.current = true;
-    } else if (moved.current) {
-      const back = home(phone);
-      goal.current = { position: new Vector3(...back.position), target: new Vector3(...back.target), left: FLY_SECONDS };
-      moved.current = false;
+      return;
     }
-  }, [seat, phone]);
+    const view = zone ? zoneView(zone, phone) : home(phone);
+    goal.current = { position: new Vector3(...view.position), target: new Vector3(...view.target), left: FLY_SECONDS };
+    // the aim says it all: a new place object for the same spot is no reason to fly
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aim, phone]);
   useFrame((_, delta) => {
     if (!goal.current || !controls) return;
     const k = 1 - Math.pow(0.015, delta);
@@ -204,7 +279,7 @@ function CameraRig({ seat, phone }) {
 /** A far planet and its ring, low in the sky, for depth. */
 function Planet() {
   return (
-    <group position={[-26, -6, -34]} rotation={[0.35, 0.4, 0.15]}>
+    <group position={[-48, -16, -70]} rotation={[0.35, 0.4, 0.15]} scale={1.6}>
       <mesh>
         <sphereGeometry args={[7, 40, 28]} />
         <meshStandardMaterial color="#3a2d6b" emissive="#1b1340" emissiveIntensity={0.6} roughness={0.9} />
@@ -514,29 +589,80 @@ function Extra({ kind, color, trim, head }) {
   }
 }
 
-/** One crew member at their desk on the ring, turned to face the core, with their name above. */
-function CrewSeat({ agent, seat, selected, arriving, onSelect, paused, saying, listening, mood, phone }) {
+/** A crew member's desk on the work deck's ring, facing the core: the screen glows in their colour while they work at it. */
+function Desk({ agent, seat, manned, paused, onSelect }) {
+  const screen = useRef();
+  const busy = manned && statusTone(agent.status) === 'busy';
+  useFrame(({ clock }) => {
+    if (paused || !screen.current) return;
+    screen.current.emissiveIntensity = busy ? 1.1 + Math.sin(clock.elapsedTime * 9 + seat.angle * 3) * 0.25 : manned ? 0.25 : 0.04;
+  });
+  return (
+    <group
+      position={[seat.x, 0, seat.z]}
+      rotation={[0, seat.angle, 0]}
+      onClick={(event) => (event.stopPropagation(), onSelect(agent.id))}
+      onPointerOver={() => (document.body.style.cursor = 'pointer')}
+      onPointerOut={() => (document.body.style.cursor = '')}
+    >
+      <RoundedBox args={[1.25, 0.08, 0.6]} radius={0.03} position={[0, 0.78, -0.62]}>
+        <meshStandardMaterial color="#2b3244" metalness={0.55} roughness={0.35} />
+      </RoundedBox>
+      <mesh position={[0, 0.4, -0.62]}>
+        <cylinderGeometry args={[0.06, 0.12, 0.74, 10]} />
+        <meshStandardMaterial color="#202636" metalness={0.6} roughness={0.4} />
+      </mesh>
+      <RoundedBox args={[0.78, 0.36, 0.04]} radius={0.02} position={[0, 1.02, -0.86]} rotation={[-0.28, 0, 0]}>
+        <meshStandardMaterial ref={screen} color="#0c0f16" emissive={agent.color} emissiveIntensity={busy ? 1 : 0.04} toneMapped={false} />
+      </RoundedBox>
+      <mesh position={[0, 0.36, 0.08]}>
+        <cylinderGeometry args={[0.3, 0.3, 0.08, 20]} />
+        <meshStandardMaterial color="#323a4e" roughness={0.5} />
+      </mesh>
+      <mesh position={[0, 0.18, 0.08]}>
+        <cylinderGeometry args={[0.04, 0.04, 0.32, 8]} />
+        <meshStandardMaterial color="#202636" />
+      </mesh>
+      {/* their name plate on the desk's edge, so an empty desk still says whose it is */}
+      <mesh position={[0, 0.83, -0.34]}>
+        <boxGeometry args={[0.36, 0.03, 0.05]} />
+        <meshBasicMaterial color={agent.color} transparent opacity={manned ? 0.9 : 0.35} />
+      </mesh>
+    </group>
+  );
+}
+
+/**
+ * One crew member where they are now: at their desk, on a bean bag or a meeting chair, at the ping-pong table, or asleep in a
+ * pod. Over the head, their name, and their mood or what they are saying. Moving to another place, they beam over: a quick
+ * ring of light where they land.
+ */
+function CrewMember({ agent, place, selected, arriving, onSelect, paused, saying, listening, mood, compact }) {
   const tone = statusTone(agent.status);
   const body = useRef();
-  const screen = useRef();
   const ping = useRef();
   const pingStart = useRef(-1);
+  const beam = useRef();
+  const beamStart = useRef(-2);
   const busy = tone === 'busy';
+  const lying = place.pose === 'lie';
+  const standing = place.pose === 'stand';
 
   useEffect(() => {
     if (arriving) pingStart.current = -2; // starts when the craft lands (set on the next frame)
   }, [arriving]);
+  useEffect(() => {
+    beamStart.current = -2;
+  }, [place.x, place.z]);
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
-    if (!paused) {
-      // a little sway while working, still otherwise
-      // while talking a livelier nod, while asleep a slow breath
-      body.current.position.y = busy ? Math.sin(t * 3 + seat.angle) * 0.025 : saying ? Math.abs(Math.sin(t * 7)) * 0.035 : tone === 'offline' ? Math.sin(t * 1.1 + seat.angle) * 0.012 : 0;
-      body.current.rotation.y = busy ? Math.sin(t * 1.3 + seat.angle) * 0.08 : saying || listening ? Math.sin(t * 2 + seat.angle) * 0.14 : 0;
-      if (screen.current) screen.current.emissiveIntensity = busy ? 1.1 + Math.sin(t * 9 + seat.angle * 3) * 0.25 : tone === 'offline' ? 0 : 0.25;
+    if (!paused && body.current) {
+      // a sway while working, a nod while talking, a swing at the ping-pong table, a slow breath asleep
+      const k = place.angle;
+      body.current.position.y = busy ? Math.sin(t * 3 + k) * 0.025 : saying ? Math.abs(Math.sin(t * 7)) * 0.035 : lying ? Math.sin(t * 1.1 + k) * 0.015 : standing ? Math.abs(Math.sin(t * 3.9)) * 0.05 : 0;
+      body.current.rotation.y = busy ? Math.sin(t * 1.3 + k) * 0.08 : standing ? Math.sin(t * 3.9 + k) * 0.35 : saying || listening ? Math.sin(t * 2 + k) * 0.14 : 0;
     }
-    // the ripple when a task arrives: starts once the craft has flown, grows and fades
     if (pingStart.current === -2) pingStart.current = t + FLIGHT_SECONDS - 0.15;
     const age = pingStart.current > 0 ? t - pingStart.current : -1;
     if (ping.current) {
@@ -547,50 +673,41 @@ function CrewSeat({ agent, seat, selected, arriving, onSelect, paused, saying, l
         ping.current.material.opacity = 0.9 * (1 - age / 1.2);
       }
     }
+    if (beamStart.current === -2) beamStart.current = t;
+    const beamAge = t - beamStart.current;
+    if (beam.current) {
+      const on = beamAge >= 0 && beamAge < 0.9;
+      beam.current.visible = on;
+      if (on) {
+        beam.current.scale.set(1 - beamAge * 0.6, 1 + beamAge * 2, 1 - beamAge * 0.6);
+        beam.current.material.opacity = 0.55 * (1 - beamAge / 0.9);
+      }
+    }
   });
 
   const select = (event) => {
     event.stopPropagation();
     onSelect(selected ? null : agent.id);
   };
+  const tagHeight = lying ? 1.25 : standing ? HEAD_HEIGHT + 0.9 : HEAD_HEIGHT + 0.65;
 
   return (
-    <group position={[seat.x, 0, seat.z]} rotation={[0, seat.angle, 0]}>
-      <group
-        onClick={select}
-        onPointerOver={() => (document.body.style.cursor = 'pointer')}
-        onPointerOut={() => (document.body.style.cursor = '')}
-      >
-        {/* the desk, between the crew member and the core, and its screen */}
-        <RoundedBox args={[1.25, 0.08, 0.6]} radius={0.03} position={[0, 0.78, -0.62]}>
-          <meshStandardMaterial color="#2b3244" metalness={0.55} roughness={0.35} />
-        </RoundedBox>
-        <mesh position={[0, 0.4, -0.62]}>
-          <cylinderGeometry args={[0.06, 0.12, 0.74, 10]} />
-          <meshStandardMaterial color="#202636" metalness={0.6} roughness={0.4} />
-        </mesh>
-        <RoundedBox args={[0.78, 0.36, 0.04]} radius={0.02} position={[0, 1.02, -0.86]} rotation={[-0.28, 0, 0]}>
-          <meshStandardMaterial ref={screen} color="#0c0f16" emissive={agent.color} emissiveIntensity={busy ? 1 : 0.2} toneMapped={false} />
-        </RoundedBox>
-        {/* the chair */}
-        <mesh position={[0, 0.36, 0.08]}>
-          <cylinderGeometry args={[0.3, 0.3, 0.08, 20]} />
-          <meshStandardMaterial color="#323a4e" roughness={0.5} />
-        </mesh>
-        <mesh position={[0, 0.18, 0.08]}>
-          <cylinderGeometry args={[0.04, 0.04, 0.32, 8]} />
-          <meshStandardMaterial color="#202636" />
-        </mesh>
-        <group ref={body} position={[0, 0, 0.08]}>
-          <Astronaut id={agent.id} color={agent.color} tone={tone} />
+    <group position={[place.x, 0, place.z]} rotation={[0, place.angle, 0]}>
+      <group onClick={select} onPointerOver={() => (document.body.style.cursor = 'pointer')} onPointerOut={() => (document.body.style.cursor = '')}>
+        {/* asleep: on their back in the pod, head outwards; standing: a little higher, no chair */}
+        <group position={lying ? [0, 0.62, -0.5] : [0, standing ? 0.25 : 0, place.zone === 'work' ? 0.08 : 0]} rotation={lying ? [Math.PI / 2, 0, 0] : [0, 0, 0]}>
+          <group ref={body}>
+            <Astronaut id={agent.id} color={agent.color} tone={tone} />
+          </group>
         </group>
-        {/* the floor pad: lit in their colour when chosen */}
-        <mesh position={[0, 0.02, -0.25]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.95, 40]} />
-          <meshBasicMaterial color={agent.color} transparent opacity={selected ? 0.32 : 0.07} />
-        </mesh>
+        {!lying && (
+          <mesh position={[0, 0.02, place.zone === 'work' ? -0.25 : 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[place.zone === 'work' ? 0.95 : 0.6, 40]} />
+            <meshBasicMaterial color={agent.color} transparent opacity={selected ? 0.32 : 0.07} />
+          </mesh>
+        )}
         {selected && (
-          <mesh position={[0, 0.025, -0.25]} rotation={[-Math.PI / 2, 0, 0]}>
+          <mesh position={[0, lying ? 0.45 : 0.025, place.zone === 'work' ? -0.25 : 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <ringGeometry args={[0.95, 1.04, 48]} />
             <meshBasicMaterial color={agent.color} />
           </mesh>
@@ -600,7 +717,11 @@ function CrewSeat({ agent, seat, selected, arriving, onSelect, paused, saying, l
         <ringGeometry args={[0.8, 0.9, 48]} />
         <meshBasicMaterial color={agent.color} transparent opacity={0} />
       </mesh>
-      <Html position={[0, HEAD_HEIGHT + 0.95, 0]} zIndexRange={[31, 0]} className="pointer-events-none">
+      <mesh ref={beam} position={[0, 1, 0]} visible={false}>
+        <cylinderGeometry args={[0.55, 0.55, 2, 24, 1, true]} />
+        <meshBasicMaterial color={agent.color} transparent opacity={0} depthWrite={false} side={2} />
+      </mesh>
+      <Html position={[0, tagHeight + 0.3, 0]} zIndexRange={[31, 0]} className="pointer-events-none">
         <div className="station-above">
           {saying ? (
             <p key={saying.key} className="station-bubble" style={{ '--c': agent.color }}>
@@ -613,13 +734,13 @@ function CrewSeat({ agent, seat, selected, arriving, onSelect, paused, saying, l
           ) : (
             <span className="station-mood" data-kind={mood.kind} title={mood.word}>
               <span aria-hidden="true">{mood.icon}</span>
-              {!phone && <span className="station-mood-word">{mood.word}</span>}
+              {!compact && <span className="station-mood-word">{mood.word}</span>}
               {mood.kind === 'busy' && <i className="station-dots" aria-hidden="true" />}
             </span>
           )}
         </div>
       </Html>
-      <Html position={[0, HEAD_HEIGHT + 0.65, 0]} center zIndexRange={[30, 0]}>
+      <Html position={[0, tagHeight, 0]} center zIndexRange={[30, 0]}>
         <button type="button" onClick={select} aria-pressed={selected} aria-label={tr('{0}, {1}: {2}', agent.name, agent.role, statusWord(agent.status))} className="station-tag" data-tone={tone} style={{ '--c': agent.color }}>
           <i className="station-dot" aria-hidden="true" />
           {shortName(agent)}

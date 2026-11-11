@@ -119,6 +119,92 @@
   color: rgb(236 230 218 / 0.5);
 }
 
+/* the decks to fly to, along the bottom of the stage */
+.station-zones {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.7rem;
+  z-index: 40;
+  display: flex;
+  gap: 0.35rem;
+  max-width: calc(100% - 2rem);
+  overflow-x: auto;
+  scrollbar-width: none;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+}
+.station-zones::-webkit-scrollbar {
+  display: none;
+}
+.station-zones button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 999px;
+  padding: 0.28rem 0.65rem;
+  color: rgb(255 255 255 / 0.78);
+  background: rgb(6 8 14 / 0.62);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.station-zones button:hover,
+.station-zones button:focus-visible {
+  color: #fff;
+  border-color: var(--c, rgb(255 255 255 / 0.4));
+  outline: none;
+}
+.station-zones button[aria-pressed='true'] {
+  color: #fff;
+  border-color: var(--c, rgb(255 255 255 / 0.55));
+  background: color-mix(in srgb, var(--c, #8fb4ff) 22%, rgb(6 8 14 / 0.75));
+}
+.station-zones i {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 8px var(--c);
+}
+.station-zones-count {
+  min-width: 1.1rem;
+  border-radius: 999px;
+  padding: 0 0.3rem;
+  text-align: center;
+  color: rgb(255 255 255 / 0.85);
+  background: rgb(255 255 255 / 0.1);
+}
+/* with the deck buttons along the bottom, the hint goes over them on the right only where there is room */
+@media (max-width: 1100px) {
+  .station-hint {
+    display: none;
+  }
+}
+.station-zone-tag {
+  border: 1px solid color-mix(in srgb, var(--c) 60%, transparent);
+  border-radius: 0.45rem;
+  padding: 0.18rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--c);
+  background: rgb(6 8 14 / 0.7);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--c) 30%, transparent);
+  cursor: pointer;
+}
+.station-zone-tag:hover,
+.station-zone-tag:focus-visible {
+  color: #fff;
+  outline: none;
+}
+
 /* the name tags floating over the crew and the core (drawn by drei's Html, outside the canvas) */
 .station-tag {
   display: inline-flex;

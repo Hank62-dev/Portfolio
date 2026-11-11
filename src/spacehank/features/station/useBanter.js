@@ -5,14 +5,15 @@ const TICK_MS = 500;
 const MOOD_MS = 45000;
 
 /**
- * Keeps the talks going between free crew members: up to two at once (two only when at least four are free), a line every
- * few seconds, a pause between talks. A talk ends early when one of the two gets a task. Stops while the station is paused.
+ * Keeps the talks going between crew members in the same room (the lounge, the meeting room): up to two at once, a line
+ * every few seconds, a pause between talks. A talk ends early when one of the two leaves the room (a task, or the time to go
+ * elsewhere). Stops while the station is paused.
  * Returns what is being said ({ [speakerId]: { text, to, key } }), who is in a talk, and the slot the idle moods follow.
  */
-export function useBanter(freeIds, nameOf, paused) {
+export function useBanter(rooms, nameOf, paused) {
   const [state, setState] = useState({ slots: [null, null], moodSlot: Math.floor(Date.now() / MOOD_MS) });
-  const free = useRef(freeIds);
-  free.current = freeIds;
+  const where = useRef(rooms);
+  where.current = rooms;
   const names = useRef(nameOf);
   names.current = nameOf;
   const last = useRef(-1);
@@ -22,11 +23,11 @@ export function useBanter(freeIds, nameOf, paused) {
     const tick = () =>
       setState((now) => {
         const at = Date.now();
-        const freeNow = free.current;
+        const roomsNow = where.current;
         let changed = false;
         const slots = now.slots.map((slot, index) => {
           // a talk whose people are no longer both free ends here
-          if (slot?.lines && !slot.pair.every((id) => freeNow.includes(id))) {
+          if (slot?.lines && !slot.pair.every((id) => roomsNow[slot.room]?.includes(id))) {
             changed = true;
             return { waitUntil: at + GAP_MS[0] };
           }
@@ -37,14 +38,14 @@ export function useBanter(freeIds, nameOf, paused) {
             return { waitUntil: at + GAP_MS[0] + Math.random() * (GAP_MS[1] - GAP_MS[0]) };
           }
           if (slot && at < slot.waitUntil) return slot;
-          // a free slot: the second only opens when there are enough free for two talks
-          if (index === 1 && freeNow.length < 4) return slot;
+          // a free slot: the first talks in the lounge, the second at the meeting table, or wherever two are free to talk
           const taken = now.slots.flatMap((other, k) => (k !== index && other?.pair ? other.pair : []));
-          const talk = pickTalk(
-            freeNow.filter((id) => !taken.includes(id)),
-            Math.random,
-            last.current,
-          );
+          const order = index === 0 ? ['lounge', 'meeting'] : ['meeting', 'lounge'];
+          let talk = null;
+          for (const room of order) {
+            talk = pickTalk((roomsNow[room] ?? []).filter((id) => !taken.includes(id)), Math.random, last.current, room);
+            if (talk) break;
+          }
           if (!talk) return slot;
           changed = true;
           last.current = talk.script;

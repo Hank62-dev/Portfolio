@@ -86,6 +86,37 @@ export const SCRIPTS = [
   ],
 ];
 
+/** At the meeting table the talk is about work (a little). */
+export const MEETING_SCRIPTS = [
+  (b) => [
+    [0, tr('{0}, quick sync: what is on your list today?', b)],
+    [1, tr('Waiting for the next task, and a plan for it.')],
+    [0, tr('Good. Let us keep the board green.')],
+  ],
+  () => [
+    [0, tr('Next sprint: fewer meetings.')],
+    [1, tr('Says the one who called this meeting.')],
+    [0, tr('…Meeting closed.')],
+  ],
+  () => [
+    [0, tr('I drew the plan on the hologram. Looks good?')],
+    [1, tr('It is upside down.')],
+    [0, tr('That is the bold new direction.')],
+  ],
+  () => [
+    [0, tr('Who reviews my last change?')],
+    [1, tr('Me. Two comments, one emoji.')],
+    [0, tr('Which emoji?')],
+    [1, tr('The rocket. It is approved.')],
+  ],
+  (b) => [
+    [0, tr('{0}, ready for the next big task?', b)],
+    [1, tr('Born ready. Built ready, really.')],
+    [0, tr('Then we wait for the boss.')],
+  ],
+];
+const SETS = { lounge: SCRIPTS, meeting: MEETING_SCRIPTS };
+
 /** How long a line stays up, and how long a pair waits before the next talk. */
 export const LINE_MS = 3400;
 export const GAP_MS = [3500, 8000];
@@ -94,20 +125,21 @@ export const GAP_MS = [3500, 8000];
  * A new talk for a free slot: two crew members who are free and not already talking, and a script not told just before.
  * Returns null when fewer than two are free.
  */
-export const pickTalk = (free, rng = Math.random, lastScript = -1) => {
+export const pickTalk = (free, rng = Math.random, lastScript = -1, room = 'lounge') => {
   if (free.length < 2) return null;
+  const scripts = SETS[room] ?? SCRIPTS;
   const i = Math.floor(rng() * free.length);
   let j = Math.floor(rng() * (free.length - 1));
   if (j >= i) j += 1;
-  let script = Math.floor(rng() * SCRIPTS.length);
-  if (script === lastScript && SCRIPTS.length > 1) script = (script + 1) % SCRIPTS.length;
-  return { pair: [free[i], free[j]], script };
+  let script = Math.floor(rng() * scripts.length);
+  if (script === lastScript && scripts.length > 1) script = (script + 1) % scripts.length;
+  return { pair: [free[i], free[j]], script, room };
 };
 
 /** The lines of a talk, with the speaker's id on each. */
 export const linesOf = (talk, nameOf) => {
   const [a, b] = talk.pair;
-  return SCRIPTS[talk.script](nameOf(b)).map(([by, text]) => {
+  return (SETS[talk.room] ?? SCRIPTS)[talk.script](nameOf(b)).map(([by, text]) => {
     const speaker = by === 0 ? a : b;
     return { by: speaker, to: speaker === a ? b : a, text };
   });
@@ -128,11 +160,15 @@ const hash = (text) => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>>
  * The mood over a crew member's head, from their status: working on it, happy after a task, sad after a failed one, asleep
  * while no worker is connected, and one of a few idle moods otherwise (it changes now and then: `slot` moves every while).
  */
-export const moodOf = (id, tone, slot = 0) => {
+export const moodOf = (id, tone, slot = 0, place = null) => {
   if (tone === 'busy') return { icon: '⚙️', word: tr('Working on it'), kind: 'busy' };
+  if (place?.pose === 'lie') return { icon: '💤', word: tr('Sleeping'), kind: 'sleep' };
+  if (place?.game) return { icon: '🏓', word: tr('Playing ping-pong'), kind: 'idle' };
+  if (place?.zone === 'meeting' && tone !== 'done' && tone !== 'failed') return { icon: '📋', word: tr('In a meeting'), kind: 'idle' };
   if (tone === 'done') return { icon: '🎉', word: tr('Happy, task done'), kind: 'happy' };
   if (tone === 'failed') return { icon: '😢', word: tr('Sad, it failed'), kind: 'sad' };
-  if (tone === 'offline') return { icon: '💤', word: tr('Sleeping'), kind: 'sleep' };
+  // with no worker connected and not in bed: off duty, so an idle mood like anyone free
+  if (tone === 'offline' && !place) return { icon: '💤', word: tr('Sleeping'), kind: 'sleep' };
   const [icon, word] = IDLE_MOODS[hash(`${id}:${slot}`) % IDLE_MOODS.length];
   return { icon, word: word(), kind: 'idle' };
 };
