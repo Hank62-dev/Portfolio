@@ -113,7 +113,13 @@ function CameraRig({ seat, phone }) {
       // in front of them and well to one side, over the desk's corner: face, outfit and screen all in view
       const side = seat.angle + 0.85;
       const r = RING_RADIUS - 3.4;
-      goal.current = { position: new Vector3(r * Math.sin(side), phone ? 4.2 : 3.6, r * Math.cos(side)), target: new Vector3(seat.x, HEAD_HEIGHT - 0.35, seat.z) };
+      const position = new Vector3(r * Math.sin(side), phone ? 4.2 : 3.6, r * Math.cos(side));
+      const target = new Vector3(seat.x, HEAD_HEIGHT - 0.35, seat.z);
+      // on a wide screen their card opens on the right of the station, so the view slides right and they stand left of it;
+      // on a phone the card sits at the bottom, so the view looks a little lower and they stand above it
+      const right = target.clone().sub(position).cross(new Vector3(0, 1, 0)).normalize();
+      const shift = phone ? new Vector3(0, -0.55, 0) : right.multiplyScalar(1.05);
+      goal.current = { position: position.add(shift), target: target.add(shift) };
       moved.current = true;
     } else if (moved.current) {
       const back = home(phone);

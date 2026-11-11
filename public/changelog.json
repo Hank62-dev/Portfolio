@@ -1,5 +1,12 @@
 [
   {
+    "id": "station-mission-control",
+    "version": "1.29.0",
+    "date": "2026-11-11",
+    "vi": "SpaceWorkAI: trạm 3D rộng hết khung; chọn ai thì thẻ của họ mở ngay trong trạm, cạnh họ. Bảng báo cáo mới kiểu trạm điều khiển: số liệu phát sáng, biểu đồ 12 giờ, nhật ký nhiệm vụ, danh sách phi hành đoàn.",
+    "en": "SpaceWorkAI: the 3D station takes the whole width; choosing someone opens their card inside it, beside them. A new mission-control report: glowing figures, the last 12 hours, the mission log and the crew manifest."
+  },
+  {
     "id": "station-full-screen",
     "version": "1.28.0",
     "date": "2026-11-11",

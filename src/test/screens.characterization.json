@@ -60,7 +60,6 @@
     "Station": {
       "parts": [
         "crew-board",
-        "crew-card",
         "mission-log",
         "station",
         "tone"

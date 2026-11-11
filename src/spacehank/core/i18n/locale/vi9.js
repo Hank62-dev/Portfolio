@@ -73,4 +73,13 @@ export const vi9 = {
   'Deep blue suit, a headlamp': 'Đồ xanh đậm, đèn đội đầu',
   'Gold suit, a flower': 'Đồ vàng, cài hoa',
   'White and teal suit, a halo': 'Đồ trắng ngọc, vòng hào quang',
+  Live: 'Trực tiếp',
+  'Crew manifest': 'Danh sách phi hành đoàn',
+  '{0} at work': '{0} người đang làm',
+  'Nobody is at work': 'Chưa ai đang làm',
+  Status: 'Trạng thái',
+  'Now on / last result': 'Đang làm / kết quả gần nhất',
+  Given: 'Đã giao',
+  Average: 'Trung bình',
+  Load: 'Khối lượng',
 };
