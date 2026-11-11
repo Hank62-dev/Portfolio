@@ -1,5 +1,12 @@
 [
   {
+    "id": "station-look",
+    "version": "1.33.0",
+    "date": "2026-11-12",
+    "vi": "SpaceWorkAI đẹp hơn: bàn làm việc 2 màn hình, hologram hiện khi đang làm, dải sáng từ lõi tới bàn; phòng họp có màn hình tường, hologram, ghế tựa; khu chơi có đèn dây, jukebox, máy game; buồng ngủ to, nắp tự đóng mở; cầu có ống kính cao.",
+    "en": "SpaceWorkAI looks better: two-screen desks with a hologram while working, light from the core to each desk; a meeting room with a wall screen; string lights, a jukebox and an arcade in the lounge; bigger pods with lids; tall glass bridges."
+  },
+  {
     "id": "station-walking",
     "version": "1.32.0",
     "date": "2026-11-11",

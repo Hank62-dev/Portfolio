@@ -9,6 +9,7 @@ import { moodOf } from './banter';
 import { useBanter } from './useBanter';
 import { PODS, SIDE_ZONES, WALK_SPEED, WORK_DECK, ZONES, alongPath, measure, pathBetween, placeCrew, roomsOf } from './layout';
 import { Bridge, LoungeDeck, MeetingDeck, SleepDeck, ZONE_COLOR, zoneName } from './Zones3D';
+import { Desk, WorkDeck } from './WorkDeck3D';
 import { tr } from '../../core/i18n/lang';
 
 // The station in 3D: a round work deck floating among the stars, the owner's core turning in the middle and the crew's desks
@@ -94,6 +95,9 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
   // a faint link to each crew member at work, from whoever gave them the task
   const links = working.map((agent) => ({ to: agent.id, from: handoffs.find((h) => h.to === agent.id)?.from ?? CORE, color: agent.color }));
   const playing = crew.filter((a) => arrived[a.id]?.game).length === 2;
+  const atWork = new Set(working.filter((a) => arrived[a.id]?.zone === 'work').map((a) => a.id));
+  const deckSeats = seats.map((seat) => ({ ...seat, color: crew.find((a) => a.id === seat.id)?.color ?? '#7fb0ff' }));
+  const briefingNow = Object.values(arrived).some((p) => p.brief && p.zone === 'meeting');
   const pods = crew
     .map((a) => arrived[a.id])
     .filter((p) => p?.pose === 'lie')
@@ -151,14 +155,14 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
         <Sparkles count={phone ? 40 : 90} scale={[50, 6, 36]} position={[0, 2.5, -4]} size={2.2} speed={paused ? 0 : 0.25} opacity={0.5} color="#a9c8ff" />
         <Planet />
 
-        <Deck />
+        <WorkDeck seats={deckSeats} working={atWork} paused={paused} onFocus={focusOn} />
         <Core onCore={onCore} paused={paused} />
         {SIDE_ZONES.map((zone) => (
-          <Bridge key={zone} to={zone} />
+          <Bridge key={zone} to={zone} paused={paused} />
         ))}
-        <MeetingDeck onFocus={focusOn} paused={paused} />
-        <LoungeDeck onFocus={focusOn} paused={paused} playing={playing} />
-        <SleepDeck onFocus={focusOn} taken={pods} />
+        <MeetingDeck onFocus={focusOn} paused={paused} crowd={rooms.meeting.length} briefing={briefingNow} />
+        <LoungeDeck onFocus={focusOn} paused={paused} playing={playing} crowd={rooms.lounge.length + (playing ? 2 : 0)} />
+        <SleepDeck onFocus={focusOn} taken={pods} paused={paused} crowd={pods.length} />
 
         {crew.map((agent) => {
           const seat = seats.find((s) => s.id === agent.id);
@@ -316,46 +320,6 @@ function Planet() {
       <mesh rotation={[Math.PI / 2.3, 0, 0]}>
         <ringGeometry args={[9, 12.5, 64]} />
         <meshBasicMaterial color="#9d8cff" transparent opacity={0.18} side={2} />
-      </mesh>
-    </group>
-  );
-}
-
-/** The round deck: a dark metal disc, a glowing rim, and the ring track the desks stand on. */
-function Deck() {
-  return (
-    <group>
-      <mesh position={[0, -0.18, 0]} receiveShadow>
-        <cylinderGeometry args={[DECK, DECK - 0.4, 0.36, 96]} />
-        <meshStandardMaterial color="#141824" metalness={0.6} roughness={0.45} />
-      </mesh>
-      <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[RING_RADIUS - 1.2, RING_RADIUS + 1.1, 96]} />
-        <meshStandardMaterial color="#1c2232" metalness={0.5} roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[1.7, 1.78, 64]} />
-        <meshBasicMaterial color={HUE(0.8)} transparent />
-      </mesh>
-      <mesh position={[0, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[RING_RADIUS - 1.24, RING_RADIUS - 1.18, 96]} />
-        <meshBasicMaterial color={HUE(0.5)} transparent />
-      </mesh>
-      {/* the rim, glowing */}
-      <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[DECK, 0.08, 10, 160]} />
-        <meshBasicMaterial color={HUE()} />
-      </mesh>
-      {/* struts underneath, so the deck reads as a station and not a plate */}
-      {[0, 1, 2, 3, 4, 5].map((i) => (
-        <mesh key={i} position={[Math.sin((i * Math.PI) / 3) * 5.4, -0.9, Math.cos((i * Math.PI) / 3) * 5.4]} rotation={[0, (i * Math.PI) / 3, Math.PI / 2 - 0.35]}>
-          <cylinderGeometry args={[0.07, 0.07, 3, 8]} />
-          <meshStandardMaterial color="#2a3042" metalness={0.7} roughness={0.4} />
-        </mesh>
-      ))}
-      <mesh position={[0, -1.7, 0]}>
-        <sphereGeometry args={[0.6, 24, 16]} />
-        <meshStandardMaterial color="#232a3b" metalness={0.7} roughness={0.35} />
       </mesh>
     </group>
   );
@@ -618,49 +582,6 @@ function Extra({ kind, color, trim, head }) {
   }
 }
 
-/** A crew member's desk on the work deck's ring, facing the core: the screen glows in their colour while they work at it. */
-function Desk({ agent, seat, manned, paused, onSelect }) {
-  const screen = useRef();
-  const busy = manned && statusTone(agent.status) === 'busy';
-  useFrame(({ clock }) => {
-    if (paused || !screen.current) return;
-    screen.current.emissiveIntensity = busy ? 1.1 + Math.sin(clock.elapsedTime * 9 + seat.angle * 3) * 0.25 : manned ? 0.25 : 0.04;
-  });
-  return (
-    <group
-      position={[seat.x, 0, seat.z]}
-      rotation={[0, seat.angle, 0]}
-      onClick={(event) => (event.stopPropagation(), onSelect(agent.id))}
-      onPointerOver={() => (document.body.style.cursor = 'pointer')}
-      onPointerOut={() => (document.body.style.cursor = '')}
-    >
-      <RoundedBox args={[1.25, 0.08, 0.6]} radius={0.03} position={[0, 0.78, -0.62]}>
-        <meshStandardMaterial color="#2b3244" metalness={0.55} roughness={0.35} />
-      </RoundedBox>
-      <mesh position={[0, 0.4, -0.62]}>
-        <cylinderGeometry args={[0.06, 0.12, 0.74, 10]} />
-        <meshStandardMaterial color="#202636" metalness={0.6} roughness={0.4} />
-      </mesh>
-      <RoundedBox args={[0.78, 0.36, 0.04]} radius={0.02} position={[0, 1.02, -0.86]} rotation={[-0.28, 0, 0]}>
-        <meshStandardMaterial ref={screen} color="#0c0f16" emissive={agent.color} emissiveIntensity={busy ? 1 : 0.04} toneMapped={false} />
-      </RoundedBox>
-      <mesh position={[0, 0.36, 0.08]}>
-        <cylinderGeometry args={[0.3, 0.3, 0.08, 20]} />
-        <meshStandardMaterial color="#323a4e" roughness={0.5} />
-      </mesh>
-      <mesh position={[0, 0.18, 0.08]}>
-        <cylinderGeometry args={[0.04, 0.04, 0.32, 8]} />
-        <meshStandardMaterial color="#202636" />
-      </mesh>
-      {/* their name plate on the desk's edge, so an empty desk still says whose it is */}
-      <mesh position={[0, 0.83, -0.34]}>
-        <boxGeometry args={[0.36, 0.03, 0.05]} />
-        <meshBasicMaterial color={agent.color} transparent opacity={manned ? 0.9 : 0.35} />
-      </mesh>
-    </group>
-  );
-}
-
 /**
  * One crew member where they are now: at their desk, on a bean bag or a meeting chair, at the ping-pong table, or asleep in a
  * pod. Over the head, their name, and their mood or what they are saying. Sent somewhere else, they get up and walk there,
@@ -765,7 +686,7 @@ function CrewMember({ agent, place, selected, arriving, onSelect, onWalk, paused
     <group ref={root}>
       <group onClick={select} onPointerOver={() => (document.body.style.cursor = 'pointer')} onPointerOut={() => (document.body.style.cursor = '')}>
         {/* asleep: on their back in the pod, head outwards; standing or walking: a little higher, no chair */}
-        <group position={lying ? [0, 0.62, -0.5] : [0, standing ? 0.25 : 0, atDesk ? 0.08 : 0]} rotation={lying ? [Math.PI / 2, 0, 0] : [0, 0, 0]}>
+        <group position={lying ? [0, 0.62, -0.85] : [0, standing ? 0.25 : 0, atDesk ? 0.08 : 0]} rotation={lying ? [Math.PI / 2, 0, 0] : [0, 0, 0]}>
           <group ref={body}>
             <Astronaut id={agent.id} color={agent.color} tone={tone} />
           </group>

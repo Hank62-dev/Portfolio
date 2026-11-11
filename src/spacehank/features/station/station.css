@@ -199,6 +199,14 @@
   box-shadow: 0 0 14px color-mix(in srgb, var(--c) 30%, transparent);
   cursor: pointer;
 }
+.station-zone-tag-count {
+  margin-left: 0.45rem;
+  border-radius: 999px;
+  padding: 0 0.35rem;
+  font-weight: 700;
+  color: #06080e;
+  background: var(--c);
+}
 .station-zone-tag:hover,
 .station-zone-tag:focus-visible {
   color: #fff;
