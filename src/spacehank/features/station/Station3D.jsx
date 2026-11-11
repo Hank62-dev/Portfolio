@@ -5,6 +5,8 @@ import { Html, OrbitControls, QuadraticBezierLine, RoundedBox, Sparkles, Stars, 
 import { CORE, HEAD_HEIGHT, RING_RADIUS, along, anchorOf, ease, flightMid, ringSeats, statusTone } from './model';
 import { shortName, statusWord } from './parts';
 import { outfitOf } from './outfits';
+import { moodOf } from './banter';
+import { useBanter } from './useBanter';
 import { tr } from '../../core/i18n/lang';
 
 // The station in 3D: a round deck floating among the stars, the owner's core turning in the middle, and the crew at their
@@ -17,12 +19,31 @@ export const FLIGHT_SECONDS = 1.8;
 const HUE = (alpha = 1) => `hsla(214, 90%, 68%, ${alpha})`;
 
 export default function Station3D({ crew, handoffs, flights, selected, onSelect, onCore, paused, phone }) {
-  const seats = useMemo(() => ringSeats(crew.map((a) => a.id)), [crew]);
+  // the seats only move when the crew itself changes, not on every status update (a new seat would fly the camera again)
+  const ids = crew.map((a) => a.id).join(',');
+  const seats = useMemo(() => ringSeats(ids.split(',')), [ids]);
+  // turning the view by hand stops the slow spin, until it has been left alone for a while
+  const [handled, setHandled] = useState(false);
+  const idle = useRef(null);
+  useEffect(() => () => clearTimeout(idle.current), []);
+  const grab = () => {
+    clearTimeout(idle.current);
+    setHandled(true);
+  };
+  const letGo = () => {
+    clearTimeout(idle.current);
+    idle.current = setTimeout(() => setHandled(false), SPIN_AGAIN_MS);
+  };
   const [lost, setLost] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const working = crew.filter((a) => statusTone(a.status) === 'busy');
   // a faint link to each crew member at work, from whoever gave them the task
   const links = working.map((agent) => ({ to: agent.id, from: handoffs.find((h) => h.to === agent.id)?.from ?? CORE, color: agent.color }));
+  // the free ones talk among themselves: who says what, and a soft line between the two
+  const freeIds = crew.filter((a) => statusTone(a.status) !== 'busy').map((a) => a.id);
+  const nameOf = (id) => shortName(crew.find((a) => a.id === id) ?? { name: id });
+  const { saying, talking, moodSlot } = useBanter(freeIds, nameOf, paused);
+  const talks = Object.entries(saying).map(([by, line]) => ({ by, ...line }));
 
   return (
     <>
@@ -51,14 +72,14 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
         frameloop={paused ? 'demand' : 'always'}
       >
         <color attach="background" args={['#04050a']} />
-        <fog attach="fog" args={['#04050a', 22, 48]} />
+        <fog attach="fog" args={['#04050a', 30, 64]} />
         <ambientLight intensity={0.55} />
         <hemisphereLight args={['#bcd4ff', '#140c22', 0.7]} />
         <directionalLight position={[6, 12, 8]} intensity={1.6} color="#fff4e8" />
         <pointLight position={[0, 2.4, 0]} intensity={18} distance={13} decay={1.6} color={HUE()} />
 
         <Stars radius={70} depth={40} count={phone ? 1800 : 3200} factor={3.2} saturation={0.4} fade speed={paused ? 0 : 0.6} />
-        <Sparkles count={phone ? 30 : 60} scale={[16, 5, 16]} position={[0, 2.5, 0]} size={2.2} speed={paused ? 0 : 0.25} opacity={0.5} color="#a9c8ff" />
+        <Sparkles count={phone ? 30 : 60} scale={[22, 5, 22]} position={[0, 2.5, 0]} size={2.2} speed={paused ? 0 : 0.25} opacity={0.5} color="#a9c8ff" />
         <Planet />
 
         <Deck />
@@ -66,13 +87,37 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
 
         {crew.map((agent) => {
           const seat = seats.find((s) => s.id === agent.id);
-          return <CrewSeat key={agent.id} agent={agent} seat={seat} selected={selected === agent.id} arriving={flights.some((f) => f.to === agent.id)} onSelect={onSelect} paused={paused} />;
+          return (
+            <CrewSeat
+              key={agent.id}
+              agent={agent}
+              seat={seat}
+              selected={selected === agent.id}
+              arriving={flights.some((f) => f.to === agent.id)}
+              onSelect={onSelect}
+              paused={paused}
+              saying={saying[agent.id] ?? null}
+              listening={talking.has(agent.id) && !saying[agent.id]}
+              mood={moodOf(agent.id, statusTone(agent.status), moodSlot)}
+              phone={phone}
+            />
+          );
         })}
 
         {links.map((link) => {
           const from = anchorOf(link.from, seats);
           const to = anchorOf(link.to, seats);
           return <Link key={`${link.from}-${link.to}`} from={from} to={to} color={link.color} paused={paused} />;
+        })}
+        {talks.map((talk) => {
+          const from = anchorOf(talk.by, seats);
+          const to = anchorOf(talk.to, seats);
+          return (
+            <group key={talk.key}>
+              <Link from={from} to={to} color="#cfe0ff" paused={paused} />
+              <Whisper from={from} to={to} color={crew.find((a) => a.id === talk.by)?.color ?? '#fff'} />
+            </group>
+          );
         })}
         {flights.map((flight) => (
           <Flight key={flight.key} from={anchorOf(flight.from, seats)} to={anchorOf(flight.to, seats)} color={crew.find((a) => a.id === flight.to)?.color ?? '#fff'} />
@@ -85,12 +130,14 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
           enableDamping
           dampingFactor={0.08}
           minDistance={2.5}
-          maxDistance={26}
+          maxDistance={36}
           minPolarAngle={0.25}
           maxPolarAngle={Math.PI / 2.25}
-          autoRotate={!paused && !selected}
+          autoRotate={!paused && !selected && !handled}
           autoRotateSpeed={0.35}
-          target={[0, 0.8, 0]}
+          target={HOME_TARGET}
+          onStart={grab}
+          onEnd={letGo}
         />
       </Canvas>
     </>
@@ -98,7 +145,14 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
 }
 
 /** Where the camera rests when nobody is chosen: the whole station in view. */
-const home = (phone) => ({ position: phone ? [0, 15, 17] : [0, 11, 18], target: [0, 0.8, 0] });
+// one array for good: a new one on every render would put the controls' target back each time the crew's status changes
+const HOME_TARGET = [0, 0.8, 0];
+const SPIN_AGAIN_MS = 8000;
+const FLY_SECONDS = 2.5;
+const WHISPER_SECONDS = 1.1;
+// the deck's edge: room round the desks to walk about
+const DECK = RING_RADIUS + 2.6;
+const home = (phone) => ({ position: phone ? [0, 22, 25] : [0, 11, 17.5], target: HOME_TARGET });
 
 /**
  * Flies the camera to the chosen crew member (close, a little to one side and above, so their outfit and face show over the
@@ -108,22 +162,29 @@ function CameraRig({ seat, phone }) {
   const { camera, controls } = useThree();
   const goal = useRef(null);
   const moved = useRef(false);
+  // the hand wins: grabbing the view while the camera is still flying stops the flight there
+  useEffect(() => {
+    if (!controls) return undefined;
+    const stop = () => (goal.current = null);
+    controls.addEventListener('start', stop);
+    return () => controls.removeEventListener('start', stop);
+  }, [controls]);
   useEffect(() => {
     if (seat) {
       // in front of them and well to one side, over the desk's corner: face, outfit and screen all in view
-      const side = seat.angle + 0.85;
-      const r = RING_RADIUS - 3.4;
+      const side = seat.angle + 0.7;
+      const r = RING_RADIUS - 3;
       const position = new Vector3(r * Math.sin(side), phone ? 4.2 : 3.6, r * Math.cos(side));
       const target = new Vector3(seat.x, HEAD_HEIGHT - 0.35, seat.z);
       // on a wide screen their card opens on the right of the station, so the view slides right and they stand left of it;
       // on a phone the card sits at the bottom, so the view looks a little lower and they stand above it
       const right = target.clone().sub(position).cross(new Vector3(0, 1, 0)).normalize();
       const shift = phone ? new Vector3(0, -0.55, 0) : right.multiplyScalar(1.05);
-      goal.current = { position: position.add(shift), target: target.add(shift) };
+      goal.current = { position: position.add(shift), target: target.add(shift), left: FLY_SECONDS };
       moved.current = true;
     } else if (moved.current) {
       const back = home(phone);
-      goal.current = { position: new Vector3(...back.position), target: new Vector3(...back.target) };
+      goal.current = { position: new Vector3(...back.position), target: new Vector3(...back.target), left: FLY_SECONDS };
       moved.current = false;
     }
   }, [seat, phone]);
@@ -133,7 +194,9 @@ function CameraRig({ seat, phone }) {
     camera.position.lerp(goal.current.position, k);
     controls.target.lerp(goal.current.target, k);
     controls.update();
-    if (camera.position.distanceTo(goal.current.position) < 0.03 && controls.target.distanceTo(goal.current.target) < 0.03) goal.current = null;
+    goal.current.left -= delta;
+    // there, or close enough after a while (the controls' limits may keep it from the very spot): the view is the owner's again
+    if (goal.current.left <= 0 || (camera.position.distanceTo(goal.current.position) < 0.03 && controls.target.distanceTo(goal.current.target) < 0.03)) goal.current = null;
   });
   return null;
 }
@@ -159,11 +222,11 @@ function Deck() {
   return (
     <group>
       <mesh position={[0, -0.18, 0]} receiveShadow>
-        <cylinderGeometry args={[7.6, 7.2, 0.36, 72]} />
+        <cylinderGeometry args={[DECK, DECK - 0.4, 0.36, 96]} />
         <meshStandardMaterial color="#141824" metalness={0.6} roughness={0.45} />
       </mesh>
       <mesh position={[0, 0.005, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[4.4, 6.4, 72]} />
+        <ringGeometry args={[RING_RADIUS - 1.2, RING_RADIUS + 1.1, 96]} />
         <meshStandardMaterial color="#1c2232" metalness={0.5} roughness={0.5} />
       </mesh>
       <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -171,17 +234,17 @@ function Deck() {
         <meshBasicMaterial color={HUE(0.8)} transparent />
       </mesh>
       <mesh position={[0, 0.012, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <ringGeometry args={[4.36, 4.42, 72]} />
+        <ringGeometry args={[RING_RADIUS - 1.24, RING_RADIUS - 1.18, 96]} />
         <meshBasicMaterial color={HUE(0.5)} transparent />
       </mesh>
       {/* the rim, glowing */}
       <mesh position={[0, 0, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[7.6, 0.07, 10, 120]} />
+        <torusGeometry args={[DECK, 0.08, 10, 160]} />
         <meshBasicMaterial color={HUE()} />
       </mesh>
       {/* struts underneath, so the deck reads as a station and not a plate */}
       {[0, 1, 2, 3, 4, 5].map((i) => (
-        <mesh key={i} position={[Math.sin((i * Math.PI) / 3) * 4, -0.9, Math.cos((i * Math.PI) / 3) * 4]} rotation={[0, (i * Math.PI) / 3, Math.PI / 2 - 0.35]}>
+        <mesh key={i} position={[Math.sin((i * Math.PI) / 3) * 5.4, -0.9, Math.cos((i * Math.PI) / 3) * 5.4]} rotation={[0, (i * Math.PI) / 3, Math.PI / 2 - 0.35]}>
           <cylinderGeometry args={[0.07, 0.07, 3, 8]} />
           <meshStandardMaterial color="#2a3042" metalness={0.7} roughness={0.4} />
         </mesh>
@@ -452,7 +515,7 @@ function Extra({ kind, color, trim, head }) {
 }
 
 /** One crew member at their desk on the ring, turned to face the core, with their name above. */
-function CrewSeat({ agent, seat, selected, arriving, onSelect, paused }) {
+function CrewSeat({ agent, seat, selected, arriving, onSelect, paused, saying, listening, mood, phone }) {
   const tone = statusTone(agent.status);
   const body = useRef();
   const screen = useRef();
@@ -468,8 +531,9 @@ function CrewSeat({ agent, seat, selected, arriving, onSelect, paused }) {
     const t = clock.elapsedTime;
     if (!paused) {
       // a little sway while working, still otherwise
-      body.current.position.y = busy ? Math.sin(t * 3 + seat.angle) * 0.025 : 0;
-      body.current.rotation.y = busy ? Math.sin(t * 1.3 + seat.angle) * 0.08 : 0;
+      // while talking a livelier nod, while asleep a slow breath
+      body.current.position.y = busy ? Math.sin(t * 3 + seat.angle) * 0.025 : saying ? Math.abs(Math.sin(t * 7)) * 0.035 : tone === 'offline' ? Math.sin(t * 1.1 + seat.angle) * 0.012 : 0;
+      body.current.rotation.y = busy ? Math.sin(t * 1.3 + seat.angle) * 0.08 : saying || listening ? Math.sin(t * 2 + seat.angle) * 0.14 : 0;
       if (screen.current) screen.current.emissiveIntensity = busy ? 1.1 + Math.sin(t * 9 + seat.angle * 3) * 0.25 : tone === 'offline' ? 0 : 0.25;
     }
     // the ripple when a task arrives: starts once the craft has flown, grows and fades
@@ -536,6 +600,25 @@ function CrewSeat({ agent, seat, selected, arriving, onSelect, paused }) {
         <ringGeometry args={[0.8, 0.9, 48]} />
         <meshBasicMaterial color={agent.color} transparent opacity={0} />
       </mesh>
+      <Html position={[0, HEAD_HEIGHT + 0.95, 0]} zIndexRange={[31, 0]} className="pointer-events-none">
+        <div className="station-above">
+          {saying ? (
+            <p key={saying.key} className="station-bubble" style={{ '--c': agent.color }}>
+              {saying.text}
+            </p>
+          ) : listening ? (
+            <span className="station-mood is-listening" aria-hidden="true">
+              💬
+            </span>
+          ) : (
+            <span className="station-mood" data-kind={mood.kind} title={mood.word}>
+              <span aria-hidden="true">{mood.icon}</span>
+              {!phone && <span className="station-mood-word">{mood.word}</span>}
+              {mood.kind === 'busy' && <i className="station-dots" aria-hidden="true" />}
+            </span>
+          )}
+        </div>
+      </Html>
       <Html position={[0, HEAD_HEIGHT + 0.65, 0]} center zIndexRange={[30, 0]}>
         <button type="button" onClick={select} aria-pressed={selected} aria-label={tr('{0}, {1}: {2}', agent.name, agent.role, statusWord(agent.status))} className="station-tag" data-tone={tone} style={{ '--c': agent.color }}>
           <i className="station-dot" aria-hidden="true" />
@@ -578,5 +661,27 @@ function Flight({ from, to, color }) {
         </mesh>
       </Trail>
     </>
+  );
+}
+
+/** A word on its way: a small spark from whoever speaks to whoever listens, once per line. */
+function Whisper({ from, to, color }) {
+  const spark = useRef();
+  const start = useRef(null);
+  const mid = useMemo(() => flightMid(from, to), [from, to]);
+  useFrame(({ clock }) => {
+    if (start.current === null) start.current = clock.elapsedTime;
+    const t = Math.min(1, (clock.elapsedTime - start.current) / WHISPER_SECONDS);
+    const [x, y, z] = along(from, mid, to, ease(t));
+    spark.current.position.set(x, y, z);
+    spark.current.scale.setScalar(t >= 1 ? 0 : 1);
+  });
+  return (
+    <Trail width={0.6} length={3} color={color} attenuation={(w) => w * w}>
+      <mesh ref={spark} position={from}>
+        <sphereGeometry args={[0.06, 10, 8]} />
+        <meshBasicMaterial color={color} toneMapped={false} />
+      </mesh>
+    </Trail>
   );
 }

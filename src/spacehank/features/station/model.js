@@ -5,7 +5,7 @@
 export const CORE = 'you';
 
 /** How far from the core the desks sit, and how high the crew's heads are, in scene units. */
-export const RING_RADIUS = 5.4;
+export const RING_RADIUS = 7;
 export const HEAD_HEIGHT = 1.35;
 
 /**

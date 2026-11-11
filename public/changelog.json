@@ -1,5 +1,12 @@
 [
   {
+    "id": "station-crew-life",
+    "version": "1.30.0",
+    "date": "2026-11-11",
+    "vi": "SpaceWorkAI sống động hơn: trên đầu mỗi người có trạng thái (đang xử lý, vui, buồn, đang ngủ…), ai rảnh thì nói chuyện với nhau bằng bong bóng thoại; sàn trạm rộng hơn; xoay tay thoải mái, không bị kéo về.",
+    "en": "SpaceWorkAI comes alive: a mood over each head (working, happy, sad, asleep…), free crew chat with each other in speech bubbles, a wider deck, and the view turns freely by hand without pulling back."
+  },
+  {
     "id": "station-mission-control",
     "version": "1.29.0",
     "date": "2026-11-11",
