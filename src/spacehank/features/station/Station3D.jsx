@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
 import { Html, OrbitControls, QuadraticBezierLine, RoundedBox, Sparkles, Stars, Trail } from '@react-three/drei';
@@ -7,7 +7,7 @@ import { shortName, statusWord } from './parts';
 import { outfitOf } from './outfits';
 import { moodOf } from './banter';
 import { useBanter } from './useBanter';
-import { PODS, SIDE_ZONES, WORK_DECK, ZONES, placeCrew, roomsOf } from './layout';
+import { PODS, SIDE_ZONES, WALK_SPEED, WORK_DECK, ZONES, alongPath, measure, pathBetween, placeCrew, roomsOf } from './layout';
 import { Bridge, LoungeDeck, MeetingDeck, SleepDeck, ZONE_COLOR, zoneName } from './Zones3D';
 import { tr } from '../../core/i18n/lang';
 
@@ -54,8 +54,33 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
     const timer = setInterval(() => setPlaceSlot(Math.floor(Date.now() / MOVE_MS)), 5000);
     return () => clearInterval(timer);
   }, [paused]);
-  const places = useMemo(() => placeCrew(crew, placeSlot), [crew, placeSlot]);
-  const rooms = roomsOf(crew, places);
+  // when Mira hands someone a task, the two of them meet at the meeting table first, then the one goes to their desk
+  const [briefed, setBriefed] = useState(() => new Set());
+  const briefedFor = useRef(new Map());
+  const briefTimers = useRef([]);
+  useEffect(() => {
+    const fresh = flights.filter((f) => f.from === MIRA && f.to !== MIRA && !briefedFor.current.has(f.key));
+    if (!fresh.length) return;
+    fresh.forEach((f) => briefedFor.current.set(f.key, [f.to, Date.now() + BRIEF_MS]));
+    const update = () => {
+      const now = Date.now();
+      for (const [key, [, until]] of briefedFor.current) if (until <= now) briefedFor.current.set(key, [null, until]);
+      const ids = [...briefedFor.current.values()].filter(([id]) => id).map(([id]) => id);
+      setBriefed(new Set(ids.length ? [...ids, MIRA] : []));
+    };
+    update();
+    // not cleared when the flights change again (a flight that has landed goes from the list): only when the station closes
+    briefTimers.current.push(setTimeout(update, BRIEF_MS + 50));
+  }, [flights]);
+  useEffect(() => () => briefTimers.current.forEach(clearTimeout), []);
+  const briefKey = [...briefed].sort().join(',');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const places = useMemo(() => placeCrew(crew, placeSlot, briefed), [crew, placeSlot, briefKey]);
+  // who is on their way somewhere: they talk, play and count in a room only once they are there
+  const [walking, setWalking] = useState(() => new Set());
+  const onWalk = useCallback((id, on) => setWalking((now) => (now.has(id) === on ? now : on ? new Set([...now, id]) : new Set([...now].filter((x) => x !== id)))), []);
+  const arrived = Object.fromEntries(Object.entries(places).filter(([id]) => !walking.has(id)));
+  const rooms = roomsOf(crew, arrived);
   const { saying, talking, moodSlot } = useBanter(rooms, nameOf, paused);
   const talks = Object.entries(saying).map(([by, line]) => ({ by, ...line }));
   const anchor = (id) => {
@@ -68,9 +93,9 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
   const working = crew.filter((a) => statusTone(a.status) === 'busy');
   // a faint link to each crew member at work, from whoever gave them the task
   const links = working.map((agent) => ({ to: agent.id, from: handoffs.find((h) => h.to === agent.id)?.from ?? CORE, color: agent.color }));
-  const playing = crew.filter((a) => places[a.id]?.game).length === 2;
+  const playing = crew.filter((a) => arrived[a.id]?.game).length === 2;
   const pods = crew
-    .map((a) => places[a.id])
+    .map((a) => arrived[a.id])
     .filter((p) => p?.pose === 'lie')
     .map((p) => PODS.findIndex((pod) => pod.x === p.x && pod.z === p.z));
 
@@ -97,7 +122,7 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
           <button key={zone} type="button" aria-pressed={focus === zone && !selected} style={{ '--c': ZONE_COLOR[zone] }} onClick={() => focusOn(zone)}>
             <i aria-hidden="true" />
             {zoneName(zone)}
-            <span className="station-zones-count">{zone === 'work' ? working.length : (rooms[zone]?.length ?? 0) + (zone === 'lounge' && playing ? 2 : 0)}</span>
+            <span className="station-zones-count">{zone === 'work' ? rooms.work.length : (rooms[zone]?.length ?? 0) + (zone === 'lounge' && playing ? 2 : 0)}</span>
           </button>
         ))}
       </nav>
@@ -148,6 +173,7 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
               selected={selected === agent.id}
               arriving={flights.some((f) => f.to === agent.id)}
               onSelect={onSelect}
+              onWalk={onWalk}
               paused={paused}
               saying={saying[agent.id] ?? null}
               listening={talking.has(agent.id) && !saying[agent.id]}
@@ -202,6 +228,9 @@ const FLY_SECONDS = 2.5;
 const WHISPER_SECONDS = 1.1;
 // how often the free ones get up and go somewhere else
 const MOVE_MS = 90 * 1000;
+// how long Mira keeps someone in the meeting room over a task she handed them (the walk there is part of it)
+const BRIEF_MS = 26 * 1000;
+const MIRA = 'mira';
 const DECK = WORK_DECK;
 /** Where the camera rests when nothing is chosen: the whole station, all four decks, in view. */
 const home = (phone) => ({ position: phone ? [0, 64, 58] : [0, 30, 40], target: HOME_TARGET });
@@ -634,34 +663,84 @@ function Desk({ agent, seat, manned, paused, onSelect }) {
 
 /**
  * One crew member where they are now: at their desk, on a bean bag or a meeting chair, at the ping-pong table, or asleep in a
- * pod. Over the head, their name, and their mood or what they are saying. Moving to another place, they beam over: a quick
- * ring of light where they land.
+ * pod. Over the head, their name, and their mood or what they are saying. Sent somewhere else, they get up and walk there,
+ * round the work deck's walkway and over the glass bridges (layout.js finds the way), and sit, stand or lie down on arrival.
  */
-function CrewMember({ agent, place, selected, arriving, onSelect, paused, saying, listening, mood, compact }) {
+function CrewMember({ agent, place, selected, arriving, onSelect, onWalk, paused, saying, listening, mood, compact }) {
   const tone = statusTone(agent.status);
+  const root = useRef();
   const body = useRef();
   const ping = useRef();
   const pingStart = useRef(-1);
-  const beam = useRef();
-  const beamStart = useRef(-2);
+  const walk = useRef(null); // { points, at, total, done }
+  const was = useRef(null); // the deck they were last sent to
+  const [moving, setMoving] = useState(false);
   const busy = tone === 'busy';
-  const lying = place.pose === 'lie';
-  const standing = place.pose === 'stand';
+  const lying = place.pose === 'lie' && !moving;
+  const standing = place.pose === 'stand' || moving;
 
   useEffect(() => {
     if (arriving) pingStart.current = -2; // starts when the craft lands (set on the next frame)
   }, [arriving]);
-  useEffect(() => {
-    beamStart.current = -2;
-  }, [place.x, place.z]);
 
-  useFrame(({ clock }) => {
+  // a new place: the first one they simply are at; after that, they walk there from wherever they are
+  useLayoutEffect(() => {
+    const node = root.current;
+    if (!node) return;
+    if (!was.current) {
+      node.position.set(place.x, 0, place.z);
+      node.rotation.y = place.angle;
+      was.current = place.zone;
+      return;
+    }
+    const points = pathBetween({ x: node.position.x, z: node.position.z, zone: was.current }, place);
+    was.current = place.zone;
+    const { at, total } = measure(points);
+    if (total < 0.05) return;
+    walk.current = { points, at, total, done: 0 };
+    setMoving(true);
+    onWalk(agent.id, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [place.x, place.z]);
+  useEffect(() => () => onWalk(agent.id, false), [agent.id, onWalk]);
+
+  useFrame(({ clock }, delta) => {
     const t = clock.elapsedTime;
+    const node = root.current;
+    const w = walk.current;
+    if (w && node && !paused) {
+      // a slow frame only skips ahead a little, so nobody jumps a whole bridge
+      w.done += Math.min(delta, 0.25) * WALK_SPEED;
+      if (w.done >= w.total) {
+        node.position.set(place.x, 0, place.z);
+        node.rotation.y = place.angle;
+        walk.current = null;
+        setMoving(false);
+        onWalk(agent.id, false);
+      } else {
+        const [x, z, facing] = alongPath(w.points, w.at, w.done);
+        node.position.set(x, 0, z);
+        // turn toward the way they go, smoothly, the short way round
+        const turn = ((((facing - node.rotation.y + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI;
+        node.rotation.y += turn * Math.min(1, delta * 10);
+      }
+    }
     if (!paused && body.current) {
-      // a sway while working, a nod while talking, a swing at the ping-pong table, a slow breath asleep
+      // a step while walking, a sway while working, a nod while talking, a swing at the ping-pong table, a slow breath asleep
       const k = place.angle;
-      body.current.position.y = busy ? Math.sin(t * 3 + k) * 0.025 : saying ? Math.abs(Math.sin(t * 7)) * 0.035 : lying ? Math.sin(t * 1.1 + k) * 0.015 : standing ? Math.abs(Math.sin(t * 3.9)) * 0.05 : 0;
-      body.current.rotation.y = busy ? Math.sin(t * 1.3 + k) * 0.08 : standing ? Math.sin(t * 3.9 + k) * 0.35 : saying || listening ? Math.sin(t * 2 + k) * 0.14 : 0;
+      body.current.position.y = moving
+        ? Math.abs(Math.sin(t * 9)) * 0.06
+        : busy
+          ? Math.sin(t * 3 + k) * 0.025
+          : saying
+            ? Math.abs(Math.sin(t * 7)) * 0.035
+            : lying
+              ? Math.sin(t * 1.1 + k) * 0.015
+              : standing
+                ? Math.abs(Math.sin(t * 3.9)) * 0.05
+                : 0;
+      body.current.rotation.z = moving ? Math.sin(t * 9) * 0.08 : 0;
+      body.current.rotation.y = moving ? 0 : busy ? Math.sin(t * 1.3 + k) * 0.08 : standing ? Math.sin(t * 3.9 + k) * 0.35 : saying || listening ? Math.sin(t * 2 + k) * 0.14 : 0;
     }
     if (pingStart.current === -2) pingStart.current = t + FLIGHT_SECONDS - 0.15;
     const age = pingStart.current > 0 ? t - pingStart.current : -1;
@@ -673,16 +752,6 @@ function CrewMember({ agent, place, selected, arriving, onSelect, paused, saying
         ping.current.material.opacity = 0.9 * (1 - age / 1.2);
       }
     }
-    if (beamStart.current === -2) beamStart.current = t;
-    const beamAge = t - beamStart.current;
-    if (beam.current) {
-      const on = beamAge >= 0 && beamAge < 0.9;
-      beam.current.visible = on;
-      if (on) {
-        beam.current.scale.set(1 - beamAge * 0.6, 1 + beamAge * 2, 1 - beamAge * 0.6);
-        beam.current.material.opacity = 0.55 * (1 - beamAge / 0.9);
-      }
-    }
   });
 
   const select = (event) => {
@@ -690,24 +759,25 @@ function CrewMember({ agent, place, selected, arriving, onSelect, paused, saying
     onSelect(selected ? null : agent.id);
   };
   const tagHeight = lying ? 1.25 : standing ? HEAD_HEIGHT + 0.9 : HEAD_HEIGHT + 0.65;
+  const atDesk = place.zone === 'work' && !moving;
 
   return (
-    <group position={[place.x, 0, place.z]} rotation={[0, place.angle, 0]}>
+    <group ref={root}>
       <group onClick={select} onPointerOver={() => (document.body.style.cursor = 'pointer')} onPointerOut={() => (document.body.style.cursor = '')}>
-        {/* asleep: on their back in the pod, head outwards; standing: a little higher, no chair */}
-        <group position={lying ? [0, 0.62, -0.5] : [0, standing ? 0.25 : 0, place.zone === 'work' ? 0.08 : 0]} rotation={lying ? [Math.PI / 2, 0, 0] : [0, 0, 0]}>
+        {/* asleep: on their back in the pod, head outwards; standing or walking: a little higher, no chair */}
+        <group position={lying ? [0, 0.62, -0.5] : [0, standing ? 0.25 : 0, atDesk ? 0.08 : 0]} rotation={lying ? [Math.PI / 2, 0, 0] : [0, 0, 0]}>
           <group ref={body}>
             <Astronaut id={agent.id} color={agent.color} tone={tone} />
           </group>
         </group>
         {!lying && (
-          <mesh position={[0, 0.02, place.zone === 'work' ? -0.25 : 0]} rotation={[-Math.PI / 2, 0, 0]}>
-            <circleGeometry args={[place.zone === 'work' ? 0.95 : 0.6, 40]} />
+          <mesh position={[0, 0.02, atDesk ? -0.25 : 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[atDesk ? 0.95 : 0.6, 40]} />
             <meshBasicMaterial color={agent.color} transparent opacity={selected ? 0.32 : 0.07} />
           </mesh>
         )}
         {selected && (
-          <mesh position={[0, lying ? 0.45 : 0.025, place.zone === 'work' ? -0.25 : 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <mesh position={[0, lying ? 0.45 : 0.025, atDesk ? -0.25 : 0]} rotation={[-Math.PI / 2, 0, 0]}>
             <ringGeometry args={[0.95, 1.04, 48]} />
             <meshBasicMaterial color={agent.color} />
           </mesh>
@@ -716,10 +786,6 @@ function CrewMember({ agent, place, selected, arriving, onSelect, paused, saying
       <mesh ref={ping} position={[0, 0.04, -0.25]} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
         <ringGeometry args={[0.8, 0.9, 48]} />
         <meshBasicMaterial color={agent.color} transparent opacity={0} />
-      </mesh>
-      <mesh ref={beam} position={[0, 1, 0]} visible={false}>
-        <cylinderGeometry args={[0.55, 0.55, 2, 24, 1, true]} />
-        <meshBasicMaterial color={agent.color} transparent opacity={0} depthWrite={false} side={2} />
       </mesh>
       <Html position={[0, tagHeight + 0.3, 0]} zIndexRange={[31, 0]} className="pointer-events-none">
         <div className="station-above">
@@ -732,10 +798,10 @@ function CrewMember({ agent, place, selected, arriving, onSelect, paused, saying
               💬
             </span>
           ) : (
-            <span className="station-mood" data-kind={mood.kind} title={mood.word}>
-              <span aria-hidden="true">{mood.icon}</span>
-              {!compact && <span className="station-mood-word">{mood.word}</span>}
-              {mood.kind === 'busy' && <i className="station-dots" aria-hidden="true" />}
+            <span className="station-mood" data-kind={moving ? 'idle' : mood.kind} title={moving ? tr('On the way') : mood.word}>
+              <span aria-hidden="true">{moving ? '🚶' : mood.icon}</span>
+              {!compact && <span className="station-mood-word">{moving ? tr('On the way') : mood.word}</span>}
+              {!moving && mood.kind === 'busy' && <i className="station-dots" aria-hidden="true" />}
             </span>
           )}
         </div>

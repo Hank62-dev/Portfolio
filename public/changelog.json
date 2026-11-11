@@ -1,5 +1,12 @@
 [
   {
+    "id": "station-walking",
+    "version": "1.32.0",
+    "date": "2026-11-11",
+    "vi": "SpaceWorkAI: nhân viên đi bộ thật giữa các khu, vòng quanh lối đi ngoài bàn và qua cầu kính, không còn dịch chuyển. Khi Mira giao việc, cả hai vào phòng họp nghe giao việc trước rồi người kia mới về bàn làm.",
+    "en": "SpaceWorkAI: the crew walk between decks, round the walkway outside the desks and over the glass bridges, instead of beaming. When Mira hands out a task, both meet in the meeting room for the brief first, then it is off to the desk."
+  },
+  {
     "id": "station-decks",
     "version": "1.31.0",
     "date": "2026-11-11",

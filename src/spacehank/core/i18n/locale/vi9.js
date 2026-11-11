@@ -166,4 +166,7 @@ export const vi9 = {
   '{0}, ready for the next big task?': '{0}, sẵn sàng cho task lớn tiếp theo chưa?',
   'Born ready. Built ready, really.': 'Sinh ra đã sẵn sàng. À, được build ra đã sẵn sàng.',
   'Then we wait for the boss.': 'Vậy chờ sếp thôi.',
+  'On the way': 'Đang đi',
+  'Briefing the crew': 'Đang giao việc',
+  'Getting the brief': 'Đang nghe giao việc',
 };

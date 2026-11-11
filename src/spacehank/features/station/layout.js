@@ -37,10 +37,15 @@ const LOUNGE_SPOTS = [
 ];
 export const PODS = around(ZONES.sleep, 11, 3.3, Math.PI / 11);
 
+const NONE = new Set();
 const hash = (text) => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 
-/** Where a crew member wants to be for this slot: their desk while working, otherwise lounge, meeting room or bed. */
-export const zoneOf = (agent, slot) => {
+/**
+ * Where a crew member wants to be for this slot: in the meeting room while Mira briefs them on a task she handed them, at
+ * their desk while working, otherwise lounge, meeting room or bed.
+ */
+export const zoneOf = (agent, slot, briefed = NONE) => {
+  if (briefed.has(agent.id)) return 'meeting';
   const tone = statusTone(agent.status);
   if (tone === 'busy') return 'work';
   const roll = hash(`${agent.id}#${slot}`) % 10;
@@ -52,9 +57,10 @@ export const zoneOf = (agent, slot) => {
  * Everyone's place for this slot: { [id]: { zone, x, z, angle, pose, game? } }. Desks are each crew member's own. In a room,
  * everyone has a place of their own to go to (from their place in the crew and the slot), and takes the next one round only
  * when it is taken, so one person coming or going does not make the others move. Two in the lounge play ping-pong when at
- * least three are there; whoever finds a room full goes to the lounge, then to bed.
+ * least three are there; whoever finds a room full goes to the lounge, then to bed. Those being briefed (`briefed`) are
+ * seated at the meeting table first, and marked so.
  */
-export const placeCrew = (crew, slot = 0) => {
+export const placeCrew = (crew, slot = 0, briefed = NONE) => {
   const desks = ringSeats(crew.map((a) => a.id));
   const places = {};
   const spots = { meeting: MEETING_SPOTS, lounge: LOUNGE_SPOTS.filter((s) => !s.game), sleep: PODS };
@@ -63,7 +69,7 @@ export const placeCrew = (crew, slot = 0) => {
   const wanting = { meeting: [], lounge: [], sleep: [] };
 
   crew.forEach((agent, i) => {
-    const zone = zoneOf(agent, slot);
+    const zone = zoneOf(agent, slot, briefed);
     if (zone === 'work') places[agent.id] = { ...desks[i], zone: 'work', pose: 'sit' };
     else wanting[zone].push([agent.id, i]);
   });
@@ -86,7 +92,12 @@ export const placeCrew = (crew, slot = 0) => {
       }
     }
   };
-  wanting.meeting.forEach((who) => seat(who, ['meeting', 'lounge', 'sleep']));
+  const briefing = wanting.meeting.filter(([id]) => briefed.has(id));
+  briefing.forEach((who) => {
+    seat(who, ['meeting', 'lounge', 'sleep']);
+    if (places[who[0]]) places[who[0]].brief = true;
+  });
+  wanting.meeting.filter(([id]) => !briefed.has(id)).forEach((who) => seat(who, ['meeting', 'lounge', 'sleep']));
   wanting.lounge.forEach((who) => seat(who, ['lounge', 'meeting', 'sleep']));
   wanting.sleep.forEach((who) => seat(who, ['sleep', 'lounge', 'meeting']));
   return places;
@@ -111,4 +122,77 @@ export const bridgeTo = (zoneId) => {
   const from = [ux * (WORK_DECK - 0.3), uz * (WORK_DECK - 0.3)];
   const to = [zone.x - ux * (zone.radius - 0.3), zone.z - uz * (zone.radius - 0.3)];
   return { from, to, length: Math.hypot(to[0] - from[0], to[1] - from[1]), angle: Math.atan2(ux, uz), mid: [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2] };
+};
+
+// ---- walking about: the way from one place to another, over the decks and the bridges ----
+
+/** The walkway round the work deck, outside the desks, and how fast the crew walk (units a second). */
+export const WALKWAY = WORK_DECK - 0.75;
+export const WALK_SPEED = 3.2;
+
+const angleOf = (x, z) => Math.atan2(x, z);
+const onWalkway = (angle) => [WALKWAY * Math.sin(angle), WALKWAY * Math.cos(angle)];
+
+/** Round the walkway from one angle to another, the short way, a point every so often. */
+const arc = (from, to) => {
+  const turn = ((((to - from + Math.PI) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) - Math.PI;
+  const steps = Math.max(1, Math.ceil(Math.abs(turn) / 0.25));
+  return Array.from({ length: steps + 1 }, (_, i) => onWalkway(from + (turn * i) / steps));
+};
+
+/** Where a side deck's bridge meets the work deck's walkway (its angle), and where it lands on the side deck. */
+const doorsOf = (zoneId) => {
+  const b = bridgeTo(zoneId);
+  return { angle: angleOf(b.from[0], b.from[1]), inner: b.from, outer: b.to };
+};
+
+/**
+ * The way a crew member walks from where they are (`from`: x, z and the deck they are on) to a place (`to`: x, z, zone):
+ * a list of [x, z] points. Inside one side deck it is straight there; on the work deck, round the walkway outside the desks
+ * (never through the core); between decks, out over one bridge, round the walkway and in over the other.
+ */
+export const pathBetween = (from, to) => {
+  const start = [from.x, from.z];
+  const end = [to.x, to.z];
+  if (from.zone === to.zone && from.zone !== 'work') return [start, end];
+  const points = [start];
+  // from a side deck, out to its bridge and over it onto the work deck
+  let angle;
+  if (from.zone === 'work') {
+    angle = angleOf(from.x, from.z);
+    points.push(onWalkway(angle));
+  } else {
+    const door = doorsOf(from.zone);
+    points.push(door.outer, door.inner);
+    angle = door.angle;
+  }
+  if (to.zone === 'work') {
+    const seat = angleOf(to.x, to.z);
+    points.push(...arc(angle, seat).slice(1), end);
+  } else {
+    const door = doorsOf(to.zone);
+    points.push(...arc(angle, door.angle).slice(1), door.inner, door.outer, end);
+  }
+  return points;
+};
+
+/** A path's length, and the length walked at each of its points. */
+export const measure = (points) => {
+  const at = [0];
+  for (let i = 1; i < points.length; i++) at.push(at[i - 1] + Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]));
+  return { at, total: at[at.length - 1] };
+};
+
+/** Where on a path someone is after walking `distance`, and the way they face: [x, z, angle]. */
+export const alongPath = (points, at, distance) => {
+  const total = at[at.length - 1];
+  const d = Math.min(Math.max(distance, 0), total);
+  let i = 1;
+  while (i < points.length - 1 && at[i] < d) i++;
+  const [ax, az] = points[i - 1];
+  const [bx, bz] = points[i];
+  const span = at[i] - at[i - 1] || 1;
+  const k = (d - at[i - 1]) / span;
+  // they face where they go: their front is -z of their own frame
+  return [ax + (bx - ax) * k, az + (bz - az) * k, Math.atan2(-(bx - ax), -(bz - az))];
 };

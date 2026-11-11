@@ -9,13 +9,13 @@ export const DEMO_STEPS = [
   { agent: 'pixel', task: 'Tidy the spacing scale', action: 'started', text: 'Collapsing nine spacing values into six.' },
   { agent: 'codex', task: 'Refactor the checkout flow', action: 'output', text: '14 files changed, tests still green.' },
   { agent: 'nova', task: 'Draft the Q4 onboarding guide', action: 'started', text: 'Outline approved, writing section two of five.' },
-  { agent: 'atlas', task: 'Regression pass on login', action: 'started', text: 'Replaying 42 recorded sessions.' },
+  { agent: 'atlas', from: 'mira', task: 'Regression pass on login', action: 'started', text: 'Replaying 42 recorded sessions.' },
   { agent: 'claude', task: 'Compare vector stores for the knowledge base', action: 'completed', text: 'Recommendation written, two trade-offs flagged.' },
   { agent: 'rhea', task: 'Fine-tune the intent classifier', action: 'started', text: 'Epoch 3 of 8, validation loss falling.' },
   { agent: 'pixel', task: 'Tidy the spacing scale', action: 'completed', text: 'Merged. Components re-checked at three widths.' },
   { agent: 'mira', task: 'Watch the deploy', action: 'started', text: 'All services healthy, latency steady.' },
   { agent: 'atlas', task: 'Regression pass on login', action: 'completed', text: '0 regressions. One flaky test quarantined.' },
-  { agent: 'gemini', task: 'Summarise the support backlog', action: 'started', text: 'Clustering 310 tickets by cause.' },
+  { agent: 'gemini', from: 'mira', task: 'Summarise the support backlog', action: 'started', text: 'Clustering 310 tickets by cause.' },
 ];
 
 /**
@@ -28,7 +28,8 @@ export const demoMessage = (n, now = Date.now()) => {
   return {
     type: 'event',
     agents: [{ id: step.agent, status: working ? 'working' : 'idle', task: working ? step.task : 'Idle' }],
-    event: { agent: step.agent, action: step.action, text: step.text, at: now },
+    // a step Mira hands out says so, so the station shows the hand-off (and the briefing) from her
+    event: { agent: step.agent, action: step.action, text: step.text, at: now, ...(step.from && { from: step.from }) },
   };
 };
 

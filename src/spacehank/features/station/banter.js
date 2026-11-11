@@ -161,6 +161,7 @@ const hash = (text) => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>>
  * while no worker is connected, and one of a few idle moods otherwise (it changes now and then: `slot` moves every while).
  */
 export const moodOf = (id, tone, slot = 0, place = null) => {
+  if (place?.brief) return { icon: '📋', word: id === 'mira' ? tr('Briefing the crew') : tr('Getting the brief'), kind: 'busy' };
   if (tone === 'busy') return { icon: '⚙️', word: tr('Working on it'), kind: 'busy' };
   if (place?.pose === 'lie') return { icon: '💤', word: tr('Sleeping'), kind: 'sleep' };
   if (place?.game) return { icon: '🏓', word: tr('Playing ping-pong'), kind: 'idle' };
