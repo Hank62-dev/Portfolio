@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Rocket, Send, Sparkles } from 'lucide-react';
+import { ArrowRight, Maximize2, Minimize2, Rocket, Send, Sparkles } from 'lucide-react';
 import { Button, Loading } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import { useMediaQuery } from '../../../shared/hooks/useMediaQuery';
@@ -46,7 +46,12 @@ export default function StationView({ agents, events, selected, onSelect, paused
 
   const working = crew.filter(isWorking).length;
   const active = crew.find((a) => a.id === selected) ?? null;
-  const giveTask = () => onTask?.(selected ?? undefined);
+  const { stage, full, toggleFull, leaveFull } = useFullStage();
+  // the task dialog opens over the page, so the station leaves full screen first
+  const giveTask = () => {
+    leaveFull();
+    onTask?.(selected ?? undefined);
+  };
 
   return (
     <div className="flex flex-col gap-5" data-station>
@@ -57,7 +62,7 @@ export default function StationView({ agents, events, selected, onSelect, paused
       </PageHead>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
-        <section aria-label={tr('The station')} className={clsx('dark-island station-stage', paused && 'is-paused')}>
+        <section ref={stage} aria-label={tr('The station')} className={clsx('dark-island station-stage', paused && 'is-paused', full && 'is-full')}>
           <Suspense fallback={<Loading label={tr('Loading the station')} className="station-loading" />}>
             <Station3D crew={crew} handoffs={handoffs} flights={flights} selected={selected} onSelect={onSelect} onCore={giveTask} paused={paused} phone={phone} />
           </Suspense>
@@ -75,6 +80,9 @@ export default function StationView({ agents, events, selected, onSelect, paused
               </span>
             )}
           </div>
+          <button type="button" className="station-zoom" onClick={toggleFull} aria-pressed={full} aria-label={full ? tr('Exit full screen') : tr('Full screen')} title={full ? tr('Exit full screen') : tr('Full screen')}>
+            {full ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+          </button>
           <p className="station-hint">{phone ? tr('Drag to turn · pinch to zoom') : tr('Drag to turn · scroll to zoom · click a desk')}</p>
         </section>
 
@@ -87,6 +95,63 @@ export default function StationView({ agents, events, selected, onSelect, paused
       <CrewBoard crew={crew} events={events} selected={selected} onSelect={onSelect} onTask={onTask} />
     </div>
   );
+}
+
+/**
+ * The station filling the screen: the browser's full screen where it lets an element have it, else the stage laid over
+ * the page (iPhone Safari). Esc leaves either way.
+ */
+function useFullStage() {
+  const stage = useRef(null);
+  const [full, setFull] = useState(false);
+  const native = useRef(false);
+
+  useEffect(() => {
+    const onChange = () => {
+      const on = Boolean(stage.current) && document.fullscreenElement === stage.current;
+      if (native.current && !on) native.current = false;
+      if (native.current || on) setFull(on);
+    };
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  }, []);
+
+  // the laid-over stage: the page under it holds still, and Esc closes it
+  useEffect(() => {
+    if (!full || native.current) return undefined;
+    const before = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (event) => event.key === 'Escape' && setFull(false);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = before;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [full]);
+
+  // leaving the station leaves full screen too
+  useEffect(() => () => native.current && document.fullscreenElement && document.exitFullscreen?.(), []);
+
+  const leaveFull = () => {
+    if (native.current && document.fullscreenElement) document.exitFullscreen?.();
+    else setFull(false);
+  };
+  const toggleFull = () => {
+    if (full) return leaveFull();
+    const el = stage.current;
+    if (el?.requestFullscreen && document.fullscreenEnabled) {
+      native.current = true;
+      el.requestFullscreen().then(
+        () => setFull(true),
+        () => {
+          native.current = false;
+          setFull(true);
+        }
+      );
+    } else setFull(true);
+  };
+
+  return { stage, full, toggleFull, leaveFull };
 }
 
 /** The chosen crew member, or a word on how the station works when nobody is chosen. */

@@ -1,5 +1,12 @@
 [
   {
+    "id": "station-full-screen",
+    "version": "1.28.0",
+    "date": "2026-11-11",
+    "vi": "Trạm SpaceWorkAI có nút phóng to toàn màn hình (góc trên bên phải); bấm lại hoặc Esc để thu nhỏ. Trên iPhone trạm phủ kín trang.",
+    "en": "The SpaceWorkAI station has a full screen button (top right); press it again or Esc to leave. On iPhone the station covers the page."
+  },
+  {
     "id": "station-outfits-offline",
     "version": "1.27.1",
     "date": "2026-11-11",
