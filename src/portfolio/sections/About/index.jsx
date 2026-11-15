@@ -1,4 +1,7 @@
+import { useMemo } from 'react';
 import { facts, profile } from '../../../shared/profile';
+import { deriveStack, LAYERS, projects } from '../../data/projects';
+import CountUp from '../../components/CountUp';
 import { useLang } from '../../i18n';
 import { gsap, MOTION, ScrollTrigger } from '../../motion/gsap';
 import ScrubText from '../../motion/ScrubText';
@@ -21,6 +24,16 @@ const About = () => {
   const { c, t } = useLang();
   const [lead, ...rest] = c.about.body;
   const seal = `${profile.name.toUpperCase()} · ${t(facts[0].value).toUpperCase()} · `.repeat(2);
+  // counted from the projects on this site, so the numbers can never say more than the data
+  const stats = useMemo(() => {
+    const stack = deriveStack();
+    const techs = new Set(LAYERS.flatMap((layer) => stack[layer].map(({ tech }) => tech)));
+    return [
+      { key: 'projects', value: projects.length },
+      { key: 'tech', value: techs.size },
+      { key: 'cases', value: projects.filter((p) => p.decisions.length > 0).length },
+    ];
+  }, []);
 
   const scope = useGsap(({ scope: ref, mm }) => {
     mm.add(MOTION, () => {
@@ -89,6 +102,17 @@ const About = () => {
                 </ScrubText>
               ))}
             </div>
+
+            <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-card border border-line-strong bg-line">
+              {stats.map((s) => (
+                <div key={s.key} data-fact className="grid content-start gap-1 bg-ink-0 p-4 sm:p-5">
+                  <dt className="order-2 font-mono text-[0.72rem] tracking-[0.08em] text-bone-faint uppercase">{c.about.stats[s.key]}</dt>
+                  <dd className="order-1 font-display text-[clamp(2.2rem,1.6rem+2.4vw,3.6rem)] leading-none text-bone">
+                    <CountUp value={s.value} />
+                  </dd>
+                </div>
+              ))}
+            </dl>
 
             <ul className="grid border-t border-line-strong">
               {facts.map((f) => (

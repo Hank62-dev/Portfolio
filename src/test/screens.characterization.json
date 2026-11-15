@@ -183,9 +183,13 @@
         "email",
         "email-letter",
         "fact",
+        "footer-body",
+        "footer-col",
         "footer-row",
+        "footer-rule",
         "glow",
         "intro-name",
+        "invite-fade",
         "lab-card",
         "layer-panel",
         "letter",
@@ -203,6 +207,7 @@
         "rule",
         "seal",
         "social",
+        "sound-toggle",
         "vr",
         "wordmark"
       ],
@@ -212,10 +217,15 @@
       "parts": [
         "cursor",
         "discover",
+        "footer-body",
+        "footer-col",
         "footer-row",
+        "footer-rule",
         "intro-name",
+        "invite-fade",
         "letter",
         "logo",
+        "sound-toggle",
         "wordmark"
       ],
       "heading": "SmartCenter"
@@ -224,10 +234,15 @@
       "parts": [
         "cursor",
         "discover",
+        "footer-body",
+        "footer-col",
         "footer-row",
+        "footer-rule",
         "intro-name",
+        "invite-fade",
         "letter",
         "logo",
+        "sound-toggle",
         "wordmark"
       ],
       "heading": "This page isn’t part of the system."

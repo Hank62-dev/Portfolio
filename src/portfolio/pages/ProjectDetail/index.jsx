@@ -44,7 +44,7 @@ const ProjectDetail = () => {
           <p className="max-w-[40ch] font-display text-h3 leading-[1.2] text-bone-dim">{t(project.tagline)}</p>
           <div className="mt-8 flex flex-wrap gap-3">
             {project.links.map((l, i) => (
-              <Button key={l.url} href={l.url} variant={i === 0 ? 'primary' : 'ghost'} icon="↗">
+              <Button fill key={l.url} href={l.url} variant={i === 0 ? 'primary' : 'ghost'} icon="↗">
                 {l.label === 'Live' ? c.work.live : l.label}
               </Button>
             ))}

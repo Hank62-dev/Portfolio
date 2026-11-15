@@ -278,11 +278,11 @@ export default function Immersive() {
 
           {!started && (
             <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-3 bg-gradient-to-t from-ink-0/95 via-ink-0/60 to-transparent p-5 pt-20 sm:p-7 sm:pt-24">
-              <Button icon="→" data-cursor="enter" onClick={begin} disabled={!canDraw}>
+              <Button fill icon="→" data-cursor="enter" onClick={begin} disabled={!canDraw}>
                 {text.explore}
               </Button>
               {vrSupported && (
-                <Button variant="ghost" data-cursor="VR" onClick={enterVR} disabled={!store}>
+                <Button fill variant="ghost" data-cursor="VR" onClick={enterVR} disabled={!store}>
                   {text.enterVr}
                 </Button>
               )}

@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import * as THREE from 'three';
+import Bodies from './Bodies';
 import StackModel from './StackModel';
 import { createSceneState } from './SceneContext';
 import { GAP, PALETTE, clamp01 } from './config';
@@ -76,6 +77,7 @@ export default function StackScene({ mode = 'hero', labels, techs, theme, qualit
           getBoost={() => getInput().boost ?? 0}
         />
       </Rig>
+      {mode === 'hero' && <Bodies theme={theme} quality={quality} getInput={getInput} getBurst={getBurst} />}
       {high && (
         <EffectComposer multisampling={0}>
           <Bloom mipmapBlur intensity={theme === 'light' ? 0.55 : 0.95} luminanceThreshold={1} luminanceSmoothing={0.15} levels={4} />

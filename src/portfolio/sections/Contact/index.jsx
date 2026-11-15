@@ -99,10 +99,10 @@ const Contact = () => {
               ))}
             </a>
             <div data-contact-fade className="flex flex-wrap gap-3">
-              <Button href={`mailto:${profile.email}`} icon="→">
+              <Button fill href={`mailto:${profile.email}`} icon="→">
                 {c.contact.write}
               </Button>
-              <Button variant="ghost" onClick={copy}>
+              <Button fill variant="ghost" onClick={copy}>
                 {copied ? c.contact.copied : c.contact.copy}
               </Button>
               <span className="sr-only" role="status" aria-live="polite">

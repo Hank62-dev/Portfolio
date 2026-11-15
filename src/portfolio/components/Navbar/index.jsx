@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAV_SECTIONS } from '../../../shared/profile';
 import { useLang } from '../../i18n';
@@ -7,16 +7,9 @@ import { clsx } from '../../../shared/lib/format';
 import { jumpTo } from '../../lib/scroll';
 import { lenisRef } from '../../motion/SmoothScroll';
 import LangToggle from '../LangToggle';
+import Menu from '../Menu';
+import SoundToggle from '../SoundToggle';
 import Logo from '../../../shared/ui/Logo';
-
-// Below the `nav` breakpoint the links become a full-screen panel that fades and slides in.
-// `visibility` flips last when closing so the panel stays clickable-proof while it fades out.
-const PANEL_BASE =
-  'max-nav:fixed max-nav:inset-x-0 max-nav:top-header max-nav:bottom-0 max-nav:flex-col max-nav:items-stretch max-nav:justify-between max-nav:gap-6 max-nav:bg-ink-0 max-nav:px-gutter max-nav:pt-6 max-nav:pb-8';
-const PANEL_CLOSED =
-  'max-nav:invisible max-nav:-translate-y-2 max-nav:opacity-0 max-nav:[transition:opacity_.5s_var(--ease-out-expo),translate_.5s_var(--ease-out-expo),visibility_0s_linear_.5s]';
-const PANEL_OPEN =
-  'max-nav:visible max-nav:translate-y-0 max-nav:opacity-100 max-nav:[transition:opacity_.5s_var(--ease-out-expo),translate_.5s_var(--ease-out-expo),visibility_0s]';
 
 const Navbar = () => {
   const { c } = useLang();
@@ -24,6 +17,9 @@ const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [tucked, setTucked] = useState(false);
+  const [origin, setOrigin] = useState(null);
+  const menuButton = useRef(null);
+  const close = useCallback(() => setOpen(false), []);
   const active = useActiveSection(NAV_SECTIONS, pathname === '/');
 
   // Scrolling down tucks the bar away to give the page room; scrolling up brings it back.
@@ -44,14 +40,11 @@ const Navbar = () => {
 
   useEffect(() => {
     if (!open) return undefined;
-    const onKey = (e) => e.key === 'Escape' && setOpen(false);
-    document.addEventListener('keydown', onKey);
     document.body.style.overflow = 'hidden';
     document.documentElement.dataset.menu = 'open'; // the theme pull cord hides while the menu covers the page
     lenisRef.current?.stop();
     return () => {
       delete document.documentElement.dataset.menu;
-      document.removeEventListener('keydown', onKey);
       document.body.style.overflow = '';
       lenisRef.current?.start();
     };
@@ -85,12 +78,8 @@ const Navbar = () => {
           <span className="font-display text-[1.25rem] max-[1020px]:hidden">Võ Gia Huy</span>
         </Link>
 
-        <nav
-          id="primary-nav"
-          className={clsx('flex items-center gap-7', PANEL_BASE, open ? PANEL_OPEN : PANEL_CLOSED)}
-          aria-label="Primary"
-        >
-          <ul className="flex gap-1 max-nav:flex-col max-nav:gap-0">
+        <nav className="flex items-center gap-6 max-lg:hidden" aria-label="Sections">
+          <ul className="flex gap-1">
             {NAV_SECTIONS.map((id, i) => (
               <li key={id}>
                 <Link
@@ -101,28 +90,21 @@ const Navbar = () => {
                     'group relative inline-flex items-baseline gap-2 rounded-sm px-3 py-2 font-mono text-fine transition-colors duration-200',
                     // underline draws in on hover and stays on the section being read
                     'after:absolute after:inset-x-3 after:bottom-0.5 after:h-px after:origin-left after:bg-signal after:transition-transform after:duration-500 after:ease-out-expo',
-                    // full-screen menu: big serif rows with a hairline
-                    'max-nav:w-full max-nav:rounded-none max-nav:border-b max-nav:border-line max-nav:px-0 max-nav:py-[18px] max-nav:font-display max-nav:text-h3 max-nav:text-bone max-nav:after:hidden',
                     active === id
                       ? 'text-bone after:scale-x-100'
                       : 'text-bone-dim after:scale-x-0 hover:text-bone hover:after:scale-x-100'
                   )}
                 >
-                  <span
-                    className={clsx(
-                      'text-[0.68rem] max-nav:font-mono max-nav:text-[0.72rem]',
-                      active === id ? 'text-signal' : 'text-bone-faint'
-                    )}
-                  >
+                  <span className={clsx('text-[0.68rem]', active === id ? 'text-signal' : 'text-bone-faint')}>
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   {/* two copies of the label: on hover the first rolls out and the second rolls in */}
                   <span className="relative inline-block overflow-hidden align-bottom">
-                    <span className="block transition-transform duration-500 ease-out-expo group-hover:-translate-y-full max-nav:group-hover:translate-y-0">
+                    <span className="block transition-transform duration-500 ease-out-expo group-hover:-translate-y-full">
                       {c.nav[id]}
                     </span>
                     <span
-                      className="absolute inset-0 block translate-y-full text-signal transition-transform duration-500 ease-out-expo group-hover:translate-y-0 max-nav:hidden"
+                      className="absolute inset-0 block translate-y-full text-signal transition-transform duration-500 ease-out-expo group-hover:translate-y-0"
                       aria-hidden="true"
                     >
                       {c.nav[id]}
@@ -132,23 +114,38 @@ const Navbar = () => {
               </li>
             ))}
           </ul>
-          <div className="flex items-center gap-3 max-nav:flex-wrap">
-            <LangToggle />
-          </div>
+          <LangToggle />
         </nav>
 
-        <button
-          type="button"
-          className="group relative -mr-2.5 hidden size-11 max-nav:block"
-          aria-expanded={open}
-          aria-controls="primary-nav"
-          aria-label={open ? c.nav.close : c.nav.menu}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span className="absolute inset-x-[11px] top-[18px] h-[1.5px] bg-bone transition-transform duration-500 ease-out-expo group-aria-expanded:translate-y-[3.5px] group-aria-expanded:rotate-45" />
-          <span className="absolute inset-x-[11px] top-[25px] h-[1.5px] bg-bone transition-transform duration-500 ease-out-expo group-aria-expanded:-translate-y-[3.5px] group-aria-expanded:-rotate-45" />
-        </button>
+        <div className="flex items-center gap-2">
+          <SoundToggle />
+          <button
+            ref={menuButton}
+            type="button"
+            className="group relative -mr-1 inline-flex h-10 items-center gap-3 overflow-hidden rounded-full border border-line-strong px-4 font-mono text-fine text-bone transition-colors duration-300 hover:border-bone"
+            aria-expanded={open}
+            aria-controls="site-menu"
+            aria-haspopup="dialog"
+            onClick={(e) => {
+              const r = e.currentTarget.getBoundingClientRect();
+              setOrigin({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+              setOpen(true);
+            }}
+          >
+            <span className="relative inline-block overflow-hidden">
+              <span className="block transition-transform duration-500 ease-out-expo group-hover:-translate-y-full">{c.nav.menu}</span>
+              <span className="absolute inset-0 block translate-y-full text-signal transition-transform duration-500 ease-out-expo group-hover:translate-y-0" aria-hidden="true">
+                {c.nav.menu}
+              </span>
+            </span>
+            <span className="grid gap-[4px]" aria-hidden="true">
+              <span className="block h-[1.5px] w-4 bg-current transition-transform duration-500 ease-out-expo group-hover:scale-x-75" />
+              <span className="block h-[1.5px] w-4 origin-right bg-current transition-transform duration-500 ease-out-expo group-hover:scale-x-50" />
+            </span>
+          </button>
+        </div>
       </div>
+      <Menu open={open} onClose={close} origin={origin} active={active} onGo={go} returnFocus={menuButton} />
     </header>
   );
 };

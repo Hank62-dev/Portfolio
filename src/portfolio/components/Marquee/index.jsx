@@ -7,11 +7,11 @@ import { motionStore } from '../../motion/store';
 import { useGsap } from '../../motion/useGsap';
 
 /**
- * One row of a kinetic marquee. It loops forever, speeds up while you scroll, and flips direction
+ * One row of a kinetic marquee (also used on its own, in the footer). It loops forever, speeds up while you scroll, and flips direction
  * with the scroll direction; the row also leans (skew) into the movement. With reduced motion it is a
  * static strip. `items` render twice so the loop is seamless.
  */
-const Row = ({ items, big = false, reverse = false, className }) => {
+export const MarqueeRow = ({ items, big = false, reverse = false, className }) => {
   const track = useRef(null);
   const scope = useGsap(({ mm }) => {
     mm.add(MOTION, () => {
@@ -83,8 +83,8 @@ const Marquee = () => {
 
   return (
     <div className="relative overflow-hidden border-y border-line bg-ink-1/60 py-6 backdrop-blur-[2px]" aria-hidden="true">
-      <Row items={words} big />
-      <Row
+      <MarqueeRow items={words} big />
+      <MarqueeRow
         items={tech}
         reverse
         className="mt-4 border-t border-line [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]"

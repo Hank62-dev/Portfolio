@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { byTier, projectHref } from '../../data/projects';
 import { useLang } from '../../i18n';
 import { clsx } from '../../../shared/lib/format';
 import { gsap, FINE_POINTER, MOTION, ScrollTrigger } from '../../motion/gsap';
+import Distort from '../../motion/Distort';
 import SplitReveal from '../../motion/SplitReveal';
 import { useGsap } from '../../motion/useGsap';
 import SectionTitle from '../../components/SectionTitle';
@@ -46,6 +47,9 @@ const Work = () => {
   const featured = byTier('featured');
   const archive = byTier('archive');
   const [activeSlug, setActiveSlug] = useState(featured[0].slug);
+  // how fast the floating preview is being dragged about, in px per move; it bends the picture
+  const dragSpeed = useRef(0);
+  const previewSpeed = useCallback(() => (dragSpeed.current *= 0.88), []);
 
   const scope = useGsap(({ scope: ref, mm }) => {
     // With a real mouse: a cover floats beside the pointer and trails it, leaning into the movement.
@@ -58,12 +62,15 @@ const Work = () => {
       const moveY = gsap.quickTo(card, 'y', { duration: 0.7, ease: 'power3' });
       const lean = gsap.quickTo(card, 'rotation', { duration: 0.5, ease: 'power3' });
       let lastX = 0;
+      let lastY = 0;
 
       const onMove = (e) => {
         moveX(e.clientX + Math.min(260, window.innerWidth * 0.18));
         moveY(e.clientY);
         lean(gsap.utils.clamp(-14, 14, (e.clientX - lastX) * 0.5));
+        dragSpeed.current = Math.max(dragSpeed.current, Math.min(80, Math.hypot(e.clientX - lastX, e.clientY - lastY) * 1.6));
         lastX = e.clientX;
+        lastY = e.clientY;
       };
       const show = () => gsap.to(card, { opacity: 1, scale: 1, duration: 0.6, ease: 'expo.out', overwrite: 'auto' });
       const hide = () => gsap.to(card, { opacity: 0, scale: 0.8, rotation: 0, duration: 0.4, ease: 'power3.in', overwrite: 'auto' });
@@ -163,7 +170,9 @@ const Work = () => {
                 className="mb-9 aspect-[16/10] max-w-[640px] overflow-hidden rounded-card border border-line fine:motion-safe:hidden"
                 aria-hidden="true"
               >
-                <Cover project={p} parallax />
+                <Distort className="size-full">
+                  <Cover project={p} parallax />
+                </Distort>
               </div>
             </li>
           ))}
@@ -176,17 +185,19 @@ const Work = () => {
           className="pointer-events-none fixed top-0 left-0 z-30 hidden aspect-[16/10] w-[min(380px,32vw)] overflow-hidden rounded-card border border-line-strong bg-ink-2 shadow-pop fine:motion-safe:block"
           aria-hidden="true"
         >
-          {featured.map((p) => (
-            <div
-              key={p.slug}
-              className={clsx(
-                'absolute inset-0 transition-[clip-path] duration-700 ease-out-expo',
-                p.slug === activeSlug ? 'z-10 [clip-path:inset(0)]' : 'z-0 [clip-path:inset(0_0_100%_0)]'
-              )}
-            >
-              <Cover project={p} />
-            </div>
-          ))}
+          <Distort className="absolute inset-0" getSpeed={previewSpeed} axis="x">
+            {featured.map((p) => (
+              <div
+                key={p.slug}
+                className={clsx(
+                  'absolute inset-0 transition-[clip-path] duration-700 ease-out-expo',
+                  p.slug === activeSlug ? 'z-10 [clip-path:inset(0)]' : 'z-0 [clip-path:inset(0_0_100%_0)]'
+                )}
+              >
+                <Cover project={p} />
+              </div>
+            ))}
+          </Distort>
           <p className="absolute right-3 bottom-3 z-20 rounded-full bg-ink-0/80 px-2.5 py-1 font-mono text-[0.68rem] tracking-[0.06em] text-signal uppercase backdrop-blur">
             {t(featured.find((p) => p.slug === activeSlug).kind)}
           </p>

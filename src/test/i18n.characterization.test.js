@@ -24,8 +24,8 @@ const EXPECTED = {
   trKeys: 2697,
   trEn: 'af44d35598c08d85',
   trVi: 'ac2521936534f62e',
-  copyEn: '43d372accd600733',
-  copyVi: '1dddcb73e36d760f',
+  copyEn: '1ffee3b141e8cfbb',
+  copyVi: '3649a475bf6f7321',
   ragEn: 'f16801d9891a1899',
   ragVi: '65bca26aa76f8a4f',
 };

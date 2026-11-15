@@ -1,5 +1,12 @@
 [
   {
+    "id": "portfolio-motion-footer",
+    "version": "1.34.0",
+    "date": "2026-11-15",
+    "vi": "Portfolio sống động hơn: viên nang 3D né chuột ở hero, chuột khuấy nền khói, ảnh dự án gợn sóng khi cuộn, menu toàn màn hình, chuyển trang bằng màn cháy, có âm thanh và footer mới hiện ra kiểu vén màn.",
+    "en": "A livelier portfolio: 3D capsules dodge the pointer in the hero, the pointer stirs the smoke, project pictures ripple as you scroll, a full-screen menu, a burn between pages, sound, and a new footer uncovered as you scroll."
+  },
+  {
     "id": "station-look",
     "version": "1.33.0",
     "date": "2026-11-12",

@@ -23,6 +23,8 @@ uniform vec2 uMouse;
 uniform float uVel;
 uniform float uProgress;
 uniform float uLight;
+// The pointer's recent path: xy in 0..1 (origin bottom-left), z = strength fading from 1 to 0.
+uniform vec3 uTrail[TRAIL];
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
@@ -42,6 +44,16 @@ void main() {
   vec2 p = (uv - 0.5) * vec2(aspect, 1.0) * 1.7;
   float t = uTime * 0.045;
 
+  // The pointer stirs the smoke: each point of its path is a small vortex that fades as the path ages.
+  float wake = 0.0;
+  for (int i = 0; i < TRAIL; i++) {
+    vec3 pt = uTrail[i];
+    vec2 d = (uv - pt.xy) * vec2(aspect, 1.0);
+    float fall = exp(-dot(d, d) * 90.0) * pt.z;
+    p += vec2(-d.y, d.x) * fall * 5.0;
+    wake += fall;
+  }
+
   vec2 q = vec2(fbm(p + t), fbm(p + vec2(5.2, 1.3) - t));
   vec2 r = vec2(fbm(p + 3.0 * q + vec2(1.7, 9.2) + uProgress * 2.0), fbm(p + 3.0 * q + vec2(8.3, 2.8) - t));
   float f = fbm(p + 3.0 * r);
@@ -50,7 +62,7 @@ void main() {
   float glow = 1.0 - smoothstep(0.0, 0.55, distance(uv * vec2(aspect, 1.0), m));
 
   float vel = clamp(uVel, 0.0, 12.0);
-  float heat = smoothstep(0.5, 0.95, f) * (0.075 + vel * 0.02) + glow * 0.07;
+  float heat = smoothstep(0.5, 0.95, f) * (0.075 + vel * 0.02) + glow * 0.07 + clamp(wake, 0.0, 1.0) * smoothstep(0.35, 0.8, f) * 0.12;
   heat = clamp(heat, 0.0, 0.3);
   float sheen = smoothstep(0.72, 1.0, f) * 0.018;
 
@@ -70,6 +82,24 @@ const compile = (gl, type, source) => {
 };
 
 const SCALE = 0.5;
+/** How many points of the pointer's path stir the smoke. */
+export const TRAIL = 14;
+
+/**
+ * Moves the pointer's path one frame on: every point fades, and when the pointer has moved far enough the
+ * oldest point is reused at its new spot. `trail` is a Float32Array of TRAIL * 3 (x, y, strength).
+ * Returns the index of the next slot to write.
+ */
+export const advanceTrail = (trail, head, x, y, fade = 0.035) => {
+  for (let i = 0; i < TRAIL; i += 1) trail[i * 3 + 2] = Math.max(0, trail[i * 3 + 2] - fade);
+  const last = ((head - 1 + TRAIL) % TRAIL) * 3;
+  const moved = Math.hypot(x - trail[last], y - trail[last + 1]);
+  if (moved < 0.012) return head;
+  trail[head * 3] = x;
+  trail[head * 3 + 1] = y;
+  trail[head * 3 + 2] = Math.min(1, 0.35 + moved * 12);
+  return (head + 1) % TRAIL;
+};
 
 /**
  * The centre pixel must be roughly the background colour for the current theme. If a GPU or driver
@@ -97,7 +127,8 @@ function Field({ light, onFail }) {
 
     const program = gl.createProgram();
     gl.attachShader(program, compile(gl, gl.VERTEX_SHADER, VERTEX));
-    gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, FRAGMENT));
+    gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, `#define TRAIL ${TRAIL}
+${FRAGMENT}`));
     gl.linkProgram(program);
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       onFail();
@@ -113,8 +144,12 @@ function Field({ light, onFail }) {
     gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
     const u = Object.fromEntries(
-      ['uRes', 'uTime', 'uMouse', 'uVel', 'uProgress', 'uLight'].map((name) => [name, gl.getUniformLocation(program, name)])
+      ['uRes', 'uTime', 'uMouse', 'uVel', 'uProgress', 'uLight', 'uTrail'].map((name) => [name, gl.getUniformLocation(program, name)])
     );
+    // the stir only follows a real mouse; touch scrolling would otherwise leave swirls everywhere
+    const stir = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const trail = new Float32Array(TRAIL * 3);
+    let head = 0;
 
     const resize = () => {
       canvas.width = Math.max(1, Math.floor(window.innerWidth * SCALE));
@@ -140,6 +175,8 @@ function Field({ light, onFail }) {
       mouseX += (motionStore.pointerX - mouseX) * 0.06;
       mouseY += (motionStore.pointerY - mouseY) * 0.06;
       lightNow += (lightTarget.current - lightNow) * 0.1; // the theme switch fades rather than snaps
+      if (stir) head = advanceTrail(trail, head, motionStore.pointerX, 1 - motionStore.pointerY);
+      gl.uniform3fv(u.uTrail, trail);
       gl.uniform2f(u.uRes, canvas.width, canvas.height);
       gl.uniform1f(u.uTime, (performance.now() - start) / 1000);
       gl.uniform2f(u.uMouse, mouseX, mouseY);

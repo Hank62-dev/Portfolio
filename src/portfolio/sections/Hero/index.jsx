@@ -116,10 +116,10 @@ const Hero = ({ github }) => {
             {c.hero.lede}
           </p>
           <div className="enter mt-10 flex flex-wrap gap-3" style={{ '--d': 0.7 }}>
-            <Button to="/#work" icon="→" onClick={jumpTo('work')}>
+            <Button fill to="/#work" icon="→" onClick={jumpTo('work')}>
               {c.hero.ctaWork}
             </Button>
-            <Button to="/#contact" variant="ghost" onClick={jumpTo('contact')}>
+            <Button fill to="/#contact" variant="ghost" onClick={jumpTo('contact')}>
               {c.hero.ctaContact}
             </Button>
           </div>

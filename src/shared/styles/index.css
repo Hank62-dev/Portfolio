@@ -227,6 +227,16 @@
   }
 }
 
+/* the sound toggle's bars, while the sound is on */
+@keyframes sound-bar {
+  from {
+    transform: scaleY(0.25);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
 /* ───────────────────────── Light theme ─────────────────────────
    Dark is the default (see src/shared/lib/theme.jsx). The same token names are redefined for paper-and-ink;
    utilities and components read the variables, so nothing else needs to know which theme is active.

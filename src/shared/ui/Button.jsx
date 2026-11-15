@@ -17,6 +17,22 @@ const VARIANTS = {
   link: 'border-b border-line-strong text-bone hover:border-signal hover:text-signal',
 };
 
+// `fill`: instead of changing colour, the hover colour floods in from the side the pointer came in by
+// and drains out the side it leaves by.
+const FILL_LOOK = {
+  primary: 'rounded-sm bg-bone text-ink-0',
+  ghost: 'rounded-sm border border-line-strong text-bone hover:border-bone hover:text-ink-0',
+};
+const FILL_COLOR = { primary: 'bg-signal', ghost: 'bg-bone' };
+
+/** Writes where the pointer crossed the edge into --fx / --fy, so the flood starts (or ends) there. */
+const markEdge = (e) => {
+  const el = e.currentTarget;
+  const r = el.getBoundingClientRect();
+  el.style.setProperty('--fx', `${e.clientX - r.left}px`);
+  el.style.setProperty('--fy', `${e.clientY - r.top}px`);
+};
+
 const SIZES = {
   md: 'min-h-[46px] px-5',
   sm: 'min-h-9 px-3.5',
@@ -32,11 +48,25 @@ const SIZES = {
  *   size     md | sm | icon (icon-only buttons need an aria-label)
  *   icon     trailing arrow-style icon that nudges on hover
  *   loading  hides the label behind three waving dots and disables the button
+ *   fill     (primary and ghost) the hover colour floods in from where the pointer enters
  */
-const Button = forwardRef(function Button({ variant = 'primary', size = 'md', to, href, children, className, icon, loading = false, ...rest }, forwarded) {
+const Button = forwardRef(function Button({ variant = 'primary', size = 'md', to, href, children, className, icon, loading = false, fill = false, ...rest }, forwarded) {
   const soft = useSoft();
-  const look = soft ? VARIANTS[variant].replace('rounded-sm', 'rounded-full') : VARIANTS[variant];
-  const cls = clsx(BASE, look, variant !== 'link' && SIZES[size], loading && 'relative', className);
+  const flood = fill && FILL_LOOK[variant] ? FILL_COLOR[variant] : null;
+  const base = flood ? FILL_LOOK[variant] : VARIANTS[variant];
+  const look = soft ? base.replace('rounded-sm', 'rounded-full') : base;
+  const cls = clsx(BASE, look, variant !== 'link' && SIZES[size], (loading || flood) && 'relative', flood && 'group/fill isolate overflow-hidden', className);
+  if (flood) {
+    const { onPointerEnter, onPointerLeave } = rest;
+    rest.onPointerEnter = (e) => {
+      markEdge(e);
+      onPointerEnter?.(e);
+    };
+    rest.onPointerLeave = (e) => {
+      markEdge(e);
+      onPointerLeave?.(e);
+    };
+  }
   // The pointer-follow effect belongs to full-size calls to action only.
   const own = useMagnetic(variant !== 'link' && size === 'md');
   // a menu, popover or tooltip puts its own ref on the trigger to know where to open: both refs get the element
@@ -50,6 +80,16 @@ const Button = forwardRef(function Button({ variant = 'primary', size = 'md', to
   );
   const content = (
     <>
+      {flood && (
+        <span className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-[inherit]" aria-hidden="true">
+          <span
+            className={clsx(
+              'absolute top-[var(--fy,50%)] left-[var(--fx,50%)] aspect-square w-[260%] -translate-x-1/2 -translate-y-1/2 scale-0 rounded-full transition-transform duration-[650ms] ease-out-expo group-hover/fill:scale-100 group-focus-visible/fill:scale-100 motion-reduce:transition-none',
+              flood
+            )}
+          />
+        </span>
+      )}
       <span className={clsx('inline-flex items-center gap-2 transition-opacity', loading && 'opacity-0')}>{children}</span>
       {loading && <Dots size={6} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />}
       {icon && (

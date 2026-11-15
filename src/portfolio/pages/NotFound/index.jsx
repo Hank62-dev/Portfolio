@@ -20,7 +20,7 @@ const NotFound = ({ variant }) => {
           {isProject ? c.project.notFoundTitle : c.notFound.title}
         </h1>
         <p className="mb-8 max-w-[44ch] text-bone-dim">{isProject ? c.project.notFoundBody : c.notFound.body}</p>
-        <Button to={isProject ? '/#work' : '/'} icon="→">
+        <Button fill to={isProject ? '/#work' : '/'} icon="→">
           {isProject ? c.project.back : c.notFound.home}
         </Button>
         <p className="sr-only">
