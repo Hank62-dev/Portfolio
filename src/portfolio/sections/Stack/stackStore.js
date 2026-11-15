@@ -6,6 +6,10 @@ const listeners = new Set();
 
 export const stackStore = {
   active: 0,
+  /** How far through the section's layers the reader is, 0..1: the picture turns from orbits to plates. */
+  progress: 0,
+  /** A technology the pointer is resting on in the lists, lit in the picture; null when none. */
+  focus: null,
   set(index) {
     if (index === this.active) return;
     this.active = index;

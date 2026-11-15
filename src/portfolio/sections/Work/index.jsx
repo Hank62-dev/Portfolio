@@ -10,16 +10,9 @@ import { useGsap } from '../../motion/useGsap';
 import SectionTitle from '../../components/SectionTitle';
 import ProjectMark from '../../components/ProjectMark';
 import Badge from '../../../shared/ui/Badge';
+import ArchiveIndex from './ArchiveIndex';
 
 const topTech = (p) => [...p.layers.interface, ...p.layers.service, ...p.layers.data].slice(0, 5);
-
-// A compact stack summary for table rows: first few technologies, then "+N".
-const archiveStack = (p) => {
-  const all = [...p.layers.interface, ...p.layers.service, ...p.layers.data];
-  if (!all.length) return '—';
-  const shown = all.slice(0, 5).join(' · ');
-  return all.length > 5 ? `${shown} +${all.length - 5}` : shown;
-};
 
 const Cover = ({ project, parallax = false }) =>
   project.cover ? (
@@ -35,12 +28,6 @@ const Cover = ({ project, parallax = false }) =>
   ) : (
     <ProjectMark project={project} label="" />
   );
-
-// Table cells share one look; the header row and the row-header override a few properties.
-const CELL = 'border-line py-3.5 pr-4 text-left align-top font-normal md:border-t max-md:block max-md:py-0.5 max-md:pr-0';
-const HEAD =
-  'border-b border-line-strong py-3.5 pr-4 text-left align-top font-mono text-[0.72rem] font-normal tracking-[0.08em] text-bone-faint uppercase';
-const EXT_LINK = 'border-b border-line-strong text-bone hover:border-signal hover:text-signal';
 
 const Work = () => {
   const { c, t } = useLang();
@@ -204,48 +191,7 @@ const Work = () => {
         </div>
 
         <div className="mt-[clamp(72px,9vw,128px)]">
-          <h3 className="font-display text-h3">{c.work.also}</h3>
-          <p className="mt-2 mb-7 text-bone-dim">{c.work.alsoLede}</p>
-          <div className="md:overflow-x-auto">
-            <table className="w-full border-collapse text-fine max-md:block md:min-w-[720px]">
-              <thead className="max-md:hidden">
-                <tr>
-                  <th scope="col" className={HEAD}>{c.work.colName}</th>
-                  <th scope="col" className={HEAD}>{c.work.colWhat}</th>
-                  <th scope="col" className={HEAD}>{c.work.colStack}</th>
-                  <th scope="col" className={HEAD}>{c.work.colYear}</th>
-                  <th scope="col" className={HEAD}>{c.work.colLinks}</th>
-                </tr>
-              </thead>
-              <tbody className="max-md:block">
-                {archive.map((p) => (
-                  <tr key={p.slug} data-archive-row className="transition-colors duration-300 hover:bg-ink-1/70 max-md:block max-md:border-t max-md:border-line max-md:py-4">
-                    <th scope="row" className={clsx(CELL, 'font-medium text-bone md:whitespace-nowrap')}>
-                      {p.decisions.length > 0 ? (
-                        <Link to={projectHref(p)} className={EXT_LINK}>
-                          {p.name}
-                        </Link>
-                      ) : (
-                        p.name
-                      )}
-                    </th>
-                    <td className={clsx(CELL, 'text-bone-dim')}>{t(p.tagline)}</td>
-                    <td className={clsx(CELL, 'font-mono text-bone-dim')}>{archiveStack(p)}</td>
-                    <td className={clsx(CELL, 'mono text-bone-dim')}>{p.year}</td>
-                    <td className={clsx(CELL, 'text-bone-dim')}>
-                      <div className="flex flex-wrap gap-x-3.5 gap-y-1 whitespace-nowrap">
-                        {p.links.map((l) => (
-                          <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className={EXT_LINK}>
-                            {l.label === 'Live' ? c.work.live : l.label} ↗
-                          </a>
-                        ))}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <ArchiveIndex projects={archive} />
         </div>
       </div>
     </section>

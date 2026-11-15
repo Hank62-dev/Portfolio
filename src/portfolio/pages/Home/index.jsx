@@ -2,6 +2,7 @@ import { useLang } from '../../i18n';
 import { useGithub } from '../../hooks/useGithub';
 import { usePageMeta } from '../../hooks/usePageMeta';
 import Marquee from '../../components/Marquee';
+import Interlude from '../../components/Interlude';
 import Hero from '../../sections/Hero';
 import Work from '../../sections/Work';
 import Stack from '../../sections/Stack';
@@ -21,6 +22,7 @@ const Home = () => {
       <Hero github={github} />
       <Marquee />
       <Work />
+      <Interlude />
       <Stack />
       <Lab />
       <Immersive />

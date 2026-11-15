@@ -2,8 +2,15 @@ import { useGsap } from './useGsap';
 import { gsap, MOTION, SplitText } from './gsap';
 
 const VARIANTS = {
-  // Each line rises out of a mask. The default for headings.
-  lines: { type: 'lines', mask: 'lines', target: 'lines', from: { yPercent: 115 }, stagger: 0.12, duration: 1.15 },
+  // Each line rises out of a mask, tipping up from lying back. The default for headings.
+  lines: {
+    type: 'lines',
+    mask: 'lines',
+    target: 'lines',
+    from: { yPercent: 115, rotationX: -75, transformPerspective: 700, transformOrigin: '50% 100%' },
+    stagger: 0.12,
+    duration: 1.3,
+  },
   // Words rise one after another; good for short statements.
   words: { type: 'words', mask: 'words', target: 'words', from: { yPercent: 115 }, stagger: 0.045, duration: 0.9 },
   // Letters tumble in: for the biggest type only, since it creates many elements.

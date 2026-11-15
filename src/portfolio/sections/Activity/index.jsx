@@ -8,6 +8,7 @@ import Button from '../../../shared/ui/Button';
 import CountUp from '../../components/CountUp';
 import { gsap, MOTION, ScrollTrigger } from '../../motion/gsap';
 import { useGsap } from '../../motion/useGsap';
+import Skyline from './Skyline';
 
 const DAYS = 28;
 
@@ -107,7 +108,11 @@ const YearHeatmap = ({ days, label, caption }) => {
   return (
     <figure className="mt-9 overflow-hidden border-t border-line pt-6">
       <figcaption className="mb-4 font-mono text-[0.72rem] tracking-[0.06em] text-bone-faint uppercase">{caption}</figcaption>
-      <svg viewBox={`0 0 ${weeks * step - CELL_GAP} ${7 * step - CELL_GAP}`} className="h-auto w-full" role="img" aria-label={label}>
+      <div className="max-lg:hidden">
+        <Skyline cells={cells} weeks={weeks} />
+      </div>
+      {/* the flat grid: what phones see, and what assistive technology reads on every screen */}
+      <svg viewBox={`0 0 ${weeks * step - CELL_GAP} ${7 * step - CELL_GAP}`} className="h-auto w-full lg:sr-only" role="img" aria-label={label}>
         {cells.map((d) => (
           <rect
             key={d.date}

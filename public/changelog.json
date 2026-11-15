@@ -1,5 +1,12 @@
 [
   {
+    "id": "portfolio-orbit-lab-index",
+    "version": "1.35.0",
+    "date": "2026-11-16",
+    "vi": "Portfolio bùng nổ hơn: công nghệ quay quanh lõi rồi nghiêng thành 4 tầng khi cuộn, Lab trượt ngang trên đường cong 3D, bảng dự án thành Index chữ lớn, câu chuyển cảnh phóng to, biểu đồ đóng góp 3D, tên ở footer không còn bị cắt.",
+    "en": "A bolder portfolio: technologies orbit a core and tilt into four layers as you scroll, the Lab slides sideways on a 3D curve, the archive is a big-type index, a zoom interlude, a 3D contribution skyline, and the footer name fits."
+  },
+  {
     "id": "portfolio-motion-footer",
     "version": "1.34.0",
     "date": "2026-11-15",

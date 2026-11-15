@@ -8,10 +8,19 @@ import SplitReveal from '../../motion/SplitReveal';
  * Section header: a numbered label on a hairline that draws itself, then a serif title whose lines rise
  * out of a mask. `title` is an array of lines; the last line is emphasised.
  */
-const SectionTitle = ({ index, label, title, lede, id }) => {
+const SectionTitle = ({ index, label, title, lede, id, stacked = false }) => {
   const rule = useRef(null);
-  const scope = useGsap(({ mm }) => {
+  const ghost = useRef(null);
+  const scope = useGsap(({ scope: ref, mm }) => {
     mm.add(MOTION, () => {
+      // the hollow number drifts up past the heading as it scrolls by
+      if (ghost.current) {
+        gsap.fromTo(
+          ghost.current,
+          { yPercent: 35 },
+          { yPercent: -35, ease: 'none', scrollTrigger: { trigger: ref.current, start: 'top bottom', end: 'bottom top', scrub: true } }
+        );
+      }
       gsap.from(rule.current, {
         scaleX: 0,
         transformOrigin: 'left',
@@ -25,8 +34,21 @@ const SectionTitle = ({ index, label, title, lede, id }) => {
   return (
     <header
       ref={scope}
-      className="mb-[clamp(40px,6vw,80px)] grid gap-7 min-[900px]:grid-cols-[5fr_4fr] min-[900px]:items-end min-[900px]:gap-x-16"
+      className={
+        stacked
+          ? 'mb-[clamp(40px,6vw,64px)] grid gap-7'
+          : 'relative isolate mb-[clamp(40px,6vw,80px)] grid gap-7 min-[900px]:grid-cols-[5fr_4fr] min-[900px]:items-end min-[900px]:gap-x-16'
+      }
     >
+      {!stacked && (
+        <span
+          ref={ghost}
+          className="pointer-events-none absolute -top-[0.35em] right-0 -z-10 font-display text-[clamp(7rem,4rem+16vw,20rem)] leading-none text-transparent select-none [-webkit-text-stroke:1px_var(--color-line)]"
+          aria-hidden="true"
+        >
+          {index}
+        </span>
+      )}
       <div className="relative flex items-center gap-4 pb-3.5 font-mono text-fine tracking-[0.08em] text-bone-dim uppercase min-[900px]:col-span-full">
         <ScrambleText text={index} className="text-signal" />
         <ScrambleText text={label} />

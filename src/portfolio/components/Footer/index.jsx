@@ -8,6 +8,7 @@ import { burst } from '../../motion/burst';
 import { gsap, MOTION, ScrollTrigger } from '../../motion/gsap';
 import { useLetterProximity } from '../../motion/useLetterProximity';
 import { useGsap } from '../../motion/useGsap';
+import { useFitText } from '../../motion/useFitText';
 import { usePointerGlow } from '../../../shared/hooks/useMotion';
 import Button from '../../../shared/ui/Button';
 import LocalClock from '../LocalClock';
@@ -103,6 +104,8 @@ const Footer = () => {
   const year = new Date().getFullYear();
   const wordmark = useRef(null);
   const inner = useRef(null);
+  const wordmarkText = useRef(null);
+  useFitText(wordmarkText);
   const [height, setHeight] = useState(0);
   const [reveal, setReveal] = useState(false);
   useLetterProximity(wordmark);
@@ -250,8 +253,9 @@ const Footer = () => {
             {/* The name, enormous. Decorative repeat of the header, so it is hidden from assistive technology. */}
             <div ref={wordmark} className="wrap mt-6 select-none" aria-hidden="true">
               <p
+                ref={wordmarkText}
                 data-wordmark
-                className="overflow-hidden pb-[0.14em] font-display text-[clamp(3.5rem,19vw,18rem)] leading-[0.9] tracking-[-0.02em] whitespace-nowrap text-bone"
+                className="inline-block overflow-hidden pt-[0.06em] pb-[0.14em] font-display text-[clamp(3.5rem,17vw,18rem)] leading-[0.9] tracking-[-0.02em] whitespace-nowrap text-bone"
               >
                 {[...profile.name].map((char, i) => (
                   <span key={i} data-letter className="inline-block whitespace-pre">
