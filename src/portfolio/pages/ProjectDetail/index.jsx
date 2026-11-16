@@ -1,4 +1,9 @@
+import { useLayoutEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { flight } from '../../motion/flight';
+import { gsap, MOTION } from '../../motion/gsap';
+import LiquidImage from '../../motion/LiquidImage';
+import { useGsap } from '../../motion/useGsap';
 import { LAYERS, byTier, getProject, projectHref } from '../../data/projects';
 import { useLang } from '../../i18n';
 import { usePageMeta } from '../../hooks/usePageMeta';
@@ -20,6 +25,78 @@ const ProjectDetail = () => {
     description: project ? t(project.summary) : c.project.notFoundBody,
   });
 
+  const cover = useRef(null);
+
+  // A picture flew here from the page before (see motion/flight.js): a copy of it travels from where it
+  // was to where the cover is, and the cover shows once it lands.
+  useLayoutEffect(() => {
+    const trip = flight.take();
+    const img = cover.current;
+    if (!trip || !img) return undefined;
+    const clone = document.createElement('img');
+    clone.src = trip.src;
+    clone.alt = '';
+    clone.setAttribute('aria-hidden', 'true');
+    Object.assign(clone.style, {
+      position: 'fixed',
+      zIndex: 96,
+      left: `${trip.rect.left}px`,
+      top: `${trip.rect.top}px`,
+      width: `${trip.rect.width}px`,
+      height: `${trip.rect.height}px`,
+      objectFit: 'cover',
+      objectPosition: 'left top',
+      borderRadius: trip.radius,
+      pointerEvents: 'none',
+      boxShadow: '0 40px 120px -20px rgb(0 0 0 / 0.6)',
+    });
+    document.body.appendChild(clone);
+    img.style.visibility = 'hidden';
+    let tween = null;
+    // the page scrolls to the top on the next frame: measure where the cover is after that
+    let raf = requestAnimationFrame(() => {
+      raf = requestAnimationFrame(() => {
+        const to = img.getBoundingClientRect();
+        tween = gsap.to(clone, {
+          left: to.left,
+          top: to.top,
+          width: to.width,
+          height: to.height,
+          borderRadius: getComputedStyle(img.parentElement).borderRadius,
+          duration: 1.15,
+          ease: 'expo.inOut',
+          onComplete: () => {
+            img.style.visibility = '';
+            gsap.to(clone, { opacity: 0, duration: 0.3, onComplete: () => clone.remove() });
+          },
+        });
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf);
+      tween?.kill();
+      clone.remove();
+      img.style.visibility = '';
+    };
+  }, [project?.slug]);
+
+  // the cover folds back like a page as it scrolls away
+  const fold = useGsap(({ scope: ref, mm }) => {
+    mm.add(MOTION, () => {
+      const frame = ref.current?.querySelector('[data-fold]');
+      if (!frame) return;
+      gsap.to(frame, {
+        rotateX: 24,
+        scale: 0.9,
+        opacity: 0.55,
+        transformOrigin: '50% 100%',
+        transformPerspective: 1400,
+        ease: 'none',
+        scrollTrigger: { trigger: frame, start: 'top 20%', end: 'bottom top', scrub: true },
+      });
+    });
+  }, [project?.slug]);
+
   if (!project) return <NotFound variant="project" />;
 
   const sequence = [...byTier('featured'), ...byTier('lab')];
@@ -27,7 +104,7 @@ const ProjectDetail = () => {
   const next = index >= 0 ? sequence[(index + 1) % sequence.length] : null;
 
   return (
-    <article className="pt-[calc(var(--spacing-header)+40px)] pb-section">
+    <article ref={fold} className="pt-[calc(var(--spacing-header)+40px)] pb-section">
       <div className="wrap">
         <Link
           to="/#work"
@@ -51,9 +128,10 @@ const ProjectDetail = () => {
           </div>
         </header>
 
-        <div className="aspect-[16/8] overflow-hidden rounded-card border border-line-strong bg-ink-2">
+        <div data-fold className="relative aspect-[16/8] overflow-hidden rounded-card border border-line-strong bg-ink-2 will-change-transform">
           {project.cover ? (
-            <img
+            <LiquidImage
+              ref={cover}
               src={project.cover}
               alt=""
               width="1600"

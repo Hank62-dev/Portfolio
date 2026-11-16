@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { NAV_SECTIONS, profile, socials } from '../../../shared/profile';
 import { byTier, projectHref } from '../../data/projects';
@@ -12,6 +12,7 @@ import { useFitText } from '../../motion/useFitText';
 import { usePointerGlow } from '../../../shared/hooks/useMotion';
 import Button from '../../../shared/ui/Button';
 import LocalClock from '../LocalClock';
+import ParticleName from './ParticleName';
 import { MarqueeRow } from '../Marquee';
 
 // a hairline that draws in from the left on hover and drains out to the right
@@ -108,6 +109,9 @@ const Footer = () => {
   useFitText(wordmarkText);
   const [height, setHeight] = useState(0);
   const [reveal, setReveal] = useState(false);
+  // with a mouse the name is a cloud of dust (ParticleName); the letters underneath only keep its place
+  const [dust, setDust] = useState(false);
+  const onDust = useCallback((on) => setDust(on), []);
   useLetterProximity(wordmark);
   const featured = byTier('featured');
 
@@ -251,14 +255,16 @@ const Footer = () => {
             </div>
 
             {/* The name, enormous. Decorative repeat of the header, so it is hidden from assistive technology. */}
-            <div ref={wordmark} className="wrap mt-6 select-none" aria-hidden="true">
+            <div ref={wordmark} className="wrap relative mt-6 select-none" aria-hidden="true">
+              <ParticleName textRef={wordmarkText} onActive={onDust} />
               <p
                 ref={wordmarkText}
                 data-wordmark
                 className="inline-block overflow-hidden pt-[0.06em] pb-[0.14em] font-display text-[clamp(3.5rem,17vw,18rem)] leading-[0.9] tracking-[-0.02em] whitespace-nowrap text-bone"
+                style={dust ? { color: 'transparent' } : undefined}
               >
                 {[...profile.name].map((char, i) => (
-                  <span key={i} data-letter className="inline-block whitespace-pre">
+                  <span key={i} data-letter={dust ? undefined : true} className="inline-block whitespace-pre">
                     {char}
                   </span>
                 ))}
@@ -268,6 +274,12 @@ const Footer = () => {
             <div data-footer-row className="wrap mt-4 flex flex-wrap items-center justify-between gap-x-10 gap-y-3 font-mono">
               <p>
                 <span className="text-bone">© {year} Võ Gia Huy</span> · {c.footer.built}
+              </p>
+              {/* a hint for the curious: the keys that open the developer's view (components/DevMode) */}
+              <p className="hidden items-center gap-2 fine:flex">
+                <kbd className="rounded border border-line-strong px-1.5 text-bone">G</kbd>
+                <kbd className="rounded border border-line-strong px-1.5 text-bone">D</kbd>
+                {c.dev.hint}
               </p>
               <a
                 href="#top"

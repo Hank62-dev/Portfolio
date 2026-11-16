@@ -4139,3 +4139,9 @@ html[data-vt='player']::view-transition-new(root) {
 .sticky-body .rich-body > * + * {
   margin-top: 0.45em;
 }
+
+/* Dev mode's inspector (components/DevMode): everything under the pointer is a target */
+.dev-inspect,
+.dev-inspect * {
+  cursor: crosshair !important;
+}

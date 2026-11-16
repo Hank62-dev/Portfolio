@@ -31,11 +31,16 @@ export default function Bodies({ theme, quality, getInput, getBurst }) {
   const { camera, gl } = useThree();
   const count = COUNT[quality] ?? COUNT.low;
   const bodies = useMemo(() => createBodies(count, seeded(42)), [count]);
+  // on capable machines the pale and dark capsules are glass instead: clear, refracting what is behind them
+  const glassy = quality === 'high';
+  const isGlass = (b) => glassy && b.kind === 'capsule' && (b.tone === 1 || b.tone === 2);
   const spheres = useMemo(() => bodies.filter((b) => b.kind === 'sphere'), [bodies]);
-  const capsules = useMemo(() => bodies.filter((b) => b.kind === 'capsule'), [bodies]);
+  const capsules = useMemo(() => bodies.filter((b) => b.kind === 'capsule' && !isGlass(b)), [bodies, glassy]); // eslint-disable-line react-hooks/exhaustive-deps
+  const glass = useMemo(() => bodies.filter(isGlass), [bodies, glassy]); // eslint-disable-line react-hooks/exhaustive-deps
   const turns = useMemo(() => bodies.map(() => new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.random() * 3, Math.random() * 3, 0))), [bodies]);
   const sphereMesh = useRef();
   const capsuleMesh = useRef();
+  const glassMesh = useRef();
   const lastBurst = useRef(getBurst());
   const homes = useMemo(() => bodies.map((b) => [b.hx, b.hy, b.hz]), [bodies]);
 
@@ -104,10 +109,11 @@ export default function Bodies({ theme, quality, getInput, getBurst }) {
     };
     write(sphereMesh.current, spheres);
     write(capsuleMesh.current, capsules);
+    write(glassMesh.current, glass);
   });
 
   const material = (
-    <meshPhysicalMaterial roughness={0.22} metalness={0.05} clearcoat={1} clearcoatRoughness={0.15} />
+    <meshPhysicalMaterial roughness={0.22} metalness={0.05} clearcoat={1} clearcoatRoughness={0.15} envMapIntensity={1.4} />
   );
 
   return (
@@ -121,6 +127,23 @@ export default function Bodies({ theme, quality, getInput, getBurst }) {
         <capsuleGeometry args={[0.62, 0.9, 8, 20]} />
         {material}
       </instancedMesh>
+      {glass.length > 0 && (
+        <instancedMesh ref={glassMesh} args={[undefined, undefined, glass.length]} frustumCulled={false}>
+          <capsuleGeometry args={[0.62, 0.9, 8, 24]} />
+          <meshPhysicalMaterial
+            transmission={1}
+            thickness={0.9}
+            roughness={0.04}
+            ior={1.45}
+            iridescence={0.6}
+            iridescenceIOR={1.3}
+            clearcoat={1}
+            attenuationColor="#ff9a6e"
+            attenuationDistance={2.2}
+            envMapIntensity={1.6}
+          />
+        </instancedMesh>
+      )}
     </group>
   );
 }

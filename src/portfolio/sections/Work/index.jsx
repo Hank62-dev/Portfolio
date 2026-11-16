@@ -5,6 +5,7 @@ import { useLang } from '../../i18n';
 import { clsx } from '../../../shared/lib/format';
 import { gsap, FINE_POINTER, MOTION, ScrollTrigger } from '../../motion/gsap';
 import Distort from '../../motion/Distort';
+import { flight } from '../../motion/flight';
 import SplitReveal from '../../motion/SplitReveal';
 import { useGsap } from '../../motion/useGsap';
 import SectionTitle from '../../components/SectionTitle';
@@ -117,6 +118,11 @@ const Work = () => {
                 data-cursor="view"
                 className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 py-9 xs:grid-cols-[48px_minmax(0,1fr)_auto] lg:py-12"
                 onPointerEnter={() => setActiveSlug(p.slug)}
+                onClick={(e) => {
+                  // the floating preview (with a mouse) or the inline cover flies into the project page
+                  const preview = document.querySelector(`[data-preview] [data-cover="${p.slug}"] img`);
+                  flight.start(preview && getComputedStyle(preview.closest('[data-preview]')).opacity > 0.5 ? preview : e.currentTarget.closest('li').querySelector('img'));
+                }}
                 onFocus={() => setActiveSlug(p.slug)}
               >
                 <span data-row-fade className="hidden pt-[1.1em] font-mono text-fine text-bone-faint xs:block">
@@ -176,6 +182,7 @@ const Work = () => {
             {featured.map((p) => (
               <div
                 key={p.slug}
+                data-cover={p.slug}
                 className={clsx(
                   'absolute inset-0 transition-[clip-path] duration-700 ease-out-expo',
                   p.slug === activeSlug ? 'z-10 [clip-path:inset(0)]' : 'z-0 [clip-path:inset(0_0_100%_0)]'

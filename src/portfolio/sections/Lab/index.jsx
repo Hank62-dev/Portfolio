@@ -6,6 +6,8 @@ import { usePointerGlow } from '../../../shared/hooks/useMotion';
 import { gsap, DESKTOP, MOTION } from '../../motion/gsap';
 import { motionStore } from '../../motion/store';
 import Distort from '../../motion/Distort';
+import LiquidImage from '../../motion/LiquidImage';
+import { flight } from '../../motion/flight';
 import ScrambleText from '../../motion/ScrambleText';
 import { useGsap } from '../../motion/useGsap';
 import SectionTitle from '../../components/SectionTitle';
@@ -33,7 +35,7 @@ const LabCard = ({ project: p, index, total, open }) => {
       <div className="relative aspect-[4/3] shrink-0 overflow-hidden border-b border-line bg-ink-2 lg:aspect-auto lg:flex-[1.15]">
         <Distort className="absolute inset-0 transition-transform duration-[1400ms] ease-out-expo group-hover:scale-[1.07]">
           {p.cover ? (
-            <img src={p.cover} alt="" loading="lazy" width="1846" height="910" className="size-full object-cover" />
+            <LiquidImage hostSelector="[data-lab-card]" src={p.cover} alt="" loading="lazy" width="1846" height="910" className="size-full object-cover" />
           ) : (
             <ProjectMark project={p} label="" />
           )}
@@ -60,6 +62,7 @@ const LabCard = ({ project: p, index, total, open }) => {
         </div>
         <Link
           to={projectHref(p)}
+          onClick={(e) => flight.start(e.currentTarget.closest('[data-lab-card]').querySelector('img'))}
           data-cursor="open"
           className="mt-auto inline-flex items-center gap-2 self-start pt-3 font-mono text-fine text-bone transition-colors hover:text-signal after:absolute after:inset-0 after:z-20 after:content-['']"
         >

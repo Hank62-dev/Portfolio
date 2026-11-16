@@ -2,19 +2,35 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { gsap, prefersReducedMotion } from './gsap';
 import { sound } from './sound';
+import { flight } from './flight';
+
+// where the last click landed (0..1, origin bottom-left): the ink drop opens from there
+const lastPress = [0.5, 0.5];
+if (typeof window !== 'undefined') {
+  window.addEventListener('pointerdown', (e) => {
+    lastPress[0] = e.clientX / window.innerWidth;
+    lastPress[1] = 1 - e.clientY / window.innerHeight;
+  }, { capture: true, passive: true });
+}
 
 const VERTEX = `
 attribute vec2 aPos;
 void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
 `;
 
-// The accent colour covers the screen and burns away: noise decides which part goes first, biased so
-// the burn climbs from the bottom, with a hot bone-coloured rim on the edge that is going.
+// The accent colour covers the screen and clears away, in a way that depends on where you are going:
+//   0  burn: noise decides which part goes first, climbing from the bottom (back to the home page)
+//   1  ink drop: a hole opens from where you clicked, its edge boiling (into a project)
+//   2  blocks: the cover breaks into tiles that drop out in a sweep from left to right (project to project)
+//   3  scan: bands tear away sideways like a lost signal (a page that is not there)
+// Every mode has a hot bone-coloured rim on the edge that is going.
 const FRAGMENT = `
 precision mediump float;
 uniform vec2 uRes;
 uniform float uProgress;
 uniform float uSeed;
+uniform float uMode;
+uniform vec2 uOrigin;
 
 float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 float noise(vec2 p) {
@@ -30,9 +46,22 @@ float fbm(vec2 p) {
 
 void main() {
   vec2 uv = gl_FragCoord.xy / uRes;
-  vec2 p = uv * vec2(uRes.x / uRes.y, 1.0) * 3.0 + uSeed;
+  float aspect = uRes.x / uRes.y;
+  vec2 p = uv * vec2(aspect, 1.0) * 3.0 + uSeed;
   float n = fbm(p + fbm(p * 0.7) * 1.2);
-  float field = n * 0.55 + uv.y * 0.45;            // 0..1, low at the bottom: that is where it burns first
+  float field;
+  if (uMode < 0.5) {
+    field = n * 0.55 + uv.y * 0.45;               // low at the bottom: that is where it burns first
+  } else if (uMode < 1.5) {
+    float d = distance(uv * vec2(aspect, 1.0), uOrigin * vec2(aspect, 1.0)) / (aspect + 1.0);
+    field = d * 1.25 + n * 0.22;                  // near the click goes first
+  } else if (uMode < 2.5) {
+    vec2 cell = floor(uv * vec2(aspect, 1.0) * 9.0);
+    field = uv.x * 0.62 + hash(cell + uSeed) * 0.38; // tiles, in a sweep with some out of turn
+  } else {
+    float band = floor(uv.y * 26.0);
+    field = hash(vec2(band, uSeed)) * 0.7 + abs(uv.x - 0.5) * 0.3 + n * 0.08;
+  }
   float edge = uProgress * 1.25 - 0.12;            // sweeps past both ends so the screen ends fully clear
   float cover = smoothstep(edge - 0.015, edge + 0.015, field);
   float rim = smoothstep(edge - 0.06, edge, field) - smoothstep(edge, edge + 0.05, field);
@@ -43,6 +72,15 @@ void main() {
   gl_FragColor = vec4(color * alpha, alpha);
 }
 `;
+
+/** Which way the cover clears for a move between two paths (see the modes above). */
+export const wipeMode = (from, to, known = true) => {
+  if (!known) return 3;
+  const project = (path) => path.startsWith('/projects/');
+  if (project(from) && project(to)) return 2;
+  if (project(to)) return 1;
+  return 0;
+};
 
 /** A full-screen canvas that draws the burn at a given progress, or null when WebGL is not there. */
 const createBurn = (canvas) => {
@@ -68,9 +106,11 @@ const createBurn = (canvas) => {
   const uRes = gl.getUniformLocation(program, 'uRes');
   const uProgress = gl.getUniformLocation(program, 'uProgress');
   const uSeed = gl.getUniformLocation(program, 'uSeed');
+  const uMode = gl.getUniformLocation(program, 'uMode');
+  const uOrigin = gl.getUniformLocation(program, 'uOrigin');
 
   return {
-    draw(progress, seed) {
+    draw(progress, seed, mode = 0, origin = [0.5, 0.5]) {
       const scale = 0.5; // the edge is soft anyway: half the pixels is plenty
       const w = Math.max(1, Math.floor(window.innerWidth * scale));
       const h = Math.max(1, Math.floor(window.innerHeight * scale));
@@ -82,6 +122,8 @@ const createBurn = (canvas) => {
       gl.uniform2f(uRes, w, h);
       gl.uniform1f(uProgress, progress);
       gl.uniform1f(uSeed, seed);
+      gl.uniform1f(uMode, mode);
+      gl.uniform2f(uOrigin, origin[0], origin[1]);
       gl.clearColor(0, 0, 0, 0);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -103,6 +145,7 @@ export default function RouteWipe() {
   const canvas = useRef(null);
   const burn = useRef(undefined); // undefined: not tried yet; null: no WebGL
   const first = useRef(true);
+  const previous = useRef(pathname);
 
   useEffect(() => () => burn.current?.dispose(), []);
 
@@ -111,8 +154,15 @@ export default function RouteWipe() {
       first.current = false;
       return undefined;
     }
+    const from = previous.current;
+    previous.current = pathname;
     if (prefersReducedMotion()) return undefined;
     sound.whoosh();
+    // a picture is flying into the new page: that is the transition
+    if (flight.peek()) return undefined;
+    const known = pathname === '/' || /^\/projects\/[^/]+$/.test(pathname);
+    const mode = wipeMode(from, pathname, known);
+    const origin = [...lastPress];
 
     if (burn.current === undefined) burn.current = createBurn(canvas.current);
     const fx = burn.current;
@@ -120,7 +170,7 @@ export default function RouteWipe() {
       const el = canvas.current;
       const state = { p: 0 };
       const seed = Math.random() * 40;
-      fx.draw(0, seed); // fully covered before the first paint of the new page
+      fx.draw(0, seed, mode, origin); // fully covered before the first paint of the new page
       el.style.visibility = 'visible';
       // The new page's first frames are heavy (its effects, its scenes): start the clock only once two
       // frames have gone by, or the whole burn would be spent inside one long frame and never be seen.
@@ -131,7 +181,7 @@ export default function RouteWipe() {
             p: 1,
             duration: 1.1,
             ease: 'power2.inOut',
-            onUpdate: () => fx.draw(state.p, seed),
+            onUpdate: () => fx.draw(state.p, seed, mode, origin),
             onComplete: () => {
               el.style.visibility = 'hidden';
             },

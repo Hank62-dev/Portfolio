@@ -5,6 +5,8 @@ import { useLang } from '../../i18n';
 import { clsx } from '../../../shared/lib/format';
 import { gsap, prefersReducedMotion } from '../../motion/gsap';
 import { sound } from '../../motion/sound';
+import LiquidImage from '../../motion/LiquidImage';
+import { flight } from '../../motion/flight';
 import Badge from '../../../shared/ui/Badge';
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -121,8 +123,8 @@ const Row = ({ project: p, index, open, onToggle }) => {
               {t(p.tagline)}
             </p>
             {p.cover && (
-              <div data-drawer-fade className="aspect-[16/9] max-w-[520px] overflow-hidden rounded-card border border-line-strong">
-                <img src={p.cover} alt="" loading="lazy" className="size-full object-cover object-top" />
+              <div data-drawer-fade data-flight-frame className="relative aspect-[16/9] max-w-[520px] overflow-hidden rounded-card border border-line-strong">
+                <LiquidImage src={p.cover} alt="" loading="lazy" className="size-full object-cover object-top" />
               </div>
             )}
             <div data-drawer-fade className="flex flex-wrap gap-1.5">
@@ -149,7 +151,12 @@ const Row = ({ project: p, index, open, onToggle }) => {
                 </a>
               ))}
               {p.decisions.length > 0 && (
-                <Link to={projectHref(p)} data-cursor="view" className="border-b border-signal text-signal">
+                <Link
+                  to={projectHref(p)}
+                  onClick={() => flight.start(drawer.current?.querySelector('img'))}
+                  data-cursor="view"
+                  className="border-b border-signal text-signal"
+                >
                   {c.work.readCase} →
                 </Link>
               )}

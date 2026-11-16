@@ -23,6 +23,8 @@ import { creatorRoutes } from './routes/creator.routes.mjs';
 import { ragRoutes } from './routes/rag.routes.mjs';
 import { podcastsRoutes } from './routes/podcasts.routes.mjs';
 import { calendarRoutes } from './routes/calendar.routes.mjs';
+import { whispersRoutes } from './routes/whispers.routes.mjs';
+import { createWhispers } from './services/whispers.mjs';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -55,6 +57,8 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
   // reminders that reach a device with the app closed (see services/push.mjs); off without a database and VAPID keys
   const push = createPush({ db, sync, calendar, vapid: config.push, zone: config.push.zone, send: sendPush });
   push.start();
+  // the portfolio's guestbook: in the database when there is one, in memory otherwise
+  const whispers = createWhispers({ db });
   const query = (req) => new URL(req.url, 'http://localhost').searchParams;
   const who = (req) => clientKey(req, config.trustedProxyHops);
 
@@ -79,7 +83,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
   };
 
   // every route, by group (see routes/): what each group reaches is in this one object
-  const ctx = { config, json, bytes, redirect, readJson, readBytes, requireAuth, query, who, auth, hub, tasks, push, ai, calendar, sync, needSync, discord, podcasts, google };
+  const ctx = { config, json, bytes, redirect, readJson, readBytes, requireAuth, query, who, auth, hub, tasks, push, ai, calendar, sync, needSync, discord, podcasts, google, whispers };
   const routes = {
     ...systemRoutes(ctx),
     ...authRoutes(ctx),
@@ -90,6 +94,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
     ...ragRoutes(ctx),
     ...podcastsRoutes(ctx),
     ...calendarRoutes(ctx),
+    ...whispersRoutes(ctx),
   };
 
   const server = http.createServer(async (req, res) => {

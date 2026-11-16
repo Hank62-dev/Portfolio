@@ -24,7 +24,9 @@ const known = new Set(files);
 const IMPORT = /(?:import|export)\s[^'"]*?from\s*['"]([^'"]+)['"]|import\s*\(\s*['"]([^'"]+)['"]\s*\)|import\s*['"]([^'"]+)['"]/g;
 
 /** Where an import points, as a path from the repository root; null for a package (react, three…). */
-const target = (from, spec) => {
+const target = (from, raw) => {
+  // a Vite query (`?raw`, `?url`) changes how the file is loaded, not which file it is
+  const spec = raw.replace(/\?.*$/, '');
   let base;
   if (spec.startsWith('@/')) base = `src/${spec.slice(2)}`;
   else if (spec.startsWith('.')) base = path.posix.join(path.posix.dirname(from), spec);

@@ -10,7 +10,9 @@ import { profile } from '../shared/profile';
 import { useTheme } from '../shared/lib/theme';
 import { scrollToTarget } from '../portfolio/lib/scroll';
 import BackgroundField from '../portfolio/motion/BackgroundField';
+import FluidInk from '../portfolio/motion/FluidInk';
 import Cursor from '../portfolio/motion/Cursor';
+import DevMode from '../portfolio/components/DevMode';
 import { ScrollTrigger } from '../portfolio/motion/gsap';
 import Grain from '../portfolio/motion/Grain';
 import Intro from '../portfolio/motion/Intro';
@@ -50,8 +52,10 @@ const MainLayout = ({ children }) => {
     <>
       <ScrollManager />
       <BackgroundField />
+      <FluidInk />
       <Grain />
       <Cursor />
+      <DevMode />
       <RouteWipe />
       <Intro name={profile.name} />
       {/* A rope hanging from the top edge: pull it to switch between the dark and light themes. */}

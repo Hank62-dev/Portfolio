@@ -1,5 +1,12 @@
 [
   {
+    "id": "portfolio-xray-dust-guestbook",
+    "version": "1.36.0",
+    "date": "2026-11-16",
+    "vi": "Hero lộ mã nguồn dưới chuột, viên kính trong và camera bay vào; hạt bụi đổi hình theo từng phần; mực cam theo chuột; ảnh gợn nước và bay sang trang dự án; 4 kiểu chuyển trang; footer bằng hạt; Dev mode (G/D); sổ lưu bút thắp lửa.",
+    "en": "The hero shows its source under the pointer, with glass pieces and a fly-in camera; dust that takes a shape per section; ink the pointer stirs; liquid pictures that fly into project pages; four page wipes; a dust footer name; dev mode (G/D); a guestbook."
+  },
+  {
     "id": "portfolio-orbit-lab-index",
     "version": "1.35.0",
     "date": "2026-11-16",

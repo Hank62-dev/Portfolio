@@ -8,6 +8,7 @@ import Button from '../../../shared/ui/Button';
 import ScrambleText from '../../motion/ScrambleText';
 import HeroVisual from './HeroVisual';
 import StackIllustration from './StackIllustration';
+import XRay from './XRay';
 import { useHeroMotion } from './useHeroMotion';
 
 // The blueprint grid is two 1px gradients; the glow layer repeats it in the accent colour.
@@ -82,6 +83,9 @@ const Hero = ({ github }) => {
         )}
         aria-hidden="true"
       />
+
+      {/* under the pointer the hero turns into its own source code */}
+      <XRay sectionRef={glowRef} />
 
       <HeroVisual labels={c.stack.layers} active={inView} />
 

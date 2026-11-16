@@ -11,6 +11,8 @@ import Lab from '../../sections/Lab';
 import About from '../../sections/About';
 import Activity from '../../sections/Activity';
 import Contact from '../../sections/Contact';
+import Whispers from '../../sections/Whispers';
+import ParticleField from '../../scene/particles/ParticleField';
 
 const Home = () => {
   const { c } = useLang();
@@ -19,6 +21,7 @@ const Home = () => {
 
   return (
     <>
+      <ParticleField />
       <Hero github={github} />
       <Marquee />
       <Work />
@@ -28,6 +31,7 @@ const Home = () => {
       <Immersive />
       <About />
       <Activity github={github} />
+      <Whispers />
       <Contact />
     </>
   );
