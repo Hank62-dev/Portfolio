@@ -387,3 +387,19 @@
     filter: none;
   }
 }
+
+/* The themes dialog is wider than the others on a big screen, for its rows of wallpapers. */
+@media (min-width: 640px) {
+  [data-wide-dialog] {
+    width: min(720px, calc(100vw - 32px));
+  }
+}
+
+/* A live wallpaper is on: the corner glow of the tab steps aside, and the sidebar and bars turn to frosted glass over it. */
+.app-shell[data-wallpaper] .tab-glow {
+  display: none;
+}
+.app-shell[data-wallpaper] > aside {
+  background: color-mix(in srgb, var(--color-ink-1) 78%, transparent);
+  backdrop-filter: blur(14px);
+}

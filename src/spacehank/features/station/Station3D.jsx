@@ -77,11 +77,12 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
   }, [flights]);
   useEffect(() => () => briefTimers.current.forEach(clearTimeout), []);
   const briefKey = [...briefed].sort().join(',');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   // the station keeps the owner's clock: at lunch and dinner the free crew go down to the canteen
   const places = useMemo(() => {
     const now = new Date();
     return placeCrew(crew, placeSlot, briefed, now.getHours() + now.getMinutes() / 60);
+    // the set of briefed is new on every change, its sorted ids (briefKey) say when it really changed
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [crew, placeSlot, briefKey]);
   // who is on their way somewhere: they talk, play and count in a room only once they are there
   const [walking, setWalking] = useState(() => new Set());

@@ -23,6 +23,9 @@ import CaptureSheet from '../features/capture/CaptureSheet';
 import { openCapture } from '../features/capture/ui';
 import ModulesSheet from '../layout/ModulesSheet';
 import PalettePicker, { openPalettes } from '../layout/PalettePicker';
+import Wallpaper from '../features/wallpaper/Wallpaper';
+import { wallpaperState, setWallpaper } from '../features/wallpaper/store';
+import { SCENES, NONE as NO_WALLPAPER } from '../features/wallpaper/scenes';
 import { PALETTES, paletteState, setPalette } from '../core/palettes';
 import { lifeSnapshot, loadLife } from '../features/today/useLifeData';
 import { lifeDocs, searchEverything } from '../features/search/model';
@@ -115,6 +118,7 @@ export default function Workspace({
   const [taskOpen, setTaskOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const paletteId = useStore(paletteState, (s) => s.id);
+  const wallpaperId = useStore(wallpaperState, (s) => s.id);
   const shellRef = useRef(null);
   useCardGlow(shellRef);
   // a focus block that ran to its end is celebrated wherever the owner is (from the timer, or the middle of the screen)
@@ -208,6 +212,8 @@ export default function Workspace({
       { id: 'customise', label: tr('Choose which places to show'), hint: tr('Appearance'), icon: SlidersHorizontal, keywords: 'modules hide show tabs menu customise customize', run: openModules },
       ...visibleNav.map((item) => ({ id: `go-${item.id}`, label: tr('Go to {0}', item.label), hint: tr('Navigate'), icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
       { id: 'new-task', label: tr('New task for an agent'), hint: tr('Action'), icon: Plus, keywords: 'dispatch assign', run: () => setTaskOpen(true) },
+      ...SCENES.filter(({ id }) => id !== wallpaperId).map((scene) => ({ id: `wallpaper-${scene.id}`, label: tr('Wallpaper: {0}', scene.name), hint: tr('Appearance'), icon: Palette, keywords: 'wallpaper background live ascii theme hình nền', run: () => setWallpaper(scene.id) })),
+      ...(wallpaperId !== NO_WALLPAPER ? [{ id: 'wallpaper-none', label: tr('Wallpaper: none'), hint: tr('Appearance'), icon: Palette, keywords: 'wallpaper background off', run: () => setWallpaper(NO_WALLPAPER) }] : []),
       { id: 'palettes', label: tr('Choose a colour theme'), hint: tr('Appearance'), icon: Palette, keywords: 'theme colour color palette look skin anthropic', run: openPalettes },
       ...PALETTES.filter(({ id }) => id !== paletteId).map((p) => ({ id: `palette-${p.id}`, label: tr('Colour theme: {0}', p.name), hint: tr('Appearance'), icon: Palette, keywords: 'theme colour color palette look', run: () => setPalette(p.id) })),
       ...THEME_CHOICES.filter(({ id }) => id !== mode).map(({ id, label, short, icon }) => ({ id: `theme-${id}`, label: id === 'auto' ? tr('Theme: follow the time of day') : tr('Theme: {0}', label.toLowerCase()), hint: short ?? tr('Appearance'), icon, keywords: 'dark light mode appearance night day auto time sunrise sunset', run: () => setMode(id) })),
@@ -247,7 +253,7 @@ export default function Workspace({
       );
     }
     return list;
-  }, [paletteId, agents, app, hasTrack, music, newSticky, onNotify, onPause, onSelect, onTab, paused, playing, podFront, podPlaying, mode, setMode, visibleNav]);
+  }, [paletteId, wallpaperId, agents, app, hasTrack, music, newSticky, onNotify, onPause, onSelect, onTab, paused, playing, podFront, podPlaying, mode, setMode, visibleNav]);
 
   // what matches in everything that is kept, as rows for the palette
   const searchData = useCallback(
@@ -384,7 +390,8 @@ export default function Workspace({
   return (
     <SoftContext.Provider value>
       <TooltipProvider>
-        <div ref={shellRef} className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab), ...signalVars(tabHue(tab)) }}>
+        <div ref={shellRef} data-wallpaper={wallpaperId !== NO_WALLPAPER ? wallpaperId : undefined} className={clsx('app-shell flex bg-ink-0 text-bone', tab === 'play' && phone && 'desk', fit ? 'h-dvh overflow-hidden' : 'min-h-screen')} style={{ '--app-hue': tabHue(tab), ...signalVars(tabHue(tab)) }}>
+          <Wallpaper />
           {!phone && (
             <Sidebar
               tab={tab}

@@ -6,7 +6,7 @@ import { tr } from '../core/i18n/lang';
 import { sound, soundState } from '../core/sound';
 import { useStore } from '../core/store';
 import { openPalettes } from './PalettePicker';
-import { paletteOf, paletteState } from '../core/palettes';
+import { paletteState } from '../core/palettes';
 
 /** The three ways to choose the look: light, dark, or auto (light by day, dark by night, following the clock). */
 export const THEME_CHOICES = [
@@ -35,7 +35,7 @@ export function ThemeMenu() {
         ...THEME_CHOICES.map(({ id, label, icon }) => ({ id, label, icon, selected: mode === id, onSelect: () => setMode(id) })),
         // the workspace's small sounds (ticks, a chime when something is done), off until chosen
         { id: 'sound', label: soundOn ? tr('Sounds: on') : tr('Sounds: off'), icon: soundOn ? Volume2 : VolumeX, selected: soundOn, onSelect: () => sound.set(!soundOn) },
-        { id: 'palette', label: tr('Colour theme: {0}', paletteOf(palette).name), icon: Palette, onSelect: openPalettes },
+        { id: 'palette', label: tr('Themes and wallpapers'), icon: Palette, selected: palette !== 'default', onSelect: openPalettes },
       ]}
     />
   );
@@ -70,7 +70,7 @@ export function ThemePills({ className }) {
         {soundOn ? <Volume2 size={15} aria-hidden="true" /> : <VolumeX size={15} aria-hidden="true" />} {tr('Sounds')}
       </button>
       <button type="button" onClick={openPalettes} className="inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 font-mono text-fine text-bone-dim">
-        <Palette size={15} aria-hidden="true" /> {tr('Colour themes')}
+        <Palette size={15} aria-hidden="true" /> {tr('Themes')}
       </button>
     </div>
   );
