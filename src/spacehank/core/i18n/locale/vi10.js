@@ -27,4 +27,11 @@ export const vi10 = {
   '{0}, can I have your spring roll?': '{0}, cho tôi xin cái chả giò nhé?',
   'Only if you review my pull request.': 'Được, nếu bạn review pull request của tôi.',
   'Deal. Roll first.': 'Chốt. Chả giò trước.',
+  // colour themes
+  'Tab colours': 'Màu theo tab',
+  'Colour theme: {0}': 'Bảng màu: {0}',
+  'Colour themes': 'Bảng màu',
+  'Choose a colour theme': 'Chọn bảng màu',
+  'One palette for the whole workspace, in light and in dark. Light, dark or auto stays your choice.': 'Một bảng màu cho cả không gian làm việc, có bản sáng và tối. Sáng, tối hay tự động vẫn do bạn chọn.',
+  'The palettes come from the theme examples of Anthropic’s theme-factory skill.': 'Các bảng màu lấy từ bộ theme mẫu theme-factory của Anthropic.',
 };

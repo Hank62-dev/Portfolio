@@ -1,7 +1,7 @@
 import { tr } from '../core/i18n/lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookHeart, CalendarDays, Headphones, StickyNote, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
+import { BookHeart, Palette, CalendarDays, Headphones, StickyNote, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
 import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../shared/ui';
 import { useMediaQuery } from '../../shared/hooks/useMediaQuery';
 import { useInstall } from '../core/hooks/useInstall';
@@ -22,6 +22,8 @@ import { loadModules, loadSharedModules, openModules, useNav } from '../core/mod
 import CaptureSheet from '../features/capture/CaptureSheet';
 import { openCapture } from '../features/capture/ui';
 import ModulesSheet from '../layout/ModulesSheet';
+import PalettePicker, { openPalettes } from '../layout/PalettePicker';
+import { PALETTES, paletteState, setPalette } from '../core/palettes';
 import { lifeSnapshot, loadLife } from '../features/today/useLifeData';
 import { lifeDocs, searchEverything } from '../features/search/model';
 import { GUEST_HOME, guestCan } from '../core/demo/mode';
@@ -112,6 +114,7 @@ export default function Workspace({
   const [collapsed, setCollapsed] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const paletteId = useStore(paletteState, (s) => s.id);
   const shellRef = useRef(null);
   useCardGlow(shellRef);
   // a focus block that ran to its end is celebrated wherever the owner is (from the timer, or the middle of the screen)
@@ -205,6 +208,8 @@ export default function Workspace({
       { id: 'customise', label: tr('Choose which places to show'), hint: tr('Appearance'), icon: SlidersHorizontal, keywords: 'modules hide show tabs menu customise customize', run: openModules },
       ...visibleNav.map((item) => ({ id: `go-${item.id}`, label: tr('Go to {0}', item.label), hint: tr('Navigate'), icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
       { id: 'new-task', label: tr('New task for an agent'), hint: tr('Action'), icon: Plus, keywords: 'dispatch assign', run: () => setTaskOpen(true) },
+      { id: 'palettes', label: tr('Choose a colour theme'), hint: tr('Appearance'), icon: Palette, keywords: 'theme colour color palette look skin anthropic', run: openPalettes },
+      ...PALETTES.filter(({ id }) => id !== paletteId).map((p) => ({ id: `palette-${p.id}`, label: tr('Colour theme: {0}', p.name), hint: tr('Appearance'), icon: Palette, keywords: 'theme colour color palette look', run: () => setPalette(p.id) })),
       ...THEME_CHOICES.filter(({ id }) => id !== mode).map(({ id, label, short, icon }) => ({ id: `theme-${id}`, label: id === 'auto' ? tr('Theme: follow the time of day') : tr('Theme: {0}', label.toLowerCase()), hint: short ?? tr('Appearance'), icon, keywords: 'dark light mode appearance night day auto time sunrise sunset', run: () => setMode(id) })),
       { id: 'pause', label: paused ? tr('Resume the floor') : tr('Pause the floor'), hint: tr('Action'), icon: paused ? Play : Pause, keywords: 'stop animation', run: onPause },
       {
@@ -242,7 +247,7 @@ export default function Workspace({
       );
     }
     return list;
-  }, [agents, app, hasTrack, music, newSticky, onNotify, onPause, onSelect, onTab, paused, playing, podFront, podPlaying, mode, setMode, visibleNav]);
+  }, [paletteId, agents, app, hasTrack, music, newSticky, onNotify, onPause, onSelect, onTab, paused, playing, podFront, podPlaying, mode, setMode, visibleNav]);
 
   // what matches in everything that is kept, as rows for the palette
   const searchData = useCallback(
@@ -418,6 +423,7 @@ export default function Workspace({
             </Suspense>
           )}
           <ModulesSheet />
+          <PalettePicker />
           {taskOpen && <TaskModal agents={agents} initialAgent={typeof taskOpen === 'string' ? taskOpen : undefined} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}

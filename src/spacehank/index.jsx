@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import LoginScreen, { AuthLoading, ServerUnreachable } from './layout/LoginScreen';
 import { Toast } from '../shared/ui';
@@ -20,9 +20,15 @@ const tabOf = (params, fallback) => {
 import Workspace from './app/Workspace';
 import './fx.css';
 import { tr } from './core/i18n/lang';
+import { applyPalette, clearPalette } from './core/palettes';
 
 export default function SpaceHank() {
   useAppViewport(); // the workspace is an app: the page cannot be pinched to zoom
+  // the workspace's colour theme is on while it is open (the sign-in screen too), and off again on the portfolio
+  useLayoutEffect(() => {
+    applyPalette();
+    return clearPalette;
+  }, []);
   const live = useRealtime();
   // the portfolio links here with ?demo: the same workspace, filled with made-up data (see ./demo)
   const guest = isDemo();

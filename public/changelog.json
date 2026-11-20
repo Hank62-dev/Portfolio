@@ -1,5 +1,12 @@
 [
   {
+    "id": "spacehank-colour-themes",
+    "version": "1.38.0",
+    "date": "2026-11-20",
+    "vi": "SpaceHank có thêm 10 bảng màu (Ocean Depths, Midnight Galaxy, Forest Canopy, Sunset Boulevard…), mỗi bảng có bản sáng và tối, chữ luôn dễ đọc. Chọn trong menu giao diện hoặc gõ \"bảng màu\" ở ô tìm kiếm.",
+    "en": "SpaceHank gets ten colour themes (Ocean Depths, Midnight Galaxy, Forest Canopy, Sunset Boulevard…), each in light and dark, always readable. Pick one from the theme menu or search for \"colour theme\"."
+  },
+  {
     "id": "spacehank-effects-canteen",
     "version": "1.37.0",
     "date": "2026-11-20",
