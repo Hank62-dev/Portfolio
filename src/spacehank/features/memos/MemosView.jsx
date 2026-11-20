@@ -15,6 +15,7 @@ import { textToHtml } from '../notes/notes';
 import { useFab } from '../../core/fab';
 import { useStore } from '../../core/store';
 import { getLang, locale, tr } from '../../core/i18n/lang';
+import VoiceInk from './VoiceInk';
 
 const PEAKS = 64;
 
@@ -319,7 +320,8 @@ export default function MemosView({ onNotify }) {
       <PageHead eyebrow={tr('Capture')} title={tr('Voice')} accent="Memos." description={tr('Press the button and say it. It keeps the recording, turns your words into text when the browser can, and can send it to Second Brain.')} />
 
       <section className="relative overflow-hidden ink-panel rounded-3xl p-6 sm:p-8" aria-label={tr('Recorder')}>
-        <div className="mx-auto flex max-w-xl flex-col items-center gap-5">
+        {recording && <VoiceInk level={() => rec.current.peaks?.[rec.current.peaks.length - 1] ?? 0} />}
+        <div className="relative mx-auto flex max-w-xl flex-col items-center gap-5">
           <div className="relative grid size-28 place-items-center">
             {recording && <i className="absolute inset-0 animate-ping rounded-full bg-danger/25 [animation-duration:1.8s]" aria-hidden="true" />}
             <button

@@ -6,7 +6,8 @@ import { SITE_URL, GITHUB_USERNAME } from '../../../shared/profile';
 import { aiUsage } from '../../core/api/owner';
 import { Figure, PageHead, Tile } from '../../ui/Page';
 import { spacehankConfig } from '../../core/config';
-import { healthTone, loadGithub, ping, runTone, timeAgo } from './github';
+import { healthTone, loadContributions, loadGithub, ping, runTone, timeAgo } from './github';
+import CommitCity from './CommitCity';
 import { tr } from '../../core/i18n/lang';
 
 const TONE_TEXT = { ok: 'text-ok', warn: 'text-warn', danger: 'text-danger', neutral: 'text-bone-faint' };
@@ -32,6 +33,18 @@ function Trace({ history }) {
   );
 }
 
+/** The health of everything as a heartbeat: a bright stretch runs along the line while all is up (quicker when something is
+ * slow or failing), and the line lies flat when a service is down. */
+function Heartbeat({ live, tone, fast }) {
+  const path = 'M0 30 H60 L68 30 L75 8 L85 50 L94 16 L101 30 H170 L178 30 L185 22 L192 38 L199 30 H240';
+  return (
+    <svg viewBox="0 0 240 60" preserveAspectRatio="none" className={clsx('h-10 w-full shrink-0 overflow-visible sm:w-56', tone)} aria-hidden="true" data-heartbeat>
+      <path d={live ? path : 'M0 30 H240'} fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" className="opacity-30" vectorEffect="non-scaling-stroke" />
+      {live && <path d={path} pathLength="1" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="ecg-pulse" style={fast ? { animationDuration: '1.4s' } : undefined} vectorEffect="non-scaling-stroke" />}
+    </svg>
+  );
+}
+
 export default function PulseView({ owner }) {
   const [checks, setChecks] = useState({});
   const [repos, setRepos] = useState(null);
@@ -39,6 +52,7 @@ export default function PulseView({ owner }) {
   const [usage, setUsage] = useState(null);
   const [at, setAt] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [year, setYear] = useState(null);
   const history = useRef({});
 
   const refresh = useCallback(async () => {
@@ -60,6 +74,16 @@ export default function PulseView({ owner }) {
     const timer = window.setInterval(refresh, 60000);
     return () => window.clearInterval(timer);
   }, [refresh]);
+
+  useEffect(() => {
+    let live = true;
+    loadContributions()
+      .then((days) => live && setYear(days))
+      .catch(() => live && setYear(null));
+    return () => {
+      live = false;
+    };
+  }, []);
 
   useEffect(() => {
     let live = true;
@@ -91,6 +115,7 @@ export default function PulseView({ owner }) {
           <h2 className="font-display text-h3 text-bone">{!at ? tr('Checking…') : issues ? tr('{0} thing{1} attention', issues, issues > 1 ? tr('s need') : tr(' needs')) : slow ? tr('Up, but something is slow') : tr('All systems healthy')}</h2>
           <p className="font-mono text-[0.72rem] text-bone-faint">{at ? tr('Checked {0}. Refreshes every minute.', timeAgo(new Date(at).toISOString())) : tr('Pinging the services…')}</p>
         </div>
+        <Heartbeat live={Boolean(at) && !down} tone={issues ? 'text-danger' : slow ? 'text-warn' : 'text-ok'} fast={Boolean(slow || issues)} />
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -135,6 +160,8 @@ export default function PulseView({ owner }) {
           <Figure value={usage.image ?? 'Off'} label={tr('Image provider')} />
         </div>
       )}
+
+      {year?.length > 0 && <CommitCity days={year} />}
 
       <section aria-label={tr('Repositories')} className="flex flex-col gap-3">
         <div className="flex items-center gap-2">

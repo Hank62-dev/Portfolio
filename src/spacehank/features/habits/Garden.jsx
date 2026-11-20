@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { clsx } from '../../../shared/lib/format';
 import { Check, Droplet, Flame } from 'lucide-react';
 import { skyOf } from '../today/sky';
 import { dayKey, gardenLine, toggleDay } from './model';
@@ -6,6 +7,8 @@ import { gardenPlants, newlyWatered } from './plants';
 import { habits } from './store';
 import Plant from './Plant';
 import { tr } from '../../core/i18n/lang';
+import { celebrate } from '../../core/celebrate';
+import { canMove } from '../../../shared/fx/gate';
 
 const DROPS = [-14, -6, 2, 10, 18];
 
@@ -37,11 +40,29 @@ export default function Garden({ items, head }) {
     return () => window.clearTimeout(timer);
   }, [items, key]);
 
-  const water = (plant) => {
+  // the plants lean away from a hand passing over them, like grass in a breeze
+  const row = useRef(null);
+  const lean = (event) => {
+    const list = row.current;
+    if (!list || !canMove()) return;
+    for (const tile of list.children) {
+      const r = tile.getBoundingClientRect();
+      const dx = r.left + r.width / 2 - event.clientX;
+      const dy = r.top + r.height / 2 - event.clientY;
+      const near = Math.max(0, 1 - Math.hypot(dx, dy) / 160);
+      tile.style.setProperty('--bend', `${(Math.sign(dx) || 1) * near * 9}deg`);
+    }
+  };
+  const still = () => {
+    for (const tile of row.current?.children ?? []) tile.style.setProperty('--bend', '0deg');
+  };
+
+  const water = (plant, event) => {
     if (plant.doneToday) return;
     const habit = items.find((h) => h.id === plant.id);
     if (!habit) return;
     navigator.vibrate?.(10);
+    celebrate(event, { count: 18, colors: ['hsl(200 85% 70%)', 'hsl(190 70% 82%)', `hsl(${plant.hue} 65% 62%)`, 'hsl(140 55% 60%)'] });
     void habits.update(habit.id, { days: toggleDay(habit.days, key) });
   };
 
@@ -67,9 +88,9 @@ export default function Garden({ items, head }) {
       <div className="garden-scene flex flex-col gap-3">
         <p className="relative z-[3] max-w-[85%] self-start rounded-full border border-white/20 bg-black/25 px-3 py-1.5 font-mono text-[0.7rem] text-white/90 backdrop-blur-md">{gardenLine(done, plants.length)}</p>
 
-        <ul className="garden-plants no-scrollbar flex items-end justify-start gap-2 overflow-x-auto pt-2 pb-3" aria-label={tr('Habits')}>
+        <ul ref={row} onPointerMove={lean} onPointerLeave={still} className="garden-plants no-scrollbar flex items-end justify-start gap-2 overflow-x-auto pt-2 pb-3" aria-label={tr('Habits')}>
           {plants.map((plant) => (
-            <li key={plant.id} className="plant-tile relative w-[6.75rem] shrink-0 first:ml-auto last:mr-auto" data-state={plant.doneToday ? 'done' : plant.wilting ? 'wilting' : 'waiting'} style={{ '--h': plant.hue }}>
+            <li key={plant.id} className="plant-tile plant-sway relative w-[6.75rem] shrink-0 first:ml-auto last:mr-auto" data-state={plant.doneToday ? 'done' : plant.wilting ? 'wilting' : 'waiting'} style={{ '--h': plant.hue, '--i': plants.indexOf(plant) }}>
               {rain[plant.id] && (
                 <span key={rain[plant.id]} className="pointer-events-none absolute inset-x-0 top-0 h-0" aria-hidden="true">
                   {DROPS.map((dx, i) => (
@@ -77,9 +98,9 @@ export default function Garden({ items, head }) {
                   ))}
                 </span>
               )}
-              <button type="button" onClick={() => water(plant)} disabled={plant.doneToday} aria-label={plant.doneToday ? plant.name : tr('Water {0}', plant.name)} className="relative block w-full active:scale-95 disabled:cursor-default">
+              <button type="button" onClick={(event) => water(plant, event)} disabled={plant.doneToday} aria-label={plant.doneToday ? plant.name : tr('Water {0}', plant.name)} className={clsx('relative block w-full active:scale-95 disabled:cursor-default', rain[plant.id] && 'plant-grow')}>
                 <span className="plant-glow" aria-hidden="true" />
-                <Plant stage={plant.stage} wilting={plant.wilting} hue={plant.hue} className="relative mx-auto h-[5.6rem] w-[4.9rem]" />
+                <Plant stage={plant.stage} wilting={plant.wilting} hue={plant.hue} className="plant-body relative mx-auto h-[5.6rem] w-[4.9rem]" />
                 <span className="plant-badge" aria-hidden="true">
                   {plant.doneToday ? <Check size={11} strokeWidth={3} /> : <Droplet size={11} strokeWidth={2.4} />}
                 </span>

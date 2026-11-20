@@ -188,7 +188,9 @@ export default function MemoryView({ events }) {
         </div>
 
         {groups.length ? (
-          <ol className="max-h-[min(52vh,460px)] overflow-y-auto p-2" aria-label={tr('Signals')}>
+          <ol className="memory-timeline max-h-[min(52vh,460px)] overflow-y-auto p-2" aria-label={tr('Signals')}>
+            {/* how far down the stream the reader is, filled by the scrolling itself */}
+            <li role="presentation" aria-hidden="true" className="memory-progress" />
             {groups.map((group, index) => {
               const key = `${group.name}-${group.action}-${index}`;
               return <Row key={key} group={group} open={openKey === key} onToggle={() => setOpenKey(openKey === key ? null : key)} />;

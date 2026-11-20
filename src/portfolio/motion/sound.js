@@ -3,6 +3,8 @@
 // a page change. Off until the visitor turns it on (browsers only allow audio after a gesture anyway);
 // the choice is remembered in this browser.
 
+import { blip, makeContext, whoosh } from '../../shared/fx/tones';
+
 const KEY = 'portfolio-sound';
 const listeners = new Set();
 
@@ -22,9 +24,8 @@ let lastTick = 0;
 
 const ensureContext = () => {
   if (ctx) return ctx;
-  const Ctor = window.AudioContext || window.webkitAudioContext;
-  if (!Ctor) return null;
-  ctx = new Ctor();
+  ctx = makeContext();
+  if (!ctx) return null;
   master = ctx.createGain();
   master.gain.value = 0;
   master.connect(ctx.destination);
@@ -79,21 +80,9 @@ const fadeMaster = (to, seconds) => {
   master.gain.linearRampToValueAtTime(to, now + seconds);
 };
 
-/** A short enveloped tone: `from` Hz gliding to `to` Hz over `length` seconds. */
-const blip = (from, to, length, volume, type = 'sine') => {
+const play = (fn) => {
   if (!enabled || !ctx || ctx.state !== 'running') return;
-  const now = ctx.currentTime;
-  const osc = ctx.createOscillator();
-  osc.type = type;
-  osc.frequency.setValueAtTime(from, now);
-  osc.frequency.exponentialRampToValueAtTime(to, now + length);
-  const g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001, now);
-  g.gain.exponentialRampToValueAtTime(volume, now + 0.008);
-  g.gain.exponentialRampToValueAtTime(0.0001, now + length);
-  osc.connect(g).connect(master);
-  osc.start(now);
-  osc.stop(now + length + 0.02);
+  fn(ctx, master);
 };
 
 export const sound = {
@@ -133,33 +122,15 @@ export const sound = {
     const now = performance.now();
     if (now - lastTick < 70) return;
     lastTick = now;
-    blip(2400, 1800, 0.05, 0.035);
+    play((c, out) => blip(c, out, 2400, 1800, 0.05, 0.035));
   },
 
   click() {
-    blip(620, 240, 0.12, 0.08, 'triangle');
+    play((c, out) => blip(c, out, 620, 240, 0.12, 0.08, 'triangle'));
   },
 
   /** Filtered noise sweeping down: the page changing. */
   whoosh() {
-    if (!enabled || !ctx || ctx.state !== 'running') return;
-    const now = ctx.currentTime;
-    const length = 0.9;
-    const buffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * length), ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < data.length; i += 1) data[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource();
-    src.buffer = buffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'bandpass';
-    filter.Q.value = 1.4;
-    filter.frequency.setValueAtTime(2600, now);
-    filter.frequency.exponentialRampToValueAtTime(260, now + length);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, now);
-    g.gain.exponentialRampToValueAtTime(0.12, now + 0.15);
-    g.gain.exponentialRampToValueAtTime(0.0001, now + length);
-    src.connect(filter).connect(g).connect(master);
-    src.start(now);
+    play((c, out) => whoosh(c, out));
   },
 };

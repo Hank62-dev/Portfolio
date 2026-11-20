@@ -4,6 +4,7 @@ import { ArrowUp, BookOpen, BrainCircuit, Check, Copy, FileSearch, Gauge, Globe,
 import { Badge, Dots, Loading, Ring, Skeleton, TextShimmer } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import ChatHistory from './ChatHistory';
+import LiquidOrb from './LiquidOrb';
 import { messagesOf } from './model';
 import { askHank, chatMsgs, chats, loadChats, startNewChat, view } from './store';
 import Markdown from '../../ui/Markdown';
@@ -44,7 +45,7 @@ const WEB_CHOICES = [
 
 const chip = 'inline-flex max-w-[16rem] items-center gap-1 truncate rounded-full border border-line px-2.5 py-0.5 font-mono text-[0.68rem] text-bone-dim';
 
-function Message({ message, onCopy }) {
+function Message({ message, onCopy, fresh }) {
   const { t } = useTranslation();
   const mine = message.role === 'user';
   const Origin = ORIGINS[message.source]?.icon;
@@ -61,7 +62,7 @@ function Message({ message, onCopy }) {
     <div className="flex gap-3">
       <Orb size={32} />
       <div className="min-w-0 flex-1">
-        <div className="rounded-3xl rounded-tl-lg border border-wash/8 bg-wash/[0.04] px-5 py-4 text-bone backdrop-blur">
+        <div className={clsx('rounded-3xl rounded-tl-lg border border-wash/8 bg-wash/[0.04] px-5 py-4 text-bone backdrop-blur', fresh && 'rag-answer-in')}>
           <Markdown>{message.text}</Markdown>
         </div>
         <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-1">
@@ -75,13 +76,13 @@ function Message({ message, onCopy }) {
               <Check size={12} aria-hidden="true" /> {tr('Sources verified')}
             </Badge>
           )}
-          {sources.slice(0, 5).map((source) =>
+          {sources.slice(0, 5).map((source, i) =>
             source.url ? (
-              <a key={source.name} href={source.url} target="_blank" rel="noopener noreferrer" className={clsx(chip, 'transition-colors hover:border-signal/60 hover:text-bone')}>
+              <a key={source.name} href={source.url} target="_blank" rel="noopener noreferrer" className={clsx(chip, 'transition-colors hover:border-signal/60 hover:text-bone', fresh && 'rag-source-in')} style={{ '--i': i }}>
                 <Globe size={11} className="shrink-0" aria-hidden="true" /> <span className="truncate">{source.name}</span>
               </a>
             ) : (
-              <span key={source.name} className={chip}>
+              <span key={source.name} className={clsx(chip, fresh && 'rag-source-in')} style={{ '--i': i }}>
                 <FileSearch size={11} className="shrink-0" aria-hidden="true" /> <span className="truncate">{source.name}</span>
               </span>
             )
@@ -114,6 +115,10 @@ export default function RagView() {
   const ready = chatsLoaded && messagesLoaded;
   const busy = Boolean(chat) && thinking.includes(chat.id);
   const error = chat && errors[chat.id] !== undefined ? errors[chat.id] || t('rag.error') : '';
+  // the answers already there when a chat is opened just show; one that arrives while it is open is uncovered as it comes
+  const [opened, setOpened] = useState({ chat: undefined, count: 0 });
+  if (ready && opened.chat !== (chat?.id ?? null)) setOpened({ chat: chat?.id ?? null, count: messages.length });
+  const shownAtStart = opened.chat === (chat?.id ?? null) ? opened.count : Infinity;
 
   useEffect(() => {
     void loadChats();
@@ -212,7 +217,7 @@ export default function RagView() {
           </Loading>
         ) : messages.length === 0 ? (
           <div className="m-auto flex w-full max-w-xl flex-col items-center gap-6 py-10 text-center">
-            <Orb size={84} busy={busy} />
+            <LiquidOrb size={84} busy={busy} fallback={<Orb size={84} busy={busy} />} />
             <div>
               <h1 className="font-display text-h2 leading-[1.05] text-bone">{t('rag.welcomeTitle')}</h1>
               <p className="mt-2 text-bone-dim">{t('rag.welcomeText')}</p>
@@ -229,12 +234,12 @@ export default function RagView() {
             </div>
           </div>
         ) : (
-          messages.map((message, index) => <Message key={`${message.role}-${index}`} message={message} onCopy={(text) => navigator.clipboard?.writeText(text)} />)
+          messages.map((message, index) => <Message key={`${message.role}-${index}`} message={message} fresh={index >= shownAtStart && message.role !== 'user'} onCopy={(text) => navigator.clipboard?.writeText(text)} />)
         )}
 
         {busy && (
           <div className="flex items-center gap-3">
-            <Orb size={32} busy />
+            <LiquidOrb size={32} busy fallback={<Orb size={32} busy />} />
             <span className="flex items-center gap-1.5 rounded-full border border-wash/8 bg-wash/[0.04] px-4 py-2.5 font-mono text-fine text-bone-dim" role="status">
               <Dots size={6} className="text-signal" />
               <TextShimmer className="pl-1.5">{t('rag.thinking')}</TextShimmer>

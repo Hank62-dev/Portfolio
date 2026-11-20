@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ArrowRight, Check, PartyPopper, Plus } from 'lucide-react';
 import { Badge, Button, Card, Eyebrow } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
@@ -7,6 +7,7 @@ import { useJustCompleted } from '../../core/motion/hooks';
 import { Burst, DrawnTick, Leave, ProgressRing } from '../../core/motion/Pieces';
 import SwipeToDone from '../../core/motion/SwipeToDone';
 import { tr } from '../../core/i18n/lang';
+import { celebrate } from '../../core/celebrate';
 
 const STATE_TONE = { overdue: 'danger', today: 'signal', soon: 'warn', doing: 'default' };
 const stateLabel = (task) => (task.state === 'doing' ? tr('In progress') : task.state === 'overdue' ? tr('Overdue') : dueLabel(task.due));
@@ -17,9 +18,11 @@ const stateLabel = (task) => (task.state === 'doing' ? tr('In progress') : task.
  */
 function TaskRow({ task, first, onFinish }) {
   const [phase, setPhase] = useState('idle'); // idle | ticked | leaving
+  const tick = useRef(null);
   const finish = () => {
     if (phase !== 'idle') return;
     setPhase('ticked');
+    celebrate(tick.current, { count: 16 });
     window.setTimeout(() => setPhase('leaving'), 380);
     window.setTimeout(() => onFinish(task), 760);
   };
@@ -30,6 +33,7 @@ function TaskRow({ task, first, onFinish }) {
         <SwipeToDone onDone={finish} disabled={ticked}>
           <div className="task-row" data-state={task.state} data-ticked={ticked ? '' : undefined}>
             <button
+              ref={tick}
               type="button"
               onClick={finish}
               aria-label={tr('Mark "{0}" as done', task.title)}

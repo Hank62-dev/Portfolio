@@ -12,6 +12,7 @@ import { useFab } from '../../core/fab';
 import { useStore } from '../../core/store';
 import { isDemo } from '../../core/demo/mode';
 import { tr } from '../../core/i18n/lang';
+import { celebrate } from '../../core/celebrate';
 
 // each habit picks one of these; they are drawn with the icon library, never as emoji
 const ICONS = { sprout: Sprout, book: BookOpen, run: Dumbbell, water: Droplets, mind: Brain, write: PenLine, music: Music2, sleep: Moon, walk: Footprints, eat: Apple, ride: Bike, coffee: Coffee };
@@ -132,8 +133,9 @@ function HabitRow({ habit, mood, onEdit }) {
           role="checkbox"
           aria-checked={done}
           aria-label={`${habit.name}: ${done ? tr('done today') : tr('mark done today')}`}
-          onClick={() => {
+          onClick={(event) => {
             navigator.vibrate?.(done ? 4 : 10);
+            if (!done) celebrate(event, { count: 18 });
             set(today);
           }}
           className={clsx('grid size-12 shrink-0 place-items-center rounded-full border-2 transition-all active:scale-90', done ? 'text-ink-0' : 'text-transparent hover:text-bone-faint')}

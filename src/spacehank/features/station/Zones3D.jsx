@@ -10,8 +10,8 @@ import { tr } from '../../core/i18n/lang';
 // whose lid closes over a sleeper and opens again, round a moon lamp). A deck lights up, slowly, as people come in, and every
 // change (a lid, a light, the hologram) eases to where it goes instead of jumping.
 
-export const ZONE_COLOR = { work: '#7fb0ff', meeting: '#ffc46b', lounge: '#6be0c0', sleep: '#b49cff' };
-export const zoneName = (id) => ({ work: tr('Work deck'), meeting: tr('Meeting room'), lounge: tr('Lounge'), sleep: tr('Sleeping quarters') })[id];
+export const ZONE_COLOR = { work: '#7fb0ff', meeting: '#ffc46b', lounge: '#6be0c0', sleep: '#b49cff', canteen: '#ff9b6b' };
+export const zoneName = (id) => ({ work: tr('Work deck'), meeting: tr('Meeting room'), lounge: tr('Lounge'), sleep: tr('Sleeping quarters'), canteen: tr('Canteen') })[id];
 
 /** Eases `now` toward `goal`, `speed` a second: for lights, lids and sizes that change smoothly. */
 const ease = (now, goal, delta, speed = 3) => now + (goal - now) * Math.min(1, delta * speed);
@@ -24,7 +24,7 @@ const at = (radius, angle, y = 0) => [radius * Math.sin(angle), y, radius * Math
  * A side deck: a disc with floor lines, a glass rail with an opening for the bridge, struts and a hub underneath, a glowing
  * rim and a light that brighten as people come in (`crowd`), and its name over it (tapping it flies the camera there).
  */
-function SideDeck({ zone, color, onFocus, crowd = 0, paused, children }) {
+export function SideDeck({ zone, color, onFocus, crowd = 0, paused, children }) {
   const light = useRef();
   const rim = useRef();
   const lines = useRef();
@@ -216,7 +216,7 @@ export function Bridge({ to, paused }) {
 }
 
 /** A potted plant that sways a little. */
-function Plant({ position, scale = 1, paused, hue = '#3fbf8a' }) {
+export function Plant({ position, scale = 1, paused, hue = '#3fbf8a' }) {
   const leaves = useRef();
   const k = position[0] * 1.7 + position[2];
   useFrame(({ clock }) => {

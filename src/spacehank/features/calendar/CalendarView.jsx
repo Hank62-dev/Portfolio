@@ -100,9 +100,12 @@ function MonthView({ anchor, today, selected, days, onSelect, onOpen, onAdd, can
   const grid = useMemo(() => monthGrid(anchor), [anchor]);
   const names = useMemo(() => weekOf(anchor).map((key) => fmt(key, { weekday: 'short' })), [anchor]);
   const list = days.get(selected) ?? [];
+  // which way the months went, so the new one flips over from that side like the leaf of a wall calendar
+  const [seen, setSeen] = useState({ anchor, way: '' });
+  if (seen.anchor !== anchor) setSeen({ anchor, way: anchor > seen.anchor ? 'next' : 'back' });
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_21rem]">
-      <div key={anchor} className="animate-fade-in rounded-[1.75rem] ink-tile p-2 md:p-3" data-month>
+      <div key={anchor} className={clsx('rounded-[1.75rem] ink-tile p-2 md:p-3', seen.way ? 'month-flip' : 'animate-fade-in')} data-flip={seen.way || undefined} data-month>
         <div className="grid grid-cols-7 pb-1 text-center font-mono text-[0.66rem] tracking-wide text-bone-faint uppercase">
           {names.map((name) => (
             <span key={name} className="py-1">

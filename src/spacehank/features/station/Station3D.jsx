@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Vector3 } from 'three';
+import { Bloom, EffectComposer } from '@react-three/postprocessing';
 import { Html, OrbitControls, QuadraticBezierLine, RoundedBox, Sparkles, Stars, Trail } from '@react-three/drei';
 import { CORE, HEAD_HEIGHT, RING_RADIUS, along, ease, flightMid, ringSeats, statusTone } from './model';
 import { shortName, statusWord } from './parts';
@@ -8,6 +9,7 @@ import { outfitOf } from './outfits';
 import { moodOf } from './banter';
 import { useBanter } from './useBanter';
 import { PODS, SIDE_ZONES, WALK_SPEED, WORK_DECK, ZONES, alongPath, measure, pathBetween, placeCrew, roomsOf } from './layout';
+import CanteenDeck from './CanteenDeck3D';
 import { Bridge, LoungeDeck, MeetingDeck, SleepDeck, ZONE_COLOR, zoneName } from './Zones3D';
 import { Desk, WorkDeck } from './WorkDeck3D';
 import { tr } from '../../core/i18n/lang';
@@ -76,7 +78,11 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
   useEffect(() => () => briefTimers.current.forEach(clearTimeout), []);
   const briefKey = [...briefed].sort().join(',');
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const places = useMemo(() => placeCrew(crew, placeSlot, briefed), [crew, placeSlot, briefKey]);
+  // the station keeps the owner's clock: at lunch and dinner the free crew go down to the canteen
+  const places = useMemo(() => {
+    const now = new Date();
+    return placeCrew(crew, placeSlot, briefed, now.getHours() + now.getMinutes() / 60);
+  }, [crew, placeSlot, briefKey]);
   // who is on their way somewhere: they talk, play and count in a room only once they are there
   const [walking, setWalking] = useState(() => new Set());
   const onWalk = useCallback((id, on) => setWalking((now) => (now.has(id) === on ? now : on ? new Set([...now, id]) : new Set([...now].filter((x) => x !== id)))), []);
@@ -163,6 +169,7 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
         <MeetingDeck onFocus={focusOn} paused={paused} crowd={rooms.meeting.length} briefing={briefingNow} />
         <LoungeDeck onFocus={focusOn} paused={paused} playing={playing} crowd={rooms.lounge.length + (playing ? 2 : 0)} />
         <SleepDeck onFocus={focusOn} taken={pods} paused={paused} crowd={pods.length} />
+        <CanteenDeck onFocus={focusOn} paused={paused} crowd={rooms.canteen.length} />
 
         {crew.map((agent) => {
           const seat = seats.find((s) => s.id === agent.id);
@@ -220,13 +227,14 @@ export default function Station3D({ crew, handoffs, flights, selected, onSelect,
           onStart={grab}
           onEnd={letGo}
         />
+        <StationGlow phone={phone} />
       </Canvas>
     </>
   );
 }
 
 // one array for good: a new one on every render would put the controls' target back each time the crew's status changes
-const HOME_TARGET = [0, 0, -3];
+const HOME_TARGET = [0, 0, 0];
 const SPIN_AGAIN_MS = 8000;
 const FLY_SECONDS = 2.5;
 const WHISPER_SECONDS = 1.1;
@@ -236,8 +244,8 @@ const MOVE_MS = 90 * 1000;
 const BRIEF_MS = 26 * 1000;
 const MIRA = 'mira';
 const DECK = WORK_DECK;
-/** Where the camera rests when nothing is chosen: the whole station, all four decks, in view. */
-const home = (phone) => ({ position: phone ? [0, 64, 58] : [0, 30, 40], target: HOME_TARGET });
+/** Where the camera rests when nothing is chosen: the whole station, all five decks, in view. */
+const home = (phone) => ({ position: phone ? [0, 70, 66] : [0, 34, 46], target: HOME_TARGET });
 
 /** Where to look at a deck from: in front of it and above, the whole of it in view. */
 const zoneView = (id, phone) => {
@@ -738,6 +746,19 @@ function CrewMember({ agent, place, selected, arriving, onSelect, onWalk, paused
 }
 
 /** A faint, moving dashed arc from whoever gave a task to the crew member working on it. */
+/**
+ * The light of the station: only what is drawn brighter than white (the craft in flight and its trail, the sparks of a word
+ * on its way, the core's light) blooms into a soft glow. Everything else keeps its own colours: a lower threshold lit the
+ * whole deck up and washed it out.
+ */
+function StationGlow({ phone }) {
+  return (
+    <EffectComposer multisampling={phone ? 0 : 4} enableNormalPass={false}>
+      <Bloom mipmapBlur intensity={0.6} luminanceThreshold={1} luminanceSmoothing={0.1} levels={phone ? 4 : 5} />
+    </EffectComposer>
+  );
+}
+
 function Link({ from, to, color, paused }) {
   const line = useRef();
   const mid = useMemo(() => flightMid(from, to), [from, to]);

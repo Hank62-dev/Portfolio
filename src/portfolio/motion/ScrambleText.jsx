@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { gsap, MOTION, ScrollTrigger } from './gsap';
-import { scrambleFrame } from './text';
+import { scrambleFrame } from '../../shared/fx/scramble';
 
 /**
  * Text that resolves out of random glyphs, once when it enters the viewport and again on hover.

@@ -5,6 +5,8 @@ import { CONDITION_TEXT } from './weather';
 import { getLang, locale, tr } from '../../core/i18n/lang';
 import QuickInput from './QuickInput';
 import { skyOf } from './sky';
+import { useCallback, useState } from 'react';
+import SkyShader from './SkyShader';
 
 const ICONS = { clear: Sun, partly: CloudSun, cloudy: Cloud, fog: CloudFog, drizzle: CloudDrizzle, rain: CloudRain, snow: CloudSnow, storm: CloudLightning };
 
@@ -27,6 +29,9 @@ export default function SkyHero({ owner = true, onNotify }) {
   const wet = kind === 'drizzle' || kind === 'rain' || kind === 'storm';
   // by day the clouds drift across; at night the stars are out instead
   const daylight = 1 - sky.stars;
+  // once the sky is drawn by the shader, the CSS clouds and rain step aside
+  const [gl, setGl] = useState(false);
+  const ready = useCallback(() => setGl(true), []);
   const ridge = (from, mix) => `color-mix(in srgb, ${from} ${mix}%, hsl(232 38% 5%))`;
 
   return (
@@ -34,6 +39,7 @@ export default function SkyHero({ owner = true, onNotify }) {
       className="sky-hero"
       style={{ '--sky-top': sky.top, '--sky-mid': sky.mid, '--sky-low': sky.low, '--orb-x': `${sky.orb.x}%`, '--orb-y': `${sky.orb.y}%` }}
       data-sky-hero
+      data-gl={gl ? '' : undefined}
     >
       {/* the sky is the background of the top of the page: it runs edge to edge, behind the cards that follow, and thins out downward */}
       <div className="sky-bg" aria-hidden="true">
@@ -48,6 +54,7 @@ export default function SkyHero({ owner = true, onNotify }) {
         {wet && <span className="wx-rain" data-heavy={kind === 'storm' ? '' : undefined} />}
         {kind === 'snow' && <span className="wx-snow" />}
         {kind === 'storm' && <span className="wx-flash" />}
+        <SkyShader sky={sky} kind={kind} onReady={ready} />
       </div>
       <span className="sky-orb" data-kind={sky.orb.kind} aria-hidden="true" />
       {/* the horizon: three ridges, the far one pale with the sky and the near one nearly black, which melt into the page below */}

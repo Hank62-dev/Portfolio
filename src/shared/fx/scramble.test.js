@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { scrambleFrame } from './text';
+import { scrambleFrame } from './scramble';
 
 describe('scrambleFrame', () => {
   it('keeps the settled prefix and scrambles the rest', () => {

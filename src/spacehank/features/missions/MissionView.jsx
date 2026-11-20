@@ -9,6 +9,8 @@ import { missions } from './store';
 import { hueOf } from '../notes/notes';
 import { useStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
+import { celebrate } from '../../core/celebrate';
+import { canMove } from '../../../shared/fx/gate';
 
 // each column has its own icon and colour, so the board reads at a glance
 const COLUMN_STYLE = {
@@ -205,8 +207,30 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
 
   const byColumn = useMemo(() => Object.fromEntries(COLUMNS.map((c) => [c.id, inColumn(cards, c.id)])), [cards]);
 
-  const move = (card, column, index = 99) => {
+  const move = (card, column, index = 99, from) => {
     void missions.putMany(moveCard(cards, card.id, column, index));
+    if (column === 'done' && card.column !== 'done') celebrate(from ?? document.querySelector('[data-column="done"]'), { count: 24 });
+  };
+
+  // a card picked up is lifted off the board: the picture that follows the pointer is tilted the way it was grabbed (held by
+  // its right side, it swings left) with a deep shadow, and the card left behind fades to a slot
+  const lift = (event, card) => {
+    event.dataTransfer.setData('text/plain', card.id);
+    event.dataTransfer.effectAllowed = 'move';
+    const el = event.currentTarget;
+    el.classList.add('is-lifted');
+    el.addEventListener('dragend', () => el.classList.remove('is-lifted'), { once: true });
+    if (!canMove() || typeof event.dataTransfer.setDragImage !== 'function') return;
+    const r = el.getBoundingClientRect();
+    const grab = (event.clientX - r.left) / r.width - 0.5;
+    const ghost = el.cloneNode(true);
+    ghost.classList.remove('is-lifted');
+    ghost.classList.add('card-ghost');
+    ghost.style.width = `${r.width}px`;
+    ghost.style.setProperty('--tilt', `${(-grab * 9).toFixed(1)}deg`);
+    document.body.appendChild(ghost);
+    event.dataTransfer.setDragImage(ghost, event.clientX - r.left, event.clientY - r.top);
+    requestAnimationFrame(() => ghost.remove());
   };
 
   const hand = async (card) => {
@@ -233,7 +257,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
     if (!card) return;
     const nodes = [...e.currentTarget.querySelectorAll('[data-card]')].filter((n) => n.dataset.card !== id);
     const index = nodes.filter((n) => n.getBoundingClientRect().top + n.getBoundingClientRect().height / 2 < e.clientY).length;
-    move(card, column, index);
+    move(card, column, index, e);
     if (column === 'agent' && !card.agent) setOpen({ ...card, column });
   };
 
@@ -317,7 +341,7 @@ export default function MissionView({ agents, events, onNewTask, onNotify, conne
             )}
             <ul className="flex flex-1 flex-col gap-2.5">
               {byColumn[column.id].map((card) => (
-                <CardView key={card.id} card={card} agents={agents} onOpen={setOpen} onMove={move} onDragStart={(e, c) => e.dataTransfer.setData('text/plain', c.id)} />
+                <CardView key={card.id} card={card} agents={agents} onOpen={setOpen} onMove={move} onDragStart={lift} />
               ))}
               {!byColumn[column.id].length && <li className="m-auto px-4 py-6 text-center font-mono text-[0.72rem] text-bone-faint">{column.hint}</li>}
             </ul>

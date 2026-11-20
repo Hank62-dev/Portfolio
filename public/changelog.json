@@ -1,5 +1,12 @@
 [
   {
+    "id": "spacehank-effects-canteen",
+    "version": "1.37.0",
+    "date": "2026-11-20",
+    "vi": "SpaceHank đẹp hơn: chữ bụi ở màn đăng nhập, vệt màu khi chuyển tab, âm thanh tuỳ chọn, bầu trời mây mưa thật, quả cầu RAG lỏng, Constellation 3D, Git Bash màn CRT, mực loang theo giọng và cọ mực; SpaceWorkAI có thêm nhà ăn.",
+    "en": "A livelier SpaceHank: dust on the sign-in, a colour wipe between tabs, optional sounds, a real cloudy sky, a liquid RAG orb, Constellation in 3D, a CRT Git Bash, voice ink and an ink brush; SpaceWorkAI gets a canteen."
+  },
+  {
     "id": "portfolio-xray-dust-guestbook",
     "version": "1.36.0",
     "date": "2026-11-16",

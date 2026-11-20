@@ -132,6 +132,7 @@
     },
     "Pulse": {
       "parts": [
+        "heartbeat",
         "overall",
         "service"
       ],
@@ -148,6 +149,7 @@
     },
     "Shell": {
       "parts": [
+        "crt",
         "shell-output"
       ],
       "heading": null
@@ -167,7 +169,8 @@
     "Wallet": {
       "parts": [
         "figures",
-        "month"
+        "month",
+        "wallet-balance"
       ],
       "heading": "My Wallet."
     }

@@ -1,4 +1,5 @@
 import { tr } from '../../core/i18n/lang';
+import Develop, { LiquidFilter } from './Develop';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BookmarkPlus, Download, Heart, ImagePlus, LockKeyhole, Palette, RotateCcw, Shapes, Sparkles, Trash2, Wand2 } from 'lucide-react';
 import { Badge, Button, Loading, Skeleton } from '../../../shared/ui';
@@ -85,7 +86,7 @@ function Thumb({ record, selected, onSelect }) {
         aria-current={selected}
         className={clsx('group relative block aspect-square w-full overflow-hidden rounded-xl bg-ink-2 ring-2 transition-all hover:scale-[1.02]', selected ? 'ring-signal' : 'ring-transparent hover:ring-line-strong')}
       >
-        {url && <img src={url} alt={record.prompt} className="size-full object-cover" loading="lazy" />}
+        {url && <img src={url} alt={record.prompt} className="liquid-hover size-full object-cover" loading="lazy" />}
         {record.favorite && (
           <span className="absolute top-1.5 right-1.5 grid size-6 place-items-center rounded-full bg-black/55 text-signal backdrop-blur">
             <Heart size={12} fill="currentColor" aria-hidden="true" />
@@ -116,6 +117,7 @@ function Stage({ record, busy, shape, onFavorite, onReuse, onRemove }) {
         {record && url && !busy ? (
           <>
             <img src={url} alt={record.prompt} className="max-h-[62vh] w-auto max-w-full object-contain" />
+            <Develop key={record.id} />
             <div className="absolute inset-x-0 bottom-0 flex items-center gap-1.5 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10">
               <Button variant="secondary" size="icon" aria-label={tr('Favorite')} aria-pressed={record.favorite} className={record.favorite ? 'text-signal' : ''} onClick={() => onFavorite(record)}>
                 <Heart size={15} fill={record.favorite ? 'currentColor' : 'none'} aria-hidden="true" />
@@ -434,6 +436,7 @@ export default function StudioView({ locked = false }) {
   const [tab, setTab] = useState('images');
   return (
     <div className="flex flex-col gap-6">
+      <LiquidFilter />
       <header className="flex flex-wrap items-end justify-between gap-4 max-md:justify-start">
         <div className="max-md:hidden">
           <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Design / Studio')}</span>

@@ -1,4 +1,5 @@
 import { tr } from '../../core/i18n/lang.js';
+import { createInk } from './ink.js';
 import { HISTORY_LIMIT, bboxOf, cropData, floodRegion, hexToRgba, layerAfterRemoving, moveLayer, newLayerMeta, nextLayerName, paintMask } from './model.js';
 
 // The drawing itself: a stack of canvases (one for each layer) with the tools that draw on them, the undo history, and the way
@@ -364,7 +365,17 @@ export class PaintEngine {
       return false;
     }
     if (tool === 'text') return false;
+    // ink from the last stroke that is still spreading is printed now, so this stroke starts from it
+    this.ink?.flush();
     const before = layer.ctx.getImageData(0, 0, this.width, this.height);
+    if (tool === 'ink') {
+      const ink = createInk({ width: this.width, height: this.height, host: this.host, color: this.color });
+      if (!ink) return false;
+      this.ink = ink;
+      this.op = { tool, layer, before, points: [p], start: p, end: p, mid: p, dx: 0, dy: 0, ink };
+      ink.stroke(p, p, this.size);
+      return true;
+    }
     this.op = { tool, layer, before, points: [p], start: p, end: p, mid: p, dx: 0, dy: 0 };
     if (tool === 'pen' || tool === 'eraser') {
       const ctx = layer.ctx;
@@ -403,7 +414,11 @@ export class PaintEngine {
   move(p, shift = false) {
     const op = this.op;
     if (!op) return;
-    if (op.tool === 'pen' || op.tool === 'eraser' || op.tool === 'marker') {
+    if (op.tool === 'ink') {
+      const last = op.points.at(-1);
+      op.points.push(p);
+      op.ink.stroke(last, p, this.widthAt(p));
+    } else if (op.tool === 'pen' || op.tool === 'eraser' || op.tool === 'marker') {
       const last = op.points.at(-1);
       op.points.push(p);
       const mid = { x: (last.x + p.x) / 2, y: (last.y + p.y) / 2 };
@@ -430,6 +445,17 @@ export class PaintEngine {
     this.op = null;
     const { layer, tool, before } = op;
     const ctx = layer.ctx;
+    if (tool === 'ink') {
+      // the ink spreads a moment longer, then is printed onto the layer as one step of history
+      op.ink.settle((canvas) => {
+        if (this.ink === op.ink) this.ink = null;
+        ctx.drawImage(canvas, 0, 0, this.width, this.height);
+        const rect = { x: 0, y: 0, w: this.width, h: this.height };
+        this.remember({ kind: 'pixels', id: layer.id, rect, before: cropData(before, rect), after: ctx.getImageData(0, 0, this.width, this.height) });
+        this.changed();
+      });
+      return;
+    }
     let rect;
     if (tool === 'pen' || tool === 'eraser') {
       const last = op.points.at(-1);
@@ -477,6 +503,10 @@ export class PaintEngine {
     const op = this.op;
     if (!op) return;
     this.op = null;
+    if (op.ink) {
+      op.ink.dispose();
+      if (this.ink === op.ink) this.ink = null;
+    }
     this.clearPreview();
     op.layer.canvas.style.transform = '';
     op.layer.ctx.putImageData(op.before, 0, 0);

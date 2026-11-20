@@ -10,6 +10,7 @@ import { library } from '../features/music/library';
 import { playTrack } from '../features/music/player';
 import { useStore } from '../core/store';
 import { tr } from '../core/i18n/lang';
+import Decode from '../../shared/fx/Decode';
 import { useDebounce } from '../../shared/hooks/useDebounce';
 
 const MAX_TRACKS = 6;
@@ -204,7 +205,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
                     className={clsx('relative flex cursor-pointer items-center gap-3 rounded-sm px-3 py-2.5', index === active ? 'text-bone' : 'text-bone-dim')}
                   >
                     {Icon && <Icon size={16} className={index === active || command.id === ASK_ID || command.id === ASK_DATA_ID ? 'text-signal' : 'text-bone-faint'} aria-hidden="true" />}
-                    <span className="flex-1 truncate text-fine">{command.label}</span>
+                    {index < 6 ? <Decode text={command.label} className="flex-1 truncate text-fine" delay={index * 25} duration={320} /> : <span className="flex-1 truncate text-fine">{command.label}</span>}
                     {command.hint && <span className="shrink-0 font-mono text-[0.72rem] text-bone-faint">{command.hint}</span>}
                     {index === active && <CornerDownLeft size={13} className="shrink-0 text-bone-faint" aria-hidden="true" />}
                   </li>
@@ -222,9 +223,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
                 <>
                   <div>
                     <span className="font-mono text-[0.72rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Hank understood')}</span>
-                    <p className="mt-1 font-display text-h3 leading-tight text-bone" data-understood>
-                      {ask.parsed.describe}
-                    </p>
+                    <Decode as="p" text={ask.parsed.describe} className="mt-1 block font-display text-h3 leading-tight text-bone" />
                   </div>
                   <div className="flex items-center gap-2">
                     <Button size="sm" onClick={confirm}>

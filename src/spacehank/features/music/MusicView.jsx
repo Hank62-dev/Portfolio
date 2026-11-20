@@ -44,10 +44,11 @@ import {
   removeSamples,
   toggleFavorite,
 } from './library';
-import { cycleRepeat, next, playList, player, playTrack, previous, seek, setSleepTimer, setVolume, toggleShuffle, togglePlay } from './player';
+import { cycleRepeat, getAnalyser, next, playList, player, playTrack, previous, seek, setSleepTimer, setVolume, toggleShuffle, togglePlay } from './player';
 import Lyrics from './Lyrics';
 import { MOODS, Orbit, SheetRow, Slider, matches } from './parts';
 import RadialVisualizer from './RadialVisualizer';
+import SoundAura from './SoundAura';
 import { musicUi } from './ui';
 import { hidePlayer } from './morph';
 import MusicPhone from './MusicPhone';
@@ -250,6 +251,8 @@ function MusicDesktop() {
         <i className="room-blob absolute -top-1/4 -left-1/6 size-[70%] animate-[drift_22s_ease-in-out_infinite] rounded-full blur-[110px] transition-colors duration-1000" style={{ background: `rgb(${tint} / 0.42)` }} />
         <i className="room-blob absolute -right-1/6 bottom-[-20%] size-[65%] animate-[drift_28s_ease-in-out_infinite_reverse] rounded-full bg-[#8a3bff]/25 blur-[120px]" />
         <i className="room-blob absolute top-1/3 left-1/3 size-[40%] animate-[drift_34s_ease-in-out_infinite] rounded-full bg-signal/15 blur-[100px]" />
+        {/* over the drifting light, a light that moves with the sound itself */}
+        <SoundAura tint={tint} playing={playing} analyser={getAnalyser} className="opacity-90" />
       </div>
 
       {dragging && (

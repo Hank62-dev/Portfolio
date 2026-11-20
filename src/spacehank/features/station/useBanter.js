@@ -5,7 +5,7 @@ const TICK_MS = 500;
 const MOOD_MS = 45000;
 
 /**
- * Keeps the talks going between crew members in the same room (the lounge, the meeting room): up to two at once, a line
+ * Keeps the talks going between crew members in the same room (the lounge, the meeting room, the canteen): up to two at once, a line
  * every few seconds, a pause between talks. A talk ends early when one of the two leaves the room (a task, or the time to go
  * elsewhere). Stops while the station is paused.
  * Returns what is being said ({ [speakerId]: { text, to, key } }), who is in a talk, and the slot the idle moods follow.
@@ -40,7 +40,7 @@ export function useBanter(rooms, nameOf, paused) {
           if (slot && at < slot.waitUntil) return slot;
           // a free slot: the first talks in the lounge, the second at the meeting table, or wherever two are free to talk
           const taken = now.slots.flatMap((other, k) => (k !== index && other?.pair ? other.pair : []));
-          const order = index === 0 ? ['lounge', 'meeting'] : ['meeting', 'lounge'];
+          const order = index === 0 ? ['lounge', 'canteen', 'meeting'] : ['meeting', 'canteen', 'lounge'];
           let talk = null;
           for (const room of order) {
             talk = pickTalk((roomsNow[room] ?? []).filter((id) => !taken.includes(id)), Math.random, last.current, room);

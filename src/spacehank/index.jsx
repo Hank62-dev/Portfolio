@@ -18,6 +18,7 @@ const tabOf = (params, fallback) => {
   return NAVIGATION.some((item) => item.id === wanted) ? wanted : fallback;
 };
 import Workspace from './app/Workspace';
+import './fx.css';
 import { tr } from './core/i18n/lang';
 
 export default function SpaceHank() {

@@ -9,6 +9,7 @@ import { shows } from './store';
 import { openShow, podcastUi } from './ui';
 import { useStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
+import SoundAura from '../music/SoundAura';
 
 // Pieces of the Podcasts tab used on more than one of its pages: headings, alerts, the play ring, the bar of what is playing, an episode row.
 
@@ -52,6 +53,7 @@ export function NowPlaying() {
   const show = useStore(podcast, (s) => s.show);
   const episode = useStore(podcast, (s) => s.episode);
   const error = useStore(podcast, (s) => s.error);
+  const playing = useStore(podcast, (s) => s.playing);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -73,6 +75,8 @@ export function NowPlaying() {
   return (
     <section ref={ref} className="ink-panel relative flex flex-col gap-4 overflow-hidden rounded-3xl p-4 sm:p-5" aria-label={tr('Now playing')}>
       {(episode.image || show?.image) && <img src={episode.image || show.image} alt="" aria-hidden="true" referrerPolicy="no-referrer" className="pointer-events-none absolute inset-0 -z-10 size-full scale-125 object-cover opacity-20 blur-3xl" />}
+      {/* a light that breathes while the episode plays (the feeds' audio is on other hosts, so it cannot be analysed) */}
+      <SoundAura tint="150 105 255" playing={playing} className="-z-10 opacity-70" />
       <button type="button" onClick={close} aria-label={tr('Stop and close the episode')} title={tr('Stop and close the episode')} className="absolute top-3 right-3 grid size-8 place-items-center rounded-full text-bone-faint hover:bg-wash/10 hover:text-bone">
         <X size={16} aria-hidden="true" />
       </button>

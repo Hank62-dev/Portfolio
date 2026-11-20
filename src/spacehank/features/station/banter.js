@@ -115,7 +115,29 @@ export const MEETING_SCRIPTS = [
     [0, tr('Then we wait for the boss.')],
   ],
 ];
-const SETS = { lounge: SCRIPTS, meeting: MEETING_SCRIPTS };
+/** Over lunch in the canteen the talk is about the food (and a little about work). */
+export const CANTEEN_SCRIPTS = [
+  (b) => [
+    [0, tr('{0}, what did you get?', b)],
+    [1, tr('Phở. The broth is better than my code today.')],
+    [0, tr('Low bar. Still, good phở.')],
+  ],
+  () => [
+    [0, tr('Is the coffee in the machine still free?')],
+    [1, tr('Free, and it tastes free.')],
+  ],
+  () => [
+    [0, tr('I trained on a lot of recipes.')],
+    [1, tr('And yet you ordered rice again.')],
+    [0, tr('Rice is reliable. Like a good test.')],
+  ],
+  (b) => [
+    [0, tr('{0}, can I have your spring roll?', b)],
+    [1, tr('Only if you review my pull request.')],
+    [0, tr('Deal. Roll first.')],
+  ],
+];
+const SETS = { lounge: SCRIPTS, meeting: MEETING_SCRIPTS, canteen: CANTEEN_SCRIPTS };
 
 /** How long a line stays up, and how long a pair waits before the next talk. */
 export const LINE_MS = 3400;
@@ -166,6 +188,7 @@ export const moodOf = (id, tone, slot = 0, place = null) => {
   if (place?.pose === 'lie') return { icon: '💤', word: tr('Sleeping'), kind: 'sleep' };
   if (place?.game) return { icon: '🏓', word: tr('Playing ping-pong'), kind: 'idle' };
   if (place?.zone === 'meeting' && tone !== 'done' && tone !== 'failed') return { icon: '📋', word: tr('In a meeting'), kind: 'idle' };
+  if (place?.zone === 'canteen' && tone !== 'done' && tone !== 'failed') return { icon: '🍜', word: tr('Having a meal'), kind: 'idle' };
   if (tone === 'done') return { icon: '🎉', word: tr('Happy, task done'), kind: 'happy' };
   if (tone === 'failed') return { icon: '😢', word: tr('Sad, it failed'), kind: 'sad' };
   // with no worker connected and not in bed: off duty, so an idle mood like anyone free

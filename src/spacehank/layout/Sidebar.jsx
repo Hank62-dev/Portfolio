@@ -7,6 +7,7 @@ import Logo from '../../shared/ui/Logo';
 import { owner } from '../core/config';
 import { bySection, openModules, useNav } from '../core/modules';
 import { tr } from '../core/i18n/lang';
+import { sound } from '../core/sound';
 
 const ITEM =
   'relative flex w-full items-center gap-3 rounded-sm px-3 py-2.5 font-mono text-fine transition-colors duration-200';
@@ -16,6 +17,7 @@ function NavButton({ rail, active, label, icon: Icon, badge, onClick }) {
     <Tooltip content={label} disabled={!rail}>
       <button
         onClick={onClick}
+        onPointerEnter={(event) => event.pointerType === 'mouse' && sound.tick()}
         aria-label={rail ? label : undefined}
         aria-current={active ? 'page' : undefined}
         className={clsx(ITEM, rail && 'justify-center px-0', active ? 'bg-ink-3 text-bone' : 'text-bone-dim hover:bg-ink-2 hover:text-bone')}

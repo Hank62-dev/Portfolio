@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowUpRight, ChevronLeft, ChevronRight, Crosshair, Hand, Link2, Maximize2, Minimize2, Minus, Plus, RotateCcw, Search, X } from 'lucide-react';
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowUpRight, Box, ChevronLeft, ChevronRight, Crosshair, Hand, Link2, Maximize2, Minimize2, Minus, Plus, RotateCcw, Search, X } from 'lucide-react';
 import { Button } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import { clamp } from '../../../shared/lib/math';
@@ -11,6 +11,19 @@ import { excerpt, hueOf } from './notes';
 import { useStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
 import { useDebounce } from '../../../shared/hooks/useDebounce';
+import { canGL } from '../../../shared/fx/gate';
+import { useMediaQuery } from '../../../shared/hooks/useMediaQuery';
+
+// the sky in depth (three.js), downloaded only when it is switched on
+const Constellation3D = lazy(() => import('./Constellation3D'));
+const DEEP = 'spacehank.constellation.3d';
+const readDeep = () => {
+  try {
+    return localStorage.getItem(DEEP) === '1';
+  } catch {
+    return false;
+  }
+};
 
 // roomier than the default, so the stars and their names have space
 const SPACING = { repulsion: 5200, rest: 130 };
@@ -51,6 +64,17 @@ export default function ConstellationView({ onOpenNote }) {
   const [touched, setTouched] = useState(false);
   const [expanded, setExpanded] = useState(false); // the sky fills the whole screen
   const [order, setOrder] = useState('linked'); // how the list of stars is sorted: 'linked' | 'az' | 'alone'
+  const [canDeep] = useState(() => canGL());
+  const [deep, setDeep] = useState(() => canDeep && readDeep()); // the sky in 3D
+  const phone = !useMediaQuery('(min-width: 768px)');
+  const toggleDeep = () => {
+    setDeep(!deep);
+    try {
+      localStorage.setItem(DEEP, deep ? '0' : '1');
+    } catch {
+      /* for this visit */
+    }
+  };
   const searchBox = useRef(null);
 
   useEffect(() => {
@@ -779,7 +803,19 @@ export default function ConstellationView({ onOpenNote }) {
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className={clsx('dark-island overflow-hidden bg-[#07070a]', expanded ? 'fixed inset-0 z-[80]' : 'relative self-start rounded-3xl border border-line')} data-expanded={expanded ? '' : undefined}>
-          <canvas ref={canvas} className={clsx('block w-full cursor-grab touch-none', expanded ? 'h-[100dvh]' : 'h-[min(66dvh,600px)] min-h-[340px] max-sm:h-[62dvh]')} aria-label={tr('A map of your notes. Use the list beside it for a keyboard-friendly version.')} data-sky />
+          <canvas ref={canvas} className={clsx('block w-full cursor-grab touch-none', deep && 'invisible', expanded ? 'h-[100dvh]' : 'h-[min(66dvh,600px)] min-h-[340px] max-sm:h-[62dvh]')} aria-label={tr('A map of your notes. Use the list beside it for a keyboard-friendly version.')} data-sky />
+          {deep && (
+            <Suspense fallback={null}>
+              <Constellation3D
+                nodes={graph.nodes}
+                edges={graph.edges}
+                selected={selected}
+                onSelect={setSelected}
+                phone={phone}
+                dimmed={(n) => (tag && !n.tags.includes(tag)) || (frame.current.match ? !frame.current.match.has(n.id) : false)}
+              />
+            </Suspense>
+          )}
 
           {/* top left: find a star (the ones that match light up), and what the sky holds */}
           <div className="absolute top-3 right-16 left-3 flex flex-col items-start gap-2 sm:right-auto sm:w-72">
@@ -833,6 +869,11 @@ export default function ConstellationView({ onOpenNote }) {
             <button type="button" aria-label={fullLabel} title={`${fullLabel} (F)`} aria-pressed={expanded} onClick={() => setExpanded(!expanded)} className={clsx(glass, 'grid size-10 place-items-center rounded-full text-bone-dim transition-colors hover:text-bone active:scale-90 sm:size-9')}>
               {expanded ? <Minimize2 size={15} aria-hidden="true" /> : <Maximize2 size={15} aria-hidden="true" />}
             </button>
+            {canDeep && (
+              <button type="button" aria-label={tr('The sky in 3D')} title={tr('The sky in 3D')} aria-pressed={deep} onClick={toggleDeep} className={clsx(glass, 'grid size-10 place-items-center rounded-full transition-colors active:scale-90 sm:size-9', deep ? 'text-signal' : 'text-bone-dim hover:text-bone')}>
+                <Box size={15} aria-hidden="true" />
+              </button>
+            )}
           </div>
 
           {/* bottom: the chosen star's card (beside the sky on a wide screen, unless the sky fills the screen), else the tags */}

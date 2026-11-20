@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { GITHUB_USERNAME } from '../../../shared/profile';
 import { useLang } from '../../i18n';
-import { computeStreaks, heatmapCells, lastDays, sumCounts } from '../../lib/contributions';
+import { computeStreaks, heatmapCells, lastDays, sumCounts } from '../../../shared/lib/contributions';
 import { formatDate, timeAgo } from '../../../shared/lib/format';
 import SectionTitle from '../../components/SectionTitle';
 import Button from '../../../shared/ui/Button';

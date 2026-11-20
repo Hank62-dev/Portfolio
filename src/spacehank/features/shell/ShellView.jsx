@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { ChevronRight, CornerDownLeft } from 'lucide-react';
+import { ChevronRight, CornerDownLeft, MonitorDot } from 'lucide-react';
+import { canMove } from '../../../shared/fx/gate';
 import { Dots } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import { complete, parseLine, runLine } from './commands';
@@ -12,9 +13,39 @@ const BANNER = [
   { id: 'b2', kind: 'out', text: 'Type help for the commands. Up and down arrows bring back earlier lines, Tab completes, Ctrl+L clears.', tone: 'dim' },
 ];
 
+// The start-up the first time the shell is opened in a visit: a few lines of an old machine waking, typed in one by one.
+const BOOT_KEY = 'hank62.shell.booted';
+const CRT_KEY = 'hank62.shell.crt';
+const bootLines = (ctx) => [
+  { text: tr('HANK62 BIOS · SpaceHank OS'), tone: 'ok' },
+  { text: tr('Memory check … 640K OK'), tone: 'dim' },
+  { text: tr('Mounting /notes /missions /wallet … ok'), tone: 'dim' },
+  { text: tr('Waking the crew … {0} on board', ctx?.agents?.length ?? 0), tone: 'dim' },
+  { text: tr('Ready.'), tone: 'ok' },
+  { text: '', tone: 'dim' },
+];
+const remembered = (key, fallback) => {
+  try {
+    const value = (key === BOOT_KEY ? sessionStorage : localStorage).getItem(key);
+    return value === null ? fallback : value === '1';
+  } catch {
+    return fallback;
+  }
+};
+const remember = (key, on) => {
+  try {
+    (key === BOOT_KEY ? sessionStorage : localStorage).setItem(key, on ? '1' : '0');
+  } catch {
+    /* for this visit only */
+  }
+};
+
 /** A command line for the workspace: type a command, see what happened. The commands live in shell/commands.js. */
 export default function ShellView({ ctx }) {
-  const [lines, setLines] = useState(BANNER);
+  const [booting] = useState(() => canMove() && !remembered(BOOT_KEY, false));
+  const [lines, setLines] = useState(booting ? [] : BANNER);
+  // the look of an old monitor: scanlines, a glow on the letters, a curved dark edge (on by default, can be switched off)
+  const [crt, setCrt] = useState(() => remembered(CRT_KEY, true));
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);
   const history = useRef([]);
@@ -26,6 +57,15 @@ export default function ShellView({ ctx }) {
   useEffect(() => {
     field.current?.focus();
   }, []);
+  useEffect(() => {
+    if (!booting) return undefined;
+    remember(BOOT_KEY, true);
+    const steps = [...bootLines(ctx), ...BANNER];
+    const timers = steps.map((line, i) => window.setTimeout(() => setLines((old) => [...old, { ...line, kind: 'out', id: `boot${i}` }]), 140 + i * 170));
+    return () => timers.forEach(window.clearTimeout);
+    // the start-up plays once, with the crew as it was when the shell opened
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [booting]);
   useEffect(() => {
     end.current?.scrollIntoView({ block: 'end' });
   }, [lines, busy]);
@@ -73,7 +113,9 @@ export default function ShellView({ ctx }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <section
-        className="dark-island flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-wash/10 bg-[#08080b] bg-[radial-gradient(80%_60%_at_0%_0%,rgb(255_91_46/0.1),transparent_60%),radial-gradient(60%_60%_at_100%_100%,rgb(91_43_255/0.12),transparent_60%)] shadow-[0_30px_80px_-40px_rgb(var(--shadow-rgb)/0.9)]"
+        data-crt={crt ? '' : undefined}
+        data-booting={booting ? '' : undefined}
+        className="shell-screen dark-island flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border border-wash/10 bg-[#08080b] bg-[radial-gradient(80%_60%_at_0%_0%,rgb(255_91_46/0.1),transparent_60%),radial-gradient(60%_60%_at_100%_100%,rgb(91_43_255/0.12),transparent_60%)] shadow-[0_30px_80px_-40px_rgb(var(--shadow-rgb)/0.9)]"
         onClick={() => window.getSelection()?.isCollapsed && field.current?.focus()}
         aria-label={tr('Shell')}
       >
@@ -85,6 +127,19 @@ export default function ShellView({ ctx }) {
             <span className="ml-3 font-mono text-[0.72rem] text-bone-faint">{tr('hank@62: ~')}</span>
           </span>
           <div className="ml-auto flex flex-wrap gap-1.5" aria-label={tr('Try one')}>
+            <button
+              type="button"
+              aria-pressed={crt}
+              aria-label={tr('Old monitor look')}
+              title={tr('Old monitor look')}
+              onClick={() => {
+                setCrt(!crt);
+                remember(CRT_KEY, !crt);
+              }}
+              className={clsx('grid size-6 place-items-center rounded-full border transition-colors', crt ? 'border-signal/60 text-signal' : 'border-wash/10 text-bone-faint hover:text-bone')}
+            >
+              <MonitorDot size={12} aria-hidden="true" />
+            </button>
             {QUICK.map((q) => (
               <button key={q} type="button" onClick={() => run(q)} className="rounded-full border border-wash/10 px-2.5 py-0.5 font-mono text-[0.72rem] text-bone-dim transition-colors hover:border-signal/60 hover:text-bone">
                 {q}
@@ -93,7 +148,7 @@ export default function ShellView({ ctx }) {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 font-mono text-[0.84rem] leading-relaxed" role="log" aria-live="polite" data-shell-output>
+        <div className="shell-output relative min-h-0 flex-1 overflow-y-auto px-4 py-3 font-mono text-[0.84rem] leading-relaxed" role="log" aria-live="polite" data-shell-output>
           {lines.map((l) =>
             l.kind === 'in' ? (
               <p key={l.id} className="mt-2 text-bone">

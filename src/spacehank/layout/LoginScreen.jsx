@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Logo from '../../shared/ui/Logo';
 import { Button, Card, ErrorState, Eyebrow, Field, Input, Loading, Skeleton } from '../../shared/ui';
 import { tr } from '../core/i18n/lang';
+import LoginDust from './LoginDust';
 
 const messageFor = (error) => {
   if (error.message === 'Failed to fetch') return tr('Realtime server is unreachable. Check that it is running.');
@@ -121,7 +122,10 @@ export default function LoginScreen({ onLogin, onGuest }) {
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-ink-0 px-gutter py-10">
+    <div className="relative grid min-h-screen place-items-center bg-ink-0 px-gutter py-10">
+      <span className="login-bg" aria-hidden="true" />
+      <div className="relative z-[1] flex w-full max-w-[720px] flex-col items-center gap-2">
+      <LoginDust />
       <Card as="form" onSubmit={submit} className="flex w-full max-w-[420px] flex-col gap-5 p-7 shadow-pop">
         <Logo className="size-12 rounded-lg" />
         <div>
@@ -159,6 +163,7 @@ export default function LoginScreen({ onLogin, onGuest }) {
         )}
         <small className="text-center font-mono text-fine text-bone-faint">{tr('Session protected · 12 hour expiry')}</small>
       </Card>
+      </div>
     </div>
   );
 }

@@ -13,6 +13,7 @@ import { THEME_CHOICES } from '../layout/ThemeMenu';
 import Sidebar from '../layout/Sidebar';
 import TaskModal from '../features/station/TaskModal';
 import Topbar from '../layout/Topbar';
+import TabWipe from '../layout/TabWipe';
 import { askNotes, interpretCommand } from '../core/api/owner';
 import { buildCatalog, validate } from '../layout/nlcommands';
 import { DEFAULT_TAB, NAVIGATION, SKY_TABS, tabHue } from '../core/navigation';
@@ -36,6 +37,8 @@ import { library, loadLibrary } from '../features/music/library';
 import { syncBundledMusic } from '../features/music/bundled';
 import Fab from '../layout/Fab';
 import FocusWidget from '../features/focus/FocusWidget';
+import { focus } from '../features/focus/store';
+import { celebrate } from '../core/celebrate';
 import ShareSheet from '../features/share/ShareSheet';
 import NowPlayingBar from '../features/music/NowPlayingBar';
 import PodcastBar from '../features/podcast/PodcastBar';
@@ -111,6 +114,15 @@ export default function Workspace({
   const [paletteOpen, setPaletteOpen] = useState(false);
   const shellRef = useRef(null);
   useCardGlow(shellRef);
+  // a focus block that ran to its end is celebrated wherever the owner is (from the timer, or the middle of the screen)
+  useEffect(() => {
+    let was = focus.get().status;
+    return focus.subscribe(() => {
+      const { status, mode } = focus.get();
+      if (status === 'done' && was === 'running' && mode === 'focus') celebrate(document.querySelector('[data-focus-widget] [role="img"], [data-focus-widget]') ?? null, { count: 34 });
+      was = status;
+    });
+  }, []);
   // which way the screen came from: a place further along the menu slides in from the right, an earlier one from the left
   const order = (id) => NAVIGATION.findIndex((item) => item.id === id);
   const [nav, setNav] = useState({ tab, way: '' });
@@ -385,6 +397,7 @@ export default function Workspace({
           <div className="relative isolate flex min-h-0 min-w-0 flex-1 flex-col overflow-x-clip">
             {/* the tab's colour, glowing in the top corner behind the bar and the page alike, so the bar is not a band of its own */}
             {!SKY_TABS.includes(tab) && <span aria-hidden="true" className="tab-glow" />}
+            <TabWipe key={`wipe-${tab}`} hue={tabHue(tab)} way={nav.way} />
             <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} onCapture={(event) => openCapture('', event)} />
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (podFront || (music && hasTrack) ? 'pb-60' : 'pb-36') : podFront ? 'pb-28' : music && hasTrack && tab !== 'music' && 'pb-28')}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}

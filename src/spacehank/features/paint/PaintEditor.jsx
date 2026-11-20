@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, BookHeart, Check, Circle, Eraser, Grid3x3, Hand, Highlighter, ImagePlus, Layers, Maximize, Minus, Move, MoveUpRight, MoreHorizontal, NotebookPen, PaintBucket, Pencil, Pipette, Redo2, RotateCcw, RotateCw, Slash, Square, Type, Undo2 } from 'lucide-react';
+import { ArrowLeft, BookHeart, Droplets, Check, Circle, Eraser, Grid3x3, Hand, Highlighter, ImagePlus, Layers, Maximize, Minus, Move, MoveUpRight, MoreHorizontal, NotebookPen, PaintBucket, Pencil, Pipette, Redo2, RotateCcw, RotateCw, Slash, Square, Type, Undo2 } from 'lucide-react';
 import { clsx } from '../../../shared/lib/format';
 import { tr } from '../../core/i18n/lang';
 import { PaintEngine } from './engine';
+import { canInk } from './ink';
 import { fitView, zoomAt } from './model';
 import { newDrawingId, saveDrawing } from './store';
 import { sendToDiary, sendToNote } from './share';
@@ -15,6 +16,8 @@ import { ToolButton, ColorPanel, SizePanel, LayersPanel, Menu, MenuItem } from '
 const TOOLS = [
   { id: 'pen', icon: Pencil, label: tr('Pen'), key: 'p' },
   { id: 'marker', icon: Highlighter, label: tr('Highlighter'), key: 'h' },
+  // ink that bleeds like on wet paper (a real fluid), where the device can run it
+  ...(typeof window !== 'undefined' && canInk() ? [{ id: 'ink', icon: Droplets, label: tr('Ink'), key: 'k' }] : []),
   { id: 'eraser', icon: Eraser, label: tr('Eraser'), key: 'e' },
   { id: 'fill', icon: PaintBucket, label: tr('Fill'), key: 'g' },
   { id: 'pick', icon: Pipette, label: tr('Pick a colour'), key: 'i' },

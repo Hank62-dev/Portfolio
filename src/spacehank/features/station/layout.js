@@ -1,7 +1,7 @@
 import { RING_RADIUS, ringSeats, statusTone } from './model';
 
 // Where everyone is on the station. The work deck is the round one in the middle (the owner's core and every desk); round it,
-// over glass bridges, a meeting room, a lounge and the sleeping quarters. Whoever works sits at their desk; the others spend
+// over glass bridges, a meeting room, a lounge, the sleeping quarters and the canteen. Whoever works sits at their desk; the others spend
 // their time in the lounge or the meeting room, and those with no worker connected now and then go to sleep in a pod. Where a
 // free one goes changes every while (`slot`), the same for the same slot, so every render agrees and nothing jumps about.
 
@@ -12,8 +12,9 @@ export const ZONES = {
   meeting: { id: 'meeting', x: 0, z: -(WORK_DECK + 11), radius: 4.6 },
   lounge: { id: 'lounge', x: WORK_DECK + 12, z: 1.5, radius: 6 },
   sleep: { id: 'sleep', x: -(WORK_DECK + 11.5), z: 1.5, radius: 5.2 },
+  canteen: { id: 'canteen', x: 0, z: WORK_DECK + 11, radius: 5.4 },
 };
-export const SIDE_ZONES = ['meeting', 'lounge', 'sleep'];
+export const SIDE_ZONES = ['meeting', 'lounge', 'sleep', 'canteen'];
 
 /** A spot round a centre, facing it: `angle` is the way out from the centre (the seat's own frame looks back at it). */
 const around = (zone, count, radius, start = 0) =>
@@ -37,20 +38,44 @@ const LOUNGE_SPOTS = [
 ];
 export const PODS = around(ZONES.sleep, 11, 3.3, Math.PI / 11);
 
+// the canteen has two long tables running away from the door, a bench down each side of each, three places a side; the
+// serving counter stands by the door on one side and the drinks machine on the other, both facing into the room
+export const CANTEEN_TABLES = [
+  { x: ZONES.canteen.x - 1.7, z: ZONES.canteen.z + 0.7 },
+  { x: ZONES.canteen.x + 1.7, z: ZONES.canteen.z + 0.7 },
+];
+export const CANTEEN_COUNTER = { x: ZONES.canteen.x + 2.45, z: ZONES.canteen.z - 3.05 };
+const CANTEEN_SPOTS = CANTEEN_TABLES.flatMap((table) =>
+  [-1, 1].flatMap((side) =>
+    [-1, 0, 1].map((row) => {
+      const x = +(table.x + side * 0.82).toFixed(4);
+      const z = +(table.z + row * 0.95).toFixed(4);
+      // the angle is the way out from the table, so whoever sits there faces it
+      return { zone: 'canteen', x, z, angle: Math.atan2(x - table.x, 0) };
+    })
+  )
+);
+
+/** Whether `hour` (0..24, minutes as a fraction) is a mealtime: lunch from 11:30 to 13:30, dinner from 18:00 to 20:00. */
+export const mealtime = (hour) => hour != null && ((hour >= 11.5 && hour < 13.5) || (hour >= 18 && hour < 20));
+
 const NONE = new Set();
 const hash = (text) => [...text].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
 
 /**
  * Where a crew member wants to be for this slot: in the meeting room while Mira briefs them on a task she handed them, at
- * their desk while working, otherwise lounge, meeting room or bed.
+ * their desk while working, otherwise lounge, meeting room, canteen or bed. At mealtimes (`hour`, the station's clock) most of
+ * the free ones go and eat; the rest of the day only now and then someone drops in for a snack. Without an hour there are no
+ * mealtimes, so the same slot always gives the same places.
  */
-export const zoneOf = (agent, slot, briefed = NONE) => {
+export const zoneOf = (agent, slot, briefed = NONE, hour = null) => {
   if (briefed.has(agent.id)) return 'meeting';
   const tone = statusTone(agent.status);
   if (tone === 'busy') return 'work';
   const roll = hash(`${agent.id}#${slot}`) % 10;
-  if (tone === 'offline') return roll < 4 ? 'sleep' : roll < 8 ? 'lounge' : 'meeting';
-  return roll < 7 ? 'lounge' : 'meeting';
+  if (mealtime(hour) && roll < 7) return 'canteen';
+  if (tone === 'offline') return roll < 4 ? 'sleep' : roll < 7 ? 'lounge' : roll < 9 ? 'meeting' : 'canteen';
+  return roll < 6 ? 'lounge' : roll < 9 ? 'meeting' : 'canteen';
 };
 
 /**
@@ -60,16 +85,16 @@ export const zoneOf = (agent, slot, briefed = NONE) => {
  * least three are there; whoever finds a room full goes to the lounge, then to bed. Those being briefed (`briefed`) are
  * seated at the meeting table first, and marked so.
  */
-export const placeCrew = (crew, slot = 0, briefed = NONE) => {
+export const placeCrew = (crew, slot = 0, briefed = NONE, hour = null) => {
   const desks = ringSeats(crew.map((a) => a.id));
   const places = {};
-  const spots = { meeting: MEETING_SPOTS, lounge: LOUNGE_SPOTS.filter((s) => !s.game), sleep: PODS };
-  const taken = { meeting: new Set(), lounge: new Set(), sleep: new Set() };
+  const spots = { meeting: MEETING_SPOTS, lounge: LOUNGE_SPOTS.filter((s) => !s.game), sleep: PODS, canteen: CANTEEN_SPOTS };
+  const taken = { meeting: new Set(), lounge: new Set(), sleep: new Set(), canteen: new Set() };
   const games = LOUNGE_SPOTS.filter((s) => s.game);
-  const wanting = { meeting: [], lounge: [], sleep: [] };
+  const wanting = { meeting: [], lounge: [], sleep: [], canteen: [] };
 
   crew.forEach((agent, i) => {
-    const zone = zoneOf(agent, slot, briefed);
+    const zone = zoneOf(agent, slot, briefed, hour);
     if (zone === 'work') places[agent.id] = { ...desks[i], zone: 'work', pose: 'sit' };
     else wanting[zone].push([agent.id, i]);
   });
@@ -99,13 +124,14 @@ export const placeCrew = (crew, slot = 0, briefed = NONE) => {
   });
   wanting.meeting.filter(([id]) => !briefed.has(id)).forEach((who) => seat(who, ['meeting', 'lounge', 'sleep']));
   wanting.lounge.forEach((who) => seat(who, ['lounge', 'meeting', 'sleep']));
+  wanting.canteen.forEach((who) => seat(who, ['canteen', 'lounge', 'meeting', 'sleep']));
   wanting.sleep.forEach((who) => seat(who, ['sleep', 'lounge', 'meeting']));
   return places;
 };
 
 /** Who is in each room, in crew order: the talks only pair people in the same one (and nobody talks in their sleep). */
 export const roomsOf = (crew, places) => {
-  const rooms = { work: [], meeting: [], lounge: [], sleep: [] };
+  const rooms = { work: [], meeting: [], lounge: [], sleep: [], canteen: [] };
   crew.forEach((agent) => {
     const place = places[agent.id];
     if (place && !place.game) rooms[place.zone].push(agent.id);

@@ -10,6 +10,7 @@ import { flashcards } from '../store';
 import { recordReview, unrecordReview } from './log';
 import { clozeFront, clozeParts, dueIn, duration, hasCloze, summarize } from './states';
 import { tr } from '../../../core/i18n/lang';
+import { celebrate } from '../../../core/celebrate';
 
 const SWIPE = 100; // px to drag a card before letting go answers it
 const TONE = [
@@ -137,9 +138,16 @@ function Summary({ grades, startedAt, pool, onClose, onMore }) {
   const dueLeft = mine.filter((c) => c.due <= now).length;
   const next = mine.filter((c) => c.due > now).sort((a, b) => a.due - b.due)[0];
   const top = Math.max(1, ...result.counts);
+  // a deck gone through: a burst from the tick at the top of the summary
+  const tick = useRef(null);
+  useEffect(() => {
+    if (grades.length) celebrate(tick.current, { count: 30 });
+    // once, when the summary opens
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-6 px-5 py-8 text-center" data-summary>
-      <span className="grid size-16 place-items-center rounded-full bg-ok/15 text-ok ring-1 ring-ok/40">
+      <span ref={tick} className="grid size-16 place-items-center rounded-full bg-ok/15 text-ok ring-1 ring-ok/40">
         <Check size={30} strokeWidth={2.6} aria-hidden="true" />
       </span>
       <div>

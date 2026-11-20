@@ -132,3 +132,26 @@ export const loadGithub = async ({ user = GITHUB_USERNAME, limit = 4, fetchImpl 
   }
   return data;
 };
+
+const CONTRIBUTIONS = 'https://github-contributions-api.jogruber.de/v4';
+const YEAR_KEY = 'hank62.pulse.year';
+
+/** The owner's public contributions of the last year, as [{ date: 'YYYY-MM-DD', count }] (kept for the visit). */
+export const loadContributions = async ({ user = GITHUB_USERNAME, fetchImpl = fetch, storage = globalThis.sessionStorage } = {}) => {
+  try {
+    const cached = JSON.parse(storage?.getItem(YEAR_KEY) ?? 'null');
+    if (cached?.user === user && Array.isArray(cached.days)) return cached.days;
+  } catch {
+    /* fetched again */
+  }
+  const res = await fetchImpl(`${CONTRIBUTIONS}/${user}?y=last`, { headers: { Accept: 'application/json' } });
+  if (!res.ok) throw new Error(`Contributions: ${res.status}`);
+  const raw = await res.json();
+  const days = (raw?.contributions ?? []).filter((d) => typeof d?.date === 'string' && Number.isFinite(d.count)).map((d) => ({ date: d.date, count: d.count }));
+  try {
+    storage?.setItem(YEAR_KEY, JSON.stringify({ user, days }));
+  } catch {
+    /* storage is blocked */
+  }
+  return days;
+};

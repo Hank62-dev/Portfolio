@@ -1,0 +1,389 @@
+/* SpaceHank's effects (shared/fx and the screens that use it). Everything here moves only where motion is welcome. */
+
+/* The change of tab: the new tab's colour spreads as a circle from where the menu was touched, then fades. */
+.tab-wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at var(--wipe-x) var(--wipe-y), hsl(var(--wipe-hue) 70% 60% / 0.34), hsl(var(--wipe-hue) 60% 40% / 0.16) 55%, transparent 80%);
+  animation: tab-wipe 0.75s var(--ease-out-expo) forwards;
+}
+@keyframes tab-wipe {
+  0% {
+    clip-path: circle(0% at var(--wipe-x) var(--wipe-y));
+    opacity: 1;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    clip-path: circle(150% at var(--wipe-x) var(--wipe-y));
+    opacity: 0;
+  }
+}
+
+/* The sign-in screen: the name as dust above the card. */
+.login-dust {
+  position: relative;
+  width: 100%;
+  height: clamp(7rem, 22vw, 12rem);
+  touch-action: none;
+  cursor: crosshair;
+}
+.login-dust canvas {
+  position: absolute;
+  inset: 0;
+}
+.login-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 50% 30%, color-mix(in srgb, var(--color-signal) 16%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 80% 90%, color-mix(in srgb, var(--color-signal) 8%, transparent), transparent 70%);
+}
+
+/* Decoding text (shared/fx/scramble): the glyphs keep the width steady while they settle. */
+.scramble {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tab-wipe {
+    display: none;
+  }
+}
+
+/* The home sky drawn by its shader (today/SkyShader): the CSS clouds and rain it replaces step aside. */
+.sky-hero[data-gl] .sky-cloud,
+.sky-hero[data-gl] .sky-drift,
+.sky-hero[data-gl] .wx-rain,
+.sky-hero[data-gl] .wx-snow {
+  display: none;
+}
+
+/* Hank RAG: an answer that arrives while the chat is open is uncovered from the top, and its sources fly in after it. */
+.rag-answer-in {
+  animation: rag-answer 0.9s var(--ease-out-expo) backwards;
+}
+@keyframes rag-answer {
+  from {
+    clip-path: inset(0 0 100% 0 round 1.5rem);
+    opacity: 0.4;
+    filter: blur(6px);
+  }
+}
+.rag-source-in {
+  animation: rag-source 0.6s var(--ease-out-expo) backwards;
+  animation-delay: calc(0.45s + var(--i, 0) * 0.07s);
+}
+@keyframes rag-source {
+  from {
+    opacity: 0;
+    transform: translate(-14px, 10px) scale(0.86);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rag-answer-in,
+  .rag-source-in {
+    animation: none;
+  }
+}
+
+/* Git Bash on an old monitor: scanlines rolling slowly over the output, a phosphor glow on the letters, the corners darkened
+   as if the glass were curved. It wakes with a flicker the first time it opens. */
+.shell-screen[data-crt] .shell-output {
+  text-shadow: 0 0 6px color-mix(in srgb, currentColor 55%, transparent), 0 0 1px currentColor;
+}
+.shell-screen[data-crt] {
+  position: relative;
+}
+.shell-screen[data-crt]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(180deg, rgb(0 0 0 / 0.22) 0 1px, transparent 1px 3px),
+    radial-gradient(130% 110% at 50% 50%, transparent 62%, rgb(0 0 0 / 0.55) 100%);
+  box-shadow: inset 0 0 60px rgb(0 0 0 / 0.6), inset 0 0 2px rgb(255 255 255 / 0.08);
+  mix-blend-mode: multiply;
+}
+.shell-screen[data-crt]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  border-radius: inherit;
+  /* a faint bright band that drifts down the screen, like the refresh of a tube */
+  background: linear-gradient(180deg, transparent 0%, rgb(255 255 255 / 0.035) 48%, transparent 52%);
+  background-size: 100% 300%;
+  animation: crt-roll 7s linear infinite;
+}
+.shell-screen[data-crt][data-booting] {
+  animation: crt-on 0.9s steps(1, end) backwards, crt-warm 1.2s var(--ease-out-expo) backwards;
+}
+@keyframes crt-roll {
+  from {
+    background-position: 0 -100%;
+  }
+  to {
+    background-position: 0 200%;
+  }
+}
+@keyframes crt-on {
+  0% {
+    opacity: 0.2;
+  }
+  12% {
+    opacity: 0.9;
+  }
+  18% {
+    opacity: 0.35;
+  }
+  30% {
+    opacity: 1;
+  }
+}
+@keyframes crt-warm {
+  from {
+    filter: brightness(2.2) saturate(0.2) blur(1.5px);
+    transform: scaleY(0.02);
+  }
+  40% {
+    transform: scaleY(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shell-screen[data-crt]::before {
+    animation: none;
+  }
+}
+
+/* Memory Stream: the timeline is driven by its own scrolling (CSS scroll-driven animations, where the browser has them):
+   each signal rises and sharpens into place as it comes into the panel, and a line at the top fills as you read down. */
+.memory-progress {
+  display: none;
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .memory-timeline {
+      position: relative;
+    }
+    .memory-progress {
+      display: block;
+      position: sticky;
+      top: -0.5rem;
+      z-index: 2;
+      height: 2px;
+      margin: -0.5rem -0.5rem 0.4rem;
+      background: linear-gradient(90deg, var(--color-signal), color-mix(in srgb, var(--color-signal) 30%, transparent));
+      transform-origin: left;
+      animation: memory-fill linear both;
+      animation-timeline: scroll(nearest block);
+    }
+    .memory-timeline > li:not(.memory-progress) {
+      animation: memory-rise linear both;
+      animation-timeline: view(block);
+      animation-range: entry 0% entry 90%;
+    }
+  }
+}
+@keyframes memory-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes memory-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* Image Studio: a picture in the history turns to rippling water under the pointer (the filter is in studio/Develop.jsx). */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .group:hover .liquid-hover {
+    filter: url(#liquid-ripple) saturate(1.15);
+  }
+}
+
+/* Habit Garden: a breeze goes through the plants when the garden opens, one after another; afterwards they lean away from
+   a hand passing over them (--bend, set by Garden.jsx); a plant just watered stretches up and settles. */
+.plant-sway .plant-body {
+  transform-origin: 50% 100%;
+  transform: rotate(var(--bend, 0deg));
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .plant-sway .plant-body {
+    animation: plant-breeze 2.4s ease-in-out calc(0.3s + var(--i, 0) * 0.12s) backwards;
+  }
+  .plant-grow .plant-body {
+    animation: plant-grow 0.9s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+}
+@keyframes plant-breeze {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(7deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+@keyframes plant-grow {
+  0% {
+    transform: scale(1, 1);
+  }
+  30% {
+    transform: scale(0.92, 1.14);
+  }
+  60% {
+    transform: scale(1.05, 0.96);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+
+/* Mission Board: the card being dragged and the place it left. */
+.is-lifted {
+  opacity: 0.35;
+  transform: scale(0.97);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.card-ghost {
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  list-style: none;
+  transform: rotate(var(--tilt, 3deg)) scale(1.04);
+  filter: drop-shadow(0 24px 30px rgb(0 0 0 / 0.45));
+}
+
+/* Nhật ký: turning a page is a leaf of paper turning on the spiral. The next page swings in from beyond the right edge about
+   the binding, a shadow running across it as it lies down flat; the page before comes back the other way. */
+@media (prefers-reduced-motion: no-preference) {
+  .app-shell .nb-page[data-turn] {
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+  }
+  .app-shell .nb-page[data-turn='next'] {
+    transform-origin: left center;
+    animation: leaf-next 0.75s cubic-bezier(0.22, 0.9, 0.3, 1) both;
+  }
+  .app-shell .nb-page[data-turn='back'] {
+    transform-origin: right center;
+    animation: leaf-back 0.75s cubic-bezier(0.22, 0.9, 0.3, 1) both;
+  }
+  .app-shell .nb-page[data-turn]::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    animation: leaf-shade 0.75s ease-out both;
+  }
+  .app-shell .nb-page[data-turn='next']::after {
+    background: linear-gradient(90deg, rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.38) 70%, rgb(255 255 255 / 0.18));
+  }
+  .app-shell .nb-page[data-turn='back']::after {
+    background: linear-gradient(270deg, rgb(0 0 0 / 0.05), rgb(0 0 0 / 0.38) 70%, rgb(255 255 255 / 0.18));
+  }
+}
+@keyframes leaf-next {
+  from {
+    opacity: 0.2;
+    transform: perspective(1400px) rotateY(-96deg) skewY(-2deg);
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: perspective(1400px) rotateY(0deg);
+  }
+}
+@keyframes leaf-back {
+  from {
+    opacity: 0.2;
+    transform: perspective(1400px) rotateY(96deg) skewY(2deg);
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: perspective(1400px) rotateY(0deg);
+  }
+}
+@keyframes leaf-shade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Calendar: a new month flips down over the top edge like the page of a wall calendar (up again going back). */
+@media (prefers-reduced-motion: no-preference) {
+  .month-flip {
+    transform-origin: 50% 0;
+    animation: month-next 0.7s cubic-bezier(0.22, 0.9, 0.3, 1) both;
+  }
+  .month-flip[data-flip='back'] {
+    transform-origin: 50% 100%;
+    animation-name: month-back;
+  }
+}
+@keyframes month-next {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) rotateX(80deg);
+    filter: brightness(0.6);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    transform: perspective(1200px) rotateX(0deg);
+    filter: none;
+  }
+}
+@keyframes month-back {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) rotateX(-80deg);
+    filter: brightness(0.6);
+  }
+  60% {
+    opacity: 1;
+  }
+  to {
+    transform: perspective(1200px) rotateX(0deg);
+    filter: none;
+  }
+}

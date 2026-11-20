@@ -9,6 +9,8 @@ import { useArrived, useCountUp } from '../../core/motion/hooks';
 import { CATEGORIES, balanceSeries, categoryOf, compact, formatVnd, inMonth, monthKey, parseEntry, summarize, toCsv } from './model';
 import { budgets, entries } from './store';
 import { locale, tr } from '../../core/i18n/lang';
+import { flyTo } from '../../../shared/fx/burst';
+import { sound } from '../../core/sound';
 
 const CAT_ICONS = { utensils: Utensils, bus: Bus, home: House, study: GraduationCap, fun: Gamepad2, health: HeartPulse, bag: ShoppingBag, cash: Banknote, other: CircleEllipsis };
 
@@ -67,7 +69,7 @@ function Donut({ parts, total }) {
   const counted = useCountUp(total);
   const uid = useId().replace(/:/g, '');
   return (
-    <div className="relative size-40 shrink-0" role="img" aria-label={tr('Spending by category')}>
+    <div className="relative size-40 shrink-0" role="img" aria-label={tr('Spending by category')} data-wallet-donut>
       <svg viewBox="0 0 140 140" className="-rotate-90" style={{ filter: 'drop-shadow(0 8px 14px rgb(0 0 0 / 0.35))' }}>
         <defs>
           {parts.map((p) => {
@@ -83,7 +85,7 @@ function Donut({ parts, total }) {
         <circle cx="70" cy="70" r={r} fill="none" stroke="var(--color-line)" strokeWidth="16" />
         {parts.map((p) => {
           const len = (p.total / total) * c;
-          const node = <circle key={p.category} cx="70" cy="70" r={r} fill="none" strokeWidth="16" stroke={`url(#${uid}-${p.category})`} strokeDasharray={`${arrived ? Math.max(0, len - 2) : 0} ${c}`} strokeDashoffset={-offset} style={{ transition: 'stroke-dasharray 0.9s var(--ease-out-expo)', transitionDelay: `${parts.indexOf(p) * 90}ms` }} />;
+          const node = <circle key={p.category} cx="70" cy="70" r={r} fill="none" strokeWidth="16" stroke={`url(#${uid}-${p.category})`} strokeDasharray={`${arrived ? Math.max(0, len - 2) : 0} ${c}`} strokeDashoffset={-offset} style={{ transition: 'stroke-dasharray 0.9s var(--ease-out-expo), stroke-dashoffset 0.9s var(--ease-out-expo)', transitionDelay: `${parts.indexOf(p) * 90}ms` }} />;
           offset += len;
           return node;
         })}
@@ -152,7 +154,7 @@ export default function WalletView() {
     e.preventDefault();
     if (draft) {
       // Enter once more on a line that has been understood saves it
-      void save();
+      void save(e.currentTarget.querySelector('button[type="submit"]') ?? e.currentTarget);
       return;
     }
     if (!text.trim()) return;
@@ -164,8 +166,15 @@ export default function WalletView() {
   };
   const retype = (type) => setDraft({ ...draft, type, category: type === 'income' ? 'income' : draft.category === 'income' ? 'other' : draft.category });
 
-  const save = async () => {
+  const save = async (from) => {
     if (!draft || draft.amount <= 0) return;
+    // the money flies to where it is counted: coins into the chart, or up into the balance when it came in
+    const income = draft.type === 'income';
+    flyTo(from, document.querySelector(income ? '[data-wallet-balance]' : '[data-wallet-donut]') ?? document.querySelector('[data-wallet-balance]'), {
+      colors: income ? ['hsl(145 60% 55%)', 'hsl(160 55% 62%)'] : ['hsl(42 92% 58%)', 'hsl(30 90% 60%)'],
+      label: income ? '+' : '₫',
+    });
+    sound.tap();
     await entries.create({ ...draft, at: Date.now() });
     setText('');
     setDraft(null);
@@ -233,7 +242,7 @@ export default function WalletView() {
 
             <div className="flex items-center gap-3">
               <span className="min-w-0 flex-1 truncate text-fine text-bone-dim">{draft.note}</span>
-              <Button type="button" onClick={save} disabled={draft.amount <= 0}>
+              <Button type="button" onClick={(event) => save(event)} disabled={draft.amount <= 0}>
                 <Check size={15} aria-hidden="true" /> {tr('Save')}
               </Button>
             </div>
@@ -262,7 +271,7 @@ export default function WalletView() {
         <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-5">
           <div className="min-w-0">
             <span className="font-mono text-[0.68rem] tracking-[0.14em] text-bone-dim uppercase">{tr('Balance this month')}</span>
-            <b className={clsx('numeral mt-3 block [font-size:clamp(3rem,12vw,6rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(balanceShown)}</b>
+            <b data-wallet-balance className={clsx('numeral mt-3 block [font-size:clamp(3rem,12vw,6rem)]', sum.balance < 0 ? 'text-danger' : 'text-bone')}>{formatVnd(balanceShown)}</b>
           </div>
           <BalanceLine values={line} className="h-16 w-full sm:w-72" />
         </div>

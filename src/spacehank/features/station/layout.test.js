@@ -1,11 +1,41 @@
 import { describe, expect, it } from 'vitest';
-import { PODS, ZONES, alongPath, bridgeTo, measure, pathBetween, placeCrew, roomsOf, zoneOf } from './layout';
+import { PODS, ZONES, alongPath, bridgeTo, mealtime, measure, pathBetween, placeCrew, roomsOf, zoneOf } from './layout';
 
 const crew = ['codex', 'claude', 'nova', 'pixel', 'atlas', 'rhea', 'gemini', 'grok', 'deepseek', 'qwen', 'mira'].map((id) => ({ id, status: 'offline' }));
 const inZone = (place) => {
   const zone = ZONES[place.zone];
   return Math.hypot(place.x - zone.x, place.z - zone.z) < zone.radius;
 };
+
+describe('the canteen', () => {
+  it('knows lunch and dinner, and has no mealtimes without a clock', () => {
+    expect(mealtime(12)).toBe(true);
+    expect(mealtime(18.5)).toBe(true);
+    expect(mealtime(15)).toBe(false);
+    expect(mealtime(null)).toBe(false);
+  });
+
+  it('fills up at lunch, a seat each on its benches, and is quiet in the afternoon', () => {
+    const free = crew.map((a) => ({ ...a, status: 'idle' }));
+    for (let slot = 0; slot < 10; slot++) {
+      const lunch = placeCrew(free, slot, new Set(), 12.5);
+      const eating = Object.values(lunch).filter((p) => p.zone === 'canteen');
+      expect(eating.length).toBeGreaterThanOrEqual(4);
+      eating.forEach((place) => expect(inZone(place)).toBe(true));
+      expect(new Set(eating.map((p) => `${p.x},${p.z}`)).size).toBe(eating.length);
+      const afternoon = Object.values(placeCrew(free, slot, new Set(), 15)).filter((p) => p.zone === 'canteen');
+      expect(afternoon.length).toBeLessThan(eating.length);
+    }
+  });
+
+  it('is reached over its own bridge, never through the core', () => {
+    const table = Object.values(placeCrew(crew.map((a) => ({ ...a, status: 'idle' })), 0, new Set(), 12.5)).find((p) => p.zone === 'canteen');
+    const path = pathBetween({ zone: 'lounge', x: ZONES.lounge.x, z: ZONES.lounge.z }, table);
+    expect(path.every(([x, z]) => Math.hypot(x, z) > 6)).toBe(true);
+    const { to } = bridgeTo('canteen');
+    expect(path.some(([x, z]) => Math.hypot(x - to[0], z - to[1]) < 0.01)).toBe(true);
+  });
+});
 
 describe('who is where on the station', () => {
   it('sits whoever works at their desk', () => {
