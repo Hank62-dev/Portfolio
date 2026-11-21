@@ -31,7 +31,7 @@ const Close = ({ className }) => (
   </button>
 );
 
-export default function PodcastBar({ onOpen, lifted = false, rail = false }) {
+export default function PodcastBar({ onOpen, lifted = false }) {
   const ratio = useStore(podcast, (s) => {
     const length = s.duration || s.episode?.duration || 0;
     return length > 0 ? Math.min(1, s.time / length) : 0;
@@ -54,7 +54,7 @@ export default function PodcastBar({ onOpen, lifted = false, rail = false }) {
   }
 
   return (
-    <div role="region" aria-label={tr('Now playing')} data-now-playing className={clsx('fixed right-0 bottom-0 z-30 border-t border-line bg-ink-0/90 backdrop-blur-xl transition-[left] duration-300 ease-out-expo', rail ? 'left-[68px]' : 'left-64')}>
+    <div role="region" aria-label={tr('Now playing')} data-now-playing className="sticky bottom-0 z-30 border-t border-line bg-ink-0/90 backdrop-blur-xl">
       <div className="mx-auto grid max-w-[1400px] grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] items-center gap-6 px-5 py-2.5">
         <Title onOpen={onOpen} />
         <div className="flex flex-col items-center gap-1">

@@ -13,6 +13,7 @@ const vi = {
   Dismiss: 'Bỏ qua',
   'Pick a date': 'Chọn ngày',
   'Something went wrong': 'Đã có lỗi xảy ra',
+  'Private workspace': 'Không gian riêng',
 };
 
 // the "shared" namespace of the app's one i18next; English is the text itself

@@ -229,7 +229,7 @@ function MusicDesktop() {
 
   return (
     <div
-      className="relative isolate min-h-[calc(100vh-10rem)] overflow-hidden rounded-[2rem] border border-line bg-ink-1 max-md:-mx-5 max-md:min-h-0 max-md:rounded-none max-md:border-0 max-md:bg-transparent"
+      className="relative isolate min-h-[calc(100vh-10rem)] max-md:-mx-5 max-md:min-h-0"
       onDragOver={(e) => {
         if ([...e.dataTransfer.types].includes('Files')) {
           e.preventDefault();
@@ -246,8 +246,9 @@ function MusicDesktop() {
       <input ref={filePicker} type="file" multiple accept="audio/*,.mp3,.m4a,.flac,.ogg,.opus,.wav,.lrc" hidden data-file-input onChange={(e) => { void add([...e.target.files]); e.target.value = ''; }} />
       <input ref={folderPicker} type="file" multiple webkitdirectory="" hidden onChange={(e) => { void add([...e.target.files]); e.target.value = ''; }} />
 
-      {/* the room's light: soft colour from the cover, drifting slowly */}
-      <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
+      {/* the room's light: soft colour from the cover, drifting slowly over the whole screen behind the music (no card around it);
+          with a live wallpaper on, the wallpaper is the room instead */}
+      <div className="music-room pointer-events-none fixed inset-0 -z-10 overflow-hidden" aria-hidden="true">
         <i className="room-blob absolute -top-1/4 -left-1/6 size-[70%] animate-[drift_22s_ease-in-out_infinite] rounded-full blur-[110px] transition-colors duration-1000" style={{ background: `rgb(${tint} / 0.42)` }} />
         <i className="room-blob absolute -right-1/6 bottom-[-20%] size-[65%] animate-[drift_28s_ease-in-out_infinite_reverse] rounded-full bg-[#8a3bff]/25 blur-[120px]" />
         <i className="room-blob absolute top-1/3 left-1/3 size-[40%] animate-[drift_34s_ease-in-out_infinite] rounded-full bg-signal/15 blur-[100px]" />
@@ -256,7 +257,7 @@ function MusicDesktop() {
       </div>
 
       {dragging && (
-        <div className="pointer-events-none absolute inset-3 z-30 grid place-items-center rounded-[1.6rem] border-2 border-dashed border-signal bg-ink-0/80 font-mono text-bone backdrop-blur">
+        <div className="pointer-events-none fixed inset-3 z-30 grid place-items-center rounded-[1.6rem] border-2 border-dashed border-signal bg-ink-0/80 font-mono text-bone backdrop-blur">
           {tr('Drop songs (and .lrc lyrics) into the room')}
         </div>
       )}

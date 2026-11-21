@@ -13,7 +13,7 @@ import { THEME_CHOICES } from '../layout/ThemeMenu';
 import Sidebar from '../layout/Sidebar';
 import TaskModal from '../features/station/TaskModal';
 import Topbar from '../layout/Topbar';
-import TabWipe from '../layout/TabWipe';
+import { sound } from '../core/sound';
 import { askNotes, interpretCommand } from '../core/api/owner';
 import { buildCatalog, validate } from '../layout/nlcommands';
 import { DEFAULT_TAB, NAVIGATION, SKY_TABS, tabHue } from '../core/navigation';
@@ -134,6 +134,10 @@ export default function Workspace({
   const order = (id) => NAVIGATION.findIndex((item) => item.id === id);
   const [nav, setNav] = useState({ tab, way: '' });
   if (nav.tab !== tab) setNav({ tab, way: order(tab) >= order(nav.tab) ? 'forward' : 'back' });
+  // a soft whoosh with each change of tab when the sounds are on (no flash of colour over the screen)
+  useEffect(() => {
+    if (nav.way) sound.move();
+  }, [nav.tab, nav.way]);
   // Tablets get the icon rail; phones get a bottom bar instead; the collapse toggle only matters on wide screens.
   const wide = useMediaQuery('(min-width: 1000px)');
   const phone = !useMediaQuery('(min-width: 768px)');
@@ -409,14 +413,16 @@ export default function Workspace({
           <div className="relative isolate flex min-h-0 min-w-0 flex-1 flex-col overflow-x-clip">
             {/* the tab's colour, glowing in the top corner behind the bar and the page alike, so the bar is not a band of its own */}
             {!SKY_TABS.includes(tab) && <span aria-hidden="true" className="tab-glow" />}
-            <TabWipe key={`wipe-${tab}`} hue={tabHue(tab)} way={nav.way} />
             <Topbar tab={tab} onTab={onTab} connected={connected} link={link} guest={guest} paused={paused} onPause={onPause} onNewTask={() => setTaskOpen(true)} onPalette={() => setPaletteOpen(true)} onCapture={(event) => openCapture('', event)} />
-            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone ? (podFront || (music && hasTrack) ? 'pb-60' : 'pb-36') : podFront ? 'pb-28' : music && hasTrack && tab !== 'music' && 'pb-28')}>
+            <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone && (podFront || (music && hasTrack) ? 'pb-60' : 'pb-36'))}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
               <div key={tab} className={clsx(nav.way === 'forward' ? 'page-from-right' : nav.way === 'back' ? 'page-from-left' : 'animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
                 <Suspense fallback={<PageLoading />}>{page}</Suspense>
               </div>
             </main>
+            {/* on a desktop the player is docked at the foot of the column: it sticks to the bottom of the screen while the page scrolls */}
+            {!phone && podFront && !(tab === 'podcast' && podCardVisible) && <PodcastBar onOpen={() => onTab('podcast')} />}
+            {!phone && music && !podFront && tab !== 'music' && <NowPlayingBar onOpen={() => onTab('music')} />}
             <footer className="flex flex-wrap max-md:hidden justify-between gap-2 border-t border-line px-gutter py-4 font-mono text-fine text-bone-faint">
               <span>{tr('HANK62 PRIVATE OS')}</span>
               <span>{activeAgent ? tr('Focused: {0}', activeAgent.name) : tr('All systems nominal')}</span>
@@ -435,8 +441,8 @@ export default function Workspace({
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}
           {phone && <Fab raised={hasTrack || podFront} />}
-          {podFront && !(tab === 'podcast' && podCardVisible) && <PodcastBar onOpen={() => onTab('podcast')} lifted={phone} rail={rail} />}
-          {music && !podFront && (tab !== 'music' || phone) && <NowPlayingBar onOpen={() => (phone ? showPlayer(() => onTab('music')) : onTab('music'))} lifted={phone} rail={rail} />}
+          {phone && podFront && !(tab === 'podcast' && podCardVisible) && <PodcastBar onOpen={() => onTab('podcast')} lifted />}
+          {phone && music && !podFront && <NowPlayingBar onOpen={() => showPlayer(() => onTab('music'))} lifted />}
           <CommandPalette
             open={paletteOpen}
             onOpenChange={setPaletteOpen}

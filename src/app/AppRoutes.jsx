@@ -4,13 +4,12 @@ import MainLayout from './MainLayout';
 import Home from '../portfolio/pages/Home';
 import ProjectDetail from '../portfolio/pages/ProjectDetail';
 import NotFound from '../portfolio/pages/NotFound';
+import BootLoader from '../shared/ui/BootLoader';
 
 // three.js / R3F / markdown only load when someone opens /spacehank.
 const SpaceHank = lazy(() => import('../spacehank'));
 
-const SpaceHankFallback = () => (
-  <div className="grid min-h-screen place-items-center bg-ink-0 font-mono text-fine text-bone-dim">Loading workspace…</div>
-);
+const SpaceHankFallback = () => <BootLoader />;
 
 // `:key` accepts a slug (/projects/smart-center) or a legacy numeric id (/projects/1).
 const AppRoutes = () => (

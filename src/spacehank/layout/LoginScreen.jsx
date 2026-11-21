@@ -1,3 +1,4 @@
+import BootLoader from '../../shared/ui/BootLoader';
 import { useEffect, useState } from 'react';
 import Logo from '../../shared/ui/Logo';
 import { Button, Card, ErrorState, Eyebrow, Field, Input, Loading, Skeleton } from '../../shared/ui';
@@ -63,17 +64,9 @@ function useLock() {
   return [until ? Math.max(0, (until - now) / 1000) : 0, lockFor];
 }
 
-export function AuthLoading({ label = tr('Securing workspace') }) {
-  return (
-    <div className="grid min-h-screen place-items-center bg-ink-0 px-gutter">
-      <Loading label={label} className="flex w-[min(22rem,100%)] flex-col gap-4 rounded-card border border-line bg-ink-1 p-6">
-        <Skeleton className="h-3 w-24" />
-        <Skeleton className="h-8 w-3/4" />
-        <Skeleton className="h-11 w-full" />
-        <Skeleton className="h-11 w-full rounded-full" />
-      </Loading>
-    </div>
-  );
+/** While the session is checked (or the server wakes): the opening screen, with its story or the one line it is given. */
+export function AuthLoading({ label }) {
+  return <BootLoader label={label} />;
 }
 
 /** The realtime server is on this computer but does not answer the page: say what to check, instead of a skeleton for ever. */

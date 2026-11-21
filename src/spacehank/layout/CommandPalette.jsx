@@ -164,7 +164,7 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
               setAsk(IDLE);
             }
           }}
-          data-palette
+          data-command-palette
         >
           <Dialog.Title className="sr-only">{tr('Command palette')}</Dialog.Title>
           <div className="flex items-center gap-3 border-b border-line px-4">

@@ -1,5 +1,12 @@
 [
   {
+    "id": "desk-cards-sticky-player",
+    "version": "1.40.0",
+    "date": "2026-11-21",
+    "vi": "Trang chủ có ba góc mới: bảng ghim giấy note, bậu cửa sổ trồng cây và hũ tiền xu. Thanh nhạc luôn bám đáy màn hình, khung Giao diện luôn hiện giữa màn hình. Màn chờ mạ vàng cổ điển, trang nhạc không còn khung.",
+    "en": "Home has a pinboard of sticky notes, a windowsill garden and a coin jar. The music bar always stays at the bottom and the Themes dialog always opens on screen. A classic gold loading screen; Hank Music has no frame."
+  },
+  {
     "id": "spacehank-live-wallpapers",
     "version": "1.39.0",
     "date": "2026-11-20",

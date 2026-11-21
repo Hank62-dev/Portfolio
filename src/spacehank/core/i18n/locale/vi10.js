@@ -51,4 +51,9 @@ export const vi10 = {
   'Sea turtle': 'Rùa biển',
   Rain: 'Mưa',
   Off: 'Tắt',
+  'to do': 'việc cần làm',
+  'Pin a new task': 'Ghim việc mới',
+  'Tick a note to finish it': 'Tích vào tờ giấy để hoàn thành',
+  '"{0}" is done today': '"{0}" đã xong hôm nay',
+  'The jar is empty today': 'Hôm nay hũ còn trống',
 };

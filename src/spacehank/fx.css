@@ -1,29 +1,5 @@
 /* SpaceHank's effects (shared/fx and the screens that use it). Everything here moves only where motion is welcome. */
 
-/* The change of tab: the new tab's colour spreads as a circle from where the menu was touched, then fades. */
-.tab-wipe {
-  position: fixed;
-  inset: 0;
-  z-index: 15;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at var(--wipe-x) var(--wipe-y), hsl(var(--wipe-hue) 70% 60% / 0.34), hsl(var(--wipe-hue) 60% 40% / 0.16) 55%, transparent 80%);
-  animation: tab-wipe 0.75s var(--ease-out-expo) forwards;
-}
-@keyframes tab-wipe {
-  0% {
-    clip-path: circle(0% at var(--wipe-x) var(--wipe-y));
-    opacity: 1;
-  }
-  45% {
-    opacity: 1;
-  }
-  100% {
-    clip-path: circle(150% at var(--wipe-x) var(--wipe-y));
-    opacity: 0;
-  }
-}
-
 /* The sign-in screen: the name as dust above the card. */
 .login-dust {
   position: relative;
@@ -49,12 +25,6 @@
 /* Decoding text (shared/fx/scramble): the glyphs keep the width steady while they settle. */
 .scramble {
   font-variant-numeric: tabular-nums;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tab-wipe {
-    display: none;
-  }
 }
 
 /* The home sky drawn by its shader (today/SkyShader): the CSS clouds and rain it replaces step aside. */
@@ -402,4 +372,13 @@
 .app-shell[data-wallpaper] > aside {
   background: color-mix(in srgb, var(--color-ink-1) 78%, transparent);
   backdrop-filter: blur(14px);
+}
+
+/* Hank Music has no card of its own: its light fills the screen behind it, unless a live wallpaper is already the background. */
+.app-shell[data-wallpaper] .music-room {
+  display: none;
+}
+/* the sidebar stays above a page's own full-screen light (such as the music room's) */
+.app-shell > aside {
+  z-index: 20;
 }

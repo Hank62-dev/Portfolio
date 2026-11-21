@@ -34,12 +34,13 @@ export const deadlinesForToday = (courses, now = Date.now()) =>
     .flatMap((g) => g.items.map((item) => ({ id: item.id, title: item.title, course: item.course?.name ?? '', at: item.at, bucket: g.id, kind: item.kind })))
     .slice(0, 4);
 
-/** Habits: how many are done today, and the ones still waiting. */
+/** Habits: how many are done today, the ones still waiting, and all of them with whether each is done (`all`). */
 export const habitsForToday = (habits, now = new Date()) => {
   const key = dayKey(now);
   const live = habits.filter((h) => !h.sample);
   const pending = live.filter((h) => !h.days.includes(key));
-  return { total: live.length, done: live.length - pending.length, pending };
+  const all = live.map((h) => ({ habit: h, done: h.days.includes(key) }));
+  return { total: live.length, done: live.length - pending.length, pending, all };
 };
 
 /** How many tasks were finished today (the demo ones do not count): what the ring of the do-now card fills with. */
