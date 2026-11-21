@@ -382,3 +382,587 @@
 .app-shell > aside {
   z-index: 20;
 }
+
+/* The player folded into the corner: a record in a ring of progress; on hover a play button over it, the name and two buttons
+   slide out to its left. */
+.mini-player {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 0.6rem;
+  animation: mini-in 0.5s var(--ease-out-expo) both;
+}
+@keyframes mini-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.6);
+  }
+}
+.mini-disc {
+  border-radius: 9999px;
+  box-shadow:
+    0 18px 36px -14px rgb(var(--shadow-rgb) / 0.9),
+    0 0 30px rgb(var(--tint) / 0.35);
+}
+.mini-controls {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  background: rgb(0 0 0 / 0.35);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.mini-label,
+.mini-side {
+  opacity: 0;
+  transform: translateX(12px);
+  pointer-events: none;
+  transition:
+    opacity 0.25s ease,
+    transform 0.3s var(--ease-out-expo);
+}
+.mini-label {
+  max-width: 12rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--color-line-strong);
+  background: color-mix(in srgb, var(--color-ink-1) 88%, transparent);
+  backdrop-filter: blur(12px);
+  line-height: 1.25;
+}
+.mini-label b {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-bone);
+}
+.mini-label small {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--color-bone-faint);
+}
+.mini-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.mini-side button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line-strong);
+  background: color-mix(in srgb, var(--color-ink-1) 88%, transparent);
+  color: var(--color-bone-dim);
+  backdrop-filter: blur(12px);
+}
+.mini-side button:hover {
+  color: var(--color-bone);
+}
+.mini-player:hover .mini-controls,
+.mini-player:focus-within .mini-controls,
+.mini-player:hover .mini-label,
+.mini-player:focus-within .mini-label,
+.mini-player:hover .mini-side,
+.mini-player:focus-within .mini-side {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* Focus mode: the screen is the timer, over a calm rain. */
+.focus-mode {
+  background: var(--color-ink-0);
+  animation: focus-in 0.6s var(--ease-out-expo) both;
+}
+@keyframes focus-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+}
+.focus-veil {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(60% 55% at 50% 45%, transparent, color-mix(in srgb, var(--color-ink-0) 85%, transparent));
+}
+.focus-clock {
+  width: min(22rem, 76vw);
+  aspect-ratio: 1;
+}
+.focus-exit {
+  position: absolute;
+  top: calc(1.2rem + env(safe-area-inset-top));
+  right: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  background: rgb(0 0 0 / 0.25);
+  color: var(--color-bone-dim);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  backdrop-filter: blur(10px);
+}
+.focus-exit:hover {
+  color: var(--color-bone);
+}
+.focus-round {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 1px solid rgb(255 255 255 / 0.16);
+  background: rgb(0 0 0 / 0.25);
+  color: var(--color-bone-dim);
+  backdrop-filter: blur(10px);
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+.focus-round:hover {
+  color: var(--color-bone);
+  border-color: var(--color-signal);
+}
+.focus-task {
+  width: min(28rem, 100%);
+  padding: 0.9rem 1rem 0.9rem 1.2rem;
+  border-radius: 1.2rem;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: rgb(0 0 0 / 0.28);
+  backdrop-filter: blur(14px);
+}
+/* while focus mode is up, the timer that floats over the workspace has nothing to add */
+:root[data-focus-mode] [data-focus-widget] {
+  display: none;
+}
+
+/* The keyboard shortcuts sheet: keys drawn as keycaps. */
+.kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border-radius: 0.4rem;
+  border: 1px solid var(--color-line-strong);
+  border-bottom-width: 3px;
+  background: var(--color-ink-2);
+  color: var(--color-bone);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .focus-mode,
+  .mini-player {
+    animation: none;
+  }
+}
+
+/* The day as a newspaper's front page: cream newsprint, a masthead, rules, a headline and three columns. Paper in both themes. */
+.paper-scrim {
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(6px);
+  animation: fade-in 0.3s ease both;
+}
+.day-paper {
+  width: min(46rem, 100%);
+  padding: clamp(1.4rem, 4vw, 2.6rem);
+  background:
+    radial-gradient(rgb(60 40 10 / 0.06) 1px, transparent 1.3px) 0 0 / 5px 5px,
+    linear-gradient(180deg, #f6f0e2, #efe6d1);
+  color: #1d1a16;
+  box-shadow: 0 40px 80px -30px rgb(0 0 0 / 0.9);
+  font-family: var(--font-display), 'Times New Roman', serif;
+  transform-origin: 50% 0;
+  animation: paper-unfold 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes paper-unfold {
+  from {
+    opacity: 0;
+    transform: perspective(1400px) rotateX(-24deg) translateY(-20px);
+  }
+}
+.paper-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+.paper-mast {
+  margin-top: 0.2rem;
+  font-size: clamp(2.4rem, 8vw, 4.2rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.paper-dateline {
+  display: flex;
+  justify-content: center;
+  gap: 1.2rem;
+  margin-top: 0.8rem;
+  padding: 0.4rem 0;
+  border-top: 3px double #1d1a16;
+  border-bottom: 1px solid #1d1a16;
+  font-style: italic;
+  font-size: 0.92rem;
+}
+.paper-headline {
+  margin-top: 1.4rem;
+  font-size: clamp(1.9rem, 5.5vw, 3rem);
+  font-weight: 600;
+  line-height: 1.05;
+  text-align: center;
+  text-wrap: balance;
+}
+.paper-deck {
+  margin-top: 0.6rem;
+  text-align: center;
+  font-style: italic;
+  opacity: 0.75;
+}
+.paper-cols {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 1.4rem;
+  border-top: 1px solid #1d1a16;
+}
+.paper-cols section {
+  padding: 0.9rem 1rem 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+.paper-cols section + section {
+  border-left: 1px solid rgb(29 26 22 / 0.4);
+}
+.paper-cols h4 {
+  margin-bottom: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.paper-cols li {
+  padding: 0.2rem 0;
+  border-bottom: 1px dotted rgb(29 26 22 / 0.3);
+}
+.paper-cols li::before {
+  content: '✓ ';
+}
+.paper-figure {
+  font-size: 2rem;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.paper-figure small {
+  font-size: 0.55em;
+  opacity: 0.6;
+}
+.paper-quote {
+  margin-top: 1.6rem;
+  padding-top: 1rem;
+  border-top: 3px double #1d1a16;
+  text-align: center;
+}
+.paper-quote p {
+  font-size: 1.3rem;
+  font-style: italic;
+  line-height: 1.35;
+}
+.paper-quote p::before {
+  content: '“';
+}
+.paper-quote p::after {
+  content: '”';
+}
+.paper-quote cite {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-style: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+.paper-foot {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.6rem;
+}
+.paper-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid #1d1a16;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+.paper-btn:hover {
+  background: #1d1a16;
+  color: #f6f0e2;
+}
+@media (max-width: 560px) {
+  .paper-cols {
+    grid-template-columns: 1fr;
+  }
+  .paper-cols section + section {
+    border-left: 0;
+    border-top: 1px solid rgb(29 26 22 / 0.4);
+    padding-top: 0.8rem;
+  }
+}
+/* the evening invitation on the home screen */
+.paper-invite {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 1.2rem;
+  border: 1px solid #c9b88f;
+  background:
+    radial-gradient(rgb(60 40 10 / 0.06) 1px, transparent 1.3px) 0 0 / 5px 5px,
+    linear-gradient(100deg, #f3ecdc, #e8dcc0);
+  color: #1d1a16;
+  text-align: left;
+  transition: transform 0.3s var(--ease-out-expo);
+}
+.paper-invite:hover {
+  transform: translateY(-2px) rotate(-0.4deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-paper,
+  .paper-scrim {
+    animation: none;
+  }
+}
+
+/* The year in pixels (diary): a grid of small rounded squares, weeks as columns, Monday on top. */
+.year-pixels {
+  padding: 1rem 0.9rem 0.9rem;
+  border-radius: 1.4rem;
+  border: 1px solid color-mix(in srgb, var(--dz-text) 18%, transparent);
+  background: color-mix(in srgb, var(--dz-text) 6%, transparent);
+  backdrop-filter: blur(6px);
+}
+.yp-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.yp-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--weeks), minmax(0, 1fr));
+  grid-template-rows: 0.9rem;
+  grid-auto-rows: auto;
+  gap: 2px;
+  width: 100%;
+  min-width: 30rem;
+}
+.yp-month {
+  grid-row: 1;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  line-height: 1;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--dz-text) 70%, transparent);
+}
+.yp-cell {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--dz-text) 12%, transparent);
+  transition: transform 0.15s var(--ease-out-expo);
+}
+.yp-cell:disabled {
+  opacity: 0.35;
+}
+.yp-cell:not(:disabled):hover {
+  transform: scale(1.6);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.35);
+}
+.yp-cell.is-today {
+  outline: 2px solid var(--dz-amber, var(--color-signal));
+  outline-offset: 1px;
+}
+.yp-key {
+  display: inline-block;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 3px;
+}
+.yp-btn {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 9999px;
+  color: var(--dz-text);
+  border: 1px solid color-mix(in srgb, var(--dz-text) 25%, transparent);
+}
+.yp-btn:disabled {
+  opacity: 0.35;
+}
+.yp-tab {
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: color-mix(in srgb, var(--dz-text) 80%, transparent);
+  border: 1px solid transparent;
+}
+.yp-tab.is-on {
+  color: var(--dz-text);
+  border-color: color-mix(in srgb, var(--dz-text) 30%, transparent);
+  background: color-mix(in srgb, var(--dz-text) 10%, transparent);
+}
+
+/* An empty place (ui/StartHere): a drawing, a sentence, the way in and a few ready starts. */
+.start-here {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem 2rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-radius: 1.6rem;
+  border: 1px dashed var(--color-line-strong);
+  background: radial-gradient(70% 90% at 0% 50%, var(--color-signal-soft), transparent 70%), var(--color-ink-1);
+}
+.start-art {
+  flex-shrink: 0;
+  width: 10rem;
+  animation: start-float 5s ease-in-out infinite alternate;
+}
+@keyframes start-float {
+  to {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+.start-art svg {
+  width: 100%;
+  overflow: visible;
+}
+.sh-shadow {
+  fill: rgb(0 0 0 / 0.25);
+}
+.sh-pot {
+  fill: hsl(18 55% 50%);
+}
+.sh-pot-rim {
+  fill: hsl(18 50% 42%);
+}
+.sh-line {
+  fill: none;
+  stroke: var(--color-bone-dim);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.sh-leaf {
+  fill: hsl(135 50% 50%);
+  transform-origin: 80px 50px;
+  animation: sh-sway 3.4s ease-in-out infinite alternate;
+}
+.sh-leaf-2 {
+  fill: hsl(135 55% 60%);
+  animation-delay: -1.2s;
+}
+@keyframes sh-sway {
+  to {
+    transform: rotate(6deg);
+  }
+}
+.sh-sun {
+  fill: hsl(42 95% 62%);
+}
+.sh-spark {
+  stroke: var(--color-signal);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.sh-glass {
+  fill: rgb(255 255 255 / 0.05);
+  stroke: var(--color-bone-dim);
+  stroke-width: 2.5;
+}
+.sh-shine {
+  stroke: rgb(255 255 255 / 0.3);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.sh-coin {
+  fill: hsl(44 92% 56%);
+  stroke: hsl(36 80% 34%);
+  stroke-width: 1.2;
+}
+.sh-coin-fall {
+  animation: sh-fall 2.6s cubic-bezier(0.5, 0, 0.75, 0) infinite;
+}
+@keyframes sh-fall {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  70%,
+  100% {
+    transform: translate(-46px, 56px);
+    opacity: 0;
+  }
+}
+.sh-board {
+  fill: hsl(28 25% 30%);
+  stroke: hsl(28 30% 22%);
+  stroke-width: 3;
+}
+.sh-note {
+  fill: hsl(48 95% 72%);
+}
+.sh-note-2 {
+  fill: hsl(355 85% 80%);
+}
+.sh-pin {
+  fill: hsl(4 75% 52%);
+}
+.start-chip {
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-line-strong);
+  background: color-mix(in srgb, var(--color-ink-0) 50%, transparent);
+  font-size: var(--text-fine);
+  color: var(--color-bone);
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s var(--ease-out-expo);
+}
+.start-chip:hover {
+  border-color: var(--color-signal);
+  transform: translateY(-1px);
+}
+.start-chip::before {
+  content: '+ ';
+  color: var(--color-signal);
+}
+@media (prefers-reduced-motion: reduce) {
+  .start-art,
+  .sh-leaf,
+  .sh-coin-fall {
+    animation: none;
+  }
+}

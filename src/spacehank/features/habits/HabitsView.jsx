@@ -3,6 +3,7 @@ import { Apple, Bike, BookOpen, Brain, Check, ChevronDown, Coffee, Droplets, Dum
 import { Badge, Button, Dialog, Input } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import { PageHead } from '../../ui/Page';
+import StartHere from '../../ui/StartHere';
 import { HABIT_ICONS, dayKey, gardenLine, gardenWeek, heatmap, longestStreak, moodLift, newHabit, nextStage, rate, stageOf, stageProgress, streak, todoFirst, toggleDay, weekStrip } from './model';
 import Garden from './Garden';
 import Plant from './Plant';
@@ -290,6 +291,14 @@ function HabitDialog({ habit, onClose, count }) {
   );
 }
 
+// three habits most people start with, one tap each when the garden is empty
+const STARTER_HABITS = () => [
+  [tr('Read 20 minutes'), 'book', 210],
+  [tr('Drink 8 glasses of water'), 'water', 195],
+  [tr('Walk 15 minutes'), 'walk', 140],
+  [tr('Write in the journal'), 'write', 30],
+];
+
 export default function HabitsView() {
   const { loaded, items } = useStore(habits.store);
   const { notes } = useStore(notesStore);
@@ -323,22 +332,25 @@ export default function HabitsView() {
       />
 
       {loaded && items.length === 0 ? (
-        <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
-          <div className="min-w-[min(100%,15rem)] flex-1">
-            <h2 className="font-display text-lead text-bone">{tr('The garden is empty')}</h2>
-            <p className="text-fine text-bone-dim">{tr('Plant your first habit.')}</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" onClick={() => setEditing({})}>
-              <Plus size={14} aria-hidden="true" /> {tr('Plant a habit')}
-            </Button>
-            {isDemo() && (
-              <Button variant="ghost" size="sm" onClick={() => habits.putMany(sampleHabits())}>
-                <Sparkles size={14} aria-hidden="true" /> {tr('Try a sample garden')}
+        <StartHere
+          art="garden"
+          title={tr('The garden is empty')}
+          text={tr('Each habit is a plant: water it every day you keep it, and watch it grow from a seed into a small tree.')}
+          action={
+            <>
+              <Button size="sm" onClick={() => setEditing({})}>
+                <Plus size={14} aria-hidden="true" /> {tr('Plant a habit')}
               </Button>
-            )}
-          </div>
-        </div>
+              {isDemo() && (
+                <Button variant="ghost" size="sm" onClick={() => habits.putMany(sampleHabits())}>
+                  <Sparkles size={14} aria-hidden="true" /> {tr('Try a sample garden')}
+                </Button>
+              )}
+            </>
+          }
+          startsLabel={tr('Or plant one of these')}
+          starts={STARTER_HABITS().map(([name, icon, hue]) => ({ label: name, run: () => void habits.create(newHabit(name, icon, hue)) }))}
+        />
       ) : (
         <>
           <Today items={items} />

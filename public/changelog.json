@@ -1,5 +1,12 @@
 [
   {
+    "id": "focus-mode-day-paper",
+    "version": "1.41.0",
+    "date": "2026-11-21",
+    "vi": "Chế độ tập trung (phím F), tờ báo của ngày, một năm thành điểm ảnh trong Nhật kí. Kéo thả và sửa note trên bảng ghim, nút Hoàn tác, thanh nhạc thu nhỏ, phím tắt (?), trang chủ đổi theo giờ.",
+    "en": "Focus mode (press F), the day as a newspaper, a year in pixels in the Diary. Drag and edit notes on the pinboard, Undo, a mini player, shortcuts (?), and a home screen that follows the time of day."
+  },
+  {
     "id": "desk-cards-sticky-player",
     "version": "1.40.0",
     "date": "2026-11-21",

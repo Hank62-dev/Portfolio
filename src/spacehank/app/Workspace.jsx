@@ -1,8 +1,8 @@
 import { tr } from '../core/i18n/lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { BookHeart, Palette, CalendarDays, Headphones, StickyNote, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Mic, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Users } from 'lucide-react';
-import { Loading, Skeleton, SoftContext, TooltipProvider } from '../../shared/ui';
+import { BookHeart, Palette, CalendarDays, Headphones, StickyNote, CheckCircle2, Coins, Copy, Download, GraduationCap, Inbox, Keyboard, Mic, Newspaper, NotebookPen, Pause, Play, Plus, SkipBack, SkipForward, SlidersHorizontal, Sprout, Timer, Users } from 'lucide-react';
+import { SoftContext, TooltipProvider } from '../../shared/ui';
 import { useMediaQuery } from '../../shared/hooks/useMediaQuery';
 import { useInstall } from '../core/hooks/useInstall';
 import { clsx } from '../../shared/lib/format';
@@ -46,6 +46,11 @@ import { focus } from '../features/focus/store';
 import { celebrate } from '../core/celebrate';
 import ShareSheet from '../features/share/ShareSheet';
 import NowPlayingBar from '../features/music/NowPlayingBar';
+import { musicUi, setMini } from '../features/music/ui';
+import ShortcutsSheet from '../layout/ShortcutsSheet';
+import PageLoading from '../layout/PageLoading';
+import DayPaper, { openPaper } from '../features/today/DayPaper';
+import { resolveKey, typing } from '../layout/shortcuts';
 import PodcastBar from '../features/podcast/PodcastBar';
 import { close as closePodcast, podcast, toggle as togglePodcast } from '../features/podcast/player';
 import { podcastUi } from '../features/podcast/ui';
@@ -84,17 +89,8 @@ const PaintView = lazy(() => import('../features/paint/PaintView'));
 
 const KIND_ICON = { note: NotebookPen, task: CheckCircle2, spending: Coins, memo: Mic, habit: Sprout, study: GraduationCap, event: CalendarDays };
 
-const PageLoading = () => (
-  <Loading label={tr('Loading')} className="flex flex-col gap-4 py-4">
-    <Skeleton className="h-8 w-48" />
-    <Skeleton className="h-4 w-72 max-w-full" />
-    <div className="grid gap-3 md:grid-cols-3">
-      <Skeleton className="h-40 rounded-3xl" />
-      <Skeleton className="h-40 rounded-3xl" />
-      <Skeleton className="h-40 rounded-3xl" />
-    </div>
-  </Loading>
-);
+const FocusMode = lazy(() => import('../features/focus/FocusMode'));
+
 
 export default function Workspace({
   guest = false,
@@ -117,6 +113,8 @@ export default function Workspace({
   const [collapsed, setCollapsed] = useState(false);
   const [taskOpen, setTaskOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [focusOn, setFocusOn] = useState(false);
+  const [keysOpen, setKeysOpen] = useState(false);
   const paletteId = useStore(paletteState, (s) => s.id);
   const wallpaperId = useStore(wallpaperState, (s) => s.id);
   const shellRef = useRef(null);
@@ -187,16 +185,31 @@ export default function Workspace({
     if (paletteOpen) void loadLife();
   }, [paletteOpen]);
 
+  // the keyboard: Ctrl+K and Ctrl+J anywhere; single keys and "g then a letter" when nothing is being typed (see layout/shortcuts)
+  const keyPrev = useRef(null);
+  const keyRun = useRef(null);
   useEffect(() => {
     const onKey = (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
         setPaletteOpen((open) => !open);
+        return;
       }
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'j') {
         event.preventDefault();
         openCapture();
+        return;
       }
+      if (event.ctrlKey || event.metaKey || event.altKey || event.repeat || typing(event.target)) return;
+      if (document.querySelector('[role="dialog"]')) return; // a dialog or focus mode has the keyboard
+      const what = resolveKey(event.key, keyPrev.current?.key);
+      window.clearTimeout(keyPrev.current?.timer);
+      keyPrev.current = null;
+      if (!what) return;
+      event.preventDefault();
+      if (what.wait) keyPrev.current = { key: what.wait, timer: window.setTimeout(() => (keyPrev.current = null), 1200) };
+      else if (what.go) keyRun.current?.go(what.go);
+      else keyRun.current?.[what.run]?.();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -208,10 +221,36 @@ export default function Workspace({
     floatNote((await createNote('')).id);
   }, []);
   const stickyCount = useStore(stickies, (s) => s.list.length);
+  keyRun.current = {
+    go: onTab,
+    help: () => setKeysOpen(true),
+    focus: () => setFocusOn(true),
+    sticky: () => void newSticky(),
+    mini: () => setMini(!musicUi.get().mini),
+  };
+
+  // a shortcut on the home screen icon (or a link) can ask for something at once: ?capture, ?focus
+  useEffect(() => {
+    if (!params.has('capture') && !params.has('focus')) return;
+    if (params.has('capture')) openCapture();
+    if (params.has('focus')) setFocusOn(true);
+    setParams(
+      (previous) => {
+        const nextParams = new URLSearchParams(previous);
+        nextParams.delete('capture');
+        nextParams.delete('focus');
+        return nextParams;
+      },
+      { replace: true }
+    );
+  }, [params, setParams]);
 
   const commands = useMemo(() => {
     const list = [
       { id: 'capture', label: tr('Quick capture'), hint: tr('Action'), icon: Inbox, keywords: 'inbox add note task expense receipt write ghi nhanh', run: () => openCapture() },
+      { id: 'focus-mode', label: tr('Focus mode'), hint: tr('Action'), icon: Timer, keywords: 'focus zen pomodoro timer deep work tap trung tập trung', run: () => setFocusOn(true) },
+      { id: 'day-paper', label: tr('Today’s paper'), hint: tr('Review'), icon: Newspaper, keywords: 'newspaper daily recap summary day review bao to bao tờ báo tong ket tổng kết', run: openPaper },
+      { id: 'shortcuts', label: tr('Keyboard shortcuts'), hint: tr('Help'), icon: Keyboard, keywords: 'keys keyboard hotkeys phim tat phím tắt', run: () => setKeysOpen(true) },
       { id: 'sticky', label: tr('New sticky note'), hint: tr('Action'), icon: StickyNote, keywords: 'sticky post-it float note screen pin ghim giấy dán', run: newSticky },
       { id: 'customise', label: tr('Choose which places to show'), hint: tr('Appearance'), icon: SlidersHorizontal, keywords: 'modules hide show tabs menu customise customize', run: openModules },
       ...visibleNav.map((item) => ({ id: `go-${item.id}`, label: tr('Go to {0}', item.label), hint: tr('Navigate'), icon: item.icon, keywords: `${item.section} ${item.keywords ?? ''}`, run: () => onTab(item.id) })),
@@ -346,6 +385,7 @@ export default function Workspace({
         const entry = parseEntry(params.text);
         if (entry.amount <= 0) return onNotify?.(tr('I could not find an amount in that'));
         await entries.create({ ...entry, at: Date.now() });
+        sound.coin();
         onNotify?.(tr('Logged in the Wallet'));
         return onTab('wallet');
       }
@@ -417,7 +457,7 @@ export default function Workspace({
             <main className={clsx('mx-auto w-full max-w-[1280px] flex-1 px-gutter py-4 md:py-8', fit && 'flex min-h-0 flex-col overflow-hidden', phone && (podFront || (music && hasTrack) ? 'pb-60' : 'pb-36'))}>
               {/* keyed by tab, so each tab eases in like a new screen in an app */}
               <div key={tab} className={clsx(nav.way === 'forward' ? 'page-from-right' : nav.way === 'back' ? 'page-from-left' : 'animate-page-in', fit && 'flex min-h-0 flex-1 flex-col')}>
-                <Suspense fallback={<PageLoading />}>{page}</Suspense>
+                <Suspense fallback={<PageLoading tab={tab} />}>{page}</Suspense>
               </div>
             </main>
             {/* on a desktop the player is docked at the foot of the column: it sticks to the bottom of the screen while the page scrolls */}
@@ -437,6 +477,13 @@ export default function Workspace({
           )}
           <ModulesSheet />
           <PalettePicker />
+          <ShortcutsSheet open={keysOpen} onOpenChange={setKeysOpen} />
+          <DayPaper />
+          {focusOn && (
+            <Suspense fallback={null}>
+              <FocusMode onClose={() => setFocusOn(false)} />
+            </Suspense>
+          )}
           {taskOpen && <TaskModal agents={agents} initialAgent={typeof taskOpen === 'string' ? taskOpen : undefined} onClose={() => setTaskOpen(false)} onSubmit={onNewTask} />}
           {phone && <MobileNav tab={tab} onTab={onTab} guest={guest} app={app} onNotify={onNotify} onLogout={onLogout} onResetDemo={onResetDemo} />}
           {tab !== 'study' && <FocusWidget onOpen={() => onTab('study')} />}

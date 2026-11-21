@@ -8,7 +8,7 @@ export const KINDS = [
   { id: 'calendar', label: tr('Calendar'), hint: tr('An event about to start'), icon: CalendarClock, tab: 'hank' },
   { id: 'tasks', label: tr('Tasks'), hint: tr('Due today or overdue on the Mission Board'), icon: Kanban, tab: 'missions' },
   { id: 'habits', label: tr('Habits'), hint: tr('Plants still waiting for water this evening'), icon: Sprout, tab: 'habits' },
-  { id: 'wallet', label: tr('Wallet'), hint: tr('A budget close to its limit'), icon: Wallet, tab: 'wallet' },
+  { id: 'wallet', label: tr('Wallet'), hint: tr('A budget close to its limit, or a day with nothing logged'), icon: Wallet, tab: 'wallet' },
   { id: 'diary', label: tr('Diary'), hint: tr('A gentle nudge to write the day’s page'), icon: BookHeart, tab: 'diary' },
   { id: 'system', label: tr('Agents & system'), hint: tr('An agent finished, the server dropped, an update is ready'), icon: Server, tab: 'hank' },
 ];

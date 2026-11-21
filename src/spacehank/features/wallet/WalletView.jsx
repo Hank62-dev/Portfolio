@@ -11,6 +11,7 @@ import { budgets, entries } from './store';
 import { locale, tr } from '../../core/i18n/lang';
 import { flyTo } from '../../../shared/fx/burst';
 import { sound } from '../../core/sound';
+import StartHere from '../../ui/StartHere';
 
 const CAT_ICONS = { utensils: Utensils, bus: Bus, home: House, study: GraduationCap, fun: Gamepad2, health: HeartPulse, bag: ShoppingBag, cash: Banknote, other: CircleEllipsis };
 
@@ -174,7 +175,7 @@ export default function WalletView() {
       colors: income ? ['hsl(145 60% 55%)', 'hsl(160 55% 62%)'] : ['hsl(42 92% 58%)', 'hsl(30 90% 60%)'],
       label: income ? '+' : '₫',
     });
-    sound.tap();
+    sound.coin();
     await entries.create({ ...draft, at: Date.now() });
     setText('');
     setDraft(null);
@@ -302,12 +303,13 @@ export default function WalletView() {
       </section>
 
       {empty ? (
-        <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-dashed border-line-strong p-6">
-          <div className="min-w-[min(100%,15rem)] flex-1">
-            <h2 className="font-display text-lead text-bone">{tr('Nothing logged yet')}</h2>
-            <p className="text-fine text-bone-dim">{tr('Type your first expense above.')}</p>
-          </div>
-        </div>
+        <StartHere
+          art="jar"
+          title={tr('Nothing logged yet')}
+          text={tr('Write what you spent the way you would say it, such as "45k lunch", and it is sorted for you. Type it above, or start with one of these.')}
+          startsLabel={tr('Try one')}
+          starts={[tr('35k coffee'), tr('45k lunch'), tr('30k Grab to school'), tr('Pocket money 2tr')].map((example) => ({ label: example, run: () => tryExample(example) }))}
+        />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">

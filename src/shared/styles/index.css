@@ -4124,6 +4124,60 @@ html[data-vt='player']::view-transition-new(root) {
   transform: rotate(0deg) scale(1.02);
 }
 
+/* a note picked up off the board: lifted over everything, no easing so it stays under the finger */
+.pin-note.is-held {
+  z-index: 30;
+  cursor: grabbing;
+  transition: none;
+  box-shadow: 0 30px 40px -18px rgb(0 0 0 / 0.8);
+}
+.pin-note:not(.is-held) {
+  cursor: grab;
+}
+.pin-input {
+  width: 100%;
+  min-height: 4.2rem;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  line-height: 1.25;
+}
+.pin-input::placeholder {
+  color: rgb(0 0 0 / 0.4);
+}
+.pin-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 3.4rem;
+  border-radius: 1rem;
+  border: 2px dashed var(--color-line-strong);
+  color: var(--color-bone-dim);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  animation: fade-in 0.25s ease both;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s var(--ease-out-expo);
+}
+.pin-zone[data-over] {
+  border-color: var(--color-signal);
+  background: var(--color-signal-soft);
+  color: var(--color-bone);
+  transform: scale(1.03);
+}
+.pin-zone[data-tone='danger'][data-over] {
+  border-color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+}
+
 /* Habits, as a windowsill: a sky in the window whose sun climbs as habits are done (--sun, 0 to 1), pots on a wooden sill. */
 .sill {
   --sky-a: color-mix(in oklab, hsl(252 40% 16%), hsl(208 70% 46%) calc(var(--sun) * 100%));

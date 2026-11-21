@@ -60,4 +60,27 @@ export const sound = {
   done() {
     if (ready()) chime(ctx, out, [784, 988, 1319]);
   },
+  /** A sticky note torn off the board: a short dry rip. */
+  tear() {
+    buzz(12);
+    if (ready()) whoosh(ctx, out, { length: 0.18, from: 5200, to: 1400, volume: 0.09 });
+  },
+  /** A plant watered: a few soft drops. */
+  water() {
+    buzz([8, 40, 8]);
+    if (!ready()) return;
+    [0, 0.09, 0.2].forEach((at, i) => blip(ctx, out, 1300 - i * 180, 520, 0.09, 0.05, 'sine', ctx.currentTime + at));
+  },
+  /** A coin dropped in the jar: a bright clink and a smaller one after it. */
+  coin() {
+    buzz(10);
+    if (!ready()) return;
+    blip(ctx, out, 2600, 2500, 0.22, 0.05, 'triangle');
+    blip(ctx, out, 3400, 3300, 0.16, 0.03, 'triangle', ctx.currentTime + 0.07);
+  },
 };
+
+/** A small buzz on a phone, for a touch that did something (only when the sounds are on, the same switch for both). */
+function buzz(pattern) {
+  if (soundState.get().on) navigator.vibrate?.(pattern);
+}

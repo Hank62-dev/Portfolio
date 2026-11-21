@@ -15,6 +15,7 @@ import { diaryLock, lockDiary } from './lock';
 import MoodFace from './MoodFace';
 import { useDiaryLocked } from './useLock';
 import WeekWave from './WeekWave';
+import YearPixels from './YearPixels';
 import Writer from './Writer';
 import { Thumb, SoftButton } from './ui';
 import { bodyOf, dayLabel, encouragement, entryOf, excerptOf, journeyDays, journeyStats, memories, milestonesOf, moodWord, shortLabel, weekMoods, writtenDays } from './model';
@@ -187,6 +188,8 @@ export default function DiaryView({ onNotify }) {
                 </ul>
               </section>
             )}
+
+            <YearPixels notes={notes} todayKey={today} onOpen={(day) => read(day)} onWrite={write} />
 
             {/* the road */}
             <section aria-label={tr('Hành trình')} className="pt-1">

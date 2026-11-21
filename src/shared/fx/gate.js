@@ -2,6 +2,8 @@
 // portfolio and in SpaceHank: nothing moves for people who asked for less motion, nothing heavy runs on weak hardware or when
 // data is being saved, and a GPU effect needs WebGL.
 
+import { lowPower } from './battery';
+
 const media = (query) => typeof window !== 'undefined' && Boolean(window.matchMedia?.(query).matches);
 
 // where the browser cannot be asked (a test, an old engine) nothing moves
@@ -36,8 +38,8 @@ export const weakDevice = ({ saveData, cores, memory } = readDevice()) => Boolea
 /** Movement that costs little (CSS, a few DOM pieces): only the person's wish for less motion stops it. */
 export const canMove = () => !reducedMotion();
 
-/** A GPU effect that runs for a while (a shader, a simulation): motion welcome, WebGL there, a device that can spare it. */
-export const canGL = () => canMove() && hasWebGL() && !weakDevice();
+/** A GPU effect that runs for a while (a shader, a simulation): motion welcome, WebGL there, a device that can spare it, and a battery that is not low. */
+export const canGL = () => canMove() && hasWebGL() && !weakDevice() && !lowPower();
 
 /** A pixel ratio for a canvas that is drawn every frame: sharp enough, never the full 3x of a phone. */
 export const fxDpr = (max = 1.5) => Math.min(typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1, max);

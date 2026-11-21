@@ -74,11 +74,11 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         categories: ['productivity', 'utilities'],
-        // long-press the app icon to jump straight to a tab
+        // long-press the app icon to do something at once (capture, log money, focus) or jump to the music
         shortcuts: [
-          { name: 'Hank RAG', short_name: 'Hank', url: '/spacehank?tab=rag' },
-          { name: 'Second Brain', short_name: 'Notes', url: '/spacehank?tab=notes' },
-          { name: 'Wallet', short_name: 'Wallet', url: '/spacehank?tab=wallet' },
+          { name: 'Quick capture', short_name: 'Capture', description: 'Write a note, a task or a spending line', url: '/spacehank?capture=1' },
+          { name: 'Log spending', short_name: 'Spend', description: 'Open the Wallet to log what you spent', url: '/spacehank?tab=wallet&capture=1' },
+          { name: 'Focus mode', short_name: 'Focus', description: 'The timer, one task and the music', url: '/spacehank?focus=1' },
           { name: 'Hank Music', short_name: 'Music', url: '/spacehank?tab=music' },
         ],
         // "Share" in another app lists Hank62: what is shared is caught by the service worker (public/sw-focus.js) and offered

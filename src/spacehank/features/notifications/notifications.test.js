@@ -115,4 +115,13 @@ describe('reminders', () => {
     expect(reminders({ now: at(12), entries, budgets })[0]).toMatchObject({ key: 'budget:food:2026-11:100', tone: 'error' });
     expect(reminders({ now: at(12), entries: [], budgets })).toHaveLength(0);
   });
+
+  it('asks in the evening when the wallet is kept but nothing was logged today', () => {
+    const yesterday = new Date(at(12).getTime() - 864e5).getTime();
+    const entries = [{ type: 'expense', category: 'food', amount: 30000, at: yesterday }];
+    expect(keys(reminders({ now: at(19), entries }))).toEqual([]);
+    expect(keys(reminders({ now: at(20, 10), entries }))).toEqual(['spend-log:2026-11-06']);
+    expect(keys(reminders({ now: at(20, 10), entries: [...entries, { ...entries[0], at: at(9).getTime() }] }))).toEqual([]);
+    expect(keys(reminders({ now: at(20, 10), entries: [] }))).toEqual([]);
+  });
 });

@@ -30,6 +30,9 @@ const IDLE = { status: 'idle' };
  * With `onInterpret`, a sentence ("give Codex a task to fix the login bug") gets an extra "Ask Hank" row. Hank
  * works out which action it means, the palette says what it understood, and nothing runs until you confirm.
  */
+/** Questions to try, about the person's own data (answered on the device's few chosen facts, see Workspace.answerData). */
+const EXAMPLES = () => [tr('How much did I spend on food this week?'), tr('What is overdue on my board?'), tr('Which habit have I kept best this month?')];
+
 export default function CommandPalette({ open, onOpenChange, commands, music, onInterpret, onRun, onSearch, onAnswer, onCapture }) {
   const [query, setQuery] = useState('');
   // what is searched: the typed words once typing pauses, so the list (and the search through everything kept) does not redo itself on every key
@@ -70,6 +73,8 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
     if (onSearch && typed.length >= 2) all = [...all, ...onSearch(typed)];
     if (onCapture && typed.length >= 3) all = [...all, { id: CAPTURE_ID, label: tr('Add "{0}" to your Inbox', typed), hint: tr('Capture'), icon: Inbox }];
     const top = [];
+    // with nothing typed yet, a few questions show that the palette can answer from what you keep
+    if (onAnswer && !typed) top.push(...EXAMPLES().map((q, i) => ({ id: `example-${i}`, label: q, hint: tr('Ask my data'), icon: MessageCircleQuestion, ask: q })));
     if (onAnswer && looksLikeQuestion(typed)) top.push({ id: ASK_DATA_ID, label: tr('Ask about my data: {0}', typed), hint: tr('AI'), icon: MessageCircleQuestion });
     // a whole sentence is most likely a request, so offer Hank first
     if (onInterpret && looksLikeRequest(search)) top.push({ id: ASK_ID, label: tr('Ask Hank: {0}', typed), hint: tr('AI'), icon: Sparkles });
@@ -95,10 +100,10 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
     }
   };
 
-  const answer = async () => {
+  const answer = async (question = search.trim()) => {
     setAsk({ status: 'answering' });
     try {
-      const reply = await onAnswer(search.trim());
+      const reply = await onAnswer(question);
       setAsk({ status: 'answer', text: reply.answer });
     } catch (error) {
       setAsk({ status: 'refused', say: error.message });
@@ -118,6 +123,11 @@ export default function CommandPalette({ open, onOpenChange, commands, music, on
     }
     if (command.id === ASK_DATA_ID) {
       void answer();
+      return;
+    }
+    if (command.ask) {
+      setQuery(command.ask);
+      void answer(command.ask);
       return;
     }
     if (command.id === CAPTURE_ID) {

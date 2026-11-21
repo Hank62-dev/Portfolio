@@ -29,16 +29,22 @@ export const toneOf = (message) => {
 /** The messages on show, oldest first. Pure; used by the store and by its tests. */
 export const withToast = (list, toast) => [...list.filter((t) => t.message !== toast.message), toast].slice(-MAX);
 
-/** Shows a message. `tone` is 'info' | 'success' | 'error' (guessed from the words when left out). Returns its id. */
-export const pushToast = (message, { tone } = {}) => {
+/**
+ * Shows a message. `tone` is 'info' | 'success' | 'error' (guessed from the words when left out); `action` ({ label, run })
+ * adds a button, such as Undo, and keeps the message up a little longer. Returns its id.
+ */
+export const pushToast = (message, { tone, action } = {}) => {
   const text = String(message ?? '').trim();
   if (!text) return 0;
   const kind = tone ?? toneOf(text);
-  const toast = { id: next++, message: text, tone: kind, ms: FOR[kind] ?? FOR.info };
+  const toast = { id: next++, message: text, tone: kind, ms: action ? 5000 : (FOR[kind] ?? FOR.info), action };
   items = withToast(items, toast);
   emit();
   return toast.id;
 };
+
+/** A message with an Undo button for five seconds: `undo` puts things back as they were. */
+export const undoToast = (message, undo) => pushToast(message, { tone: 'success', action: { label: word('Undo'), run: undo } });
 
 export const dismissToast = (id) => {
   if (!items.some((t) => t.id === id)) return;
@@ -95,6 +101,20 @@ function Item({ toast }) {
           <Icon size={16} aria-hidden="true" />
         </span>
         <p className="min-w-0 flex-1 py-1 text-[0.9rem] leading-snug break-words text-bone">{toast.message}</p>
+        {toast.action && (
+          <button
+            type="button"
+            onClick={() => {
+              dismissToast(toast.id);
+              toast.action.run();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="mt-0.5 shrink-0 rounded-full border border-line-strong px-3 py-1.5 font-mono text-[0.72rem] text-bone transition-colors hover:border-signal hover:text-signal"
+            data-toast-action
+          >
+            {toast.action.label}
+          </button>
+        )}
         <button type="button" aria-label={word('Dismiss')} onClick={() => dismissToast(toast.id)} onPointerDown={(e) => e.stopPropagation()} className="grid size-8 shrink-0 place-items-center rounded-full text-bone-faint transition-colors hover:text-bone active:scale-90">
           <X size={14} aria-hidden="true" />
         </button>

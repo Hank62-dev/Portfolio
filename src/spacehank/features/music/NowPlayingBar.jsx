@@ -1,10 +1,10 @@
 import { tr } from '../../core/i18n/lang';
 import { useEffect, useRef, useState } from 'react';
-import { Heart, ListMusic, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { Heart, ListMusic, Maximize2, Minimize2, Pause, Play, Repeat, Repeat1, Shuffle, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { clsx } from '../../../shared/lib/format';
 import { useStore } from '../../core/store';
 import Cover, { useCoverTint } from './Cover';
-import { musicUi } from './ui';
+import { musicUi, setMini } from './ui';
 import { formatTime, library, toggleFavorite } from './library';
 import { cycleRepeat, next, player, previous, seek, setVolume, stop, toggleShuffle, togglePlay } from './player';
 
@@ -45,6 +45,7 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
   const track = useStore(library, (s) => s.tracks.find((t) => t.id === trackId));
   const tint = useCoverTint(track);
   const covered = useStore(musicUi, (s) => s.full); // the full player is over this one: its record is the one that travels
+  const mini = useStore(musicUi, (s) => s.mini);
 
   // on a phone, swipe the mini player to the right to put the music away
   const [slide, setSlide] = useState({ x: 0, dragging: false });
@@ -118,6 +119,40 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
     );
   }
 
+  // folded away on a computer: a record turning in the corner inside a ring of progress; hover for play and the way back
+  if (mini) {
+    const ratio = duration > 0 ? Math.min(1, time / duration) : 0;
+    return (
+      <div role="region" aria-label={tr('Now playing')} className="mini-player fixed right-5 bottom-5 z-30" data-now-playing data-mini-player>
+        <span className="mini-disc relative block size-[4.6rem]" style={{ '--tint': tint }}>
+          <svg viewBox="0 0 100 100" className="absolute inset-0 size-full -rotate-90" aria-hidden="true">
+            <circle cx="50" cy="50" r="47" fill="none" stroke="rgb(255 255 255 / 0.14)" strokeWidth="3" />
+            <circle cx="50" cy="50" r="47" fill="none" stroke="var(--color-signal)" strokeWidth="4" strokeLinecap="round" pathLength="100" strokeDasharray={`${Math.max(0.01, ratio * 100)} 100`} />
+          </svg>
+          <Cover track={track} className={clsx('absolute inset-[8%] [animation:disc_14s_linear_infinite]', !playing && '[animation-play-state:paused]')} rounded="rounded-full" />
+          <i className="absolute top-1/2 left-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink-0 ring-1 ring-wash/30" aria-hidden="true" />
+          <span className="mini-controls">
+            <button type="button" aria-label={playing ? tr('Pause') : tr('Play')} onClick={togglePlay} className="grid size-9 place-items-center rounded-full bg-bone text-ink-0">
+              {playing ? <Pause size={15} fill="currentColor" aria-hidden="true" /> : <Play size={15} fill="currentColor" className="translate-x-px" aria-hidden="true" />}
+            </button>
+          </span>
+        </span>
+        <span className="mini-label" aria-hidden="true">
+          <b className="block truncate">{track.title}</b>
+          <small className="block truncate">{track.artist || tr('Unknown artist')}</small>
+        </span>
+        <span className="mini-side">
+          <button type="button" aria-label={tr('Next track')} onClick={next}>
+            <SkipForward size={14} fill="currentColor" aria-hidden="true" />
+          </button>
+          <button type="button" aria-label={tr('Show the full player')} onClick={() => setMini(false)}>
+            <Maximize2 size={14} aria-hidden="true" />
+          </button>
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div
       role="region"
@@ -179,6 +214,9 @@ export default function NowPlayingBar({ onOpen, lifted = false }) {
             {volume === 0 ? <VolumeX size={16} aria-hidden="true" /> : <Volume2 size={16} aria-hidden="true" />}
           </button>
           <Slider label={tr('Volume')} value={volume} max={1} step={0.02} onChange={setVolume} className="w-24" />
+          <Icon label={tr('Fold the player into the corner')} onClick={() => setMini(true)} className="ml-1">
+            <Minimize2 size={15} aria-hidden="true" />
+          </Icon>
         </div>
       </div>
       {/* on a phone the progress runs along the top edge */}

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTheme } from '../../../shared/lib/theme';
 import { canMove } from '../../../shared/fx/gate';
+import { useLowPower } from '../../../shared/fx/battery';
 import { useStore } from '../../core/store';
 import { createWallpaper } from './engine';
 import { sceneOf } from './scenes';
@@ -22,10 +23,11 @@ export function WallpaperCanvas({ id, theme, still = false, cell, className = ''
 export default function Wallpaper() {
   const id = useStore(wallpaperState, (s) => s.id);
   const { theme } = useTheme();
+  const saving = useLowPower(); // a low battery: the picture stays, the movement stops
   if (!sceneOf(id)) return null;
   return (
     <div className="wallpaper pointer-events-none fixed inset-0 z-0" aria-hidden="true">
-      <WallpaperCanvas id={id} theme={theme} />
+      <WallpaperCanvas id={id} theme={theme} still={saving} />
     </div>
   );
 }

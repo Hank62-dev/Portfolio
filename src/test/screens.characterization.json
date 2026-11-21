@@ -36,6 +36,7 @@
         "kind",
         "launcher",
         "launcher-toggle",
+        "part",
         "pet",
         "pet-line",
         "pet-mood",

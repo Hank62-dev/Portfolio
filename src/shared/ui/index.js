@@ -8,7 +8,7 @@ export { Dialog, DialogClose } from './Dialog';
 export { useSheetDrag } from './useSheetDrag';
 export { Dots, Ring, TextShimmer } from './Loader';
 export { EmptyState, ErrorState, Loading, Skeleton, SkeletonLines, StatusDot } from './Feedback';
-export { Toast, dismissToast, pushToast } from './Toast';
+export { Toast, dismissToast, pushToast, undoToast } from './Toast';
 export { DatePicker, Calendar } from './DatePicker';
 export { Field, Input, Select, Textarea } from './Field';
 export { SoftContext, useSoft } from './soft';

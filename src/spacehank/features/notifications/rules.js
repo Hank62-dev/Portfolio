@@ -78,6 +78,11 @@ export const reminders = ({ now = new Date(), zone, t = plainT, events = [], car
     });
   }
 
+  // someone who keeps a wallet but wrote nothing in it today: a quiet word in the evening, before the day is forgotten
+  if (hour >= EVENING && entries.length && !entries.some((entry) => wall(new Date(entry.at), zone).day === today)) {
+    out.push({ key: `spend-log:${today}`, kind: 'wallet', title: t('Nothing logged in the Wallet today'), body: t('Spent anything? Note it now while you remember.'), tab: 'wallet' });
+  }
+
   if (notes && hour >= NIGHT && !notes.some((note) => note.day === today)) {
     out.push({ key: `diary:${today}`, kind: 'diary', title: t('Write today’s page?'), body: t('A few lines is enough.'), tab: 'diary' });
   }
