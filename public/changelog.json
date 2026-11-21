@@ -1,5 +1,12 @@
 [
   {
+    "id": "curved-exhibition",
+    "version": "1.42.0",
+    "date": "2026-11-21",
+    "vi": "Mục 04 của portfolio thành phòng triển lãm trắng uốn cong: mọi dự án treo trong khung, sàn bóng, đèn trần. Thông tin in thẳng lên tường cạnh mỗi tác phẩm; chọn một tác phẩm để đứng trước nó và mở case study.",
+    "en": "Portfolio section 04 is now a curved white gallery: every project framed on the wall, a polished floor, a cove of light. The text is printed on the wall beside each work; choose one to stand before it and open its case study."
+  },
+  {
     "id": "focus-mode-day-paper",
     "version": "1.41.0",
     "date": "2026-11-21",

@@ -189,6 +189,7 @@
         "drawer-fade",
         "email",
         "email-letter",
+        "exhibit",
         "fact",
         "flight-frame",
         "flood",
@@ -225,7 +226,6 @@
         "sound-toggle",
         "stage",
         "text",
-        "vr",
         "whisper-fade",
         "wordmark"
       ],

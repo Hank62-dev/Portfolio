@@ -4833,3 +4833,216 @@ html[data-vt='player']::view-transition-new(root) {
     stroke-dashoffset: 0;
   }
 }
+
+/* ───────── The curved exhibition (portfolio section 04) ─────────
+   A white gallery in either theme: warm paper, black type, a little gold; the controls sit on the hall like museum signage. */
+.exhibit {
+  background: #efede8;
+  color: #1a1a1a;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.06),
+    0 40px 80px -40px rgb(0 0 0 / 0.6);
+}
+.exhibit canvas {
+  touch-action: none;
+}
+.exhibit.is-inside {
+  cursor: grab;
+}
+.exhibit.is-inside:active {
+  cursor: grabbing;
+}
+/* the title over the hall before stepping in, set like the entrance of a show */
+.exhibit-title {
+  position: absolute;
+  inset-inline: 0;
+  bottom: clamp(1.2rem, 4vw, 2.6rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  pointer-events: none;
+  animation: exhibit-rise 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.exhibit-title small {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: #5b574f;
+}
+.exhibit-title h3 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.6rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: #141414;
+}
+.exhibit-enter {
+  pointer-events: auto;
+  margin-top: 0.7rem;
+  padding: 0.7rem 1.6rem;
+  border: 1px solid #141414;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #141414;
+  background: rgb(255 255 255 / 0.55);
+  backdrop-filter: blur(6px);
+  transition:
+    background 0.35s ease,
+    color 0.35s ease,
+    letter-spacing 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.exhibit-enter:hover {
+  background: #141414;
+  color: #f5f3ef;
+  letter-spacing: 0.34em;
+}
+.exhibit-enter:disabled {
+  opacity: 0.4;
+}
+@keyframes exhibit-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+.exhibit-hint {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 2rem);
+  padding: 0.4rem 0.9rem;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.7);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: #5b574f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  animation: exhibit-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.exhibit-bar {
+  position: absolute;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: exhibit-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.exhibit-round {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  border: 1px solid rgb(20 20 20 / 0.18);
+  background: rgb(255 255 255 / 0.75);
+  backdrop-filter: blur(8px);
+  color: #141414;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+.exhibit-round:hover {
+  background: #141414;
+  color: #f5f3ef;
+}
+.exhibit-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(20 20 20 / 0.2);
+  background: rgb(255 255 255 / 0.75);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: #141414;
+  transition:
+    background 0.25s ease,
+    color 0.25s ease;
+}
+.exhibit-pill:hover {
+  background: #141414;
+  color: #f5f3ef;
+}
+.exhibit-count {
+  display: flex;
+  white-space: nowrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.75);
+  backdrop-filter: blur(8px);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #6b665d;
+}
+.exhibit-count b {
+  font-weight: 500;
+  color: #141414;
+}
+.exhibit-count em {
+  margin-left: 0.4rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: #141414;
+}
+.exhibit-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.1rem;
+  border-color: #141414;
+  background: #141414;
+  color: #f5f3ef;
+  letter-spacing: 0.04em;
+  animation: exhibit-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.exhibit-open:hover {
+  background: #a8834c;
+  border-color: #a8834c;
+}
+@media (max-width: 640px) {
+  .exhibit-bar {
+    inset-inline: 0.6rem;
+    bottom: 0.6rem;
+    gap: 0.35rem;
+  }
+  .exhibit-open {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    justify-content: center;
+  }
+  .exhibit-open-label {
+    display: none;
+  }
+  .exhibit-hint {
+    display: none;
+  }
+  .exhibit-count em {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .exhibit-title,
+  .exhibit-hint,
+  .exhibit-bar,
+  .exhibit-open {
+    animation: none;
+  }
+}
