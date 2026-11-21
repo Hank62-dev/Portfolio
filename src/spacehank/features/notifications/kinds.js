@@ -1,4 +1,4 @@
-import { BookHeart, CalendarClock, GraduationCap, Kanban, Server, Sprout, Timer, Wallet } from 'lucide-react';
+import { BookHeart, CalendarClock, CircleDollarSign, GraduationCap, Kanban, Server, Sprout, Timer, Wallet } from 'lucide-react';
 import { tr } from '../../core/i18n/lang';
 
 /** What a notification can be about. `tab` is where tapping one goes when it does not name a place of its own. */
@@ -10,6 +10,7 @@ export const KINDS = [
   { id: 'habits', label: tr('Habits'), hint: tr('Plants still waiting for water this evening'), icon: Sprout, tab: 'habits' },
   { id: 'wallet', label: tr('Wallet'), hint: tr('A budget close to its limit, or a day with nothing logged'), icon: Wallet, tab: 'wallet' },
   { id: 'diary', label: tr('Diary'), hint: tr('A gentle nudge to write the day’s page'), icon: BookHeart, tab: 'diary' },
+  { id: 'money', label: tr('Sales'), hint: tr('A payment came in, or a brand wrote from the media kit'), icon: CircleDollarSign, tab: 'creator' },
   { id: 'system', label: tr('Agents & system'), hint: tr('An agent finished, the server dropped, an update is ready'), icon: Server, tab: 'hank' },
 ];
 

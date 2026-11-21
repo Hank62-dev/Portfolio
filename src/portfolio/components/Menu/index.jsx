@@ -8,6 +8,7 @@ import { clsx } from '../../../shared/lib/format';
 import { gsap, prefersReducedMotion } from '../../motion/gsap';
 import LangToggle from '../LangToggle';
 import LocalClock from '../LocalClock';
+import { doorsFrom, useStoreData } from '../../hooks/useStoreDoors';
 
 const firstCover = (tier) => byTier(tier).find((p) => p.cover)?.cover ?? null;
 
@@ -34,6 +35,10 @@ const Menu = ({ open, onClose, origin, active, onGo, returnFocus }) => {
   const root = useRef(null);
   const [preview, setPreview] = useState(active || NAV_SECTIONS[0]);
   const [shown, setShown] = useState(open);
+  const store = useStoreData();
+  const openDoors = doorsFrom(store, c);
+  // the shop is always a door once the server answers, even before anything is on sale
+  const doors = openDoors.length ? openDoors : store ? [{ id: 'shop', to: '/shop', label: c.store.nav.shop }] : [];
 
   useEffect(() => {
     if (open) setPreview(active || NAV_SECTIONS[0]);
@@ -169,6 +174,20 @@ const Menu = ({ open, onClose, origin, active, onGo, returnFocus }) => {
               </li>
             ))}
           </ol>
+          {doors.length > 0 && (
+            <div data-menu-fade className="mt-6">
+              <p className="font-mono text-[0.7rem] tracking-[0.14em] text-bone-faint uppercase">{c.store.studio.label}</p>
+              <ul className="mt-3 flex flex-wrap gap-2">
+                {doors.map((d) => (
+                  <li key={d.id}>
+                    <Link to={d.to} onClick={onClose} className="store-door">
+                      {d.label} <span aria-hidden="true">→</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </nav>
 
         {/* What is in the section being pointed at. Decorative: the links say it all. */}

@@ -12,10 +12,11 @@
     "Creator": {
       "parts": [
         "ideas",
+        "money-move",
         "month-total",
         "quick-hooks",
         "state",
-        "today-strip",
+        "tape",
         "write-pack"
       ],
       "heading": "Creator Lab."

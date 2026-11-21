@@ -64,6 +64,11 @@ export const aiRoutes = ({ config, json, readJson, readBytes, requireAuth, query
     json(res, 200, await ai.pitch(await readJson(req, config.maxBodyBytes)));
   },
 
+  'POST /api/ai/repurpose': async (req, res) => {
+    requireAuth(req);
+    json(res, 200, await ai.repurpose(await readJson(req, config.maxBodyBytes)));
+  },
+
   'POST /api/ai/image': async (req, res) => {
     requireAuth(req);
     json(res, 200, await ai.image(await readJson(req, config.maxBodyBytes)));

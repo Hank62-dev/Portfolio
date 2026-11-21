@@ -1,6 +1,6 @@
 import { locale, tr } from '../../core/i18n/lang';
-import { useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, CalendarClock, Check, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, CalendarClock, Check, Plus, Repeat2, Trash2 } from 'lucide-react';
 import { Badge, Button, DatePicker, Dialog, Input, Textarea } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import { useFab } from '../../core/fab';
@@ -9,6 +9,7 @@ import DiscordComposer from './DiscordComposer';
 import { PLATFORMS, STAGES, byStage, dueToPost, hashtagLine, moveStage, newPiece } from './model';
 import { content } from './store';
 import { Chip, CopyButton, Label, PlatformTag, Row, STAGE_HUE } from './ui';
+import Repurpose from './Repurpose';
 
 const platformLabel = (id) => PLATFORMS.find((p) => p.id === id)?.label ?? id;
 const dayInput = (at) => {
@@ -19,7 +20,7 @@ const dayInput = (at) => {
 const when = (at) => (at ? new Date(at).toLocaleDateString(locale(), { day: 'numeric', month: 'short' }) : '');
 
 /** One piece of content: edit it, move it along, copy what is ready, post to Discord, record how it did. */
-function PieceSheet({ piece, onClose }) {
+function PieceSheet({ piece, onClose, onMoved, onRepurpose }) {
   const [title, setTitle] = useState(piece.title);
   const [hook, setHook] = useState(piece.hook ?? '');
   const [platforms, setPlatforms] = useState(piece.platforms ?? []);
@@ -36,6 +37,7 @@ function PieceSheet({ piece, onClose }) {
   const move = async (by) => {
     const moved = moveStage({ ...piece }, by);
     await save({ stage: moved.stage, postedAt: moved.postedAt });
+    if (moved.stage !== piece.stage) onMoved?.(moved.stage, by);
     if (moved.stage === 'posted') onClose();
   };
   const num = (field) => (e) => setResults({ ...results, [field]: Math.max(0, Number(e.target.value) || 0) });
@@ -83,6 +85,13 @@ function PieceSheet({ piece, onClose }) {
             )}
           </div>
         )}
+
+        <Button variant="ghost" size="sm" className="self-start" onClick={async () => {
+          await save();
+          onRepurpose(piece.id);
+        }} data-open-repurpose>
+          <Repeat2 size={14} aria-hidden="true" /> {piece.repurposed ? tr('Posts for every platform') : tr('Make it into posts for every platform')}
+        </Button>
 
         <Textarea aria-label={tr('Notes')} rows={2} placeholder={tr('Notes: what worked, what to change next time')} value={notes} onChange={(e) => setNotes(e.target.value)} />
 
@@ -159,9 +168,32 @@ function NewIdea({ onClose }) {
 }
 
 /** The pipeline: every piece of content from idea to posted, as columns (like a board), with what is due today on top. */
-export default function PipelinePanel() {
+/** The clapperboard that snaps shut over the board when a piece moves on to its next stage. */
+function Clapper({ stage, onDone }) {
+  const done = useRef(onDone);
+  done.current = onDone;
+  useEffect(() => {
+    const id = window.setTimeout(() => done.current(), 1100);
+    return () => window.clearTimeout(id);
+  }, []);
+  return (
+    <div className="cl-clapper" role="status" aria-live="polite">
+      <div className="cl-clapper-board">
+        <i className="cl-clapper-top" aria-hidden="true" />
+        <span className="cl-clapper-body">
+          <small>{tr('Scene')}</small>
+          <b>{STAGES.find((s) => s.id === stage)?.label}</b>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export default function PipelinePanel({ openId = null }) {
   const { items } = useStore(content.store);
-  const [open, setOpen] = useState(null); // a piece id
+  const [open, setOpen] = useState(openId); // a piece id
+  const [clap, setClap] = useState(null); // the stage a piece just moved forward to
+  const [repurpose, setRepurpose] = useState(null); // a piece id
   const [adding, setAdding] = useState(false);
   const groups = useMemo(() => byStage(items), [items]);
   const due = useMemo(() => dueToPost(items), [items]);
@@ -196,8 +228,8 @@ export default function PipelinePanel() {
       </div>
 
       <div className="no-scrollbar -mx-5 flex scroll-px-5 snap-x snap-mandatory items-start gap-3 overflow-x-auto px-5 pb-3 md:mx-0 md:scroll-px-0 md:px-0" data-board>
-        {STAGES.map((stage) => (
-          <section key={stage.id} aria-label={stage.label} data-stage={stage.id} className="cl-surface relative flex w-[16.5rem] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-[1.75rem] border border-line p-3 max-md:w-[78vw]">
+        {STAGES.map((stage, stageIndex) => (
+          <section key={stage.id} aria-label={stage.label} data-stage={stage.id} className="cl-film cl-surface relative flex w-[16.5rem] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-[1.75rem] border border-line p-3 max-md:w-[78vw]">
             <i className="pointer-events-none absolute inset-x-6 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62% / 0.8), transparent)` }} aria-hidden="true" />
             <header className="flex items-center justify-between px-1.5 pt-1">
               <h4 className="flex items-center gap-2 font-mono text-[0.7rem] tracking-[0.12em] text-bone-dim uppercase">
@@ -210,9 +242,9 @@ export default function PipelinePanel() {
               <p className="rounded-2xl border border-dashed border-line px-3 py-6 text-center font-mono text-[0.7rem] text-bone-faint">{tr('Nothing here yet')}</p>
             ) : (
               <ul className="flex flex-col gap-2">
-                {groups[stage.id].map((p) => (
+                {groups[stage.id].map((p, i) => (
                   <li key={p.id}>
-                    <button type="button" onClick={() => setOpen(p.id)} className="cl-card flex w-full flex-col gap-2.5 rounded-2xl border border-line p-3.5 text-left" data-piece={p.title}>
+                    <button type="button" onClick={() => setOpen(p.id)} className="cl-frame cl-card flex w-full flex-col gap-2.5 rounded-2xl border border-line p-3.5 text-left" data-piece={p.title} data-frame={`${stageIndex + 1}${String.fromCharCode(65 + (i % 26))}`}>
                       <b className="text-fine leading-snug font-medium text-bone">{p.title}</b>
                       {p.hook && <span className="line-clamp-2 text-[0.8rem] leading-snug text-bone-dim">“{p.hook}”</span>}
                       <span className="flex flex-wrap items-center gap-1.5">
@@ -231,7 +263,20 @@ export default function PipelinePanel() {
         ))}
       </div>
 
-      {piece && <PieceSheet key={piece.id} piece={piece} onClose={() => setOpen(null)} />}
+      {piece && (
+        <PieceSheet
+          key={piece.id}
+          piece={piece}
+          onClose={() => setOpen(null)}
+          onMoved={(stage, by) => by > 0 && setClap({ stage, at: Date.now() })}
+          onRepurpose={(id) => {
+            setOpen(null);
+            setRepurpose(id);
+          }}
+        />
+      )}
+      {repurpose && items.find((p) => p.id === repurpose) && <Repurpose piece={items.find((p) => p.id === repurpose)} onClose={() => setRepurpose(null)} />}
+      {clap && <Clapper key={clap.at} stage={clap.stage} onDone={() => setClap(null)} />}
       {adding && <NewIdea onClose={() => setAdding(false)} />}
     </div>
   );

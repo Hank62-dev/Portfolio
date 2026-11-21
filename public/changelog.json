@@ -1,5 +1,12 @@
 [
   {
+    "id": "creator-studio-shop",
+    "version": "1.43.0",
+    "date": "2026-11-22",
+    "vi": "Portfolio có cửa hàng: bán sản phẩm số, đặt lịch gọi, gói hội viên Discord, ủng hộ, hoá đơn, trả bằng VietQR. Thêm trang link-in-bio, media kit, mục Studio. Creator Lab có Shop, lịch, phễu deal, báo cáo tuần.",
+    "en": "The portfolio has a shop: digital products, paid calls, Discord membership, tips and invoices, paid by VietQR. A link-in-bio page, a media kit, a Studio section. Creator Lab gets the Shop, a calendar, a deal funnel, a weekly report."
+  },
+  {
     "id": "curved-exhibition",
     "version": "1.42.0",
     "date": "2026-11-21",

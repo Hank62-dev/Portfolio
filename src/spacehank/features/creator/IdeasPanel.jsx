@@ -10,6 +10,7 @@ import { useStore } from '../../core/store';
 import { PLATFORMS, hashtagLine, hookFormulas, newPiece, rankHooks, scoreHook, scriptSheet, speakSeconds } from './model';
 import { content, creatorSettings, setSetting } from './store';
 import Teleprompter from './Teleprompter';
+import HookDeck from './HookDeck';
 import { Chip, CopyButton, Label, Panel, Row } from './ui';
 
 const TONE = { strong: 'text-ok', fair: 'text-warn', weak: 'text-danger' };
@@ -67,6 +68,7 @@ export default function IdeasPanel({ onSaved }) {
   const [platforms, setPlatforms] = useDraft(ideas, 'platforms');
   const [date, setDate] = useDraft(ideas, 'date');
   const [prompter, setPrompter] = useState(false);
+  const [deck, setDeck] = useState(true); // the hooks as a deck to swipe, or as a list
 
   const write = () => {
     setNotice('');
@@ -149,7 +151,11 @@ export default function IdeasPanel({ onSaved }) {
 
       {pack && (
         <>
-          <Panel title={tr('Choose your opening line')} icon={Trophy} hue={22} aside={<span className="font-mono text-[0.68rem] text-bone-faint">{pack.source === 'ai' ? tr('written by AI') : tr('from hook formulas')}</span>}>
+          <Panel title={tr('Choose your opening line')} icon={Trophy} hue={22} aside={<Segmented label={tr('Show the hooks as')} value={deck ? 'deck' : 'list'} onChange={(v) => setDeck(v === 'deck')} options={[{ id: 'deck', label: tr('Deck') }, { id: 'list', label: tr('List') }]} />}>
+            <p className="mb-3 font-mono text-[0.68rem] text-bone-faint">{pack.source === 'ai' ? tr('written by AI') : tr('from hook formulas')}</p>
+            {deck ? (
+              <HookDeck key={pack.hooks.map((h) => h.text).join('|')} hooks={pack.hooks} chosen={hook} onChoose={setHook} />
+            ) : (
             <ul className="flex flex-col gap-2" role="radiogroup" aria-label={tr('Hooks')}>
               {pack.hooks.map((h, i) => (
                 <li key={i}>
@@ -163,6 +169,7 @@ export default function IdeasPanel({ onSaved }) {
                 </li>
               ))}
             </ul>
+            )}
             <div className="mt-4 border-t border-line pt-4">
               <Label className="mb-2">{tr('Hook lab: edit it and watch the score')}</Label>
               <HookLab value={hook} onChange={setHook} />

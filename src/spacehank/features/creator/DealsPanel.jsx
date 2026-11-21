@@ -1,6 +1,6 @@
 import { locale, tr } from '../../core/i18n/lang';
 import { useEffect, useMemo, useState } from 'react';
-import { Calculator, CalendarClock, Check, FileText, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { Calculator, CalendarClock, Check, FileText, Plus, QrCode, Sparkles, Trash2 } from 'lucide-react';
 import { Badge, Button, DatePicker, Dialog, Input, Select, Textarea, pushToast } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import { generatePitch } from '../../core/api/owner';
@@ -9,7 +9,10 @@ import { Segmented } from '../../ui/Page';
 import { useStore } from '../../core/store';
 import { CHANNELS, DEAL_KINDS, DEAL_STAGES, dueFollowUps, forgotten, newDeal, packagePrice, pipelineValue, quoteHtml, quoteTotals, sponsorRate, vnd, vndShort, winRate } from './model';
 import { creatorSettings, deals, setSetting } from './store';
-import { CopyButton, Label, Panel, Row, STAGE_HUE, Stat } from './ui';
+import { CopyButton, Label, Panel, Row, STAGE_HUE, Stat, copyText } from './ui';
+import { sendInvoice, siteOrigin } from './shopStore';
+import { payLink } from './studio';
+import Funnel from './Funnel';
 
 const KIND_LABEL = Object.fromEntries(DEAL_KINDS.map((k) => [k.id, k.label]));
 const dayInput = (at) => {
@@ -164,6 +167,8 @@ function QuoteSheet({ onClose }) {
   const [discountPct, setDiscountPct] = useState('0');
   const [vatPct, setVatPct] = useState('0');
   const [terms, setTerms] = useState('Thanh toán 50% khi bắt đầu, 50% khi bàn giao.\nBáo giá có hiệu lực trong 14 ngày.');
+  const [due, setDue] = useState(dayInput(Date.now() + 7 * 86400000));
+  const [sending, setSending] = useState(false);
   const parsed = items.map((i) => ({ desc: i.desc, qty: Number(i.qty) || 0, unit: numeric(i.unit) }));
   const totals = quoteTotals(parsed, { discountPct: Number(discountPct) || 0, vatPct: Number(vatPct) || 0 });
   const set = (index, patch) => setItems((list) => list.map((it, i) => (i === index ? { ...it, ...patch } : it)));
@@ -181,6 +186,20 @@ function QuoteSheet({ onClose }) {
     win.document.close();
     win.focus();
     win.setTimeout(() => win.print(), 300);
+  };
+
+  // the same lines sent as an invoice the client pays on the portfolio, by QR; paid, it goes into Money by itself
+  const invoice = async () => {
+    setSending(true);
+    try {
+      setSetting({ business: from });
+      const order = await sendInvoice({ client: to, title, items: parsed.filter((it) => it.desc && it.unit), discountPct: Number(discountPct) || 0, vatPct: Number(vatPct) || 0, note: terms, dueAt: atOf(due) });
+      await copyText(payLink(siteOrigin(), order), tr('Invoice sent: its link is copied. Send it to the client.'));
+      onClose();
+    } catch (e) {
+      pushToast(e.message, { tone: 'error' });
+      setSending(false);
+    }
   };
 
   return (
@@ -224,6 +243,15 @@ function QuoteSheet({ onClose }) {
         <Button onClick={open} disabled={!totals.total} className="w-full justify-center" data-print-quote>
           <FileText size={15} aria-hidden="true" /> {tr('Open to print or save as PDF')}
         </Button>
+        <div className="flex flex-col gap-2 rounded-2xl border border-line p-3">
+          <Row label={tr('Pay by')}>
+            <DatePicker aria-label={tr('Pay by')} value={due} onChange={setDue} compact className="w-full" />
+          </Row>
+          <Button variant="ghost" onClick={invoice} disabled={!totals.total || sending} className="w-full justify-center" data-send-invoice>
+            <QrCode size={15} aria-hidden="true" /> {sending ? tr('Sending…') : tr('Send as an invoice with a QR to pay')}
+          </Button>
+          <p className="text-[0.74rem] text-bone-faint">{tr('The client gets a page with the invoice and a VietQR code. When it is paid it shows in the Shop and in Money.')}</p>
+        </div>
       </div>
     </Dialog>
   );
@@ -303,6 +331,8 @@ export default function DealsPanel() {
         <Stat value={vndShort(value.won)} label={tr('Won')} tone="text-ok" />
         <Stat value={rate === null ? '–' : `${rate}%`} label={tr('Win rate')} />
       </div>
+
+      {items.length > 0 && <Funnel deals={items} onOpen={(d) => setSheet({ deal: d })} />}
 
       {due.length > 0 && (
         <section className="cl-rise rounded-[1.75rem] border border-warn/35 bg-[linear-gradient(135deg,rgb(240_180_90/0.16),transparent_70%)] p-4 md:p-5" aria-label={tr('Follow up today')} data-follow-ups>

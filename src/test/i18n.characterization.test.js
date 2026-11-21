@@ -21,11 +21,11 @@ const trIn = async (lang) => {
 };
 
 const EXPECTED = {
-  trKeys: 2826,
-  trEn: '9fb14e08220ad9a4',
-  trVi: '1eb54df29458d038',
-  copyEn: '4bbbfc8197ae8309',
-  copyVi: '0fdb10c38f9447fd',
+  trKeys: 3061,
+  trEn: 'b7f1435eab040747',
+  trVi: '459895af264e0b1f',
+  copyEn: 'baba9433cb0f8336',
+  copyVi: '990883039f55aa09',
   ragEn: 'f16801d9891a1899',
   ragVi: '65bca26aa76f8a4f',
 };

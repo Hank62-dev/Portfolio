@@ -48,6 +48,14 @@ services:
       # Creator Lab: post announcements to your own Discord server. A webhook address (Server Settings, Integrations, Webhooks). Leave blank to switch it off.
       - key: DISCORD_WEBHOOK_URL
         sync: false
+      # The storefront on the portfolio (/shop, /book, /join, /kit, /me): SePay's webhook key marks bank transfers paid by
+      # themselves; a Discord bot (Manage Roles) gives members their role. All optional: without them you confirm by hand.
+      - key: SEPAY_API_KEY
+        sync: false
+      - key: DISCORD_BOT_TOKEN
+        sync: false
+      - key: DISCORD_GUILD_ID
+        sync: false
       - key: AI_DAILY_LIMIT
         value: 60
       # Locks the Hank RAG service: it only answers a request with a ticket from this server. Give BOTH services the same value.

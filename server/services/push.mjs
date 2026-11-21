@@ -192,6 +192,13 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     return factsCache.data;
   };
 
+  /** Tells every device of something that just happened (a payment, an enquiry). Quietly nothing when push is off. */
+  const announce = async (notification) => {
+    if (!enabled) return { sent: 0 };
+    await init();
+    return { sent: await sendTo(await subscriptions(), notification) };
+  };
+
   let busy = false;
   let last = 0;
   let cleaned = 0;
@@ -266,5 +273,5 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     timer = null;
   };
 
-  return { enabled, publicKey: enabled ? vapid.publicKey : '', init, subscribe, unsubscribe, sendTest, tick, nudge, start, stop };
+  return { enabled, publicKey: enabled ? vapid.publicKey : '', init, subscribe, unsubscribe, sendTest, announce, tick, nudge, start, stop };
 };

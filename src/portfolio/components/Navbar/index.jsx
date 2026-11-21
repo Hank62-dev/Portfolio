@@ -10,6 +10,7 @@ import LangToggle from '../LangToggle';
 import Menu from '../Menu';
 import SoundToggle from '../SoundToggle';
 import Logo from '../../../shared/ui/Logo';
+import { doorsFrom, useStoreData } from '../../hooks/useStoreDoors';
 
 const Navbar = () => {
   const { c } = useLang();
@@ -21,6 +22,9 @@ const Navbar = () => {
   const menuButton = useRef(null);
   const close = useCallback(() => setOpen(false), []);
   const active = useActiveSection(NAV_SECTIONS, pathname === '/');
+  // the way into the shop, when it has anything open (the first open door: the products, else a call, else…)
+  const store = useStoreData();
+  const door = doorsFrom(store, c)[0] ?? (store ? { to: '/shop' } : null);
 
   // Scrolling down tucks the bar away to give the page room; scrolling up brings it back.
   useEffect(() => {
@@ -118,6 +122,12 @@ const Navbar = () => {
         </nav>
 
         <div className="flex items-center gap-2">
+          {door && (
+            <Link to={door.to} className="nav-shop max-sm:hidden" data-cursor="go">
+              <i aria-hidden="true" />
+              {c.store.studio.nav}
+            </Link>
+          )}
           <SoundToggle />
           <button
             ref={menuButton}

@@ -25,6 +25,8 @@ import { podcastsRoutes } from './routes/podcasts.routes.mjs';
 import { calendarRoutes } from './routes/calendar.routes.mjs';
 import { whispersRoutes } from './routes/whispers.routes.mjs';
 import { createWhispers } from './services/whispers.mjs';
+import { createStorefront } from './services/storefront.mjs';
+import { STORE_WEBHOOKS, storeRoutes } from './routes/store.routes.mjs';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -59,6 +61,9 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
   push.start();
   // the portfolio's guestbook: in the database when there is one, in memory otherwise
   const whispers = createWhispers({ db });
+  // what visitors can pay for (see services/storefront.mjs); payments are told by SePay's webhook, members get a Discord role
+  const store = createStorefront({ db, calendar, zone: config.push.zone, sepayKey: config.store.sepayKey, discordBot: config.store.discordBot, announce: (n) => push.announce(n), fetchImpl });
+  store.start();
   const query = (req) => new URL(req.url, 'http://localhost').searchParams;
   const who = (req) => clientKey(req, config.trustedProxyHops);
 
@@ -76,14 +81,15 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
 
   // The session cookie is SameSite=None in production, so any site could make the browser attach it.
   // Refuse state-changing requests that do not come from the one configured frontend.
-  const requireTrustedOrigin = (req) => {
+  const requireTrustedOrigin = (req, pathname) => {
+    if (STORE_WEBHOOKS.has(pathname)) return; // a payment service, which carries its own key instead
     if (!SAFE_METHODS.has(req.method) && req.headers.origin !== config.origin) {
       throw new HttpError(403, 'Origin not allowed');
     }
   };
 
   // every route, by group (see routes/): what each group reaches is in this one object
-  const ctx = { config, json, bytes, redirect, readJson, readBytes, requireAuth, query, who, auth, hub, tasks, push, ai, calendar, sync, needSync, discord, podcasts, google, whispers };
+  const ctx = { config, json, bytes, redirect, readJson, readBytes, requireAuth, query, who, auth, hub, tasks, push, ai, calendar, sync, needSync, discord, podcasts, google, whispers, store };
   const routes = {
     ...systemRoutes(ctx),
     ...authRoutes(ctx),
@@ -95,6 +101,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
     ...podcastsRoutes(ctx),
     ...calendarRoutes(ctx),
     ...whispersRoutes(ctx),
+    ...storeRoutes(ctx),
   };
 
   const server = http.createServer(async (req, res) => {
@@ -105,7 +112,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
       if (!handler) return json(res, 404, { error: 'Not found' });
       const allowed = limits[tierOf(pathname)].hit(who(req));
       if (!allowed.ok) return json(res, 429, { error: 'Too many requests. Slow down a little.' }, { 'Retry-After': String(allowed.retryAfterSeconds) });
-      requireTrustedOrigin(req);
+      requireTrustedOrigin(req, pathname);
       return await handler(req, res);
     } catch (error) {
       if (error instanceof HttpError) return json(res, error.status, { error: error.message });
@@ -182,6 +189,7 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
       new Promise((resolve) => {
         clearInterval(heartbeat);
         push.stop();
+        store.stop();
         for (const client of [...wss.clients, ...battleWss.clients]) client.terminate();
         wss.close(() => battleWss.close(() => server.close(() => resolve())));
       }),

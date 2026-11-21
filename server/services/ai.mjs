@@ -334,6 +334,40 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now, sleep = (ms) =
     return { subject: clip(parsed.subject, 140), message };
   };
 
+  /**
+   * One video made into everything around it: a caption for each short-video platform, a YouTube title and description, a
+   * thread, a blog post and a newsletter. Same rules as the content pack: nothing invented, [brackets] for what only the creator knows.
+   */
+  const repurpose = async ({ title, script, language, niche, audience }) => {
+    const source = clip2(script, 6000);
+    const name = clip(title, 160);
+    if (source.length < 20 && name.length < 3) throw new HttpError(400, 'Give the script, or at least what the video is about.');
+    const tongue = language === 'en' ? 'English' : 'Vietnamese';
+    const prompt = [
+      `You turn one short video by a solo creator into posts for other places. Write in natural ${tongue}, the creator's own voice.`,
+      `Video: ${JSON.stringify(name)}. Niche: ${JSON.stringify(clip(niche, 80) || 'general')}. Audience: ${JSON.stringify(clip(audience, 120) || 'general')}.`,
+      `What is said in it:\n${source || '(no script: work from the title)'}`,
+      'Rules: only what the video says; never promise income or results, never invent numbers, quotes or stories; [brackets] for facts only the creator knows.',
+      'Reply as JSON: {"tiktok":"caption under 150 characters","reels":"caption under 220 characters with line breaks","shorts":{"title":"under 90 characters","description":"under 400 characters"},',
+      '"facebook":"a post under 600 characters","thread":["4 to 6 posts, each under 270 characters"],"blog":{"title":"...","body":"a blog post of 350 to 600 words in Markdown, with ## headings"},',
+      '"newsletter":{"subject":"under 70 characters","body":"a short, warm email under 220 words"},"hashtags":["5 to 8, no # sign"]}',
+    ].join('\n');
+    const data = await gemini(ai.textModel, { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.7 } });
+    const parsed = jsonOf(data, 'Nothing came back. Try again.');
+    const out = {
+      tiktok: clip(parsed.tiktok, 300),
+      reels: clip2(parsed.reels, 500),
+      shorts: { title: clip(parsed.shorts?.title, 120), description: clip2(parsed.shorts?.description, 800) },
+      facebook: clip2(parsed.facebook, 1200),
+      thread: (Array.isArray(parsed.thread) ? parsed.thread : []).map((t) => clip(t, 280)).filter(Boolean).slice(0, 8),
+      blog: { title: clip(parsed.blog?.title, 160), body: clip2(parsed.blog?.body, 9000) },
+      newsletter: { subject: clip(parsed.newsletter?.subject, 120), body: clip2(parsed.newsletter?.body, 3000) },
+      hashtags: [...new Set((Array.isArray(parsed.hashtags) ? parsed.hashtags : []).map((h) => clip(h, 40).replace(/^#+/, '').replace(/\s+/g, '')).filter(Boolean))].slice(0, 10),
+    };
+    if (!out.tiktok && !out.blog.body) throw new HttpError(502, 'It came back empty. Try again.');
+    return out;
+  };
+
   /** A picture as bytes from a service that answers with the image itself (Hugging Face, Pollinations). */
   const fetchPicture = async (url, init, what) => {
     let response;
@@ -506,5 +540,5 @@ export const createAi = ({ ai, fetchImpl = fetch, now = Date.now, sleep = (ms) =
     return { text: clip2(text, 1200) };
   };
 
-  return { usage, dj, note, image, ask, command, cards, content, pitch, transcribe, organize, receipt, review };
+  return { usage, dj, note, image, ask, command, cards, content, pitch, repurpose, transcribe, organize, receipt, review };
 };

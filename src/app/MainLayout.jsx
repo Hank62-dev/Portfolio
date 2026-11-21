@@ -44,7 +44,8 @@ const MainLayout = ({ children }) => {
   const { theme, toggle } = useTheme();
   useReveal();
 
-  if (pathname === '/spacehank') {
+  // the workspace, the link-in-bio page and short links stand on their own, without the site around them
+  if (pathname === '/spacehank' || pathname === '/me' || pathname.startsWith('/go/')) {
     return <>{children}</>;
   }
 

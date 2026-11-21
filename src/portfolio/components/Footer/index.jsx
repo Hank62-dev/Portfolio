@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { doorsFrom, useStoreData } from '../../hooks/useStoreDoors';
 import { NAV_SECTIONS, profile, socials } from '../../../shared/profile';
 import { byTier, projectHref } from '../../data/projects';
 import { useLang } from '../../i18n';
@@ -101,6 +102,7 @@ const Invite = () => {
 
 const Footer = () => {
   const { c, t } = useLang();
+  const storeData = useStoreData();
   const { pathname } = useLocation();
   const year = new Date().getFullYear();
   const wordmark = useRef(null);
@@ -170,6 +172,8 @@ const Footer = () => {
     [reveal]
   );
 
+  const openDoors = doorsFrom(storeData, c);
+  const doors = openDoors.length ? openDoors : storeData ? [{ id: 'shop', to: '/shop', label: c.store.nav.shop }] : [];
   const sectionLink = (id) => (pathname === '/' ? { to: `/#${id}`, onClick: jumpTo(id) } : { to: `/#${id}` });
 
   return (
@@ -201,6 +205,20 @@ const Footer = () => {
                     </li>
                   ))}
                 </ul>
+                {doors.length > 0 && (
+                  <>
+                    <h2 className={`${HEAD} mt-6`}>{c.store.studio.label}</h2>
+                    <ul className="grid gap-1">
+                      {doors.map((d) => (
+                        <li key={d.id}>
+                          <Link to={d.to} className={LINK}>
+                            {d.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                )}
               </nav>
 
               <nav data-footer-col aria-label={c.footer.work}>

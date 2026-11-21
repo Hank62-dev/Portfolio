@@ -55,6 +55,12 @@ export const loadConfig = (env = process.env) => {
       key: env.CALENDAR_TOKEN_KEY || env.SPACEHANK_SESSION_SECRET || '',
     },
     discordWebhooks: parseWebhooks(env), // { channelName: webhook url }, kept on the server
+    // the storefront: SePay's webhook key (its dashboard sends it as "Authorization: Apikey …") marks transfers paid by themselves,
+    // and a Discord bot in the owner's server (with Manage Roles) gives members their role and takes it back when it runs out
+    store: {
+      sepayKey: env.SEPAY_API_KEY || '',
+      discordBot: env.DISCORD_BOT_TOKEN && env.DISCORD_GUILD_ID ? { token: env.DISCORD_BOT_TOKEN, guildId: env.DISCORD_GUILD_ID } : null,
+    },
     // the database that keeps the owner's data in step across devices; without it the workspace stays on each device
     databaseUrl: env.DATABASE_URL || '',
     sync: {

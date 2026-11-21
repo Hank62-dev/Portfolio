@@ -117,3 +117,18 @@ event in 15 minutes, a habit left for the evening, a budget at 80%), the realtim
 
 On iPhone push only works for the app added to the Home Screen (iOS 16.4 or newer). Reminders are sent once each; changing the
 keys later means switching the device off and on again.
+
+## The storefront (shop, calls, membership, media kit, links)
+
+The portfolio's /shop, /book, /join, /kit, /me, /pay/… and /go/… pages talk to the realtime service on Render.
+
+1. `DATABASE_URL` must be set: without it the shop's settings and every order live in memory and are lost when Render restarts or sleeps.
+2. In SpaceHank, Creator Lab → Shop → Payments: the bank, the account number and the holder's name (as the bank spells it). Nothing can be sold before this.
+3. Automatic confirmation (optional): make a SePay account (sepay.vn), link the same bank account, add a webhook to
+   `https://<render-service>.onrender.com/api/store/sepay` with **API Key** authentication, and put that key in `SEPAY_API_KEY` on Render.
+   Every incoming transfer whose note carries an order's code (HK……) marks it paid; without SePay you press "Mark paid" yourself.
+4. Discord roles for members (optional): create an application and bot at discord.com/developers, invite it to your server with
+   Manage Roles, put its role *above* the members' role, then set `DISCORD_BOT_TOKEN` and `DISCORD_GUILD_ID`; give each tier its role ID.
+5. Render's free plan sleeps after fifteen idle minutes. A ping to `/health` every ten minutes (cron-job.org) keeps the shop and the
+   webhook answering at once.
+6. Check: buy the cheapest product with a real transfer of its price, watch /pay/… turn to Paid and the order appear in Money.

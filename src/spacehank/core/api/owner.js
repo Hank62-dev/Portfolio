@@ -97,6 +97,13 @@ export const readReceipt = ({ image, mime }) => (needSignIn(), call('/api/ai/rec
 export const writeReview = ({ stats, language }) => (needSignIn(), call('/api/ai/review', { method: 'POST', body: { stats, language } }));
 export const generateContent = (input) => (owner(), call('/api/ai/content', { method: 'POST', body: input }));
 export const generatePitch = (input) => (owner(), call('/api/ai/pitch', { method: 'POST', body: input }));
+export const repurposeContent = (input) => (owner(), call('/api/ai/repurpose', { method: 'POST', body: input }));
+// the storefront the portfolio's visitors pay through (server/routes/store.routes.mjs)
+export const storeAdmin = () => (owner(), call('/api/store/admin'));
+export const saveStoreConfig = (config) => (owner(), call('/api/store/config', { method: 'POST', body: config }));
+export const createInvoice = (input) => (owner(), call('/api/store/invoice', { method: 'POST', body: input }));
+export const markOrder = (id, status) => (owner(), call('/api/store/mark', { method: 'POST', body: { id, status } }));
+export const removeOrder = (id) => (owner(), call('/api/store/remove', { method: 'POST', body: { id } }));
 export const discordChannels = () => (owner(), call('/api/discord/channels'));
 export const postToDiscord = ({ channel, content }) => (owner(), call('/api/discord/post', { method: 'POST', body: { channel, content } }));
 

@@ -168,6 +168,8 @@ export const SOURCES = [
   { id: 'sponsor', label: tr('Sponsorship') },
   { id: 'freelance', label: tr('Client work') },
   { id: 'product', label: tr('Digital product') },
+  { id: 'calls', label: tr('Paid calls') },
+  { id: 'affiliate', label: tr('Affiliate') },
   { id: 'membership', label: tr('Membership / donations') },
   { id: 'discord', label: tr('Discord community') },
   { id: 'other', label: tr('Other') },
@@ -187,12 +189,15 @@ const shiftMonth = (key, by) => {
 };
 
 /** A new income entry. `amount` is in VND (a whole number). */
-export const newIncome = ({ amount, source = 'other', at = Date.now(), note = '', pieceId = '' }) => ({
+export const newIncome = ({ amount, source = 'other', at = Date.now(), note = '', pieceId = '', orderId = '', linkId = '' }) => ({
   amount: Math.max(0, Math.round(Number(amount) || 0)),
   source: SOURCE_LABEL[source] ? source : 'other',
   at,
   note: String(note).trim().slice(0, 120),
   pieceId,
+  // where it came from when the storefront brought it: a paid order, or an affiliate link's commission
+  orderId,
+  linkId,
 });
 
 /** An amount of dong as "1.250.000 ₫". */

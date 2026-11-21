@@ -12,6 +12,7 @@ import About from '../../sections/About';
 import Activity from '../../sections/Activity';
 import Contact from '../../sections/Contact';
 import Whispers from '../../sections/Whispers';
+import Studio from '../../sections/Studio';
 import ParticleField from '../../scene/particles/ParticleField';
 
 const Home = () => {
@@ -32,6 +33,7 @@ const Home = () => {
       <About />
       <Activity github={github} />
       <Whispers />
+      <Studio />
       <Contact />
     </>
   );
