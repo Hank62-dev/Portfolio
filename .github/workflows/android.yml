@@ -49,6 +49,18 @@ jobs:
       # copies app-shell/ and the plugin list into the Android project (the site itself is loaded live, not bundled)
       - run: npx cap sync android
 
+      # Firebase's settings for the app (notifications from the server). Not in the repo: its API key would trip the secret scan.
+      # Make it with: base64 -w0 android/app/google-services.json, and save it as the GOOGLE_SERVICES_JSON_BASE64 secret.
+      - name: Restore the Firebase settings
+        env:
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES" ]; then
+            echo "::error::The GOOGLE_SERVICES_JSON_BASE64 secret is missing: without it the app cannot receive notifications from the server."
+            exit 1
+          fi
+          echo "$GOOGLE_SERVICES" | base64 -d > android/app/google-services.json
+
       - name: Restore the signing key
         id: key
         env:

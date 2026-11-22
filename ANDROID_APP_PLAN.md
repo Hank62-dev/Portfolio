@@ -1,6 +1,6 @@
 # Kế hoạch làm app Android (APK) cho Hank62 / SpaceHank
 
-> Trạng thái: **GĐ 1 (vỏ cơ bản) xong và đã cài thử. GĐ 2 (nhắc việc đúng giờ) đã làm**, chờ thử trên máy: plugin `@capacitor/local-notifications`; `rules.js` `ahead()` tính trước lời nhắc 48 giờ tới; `notifications/native.js` hẹn chúng thành báo thức, hiện thông báo, mở đúng tab khi bấm; plugin tự đặt lại sau khi khởi động lại máy. Vỏ: `capacitor.config.json`, `android/`, `app-shell/`, `assets/`, `.github/workflows/android.yml`.
+> Trạng thái: **GĐ 1, 2 xong và đã thử trên máy. GĐ 5 (FCM) đã làm**: `server/services/fcm.mjs` gửi qua FCM HTTP v1 (cần `FCM_SERVICE_ACCOUNT` trên Render), `push_subs.channel` = `web`/`fcm`; app đăng ký token qua `@capacitor/push-notifications` (`notifications/native.js`), khi server gửi được thì báo thức trên máy tự tắt để không nhắc hai lần. `google-services.json` không nằm trong repo: secret `GOOGLE_SERVICES_JSON_BASE64`.
 > Phạm vi: Android, cài trực tiếp bằng file APK (không CH Play, không App Store). iPhone nằm ngoài kế hoạch (xem mục 9).
 
 ---

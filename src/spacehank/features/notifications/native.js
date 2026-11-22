@@ -87,3 +87,78 @@ export const onNativeTap = (open) => {
   });
   return () => void handle.then((h) => h.remove());
 };
+
+// ---- reminders from the server, through Firebase Cloud Messaging ----------------------------------------------------
+// With the server set up for it, the app hands the server its FCM token and the server sends the reminders itself (the
+// same rules, checked every minute against the synced data), so they come even when the app has not been opened for days
+// or the data was changed on another device. The alarms above then stand down, so nothing arrives twice.
+
+const TOKEN_KEY = 'hank62.fcm';
+
+/** The FCM token this install gave the server, or ''. */
+export const appToken = () => {
+  try {
+    return localStorage.getItem(TOKEN_KEY) ?? '';
+  } catch {
+    return '';
+  }
+};
+
+const keepToken = (token) => {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* storage is blocked: the app asks again next time */
+  }
+};
+
+/** Registers with FCM (asking permission first) and resolves to the token. */
+export const registerApp = async () => {
+  const { PushNotifications } = await import('@capacitor/push-notifications');
+  const { receive } = await PushNotifications.requestPermissions();
+  nativeState.set({ display: receive });
+  if (receive !== 'granted') throw new Error('denied');
+  // the channel the server's messages name (server/services/fcm.mjs): heads-up, with sound
+  await PushNotifications.createChannel({ id: 'reminders', name: 'Reminders', description: 'Tasks, events, habits and the rest', importance: 4, visibility: 1 });
+  const token = await new Promise((resolve, reject) => {
+    const handles = [];
+    const done = (fn, value) => {
+      handles.forEach((h) => void h.then((x) => x.remove()));
+      fn(value);
+    };
+    handles.push(PushNotifications.addListener('registration', ({ value }) => done(resolve, value)));
+    handles.push(PushNotifications.addListener('registrationError', ({ error }) => done(reject, new Error(error))));
+    void PushNotifications.register();
+    setTimeout(() => done(reject, new Error('timeout')), 20000);
+  });
+  keepToken(token);
+  lastPlan = ''; // the alarms are re-planned (to none) on the next check
+  return token;
+};
+
+export const unregisterApp = async () => {
+  const { PushNotifications } = await import('@capacitor/push-notifications');
+  keepToken('');
+  lastPlan = ''; // the phone's own alarms take over again on the next check
+  await PushNotifications.unregister().catch(() => {});
+};
+
+/**
+ * Listens to the server's messages: one that arrives while the app is open goes to `received` (the bell's list), a tapped
+ * one to `open(tab)`. Returns a stop function.
+ */
+export const onAppPush = ({ received, open }) => {
+  if (!isNativeApp()) return () => {};
+  let stopped = false;
+  const handles = [];
+  void import('@capacitor/push-notifications').then(({ PushNotifications }) => {
+    if (stopped) return;
+    handles.push(PushNotifications.addListener('pushNotificationReceived', (message) => received({ ...message.data, title: message.title, body: message.body })));
+    handles.push(PushNotifications.addListener('pushNotificationActionPerformed', ({ notification }) => notification?.data?.tab && open(notification.data.tab)));
+  });
+  return () => {
+    stopped = true;
+    handles.forEach((h) => void h.then((x) => x.remove()));
+  };
+};

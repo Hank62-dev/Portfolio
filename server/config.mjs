@@ -74,6 +74,8 @@ export const loadConfig = (env = process.env) => {
       privateKey: env.VAPID_PRIVATE_KEY || '',
       subject: env.VAPID_SUBJECT || '',
       zone: env.PUSH_TIMEZONE || 'Asia/Ho_Chi_Minh',
+      // the Android app: a Firebase service account (its JSON key, as is or in base64), for sending through FCM
+      fcmAccount: env.FCM_SERVICE_ACCOUNT || '',
     },
     maxTaskChars: 20000,
     maxTasks: 200,

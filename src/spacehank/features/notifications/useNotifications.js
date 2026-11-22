@@ -11,7 +11,8 @@ import { flashcards } from '../study/store';
 import { budgets, entries } from '../wallet/store';
 import { isNativeApp } from '../../../shared/lib/platform';
 import { center, notify } from './center';
-import { onNativeTap, planNative, refreshNative } from './native';
+import { onAppPush, onNativeTap, planNative, refreshNative } from './native';
+import { pushState, refreshPush } from './push';
 import { ahead, reminders } from './rules';
 
 const EVERY = 30 * 1000; // how often the reminders are looked at
@@ -62,13 +63,15 @@ export function useNotifications({ guest, connected, agents, onTab }) {
       // the Android app also sets the next two days' reminders as alarms, so they come with the app closed
       if (isNativeApp() && !guest) {
         const { prefs, seen } = center.get();
-        const list = prefs.push ? ahead({ ...data, now: new Date() }).filter((item) => prefs.kinds[item.kind] && !seen[item.key]) : [];
+        // when the server can send them (FCM), it is the one switch: the phone's own alarms stand down so nothing comes twice
+        const list = prefs.push && !pushState.get().available ? ahead({ ...data, now: new Date() }).filter((item) => prefs.kinds[item.kind] && !seen[item.key]) : [];
         void planNative(list).catch(() => {});
       }
     };
 
     fetchCalendar();
     void refreshNative();
+    if (isNativeApp() && !guest) void refreshPush(); // learns whether the server sends to the app, and refreshes its token
     const first = window.setTimeout(tick, 4000); // after the stores have had a moment to load
     const loop = window.setInterval(tick, EVERY);
     const refetch = window.setInterval(fetchCalendar, CALENDAR_EVERY);
@@ -140,9 +143,15 @@ export function useNotifications({ guest, connected, agents, onTab }) {
     navigator.serviceWorker?.addEventListener('message', onMessage);
     // in the Android app, a tapped notification (even one that started the app) says where to go
     const stopTaps = onNativeTap(onTab);
+    // and the server's messages to the app: one that arrives while it is open joins the list, a tapped one opens its tab
+    const stopPush = onAppPush({
+      open: onTab,
+      received: ({ key, kind, title, body, tab, tone }) => title && notify({ key, kind: kind || 'system', title, body, tab, tone }),
+    });
     return () => {
       navigator.serviceWorker?.removeEventListener('message', onMessage);
       stopTaps();
+      stopPush();
     };
   }, [onTab]);
 }

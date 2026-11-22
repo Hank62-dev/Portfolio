@@ -21,6 +21,8 @@ const SCHEMA = [
    )`,
   // the language of the device, so what it is told is told in it (added later: older rows are English)
   `ALTER TABLE push_subs ADD COLUMN IF NOT EXISTS lang TEXT NOT NULL DEFAULT 'en'`,
+  // how the device is reached: 'web' (a Web Push subscription) or 'fcm' (the Android app; the endpoint is its FCM token)
+  `ALTER TABLE push_subs ADD COLUMN IF NOT EXISTS channel TEXT NOT NULL DEFAULT 'web'`,
   `CREATE TABLE IF NOT EXISTS push_sent (
      key     TEXT   PRIMARY KEY,
      sent_at BIGINT NOT NULL
@@ -49,8 +51,18 @@ const day = (ms) => new Date(ms).toISOString().slice(0, 10);
 /** The translator for a language: the Vietnamese table, or the English text as written. */
 const translator = (lang) => (lang === 'vi' ? (text, ...args) => plainT(vi[text] ?? text, ...args) : plainT);
 
-export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh', send, now = Date.now }) => {
-  const enabled = Boolean(db && sync && vapid?.publicKey && vapid?.privateKey && vapid?.subject);
+/** An FCM registration token, checked. Throws a 400 for anything else. */
+export const parseFcmToken = (input) => {
+  const token = text(input, 4096);
+  if (!/^[\w:.-]{20,}$/.test(token)) throw new HttpError(400, 'That is not an app token.');
+  return token;
+};
+
+export const createPush = ({ db, sync, calendar, vapid, fcm, zone = 'Asia/Ho_Chi_Minh', send, now = Date.now }) => {
+  // two ways to reach a device: Web Push for browsers (needs the VAPID keys), FCM for the Android app (needs a service account)
+  const webOn = Boolean(vapid?.publicKey && vapid?.privateKey && vapid?.subject);
+  const appOn = Boolean(fcm?.enabled);
+  const enabled = Boolean(db && sync && (webOn || appOn));
   const deliver = send ?? ((subscription, payload) => webpush.sendNotification(subscription, payload, { TTL: 3600, urgency: 'normal', vapidDetails: { subject: vapid.subject, publicKey: vapid.publicKey, privateKey: vapid.privateKey } }));
 
   // The database is asked as seldom as possible, because a free database goes to sleep when nobody asks and every question
@@ -73,15 +85,19 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
   }));
 
   const need = () => {
-    if (!enabled) throw new HttpError(503, 'Push is not set up: add DATABASE_URL and the VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT settings to the realtime service.');
+    if (!enabled) throw new HttpError(503, 'Push is not set up: add DATABASE_URL and the VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT settings (or FCM_SERVICE_ACCOUNT for the Android app) to the realtime service.');
   };
 
   // ---- subscriptions
 
-  const subscribe = async ({ subscription, kinds, lang }) => {
+  const subscribe = async ({ subscription, fcm: appToken, kinds, lang }) => {
     need();
+    if (appToken !== undefined && !appOn) throw new HttpError(503, 'App notifications are not set up: add FCM_SERVICE_ACCOUNT to the realtime service.');
+    if (appToken === undefined && !webOn) throw new HttpError(503, 'Web Push is not set up: add the VAPID settings to the realtime service.');
     await init();
-    const { endpoint, p256dh, auth } = parseSubscription(subscription);
+    // the Android app's token stands where a browser's endpoint would; it has no keys
+    const { endpoint, p256dh, auth } = appToken !== undefined ? { endpoint: parseFcmToken(appToken), p256dh: '', auth: '' } : parseSubscription(subscription);
+    const channel = appToken !== undefined ? 'fcm' : 'web';
     const known = await db.query(`SELECT 1 FROM push_subs WHERE endpoint = $1`, [endpoint]);
     if (!known.rows.length) {
       const count = Number((await db.query(`SELECT COUNT(*) AS n FROM push_subs`)).rows[0].n);
@@ -89,9 +105,9 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     }
     const wanted = kinds && typeof kinds === 'object' ? Object.fromEntries(Object.entries(kinds).filter(([, on]) => typeof on === 'boolean').slice(0, 20)) : {};
     await db.query(
-      `INSERT INTO push_subs (endpoint, p256dh, auth, kinds, created_at, lang) VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (endpoint) DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, kinds = EXCLUDED.kinds, lang = EXCLUDED.lang`,
-      [endpoint, p256dh, auth, JSON.stringify(wanted), now(), lang === 'vi' ? 'vi' : 'en']
+      `INSERT INTO push_subs (endpoint, p256dh, auth, kinds, created_at, lang, channel) VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (endpoint) DO UPDATE SET p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth, kinds = EXCLUDED.kinds, lang = EXCLUDED.lang, channel = EXCLUDED.channel`,
+      [endpoint, p256dh, auth, JSON.stringify(wanted), now(), lang === 'vi' ? 'vi' : 'en', channel]
     );
     subsCache = null;
     return { subscribed: true };
@@ -105,7 +121,8 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     return { subscribed: false };
   };
 
-  const subscriptions = async () => (await db.query(`SELECT endpoint, p256dh, auth, kinds, lang FROM push_subs`)).rows;
+  // a device whose way in is no longer set up (the keys were removed) is left alone, not sent to and not forgotten
+  const subscriptions = async () => (await db.query(`SELECT endpoint, p256dh, auth, kinds, lang, channel FROM push_subs`)).rows.filter((sub) => (sub.channel === 'fcm' ? appOn : webOn));
 
   /** Sends one notification to every device that wants this kind. A device the push service says is gone is forgotten. */
   const sendTo = async (subs, notification) => {
@@ -114,7 +131,8 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     for (const sub of subs) {
       if (notification.kind && sub.kinds?.[notification.kind] === false) continue;
       try {
-        await deliver({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
+        if (sub.channel === 'fcm') await fcm.send(sub.endpoint, notification);
+        else await deliver({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload);
         sent += 1;
       } catch (error) {
         if (error?.statusCode === 404 || error?.statusCode === 410) {
@@ -273,5 +291,5 @@ export const createPush = ({ db, sync, calendar, vapid, zone = 'Asia/Ho_Chi_Minh
     timer = null;
   };
 
-  return { enabled, publicKey: enabled ? vapid.publicKey : '', init, subscribe, unsubscribe, sendTest, announce, tick, nudge, start, stop };
+  return { enabled, webEnabled: enabled && webOn, appEnabled: enabled && appOn, publicKey: enabled && webOn ? vapid.publicKey : '', init, subscribe, unsubscribe, sendTest, announce, tick, nudge, start, stop };
 };

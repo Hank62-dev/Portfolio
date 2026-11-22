@@ -60,6 +60,8 @@ function Settings({ prefs }) {
   const system = native
     ? state === 'denied'
       ? tr('Notifications are off for Hank62. Turn them on in Android’s settings for the app.')
+      : on && server.available
+        ? tr('The server sends the reminders: they come even when the app has not been opened for days or the data changed on another device.')
       : on
         ? tr('Reminders for the next two days are set on the phone: they arrive on time even when the app is closed or offline.')
         : tr('Turn on to get reminders on time, even when the app is closed.')
@@ -88,7 +90,7 @@ function Settings({ prefs }) {
             {server.error}
           </p>
         )}
-        {native && on && phone.exact !== 'granted' && (
+        {native && on && !server.available && phone.exact !== 'granted' && (
           <div className="mt-3 rounded-xl bg-wash/6 p-2.5">
             <p className="font-mono text-[0.72rem] leading-snug text-bone-faint">{tr('Android may hold reminders back by a few minutes. Allow alarms & reminders for Hank62 to get them at the exact minute.')}</p>
             <button type="button" onClick={() => void askExact()} className="mt-2 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">

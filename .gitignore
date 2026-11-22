@@ -18,3 +18,5 @@ dist-ssr
 *.keystore
 *.jks
 key.txt
+# Firebase settings for the Android app: kept as the GOOGLE_SERVICES_JSON_BASE64 secret, written out by .github/workflows/android.yml
+android/app/google-services.json

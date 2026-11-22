@@ -114,7 +114,8 @@ export const discordChannels = () => (owner(), call('/api/discord/channels'));
 export const postToDiscord = ({ channel, content }) => (owner(), call('/api/discord/post', { method: 'POST', body: { channel, content } }));
 
 // Web Push (see server/services/push.mjs): the key to subscribe with, this device's subscription, and a test
-export const pushKey = () => (isDemo() ? Promise.resolve({ enabled: false, publicKey: '' }) : call('/api/push/key'));
-export const pushSubscribe = ({ subscription, kinds, lang }) => call('/api/push/subscribe', { method: 'POST', body: { subscription, kinds, lang } });
+export const pushKey = () => (isDemo() ? Promise.resolve({ enabled: false, publicKey: '', app: false }) : call('/api/push/key'));
+// a browser sends its `subscription`, the Android app its FCM token as `fcm`
+export const pushSubscribe = ({ subscription, fcm, kinds, lang }) => call('/api/push/subscribe', { method: 'POST', body: { subscription, fcm, kinds, lang } });
 export const pushUnsubscribe = (endpoint) => call('/api/push/unsubscribe', { method: 'POST', body: { endpoint } });
 export const pushTest = () => call('/api/push/test', { method: 'POST', body: {} });

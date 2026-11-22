@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-server-push",
+    "version": "1.52.0",
+    "date": "2026-11-23",
+    "vi": "App Android nhận lời nhắc từ server qua Firebase: vẫn đến khi nhiều ngày không mở app hay sửa dữ liệu trên máy khác; server cũng báo đơn hàng, liên hệ mới tới điện thoại.",
+    "en": "The Android app gets its reminders from the server through Firebase: they come even when it has not been opened for days or the data changed elsewhere; sales and enquiries reach the phone too."
+  },
+  {
     "id": "android-reminders",
     "version": "1.51.0",
     "date": "2026-11-23",

@@ -3,6 +3,7 @@ import { getLang, tr } from '../../core/i18n/lang';
 import { pushKey, pushSubscribe, pushTest, pushUnsubscribe } from '../../core/api/owner';
 import { createStore } from '../../core/store';
 import { center, permission, sendTest, setPush } from './center';
+import { appToken, registerApp, unregisterApp } from './native';
 
 // Web Push from the server, on this device: subscribing to it, and what the settings page needs to show. The server side is
 // server/services/push.mjs; the worker that shows what arrives is public/sw-focus.js.
@@ -26,8 +27,53 @@ const toKey = (base64) => {
 
 const kinds = () => center.get().prefs.kinds;
 
+// ---- the Android app: the same switches, through FCM (see native.js) ----
+
+const refreshApp = async () => {
+  try {
+    const { app } = await pushKey();
+    const token = appToken();
+    pushState.set({ checked: true, available: Boolean(app), subscribed: Boolean(app && token), error: '' });
+    // tokens can change (a reinstall, Google rotating them): hand the server the current one at each start
+    if (app && token) {
+      const fresh = await registerApp();
+      if (fresh !== token) await pushSubscribe({ fcm: fresh, kinds: kinds(), lang: getLang() });
+    }
+  } catch {
+    pushState.set({ checked: true, available: false, subscribed: false });
+  }
+};
+
+const enableApp = async () => {
+  pushState.set({ busy: true, error: '' });
+  try {
+    const { app } = await pushKey();
+    if (!app) throw new Error(tr('Push is not set up on the server yet.'));
+    let token;
+    try {
+      token = await registerApp();
+    } catch (error) {
+      throw new Error(error?.message === 'denied' ? tr('Notifications are off for Hank62. Turn them on in Android’s settings for the app.') : tr('Push could not be turned on.'));
+    }
+    await pushSubscribe({ fcm: token, kinds: kinds(), lang: getLang() });
+    await setPush(true);
+    pushState.set({ subscribed: true, busy: false });
+  } catch (error) {
+    pushState.set({ busy: false, error: error?.message || tr('Push could not be turned on.') });
+  }
+};
+
+const disableApp = async () => {
+  pushState.set({ busy: true, error: '' });
+  const token = appToken();
+  if (token) await pushUnsubscribe(token).catch(() => {});
+  await unregisterApp();
+  pushState.set({ subscribed: false, busy: false });
+};
+
 /** Asks the server whether push is set up, and whether this device is already subscribed. */
 export const refreshPush = async () => {
+  if (isNativeApp()) return refreshApp();
   if (!supported()) return pushState.set({ checked: true, available: false, subscribed: false });
   try {
     const { enabled } = await pushKey();
@@ -41,6 +87,7 @@ export const refreshPush = async () => {
 
 /** Subscribes this device (asking permission first if needed). */
 export const enablePush = async (again = true) => {
+  if (isNativeApp()) return enableApp();
   pushState.set({ busy: true, error: '' });
   try {
     if (permission() === 'default') await Notification.requestPermission();
@@ -73,6 +120,7 @@ export const enablePush = async (again = true) => {
 
 /** Unsubscribes this device, here and on the server. */
 export const disablePush = async () => {
+  if (isNativeApp()) return disableApp();
   pushState.set({ busy: true, error: '' });
   try {
     const sub = await (await worker()).pushManager.getSubscription();
@@ -89,6 +137,10 @@ export const disablePush = async () => {
 /** The kinds this device wants changed: tells the server, so it stops (or starts) sending them. */
 export const syncPushKinds = async () => {
   if (!pushState.get().subscribed) return;
+  if (isNativeApp()) {
+    await pushSubscribe({ fcm: appToken(), kinds: kinds(), lang: getLang() }).catch(() => {});
+    return;
+  }
   try {
     const sub = await (await worker()).pushManager.getSubscription();
     if (sub) await pushSubscribe({ subscription: sub.toJSON(), kinds: kinds(), lang: getLang() });

@@ -11,6 +11,7 @@ import { HttpError, clientKey, createResponder, readBytes, readJson } from './ht
 import { createHub } from './services/hub.mjs';
 import { createLimiter } from './http/limits.mjs';
 import { createPodcasts } from './services/podcasts.mjs';
+import { createFcm, parseServiceAccount } from './services/fcm.mjs';
 import { createPush } from './services/push.mjs';
 import { createSync } from './services/sync.mjs';
 import { createTaskService } from './services/tasks.mjs';
@@ -57,7 +58,8 @@ export const createApp = (config, { fetchImpl = fetch, db = null, sendPush, podc
     return sync;
   };
   // reminders that reach a device with the app closed (see services/push.mjs); off without a database and VAPID keys
-  const push = createPush({ db, sync, calendar, vapid: config.push, zone: config.push.zone, send: sendPush });
+  const fcm = createFcm({ account: parseServiceAccount(config.push.fcmAccount), fetchImpl });
+  const push = createPush({ db, sync, calendar, vapid: config.push, fcm, zone: config.push.zone, send: sendPush });
   push.start();
   // the portfolio's guestbook: in the database when there is one, in memory otherwise
   const whispers = createWhispers({ db });

@@ -5,4 +5,5 @@ export const vi14 = {
   'Turn on to get reminders on time, even when the app is closed.': 'Bật để nhận lời nhắc đúng giờ, kể cả khi đã tắt app.',
   'Android may hold reminders back by a few minutes. Allow alarms & reminders for Hank62 to get them at the exact minute.': 'Android có thể giữ lời nhắc lại vài phút. Cho phép "Báo thức và lời nhắc" cho Hank62 để nhận đúng từng phút.',
   'Allow exact reminders': 'Cho phép nhắc đúng giờ',
+  'The server sends the reminders: they come even when the app has not been opened for days or the data changed on another device.': 'Server gửi lời nhắc: vẫn đến kể cả khi nhiều ngày không mở app hay dữ liệu được sửa trên máy khác.',
 };

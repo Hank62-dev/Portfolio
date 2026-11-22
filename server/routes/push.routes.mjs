@@ -4,7 +4,8 @@ export const pushRoutes = ({ config, json, readJson, requireAuth, push }) => ({
   // ---- Web Push (see services/push.mjs): the app asks for the key, subscribes this device, and can send itself a test
   'GET /api/push/key': (req, res) => {
     requireAuth(req);
-    json(res, 200, { enabled: push.enabled, publicKey: push.publicKey });
+    // `enabled` is Web Push for a browser; `app` is FCM for the Android app
+    json(res, 200, { enabled: push.webEnabled, publicKey: push.publicKey, app: push.appEnabled });
   },
 
   'POST /api/push/subscribe': async (req, res) => {

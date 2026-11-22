@@ -45,6 +45,10 @@ services:
         sync: false
       - key: VAPID_SUBJECT
         sync: false
+      # The Android app's notifications (Firebase Cloud Messaging): the JSON key of a service account, from the Firebase
+      # console (Project settings, Service accounts, Generate new private key), pasted as is or in base64.
+      - key: FCM_SERVICE_ACCOUNT
+        sync: false
       # Creator Lab: post announcements to your own Discord server. A webhook address (Server Settings, Integrations, Webhooks). Leave blank to switch it off.
       - key: DISCORD_WEBHOOK_URL
         sync: false
