@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, X } from 'lucide-react';
+import * as RadixDialog from '@radix-ui/react-dialog';
 import { useLang } from '../../i18n';
 import { usePageMeta } from '../../hooks/usePageMeta';
 import { clsx } from '../../../shared/lib/format';
@@ -127,4 +128,34 @@ export function PayBox({ order, autoPay }) {
   );
 }
 
-export const dateTime = (at, lang) => new Date(at).toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+/** A window over the page (a sheet from the bottom on a phone): a product's details, the question before joining. */
+export function StoreModal({ open, onClose, title, children, wide = false }) {
+  const { c } = useLang();
+  return (
+    <RadixDialog.Root open={open} onOpenChange={(next) => !next && onClose()}>
+      <RadixDialog.Portal>
+        <RadixDialog.Overlay className="store-modal-backdrop" />
+        <RadixDialog.Content className={clsx('store-modal', wide && 'is-wide')} data-lenis-prevent>
+          <RadixDialog.Title className="sr-only">{title}</RadixDialog.Title>
+          <RadixDialog.Description className="sr-only">{title}</RadixDialog.Description>
+          <RadixDialog.Close className="store-modal-close" aria-label={c.store.shop.close}>
+            <X size={18} aria-hidden="true" />
+          </RadixDialog.Close>
+          {children}
+        </RadixDialog.Content>
+      </RadixDialog.Portal>
+    </RadixDialog.Root>
+  );
+}
+
+/** A money field: digits only, shown with dots, the dong sign after. */
+export function MoneyField({ value, onChange, placeholder, label }) {
+  return (
+    <span className="store-money">
+      <input inputMode="numeric" aria-label={label} placeholder={placeholder} value={value ? Number(value).toLocaleString('vi-VN') : ''} onChange={(e) => onChange(Math.round(Number(e.target.value.replace(/\D/g, '')) || 0))} />
+      <i>₫</i>
+    </span>
+  );
+}
+
+export const dateTime =(at, lang) => new Date(at).toLocaleString(lang === 'vi' ? 'vi-VN' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });

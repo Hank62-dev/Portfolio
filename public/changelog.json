@@ -1,5 +1,12 @@
 [
   {
+    "id": "store-pages-ux",
+    "version": "1.45.0",
+    "date": "2026-11-22",
+    "vi": "Các trang cửa hàng dễ dùng hơn: xem chi tiết sản phẩm trong cửa sổ, phân trang, đặt lịch theo 3 bước với thẻ tóm tắt, chọn ngày theo dải, giờ chia sáng chiều tối, gói hội viên hỏi Discord ID trước khi trả.",
+    "en": "The shop pages are easier: product details in a window, pages of products, booking in three steps with a summary, a strip of days, times by morning, afternoon and evening, membership asking for a Discord ID first."
+  },
+  {
     "id": "creator-lab-admin",
     "version": "1.44.0",
     "date": "2026-11-22",

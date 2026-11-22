@@ -7092,6 +7092,31 @@ html[data-vt='player']::view-transition-new(root) {
   }
 }
 
+/* a storefront button that is working: its words fade and a ring turns in their place */
+.store-buy.is-busy {
+  position: relative;
+  color: transparent !important;
+  opacity: 1;
+  cursor: progress;
+}
+.store-buy.is-busy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid var(--color-ink-0);
+  border-right-color: transparent;
+  border-radius: 9999px;
+  animation: store-spin 0.7s linear infinite;
+}
+@keyframes store-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* the time picker: a glass panel like the date picker's, two columns that scroll, the usual times as chips */
 .tp-panel {
   width: 17rem;
@@ -7156,4 +7181,228 @@ html[data-vt='player']::view-transition-new(root) {
   margin-left: auto;
   background: var(--color-bone);
   color: var(--color-ink-0);
+}
+/* the storefront, second pass: a window for details, numbered steps, the booking summary, a money field */
+.store-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgb(0 0 0 / 0.6);
+  backdrop-filter: blur(6px);
+  animation: store-fade 0.3s ease both;
+}
+.store-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 81;
+  width: min(30rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 1.4rem;
+  background: var(--color-ink-1);
+  color: var(--color-bone);
+  box-shadow: 0 50px 100px -40px rgb(0 0 0 / 0.8);
+  transform: translate(-50%, -50%);
+  animation: store-pop 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.store-modal.is-wide {
+  width: min(56rem, calc(100vw - 2rem));
+}
+@media (max-width: 639px) {
+  .store-modal,
+  .store-modal.is-wide {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    max-height: 92dvh;
+    border-radius: 1.5rem 1.5rem 0 0;
+    transform: none;
+    animation-name: store-sheet;
+  }
+}
+@keyframes store-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes store-pop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.97);
+  }
+}
+@keyframes store-sheet {
+  from {
+    transform: translateY(100%);
+  }
+}
+.store-modal-close {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 9999px;
+  background: rgb(0 0 0 / 0.45);
+  color: #fff;
+  backdrop-filter: blur(8px);
+}
+.store-detail-cover {
+  display: grid;
+  place-items: center;
+  min-height: 18rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 30% 20%, color-mix(in oklab, var(--color-signal) 40%, transparent), transparent 60%),
+    var(--color-ink-2);
+}
+.store-detail-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.store-detail-cover span {
+  font-family: var(--font-display);
+  font-size: 7rem;
+  color: var(--color-bone);
+}
+.store-product-open {
+  display: block;
+  width: 100%;
+  cursor: zoom-in;
+}
+.store-chip:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.store-money {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.store-money input {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 0.9rem;
+  border: 1px solid var(--color-line);
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--color-ink-1) 70%, transparent);
+  color: var(--color-bone);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  outline: none;
+}
+.store-money input:focus {
+  border-color: var(--color-signal);
+}
+.store-money i {
+  position: absolute;
+  right: 0.9rem;
+  font-style: normal;
+  color: var(--color-bone-faint);
+  pointer-events: none;
+}
+.store-step {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+.store-step span {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--color-line-strong);
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-bone-dim);
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+.store-step[data-done] span {
+  border-color: transparent;
+  background: var(--color-signal);
+  color: var(--color-ink-0);
+}
+.store-arrow {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid var(--color-line);
+  border-radius: 9999px;
+  color: var(--color-bone-dim);
+}
+.store-arrow:hover {
+  border-color: var(--color-bone);
+  color: var(--color-bone);
+}
+.store-day {
+  position: relative;
+}
+.store-day i {
+  margin-top: 0.15rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-style: normal;
+  opacity: 0.6;
+}
+.store-summary {
+  position: sticky;
+  top: calc(var(--spacing-header) + 1.5rem);
+  padding: 1.6rem;
+  border: 1px solid var(--color-line);
+  border-radius: 1.25rem;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in oklab, var(--color-signal) 16%, transparent), transparent 55%),
+    color-mix(in oklab, var(--color-ink-1) 85%, transparent);
+}
+.store-summary dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-line);
+}
+.store-summary dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--color-bone-faint);
+}
+.store-summary dd {
+  text-align: right;
+  color: var(--color-bone);
+}
+.store-tier {
+  position: relative;
+}
+.store-tier-badge {
+  position: absolute;
+  top: -0.7rem;
+  left: 1.8rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 9999px;
+  background: var(--color-signal);
+  color: var(--color-ink-0);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .store-modal,
+  .store-modal-backdrop {
+    animation: none;
+  }
 }

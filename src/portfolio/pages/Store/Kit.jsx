@@ -141,7 +141,7 @@ export default function Kit() {
                   <textarea className="store-input" rows={5} value={form.message} onChange={set('message')} maxLength={1500} required minLength={10} />
                 </label>
                 <div className="md:col-span-2">
-                  <button type="submit" className="store-buy" disabled={state.busy}>
+                  <button type="submit" className={`store-buy${state.busy ? ' is-busy' : ''}`} aria-busy={state.busy || undefined} disabled={state.busy}>
                     {t.send} →
                   </button>
                   {state.error && (
