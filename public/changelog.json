@@ -1,5 +1,12 @@
 [
   {
+    "id": "hero-blueprint",
+    "version": "1.48.0",
+    "date": "2026-11-22",
+    "vi": "Hero có bản vẽ kiến trúc tách lớp thay cho 4 tầng 3D: giao diện, service, dữ liệu, triển khai vẽ bằng nét mảnh tự hiện, kèm chú thích và khung tên; tầng dưới con trỏ đổi màu.",
+    "en": "The hero's 3D layers give way to an architect's exploded drawing: interface, services, data and delivery drawn in hairlines that draw themselves in, with callouts and a title block; the plate under the pointer lights up."
+  },
+  {
     "id": "stack-periodic-table",
     "version": "1.47.0",
     "date": "2026-11-22",

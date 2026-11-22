@@ -6,8 +6,8 @@ import { jumpTo } from '../../lib/scroll';
 import { usePointerGlow } from '../../../shared/hooks/useMotion';
 import Button from '../../../shared/ui/Button';
 import ScrambleText from '../../motion/ScrambleText';
-import HeroVisual from './HeroVisual';
-import StackIllustration from './StackIllustration';
+import HeroVisual, { useLayerTechs } from './HeroVisual';
+import Blueprint from './Blueprint';
 import XRay from './XRay';
 import { useHeroMotion } from './useHeroMotion';
 
@@ -44,7 +44,8 @@ const LatestPush = ({ github }) => {
 const Hero = ({ github }) => {
   const { c, t } = useLang();
   const glowRef = usePointerGlow();
-  const inView = useHeroMotion(glowRef);
+  useHeroMotion(glowRef);
+  const techs = useLayerTechs();
 
   // The sheet's rows enter one after another; the last is the live GitHub row.
   const rows = [
@@ -87,7 +88,7 @@ const Hero = ({ github }) => {
       {/* under the pointer the hero turns into its own source code */}
       <XRay sectionRef={glowRef} />
 
-      <HeroVisual labels={c.stack.layers} active={inView} />
+      <HeroVisual labels={c.stack.layers} />
 
       {/* --p (0..1) is the scroll progress written by useHeroMotion: the content lifts and fades as it leaves. */}
       <div className="wrap relative flex flex-col gap-14 [opacity:calc(1_-_var(--p,0)*0.9)] [transform:translateY(calc(var(--p,0)*-56px))] will-change-[transform,opacity] lg:gap-16">
@@ -130,11 +131,11 @@ const Hero = ({ github }) => {
         </div>
 
         {/* Phones get the flat drawing here, in the flow of the page; wide screens get HeroVisual behind. */}
-        <div className="enter mx-auto h-[300px] w-full max-w-[420px] lg:hidden" style={{ '--d': 0.5 }} aria-hidden="true">
-          <StackIllustration labels={c.stack.layers} />
+        <div className="enter mx-auto w-full max-w-[520px] lg:hidden" style={{ '--d': 0.5 }} aria-hidden="true">
+          <Blueprint labels={c.stack.layers} techs={techs} className="h-auto w-full" />
         </div>
 
-        {/* The profile sheet is a strip along the bottom, so the right half stays free for the 3D scene. */}
+        {/* The profile sheet is a strip along the bottom, so the right half stays free for the drawing. */}
         <div className="enter" style={{ '--d': 0.45 }} role="group" aria-label={c.hero.sheet}>
           <div className="mb-3 flex justify-between gap-3 font-mono text-[0.72rem] tracking-[0.08em] text-bone-faint uppercase">
             <span>{c.hero.sheet}</span>

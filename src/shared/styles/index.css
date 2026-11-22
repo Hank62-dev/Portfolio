@@ -7604,3 +7604,134 @@ html[data-vt='player']::view-transition-new(root) {
   }
 }
 
+/* Hero: the system as an architect's exploded drawing */
+.bp {
+  overflow: visible;
+  --bp-ink: var(--color-bone);
+  --bp-paper: var(--color-ink-0);
+}
+.bp-ln,
+.bp-dashed {
+  fill: none;
+  stroke: var(--bp-ink);
+  stroke-opacity: 0.55;
+  stroke-width: 1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  transition: stroke 0.4s, stroke-opacity 0.4s, fill 0.4s;
+}
+.bp-ln {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: bp-draw 1.5s cubic-bezier(0.6, 0, 0.2, 1) forwards;
+  animation-delay: var(--d, 0s);
+}
+.bp-dashed {
+  opacity: 0;
+  animation: bp-fade 0.8s ease forwards;
+  animation-delay: calc(var(--d, 0s) + 0.9s);
+}
+.bp-thin {
+  stroke-opacity: 0.32;
+}
+.bp-grid {
+  stroke-opacity: 0.08;
+}
+.bp-fill {
+  fill: var(--bp-paper);
+  fill-opacity: 0;
+  animation:
+    bp-draw 1.5s cubic-bezier(0.6, 0, 0.2, 1) forwards,
+    bp-fill 0.9s ease forwards;
+  animation-delay: var(--d, 0s), calc(var(--d, 0s) + 0.5s);
+}
+.bp-shade {
+  --bp-paper: var(--color-ink-1);
+}
+.bp-slab {
+  stroke-opacity: 0.7;
+}
+.bp-hot,
+.bp-axis {
+  stroke: var(--color-signal);
+  stroke-opacity: 0.85;
+}
+.bp-axis {
+  stroke-opacity: 0.5;
+}
+.bp-dot,
+.bp-node {
+  fill: var(--bp-ink);
+  fill-opacity: 0.5;
+}
+.bp-centre {
+  fill: var(--color-signal);
+}
+.bp-text {
+  font-family: var(--font-mono);
+  fill: var(--color-bone-dim);
+  opacity: 0;
+  animation: bp-fade 0.8s ease forwards;
+  animation-delay: calc(var(--d, 0s) + 1s);
+}
+.bp-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+.bp-small {
+  font-size: 8.5px;
+  letter-spacing: 0.08em;
+  fill: var(--color-bone-faint);
+}
+.bp-no {
+  fill: var(--color-signal);
+}
+.bp-plate {
+  will-change: transform;
+}
+/* the plate under the pointer is inked in the accent */
+.bp-plate.is-lit .bp-ln:not(.bp-grid),
+.bp-plate.is-lit .bp-dashed {
+  stroke: var(--color-signal);
+  stroke-opacity: 0.9;
+}
+.bp-plate.is-lit .bp-grid {
+  stroke: var(--color-signal);
+  stroke-opacity: 0.22;
+}
+.bp-plate.is-lit .bp-label {
+  fill: var(--color-bone);
+}
+.bp-plate.is-lit .bp-small {
+  fill: var(--color-signal);
+}
+@keyframes bp-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes bp-fade {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes bp-fill {
+  to {
+    fill-opacity: 0.92;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bp-ln,
+  .bp-fill,
+  .bp-dashed,
+  .bp-text {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+    fill-opacity: 0.92;
+  }
+  .bp-ln:not(.bp-fill) {
+    fill-opacity: 0;
+  }
+}
