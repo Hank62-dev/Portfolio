@@ -13,3 +13,8 @@ dist-ssr
 .vite
 # private company documents for the RAG service: kept on this machine only (scripts/ingest_pegaxus.py reads them from here)
 .integrations/hank62-rag/pegaxus-document/
+
+# the Android signing key: never in the repo (back it up somewhere safe instead)
+*.keystore
+*.jks
+key.txt

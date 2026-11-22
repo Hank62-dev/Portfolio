@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-app-shell",
+    "version": "1.50.0",
+    "date": "2026-11-22",
+    "vi": "SpaceHank có app Android (APK): mở thẳng vào workspace, giữ đăng nhập, icon và màn hình khởi động riêng, báo khi mất mạng; trong app không còn hỏi cài đặt hay bật Web Push.",
+    "en": "SpaceHank gets an Android app (APK): it opens straight into the workspace, keeps you signed in, has its own icon and splash and says when offline; inside it, no install prompt or Web Push."
+  },
+  {
     "id": "break-room-ten-more",
     "version": "1.49.0",
     "date": "2026-11-22",

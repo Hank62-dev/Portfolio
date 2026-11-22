@@ -1,3 +1,4 @@
+import { isNativeApp } from '../../../shared/lib/platform';
 import { getLang, tr } from '../../core/i18n/lang';
 import { pushKey, pushSubscribe, pushTest, pushUnsubscribe } from '../../core/api/owner';
 import { createStore } from '../../core/store';
@@ -8,7 +9,8 @@ import { center, permission, sendTest, setPush } from './center';
 
 export const pushState = createStore({ checked: false, available: false, subscribed: false, busy: false, error: '' });
 
-const supported = () => typeof navigator !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && typeof Notification !== 'undefined';
+// Web Push does not reach an Android WebView, so inside the app it is not offered (the app's own notifications come later)
+const supported = () => !isNativeApp() && typeof navigator !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window && typeof Notification !== 'undefined';
 
 /** The app's service worker, or a clear error when there is none (a dev server has none). */
 const worker = () =>

@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
+import { isNativeApp } from '../../../shared/lib/platform';
 
+// the Android app already is the installed app, so it never offers to install itself
 const isStandalone = () =>
-  typeof window !== 'undefined' && (window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true);
+  typeof window !== 'undefined' && (isNativeApp() || window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true);
 
 const isIos = () => typeof navigator !== 'undefined' && /iphone|ipad|ipod/i.test(navigator.userAgent) && !('MSStream' in window);
 

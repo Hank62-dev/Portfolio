@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Hank62</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #0b0c0e; color: #e8e6e1; font-family: system-ui, sans-serif; }
+      main { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; box-sizing: border-box; text-align: center; }
+      img { width: 72px; height: 72px; border-radius: 18px; }
+      h1 { margin: 6px 0 0; font-size: 1.25rem; font-weight: 600; }
+      p { margin: 0; max-width: 22rem; color: #9b9890; line-height: 1.5; font-size: 0.95rem; }
+      button { margin-top: 10px; padding: 12px 22px; border: 0; border-radius: 999px; background: #e8e6e1; color: #0b0c0e; font: inherit; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="logo-192.png" alt="" />
+      <h1 id="title">Chưa kết nối được</h1>
+      <p id="detail">Hank62 cần mạng cho lần mở này. Kiểm tra Wi-Fi hoặc dữ liệu di động rồi thử lại.</p>
+      <button id="retry" type="button">Thử lại</button>
+    </main>
+    <script>
+      // the app opens the live site (capacitor.config.json server.url); this page is only shown when that fails to load
+      if (!/^vi\b/i.test(navigator.language || '')) {
+        document.documentElement.lang = 'en';
+        document.getElementById('title').textContent = 'Could not connect';
+        document.getElementById('detail').textContent = 'Hank62 needs the internet to open this time. Check Wi-Fi or mobile data and try again.';
+        document.getElementById('retry').textContent = 'Try again';
+      }
+      document.getElementById('retry').addEventListener('click', () => {
+        location.href = 'https://hank62dev.vercel.app/spacehank';
+      });
+    </script>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 # Kế hoạch làm app Android (APK) cho Hank62 / SpaceHank
 
-> Trạng thái: **chỉ là kế hoạch, chưa làm gì.** Thứ tự đã chốt: hoàn thiện bản web trước, sau đó mới đóng gói thành app.
+> Trạng thái: **Giai đoạn 1 (vỏ cơ bản) đã dựng**, chờ cài thử trên máy thật. Đã có: `capacitor.config.json` (mở `https://hank62dev.vercel.app/spacehank`), thư mục `android/`, vỏ nhỏ `app-shell/` (trang báo mất mạng), icon/splash từ `assets/`, cookie bên thứ ba bật trong `MainActivity.java`, `src/shared/lib/platform.js`, workflow `.github/workflows/android.yml` build APK.
 > Phạm vi: Android, cài trực tiếp bằng file APK (không CH Play, không App Store). iPhone nằm ngoài kế hoạch (xem mục 9).
 
 ---

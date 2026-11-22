@@ -1,0 +1,32 @@
+{
+  "appId": "dev.hank62.app",
+  "appName": "Hank62",
+  "webDir": "app-shell",
+  "server": {
+    "url": "https://hank62dev.vercel.app/spacehank",
+    "androidScheme": "https",
+    "allowNavigation": [
+      "hank62dev.vercel.app"
+    ],
+    "errorPath": "offline.html"
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#0b0c0e",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0b0c0e",
+      "overlaysWebView": false
+    }
+  }
+}
