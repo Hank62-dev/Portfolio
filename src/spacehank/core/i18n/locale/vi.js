@@ -10,6 +10,7 @@ import { vi9 } from './vi9.js';
 import { vi10 } from './vi10.js';
 import { vi11 } from './vi11.js';
 import { vi12 } from './vi12.js';
+import { vi13 } from './vi13.js';
 
 /** English text to Vietnamese. The key is the text exactly as it appears in the code. */
-export const vi = { ...vi1, ...vi2, ...vi3, ...vi4, ...vi5, ...vi6, ...vi7, ...vi8, ...vi9, ...vi10, ...vi11, ...vi12 };
+export const vi = { ...vi1, ...vi2, ...vi3, ...vi4, ...vi5, ...vi6, ...vi7, ...vi8, ...vi9, ...vi10, ...vi11, ...vi12, ...vi13 };

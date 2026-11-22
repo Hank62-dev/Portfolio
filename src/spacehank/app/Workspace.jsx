@@ -202,6 +202,7 @@ export default function Workspace({
       }
       if (event.ctrlKey || event.metaKey || event.altKey || event.repeat || typing(event.target)) return;
       if (document.querySelector('[role="dialog"]')) return; // a dialog or focus mode has the keyboard
+      if (document.querySelector('[data-game]')) return; // so has a game being played (letters, space, arrows)
       const what = resolveKey(event.key, keyPrev.current?.key);
       window.clearTimeout(keyPrev.current?.timer);
       keyPrev.current = null;

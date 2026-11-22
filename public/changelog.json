@@ -1,5 +1,12 @@
 [
   {
+    "id": "break-room-ten-more",
+    "version": "1.49.0",
+    "date": "2026-11-22",
+    "vi": "Ra chơi có thêm 10 trò: đoán chữ, nhớ màu, máy bay giấy, phá gạch, phản xạ, gõ nhanh, tô ô, tính nhẩm, nối điểm với máy, tháp Hà Nội; đang chơi thì phím tắt không chen vào.",
+    "en": "The Break Room gets ten more games: word guess, copy the colours, paper plane, brick breaker, quick draw, type fast, picture logic, mental math, dots and boxes, tower of Hanoi; shortcuts keep quiet while you play."
+  },
+  {
     "id": "hero-blueprint",
     "version": "1.48.0",
     "date": "2026-11-22",

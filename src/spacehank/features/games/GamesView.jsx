@@ -1,6 +1,6 @@
 import { lazy, Suspense, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Blocks, Bomb, Brain, CircleDot, Disc, Grid3x3, Hammer, Hand, Hash, LayoutGrid, Lightbulb, Worm } from 'lucide-react';
+import { ArrowLeft, Blocks, Bomb, Brain, BrickWall, Calculator, CircleDot, Disc, Flower2, Grid2x2Check, Grid3x3, Grip, Hammer, Hand, Hash, Keyboard, Layers3, LayoutGrid, Lightbulb, Palette, Plane, Timer, Worm } from 'lucide-react';
 import { Desk, Doodle, INK, InkBox, InkButton, RED, Title } from './ink';
 import { BauCua, FindNumbers, Memory, Rps } from './small';
 import { tr } from '../../core/i18n/lang';
@@ -17,6 +17,16 @@ const SlidePuzzle = lazy(() => import('./SlidePuzzle'));
 const LightsOut = lazy(() => import('./LightsOut'));
 const WhackMole = lazy(() => import('./WhackMole'));
 const Tetris = lazy(() => import('./FallingBlocks'));
+const WordGuess = lazy(() => import('./WordGuess'));
+const ColourCopy = lazy(() => import('./ColourCopy'));
+const PaperPlane = lazy(() => import('./PaperPlane'));
+const BrickBreaker = lazy(() => import('./BrickBreaker'));
+const QuickDraw = lazy(() => import('./QuickDraw'));
+const TypeFast = lazy(() => import('./TypeFast'));
+const PictureLogic = lazy(() => import('./PictureLogic'));
+const MentalMath = lazy(() => import('./MentalMath'));
+const DotsBoxes = lazy(() => import('./DotsBoxes'));
+const Hanoi = lazy(() => import('./Hanoi'));
 
 const PEN = { filter: 'url(#pen)' };
 const GAMES = [
@@ -36,6 +46,16 @@ const GAMES = [
   { id: 'slide', name: tr('Ghép số'), hint: tr('Slide the tiles until 1 to 15 are in order.'), icon: () => <LayoutGrid size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: SlidePuzzle },
   { id: 'lights', name: tr('Tắt đèn'), hint: tr('Press a lamp, its neighbours flip too.'), icon: () => <Lightbulb size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: LightsOut },
   { id: 'whack', name: tr('Đập chuột'), hint: tr('Tap the moles before they duck. 30 seconds.'), icon: () => <Hammer size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: WhackMole },
+  { id: 'words', name: tr('Word guess'), hint: tr('Find the word before the flower loses its petals.'), icon: () => <Flower2 size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: WordGuess },
+  { id: 'colours', name: tr('Copy the colours'), hint: tr('Watch the pads, press them back in order.'), icon: () => <Palette size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: ColourCopy },
+  { id: 'plane', name: tr('Paper plane'), hint: tr('Tap to fly through the gaps between pencils.'), icon: () => <Plane size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: PaperPlane },
+  { id: 'bricks', name: tr('Brick breaker'), hint: tr('Bounce a paper ball off a ruler into the bricks.'), icon: () => <BrickWall size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: BrickBreaker },
+  { id: 'reaction', name: tr('Quick draw'), hint: tr('Tap the moment it turns red. In milliseconds.'), icon: () => <Timer size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: QuickDraw },
+  { id: 'typing', name: tr('Type fast'), hint: tr('As many words as you can in 30 seconds.'), icon: () => <Keyboard size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: TypeFast },
+  { id: 'picture', name: tr('Picture logic'), hint: tr('Fill the squares the numbers ask for.'), icon: () => <Grid2x2Check size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: PictureLogic },
+  { id: 'math', name: tr('Mental math'), hint: tr('Sums in your head, one minute.'), icon: () => <Calculator size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: MentalMath },
+  { id: 'boxes', name: tr('Dots and boxes'), hint: tr('Join dots, close boxes, beat the computer.'), icon: () => <Grip size={42} strokeWidth={2} color={INK} style={PEN} aria-hidden="true" />, tone: INK, play: DotsBoxes },
+  { id: 'hanoi', name: tr('Tower of Hanoi'), hint: tr('Move the stack, never big on small.'), icon: () => <Layers3 size={42} strokeWidth={2} color={RED} style={PEN} aria-hidden="true" />, tone: RED, play: Hanoi },
 ];
 
 /** The page of a game while its code arrives: a few lines in pale ink, where the game will be drawn. */
