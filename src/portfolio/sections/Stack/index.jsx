@@ -5,7 +5,7 @@ import { clsx } from '../../../shared/lib/format';
 import { gsap, DESKTOP, MOTION, ScrollTrigger } from '../../motion/gsap';
 import { useGsap } from '../../motion/useGsap';
 import SectionTitle from '../../components/SectionTitle';
-import Orbit from './Orbit';
+import PeriodicTable from './PeriodicTable';
 import { stackStore } from './stackStore';
 
 const ALL = 'all';
@@ -19,8 +19,7 @@ const Stack = () => {
   const pickable = useMemo(() => projects.filter((p) => p.tier !== 'archive' || p.decisions.length > 0), []);
   const project = selected === ALL ? null : getProject(selected);
 
-  // The picture follows the reading: the layer in view is lit, and the further down the layers, the
-  // lower the eye, so the orbits seen from above at the start are the stacked plates by the end.
+  // The picture follows the reading: the layer in view is the band that is lit.
   const scope = useGsap(({ scope: ref, mm }) => {
     mm.add(DESKTOP, () => {
       const root = ref.current;
@@ -101,11 +100,9 @@ const Stack = () => {
           <div className="relative" aria-hidden="true">
             <div
               data-orbit
-              className="relative h-[min(440px,110vw)] lg:sticky lg:top-[var(--spacing-header)] lg:h-[calc(100svh-var(--spacing-header))]"
+              className="relative h-[min(520px,130vw)] lg:sticky lg:top-[var(--spacing-header)] lg:h-[calc(100svh-var(--spacing-header))]"
             >
-              {/* a soft floor of light the orbits turn over */}
-              <i className="pointer-events-none absolute inset-[12%] rounded-full bg-[radial-gradient(closest-side,var(--color-signal-soft),transparent)] blur-2xl" />
-              <Orbit stack={stack} labels={c.stack.layers} selected={project?.slug ?? null} />
+              <PeriodicTable stack={stack} words={c.stack} selected={project?.slug ?? null} />
               <p className="pointer-events-none absolute bottom-4 left-0 font-mono text-[0.68rem] tracking-[0.1em] text-bone-faint uppercase max-lg:hidden">
                 {c.stack.orbitHint}
               </p>
@@ -148,8 +145,8 @@ const Stack = () => {
                         // keyed by selection too, so the entrance replays when you switch project
                         <li
                           key={`${selected}-${tech}`}
-                          onPointerEnter={() => (stackStore.focus = tech)}
-                          onPointerLeave={() => (stackStore.focus = null)}
+                          onPointerEnter={() => stackStore.setFocus(tech)}
+                          onPointerLeave={() => stackStore.setFocus(null)}
                           className="flex items-center justify-between gap-3 border-b border-line py-[10px] transition-[transform,color] duration-300 ease-out-expo hover:translate-x-1.5 hover:text-signal in:animate-tech-in in:[animation-delay:calc(var(--i,0)*35ms)]"
                           style={{ '--i': n + i * 2 }}
                         >

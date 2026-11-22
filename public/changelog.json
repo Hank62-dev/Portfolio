@@ -1,5 +1,12 @@
 [
   {
+    "id": "stack-periodic-table",
+    "version": "1.47.0",
+    "date": "2026-11-22",
+    "vi": "Mục Stack thành bảng tuần hoàn: mỗi công cụ là một nguyên tố, số hiệu là số dự án đã dùng, 4 tầng là 4 nhóm màu; rê chuột để lật xem dự án, chọn dự án thì chỉ ô của nó sáng.",
+    "en": "The Stack section becomes a periodic table: every tool an element numbered by the projects that used it, the four layers its families; point at one to turn it over, choose a project to light only its own."
+  },
+  {
     "id": "contour-background",
     "version": "1.46.0",
     "date": "2026-11-22",

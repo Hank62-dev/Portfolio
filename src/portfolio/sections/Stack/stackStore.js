@@ -10,6 +10,11 @@ export const stackStore = {
   progress: 0,
   /** A technology the pointer is resting on in the lists, lit in the picture; null when none. */
   focus: null,
+  setFocus(tech) {
+    if (tech === this.focus) return;
+    this.focus = tech;
+    listeners.forEach((listener) => listener());
+  },
   set(index) {
     if (index === this.active) return;
     this.active = index;
@@ -24,4 +29,14 @@ export const useActiveLayer = () =>
       return () => listeners.delete(listener);
     },
     () => stackStore.active
+  );
+
+/** The technology pointed at in the lists, for the picture beside to light. */
+export const useFocusedTech = () =>
+  useSyncExternalStore(
+    (listener) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
+    () => stackStore.focus
   );

@@ -66,7 +66,7 @@ export const copy = {
       none: 'Nothing recorded for this layer.',
       showing: (name) => `Showing the stack of ${name}.`,
       showingAll: 'Showing every technology across all projects.',
-      orbitHint: 'Point to push · click to scatter',
+      orbitHint: 'Every tool an element, its number how many projects used it · point at one to turn it over',
     },
     lab: {
       label: 'Lab',
@@ -451,7 +451,7 @@ export const copy = {
       none: 'Chưa ghi nhận gì ở tầng này.',
       showing: (name) => `Đang hiển thị stack của ${name}.`,
       showingAll: 'Đang hiển thị mọi công nghệ của tất cả dự án.',
-      orbitHint: 'Rê chuột để đẩy · bấm để làm văng',
+      orbitHint: 'Mỗi công cụ là một nguyên tố, số hiệu là số dự án đã dùng · rê chuột để lật',
     },
     lab: {
       label: 'Lab',
