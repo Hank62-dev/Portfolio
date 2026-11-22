@@ -10,7 +10,7 @@ import { profile } from '../shared/profile';
 import { useTheme } from '../shared/lib/theme';
 import { scrollToTarget } from '../portfolio/lib/scroll';
 import BackgroundField from '../portfolio/motion/BackgroundField';
-import FluidInk from '../portfolio/motion/FluidInk';
+import ContourField from '../portfolio/motion/ContourField';
 import Cursor from '../portfolio/motion/Cursor';
 import DevMode from '../portfolio/components/DevMode';
 import { ScrollTrigger } from '../portfolio/motion/gsap';
@@ -53,7 +53,7 @@ const MainLayout = ({ children }) => {
     <>
       <ScrollManager />
       <BackgroundField />
-      <FluidInk />
+      <ContourField />
       <Grain />
       <Cursor />
       <DevMode />

@@ -44,14 +44,13 @@ void main() {
   vec2 p = (uv - 0.5) * vec2(aspect, 1.0) * 1.7;
   float t = uTime * 0.045;
 
-  // The pointer stirs the smoke: each point of its path is a small vortex that fades as the path ages.
+  // The pointer's path only warms the smoke a little where it passed; it no longer stirs it (the depth field in front
+  // answers the pointer now, and two things chasing the mouse are one too many).
   float wake = 0.0;
   for (int i = 0; i < TRAIL; i++) {
     vec3 pt = uTrail[i];
     vec2 d = (uv - pt.xy) * vec2(aspect, 1.0);
-    float fall = exp(-dot(d, d) * 90.0) * pt.z;
-    p += vec2(-d.y, d.x) * fall * 5.0;
-    wake += fall;
+    wake += exp(-dot(d, d) * 90.0) * pt.z;
   }
 
   vec2 q = vec2(fbm(p + t), fbm(p + vec2(5.2, 1.3) - t));
@@ -62,7 +61,7 @@ void main() {
   float glow = 1.0 - smoothstep(0.0, 0.55, distance(uv * vec2(aspect, 1.0), m));
 
   float vel = clamp(uVel, 0.0, 12.0);
-  float heat = smoothstep(0.5, 0.95, f) * (0.075 + vel * 0.02) + glow * 0.07 + clamp(wake, 0.0, 1.0) * smoothstep(0.35, 0.8, f) * 0.12;
+  float heat = smoothstep(0.5, 0.95, f) * (0.075 + vel * 0.02) + glow * 0.035 + clamp(wake, 0.0, 1.0) * smoothstep(0.35, 0.8, f) * 0.03;
   heat = clamp(heat, 0.0, 0.3);
   float sheen = smoothstep(0.72, 1.0, f) * 0.018;
 

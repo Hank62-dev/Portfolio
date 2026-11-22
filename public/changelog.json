@@ -1,5 +1,12 @@
 [
   {
+    "id": "contour-background",
+    "version": "1.46.0",
+    "date": "2026-11-22",
+    "vi": "Nền trang đổi thành các đường đồng mức mảnh như bản đồ địa hình, nhô thành ngọn đồi dưới con trỏ và nghiêng nhẹ theo chuột; bỏ hiệu ứng lửa đỏ khi rê chuột.",
+    "en": "The page's background is now fine contour lines like a survey map, rising into a hill under the pointer and leaning with it; the red fire trail is gone."
+  },
+  {
     "id": "store-pages-ux",
     "version": "1.45.0",
     "date": "2026-11-22",
