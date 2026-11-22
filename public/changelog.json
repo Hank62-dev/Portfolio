@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-media-widget-share",
+    "version": "1.53.0",
+    "date": "2026-11-23",
+    "vi": "App Android: nhạc, podcast phát tiếp khi tắt màn hình, có điều khiển ở thông báo, màn hình khoá, tai nghe; widget Hôm nay; nhận chia sẻ từ app khác; báo có APK mới; nút cho chạy nền.",
+    "en": "The Android app: music and podcasts play on with the screen off, with controls on the card, lock screen and headset; a Today widget; sharing from other apps; word of a newer APK; a background setting."
+  },
+  {
     "id": "android-server-push",
     "version": "1.52.0",
     "date": "2026-11-23",

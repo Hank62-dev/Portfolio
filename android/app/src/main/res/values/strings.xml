@@ -4,4 +4,6 @@
     <string name="title_activity_main">Hank62</string>
     <string name="package_name">dev.hank62.app</string>
     <string name="custom_url_scheme">dev.hank62.app</string>
+    <string name="widget_today_label">Hank62 · Today</string>
+    <string name="widget_today_description">What is due, what is on and the habits still waiting today</string>
 </resources>

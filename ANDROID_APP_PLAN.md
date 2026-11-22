@@ -1,6 +1,6 @@
 # Kế hoạch làm app Android (APK) cho Hank62 / SpaceHank
 
-> Trạng thái: **GĐ 1, 2 xong và đã thử trên máy. GĐ 5 (FCM) đã làm**: `server/services/fcm.mjs` gửi qua FCM HTTP v1 (cần `FCM_SERVICE_ACCOUNT` trên Render), `push_subs.channel` = `web`/`fcm`; app đăng ký token qua `@capacitor/push-notifications` (`notifications/native.js`), khi server gửi được thì báo thức trên máy tự tắt để không nhắc hai lần. `google-services.json` không nằm trong repo: secret `GOOGLE_SERVICES_JSON_BASE64`.
+> Trạng thái: **Đã làm đủ 6 giai đoạn** (GĐ 1, 2 đã thử trên máy; GĐ 3–6 chờ thử). Plugin riêng `Hank62Plugin.java`: thẻ media (`MediaService.java`, nối với `navigator.mediaSession` qua `src/spacehank/features/android/media.js`), widget (`TodayWidget.java` + `android/widget.js`), nhận chia sẻ (đổ vào cùng cache với share target của PWA), tối ưu pin, số `SHELL` so với `public/android.json` để báo APK mới (tăng cả hai khi đổi phần native). FCM: `server/services/fcm.mjs`, cần `FCM_SERVICE_ACCOUNT` trên Render và secret `GOOGLE_SERVICES_JSON_BASE64`.
 > Phạm vi: Android, cài trực tiếp bằng file APK (không CH Play, không App Store). iPhone nằm ngoài kế hoạch (xem mục 9).
 
 ---

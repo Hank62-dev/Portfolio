@@ -1,3 +1,4 @@
+import { useAndroid } from '../features/android/useAndroid';
 import { tr } from '../core/i18n/lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -169,6 +170,9 @@ export default function Workspace({
       ),
     [setParams]
   );
+  // the Android app: a widget row opens a tab; a share from another app lands where the browser's would, and the same sheet opens
+  const openShare = useCallback(() => setParams((previous) => new URLSearchParams([...previous, ['share', '1']])), [setParams]);
+  useAndroid({ guest, onTab, onShare: openShare });
 
   useEffect(() => {
     if (music) void loadLibrary().then(syncBundledMusic);

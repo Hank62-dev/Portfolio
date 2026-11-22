@@ -3,6 +3,7 @@ import { getLang, tr } from '../../core/i18n/lang';
 import { pushKey, pushSubscribe, pushTest, pushUnsubscribe } from '../../core/api/owner';
 import { createStore } from '../../core/store';
 import { center, permission, sendTest, setPush } from './center';
+import { refreshInfo } from '../android/bridge';
 import { appToken, registerApp, unregisterApp } from './native';
 
 // Web Push from the server, on this device: subscribing to it, and what the settings page needs to show. The server side is
@@ -29,9 +30,12 @@ const kinds = () => center.get().prefs.kinds;
 
 // ---- the Android app: the same switches, through FCM (see native.js) ----
 
+// an APK built without Firebase's settings cannot use FCM at all (asking it to would crash), so it is never offered there
+const appCanPush = async () => (await refreshInfo()).firebase;
+
 const refreshApp = async () => {
   try {
-    const { app } = await pushKey();
+    const app = (await pushKey()).app && (await appCanPush());
     const token = appToken();
     pushState.set({ checked: true, available: Boolean(app), subscribed: Boolean(app && token), error: '' });
     // tokens can change (a reinstall, Google rotating them): hand the server the current one at each start
@@ -47,7 +51,7 @@ const refreshApp = async () => {
 const enableApp = async () => {
   pushState.set({ busy: true, error: '' });
   try {
-    const { app } = await pushKey();
+    const app = (await pushKey()).app && (await appCanPush());
     if (!app) throw new Error(tr('Push is not set up on the server yet.'));
     let token;
     try {
