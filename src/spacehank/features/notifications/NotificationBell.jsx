@@ -11,6 +11,8 @@ import { useStore } from '../../core/store';
 import { ago, center, clearAll, groupByDay, markAllRead, markRead, permission, remove, setKind, setPush, unreadCount } from './center';
 import { KINDS, kindOf } from './kinds';
 import { isNativeApp } from '../../../shared/lib/platform';
+import { appInfo, askBattery } from '../android/bridge';
+import { apkUpdate } from '../android/useAndroid';
 import { askExact, nativeState, refreshNative } from './native';
 import { disablePush, enablePush, pushState, refreshPush, syncPushKinds, testNotification } from './push';
 
@@ -47,6 +49,8 @@ function Row({ item, onOpen }) {
 function Settings({ prefs }) {
   const native = isNativeApp();
   const phone = useStore(nativeState); // read so the panel follows Android's permissions as they change
+  const install = useStore(appInfo);
+  const { latest } = useStore(apkUpdate);
   const state = permission();
   const server = useStore(pushState);
   useEffect(() => {
@@ -104,6 +108,24 @@ function Settings({ prefs }) {
           </button>
         )}
       </section>
+      {native && latest && (
+        <section className="rounded-2xl border border-signal/40 bg-signal/8 p-3.5">
+          <b className="block text-fine font-medium text-bone">{tr('A new version of the Android app is out')}</b>
+          <small className="mt-1 block font-mono text-[0.72rem] leading-snug text-bone-faint">{tr('Download the APK and open it: it installs over this one and keeps you signed in.')}</small>
+          <a href={latest.url} target="_blank" rel="noreferrer" className="mt-3 inline-block rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">
+            {tr('Download')}
+          </a>
+        </section>
+      )}
+      {native && install.checked && !install.battery && (
+        <section className="rounded-2xl border border-line bg-ink-2/60 p-3.5">
+          <b className="block text-fine font-medium text-bone">{tr('Let Hank62 run in the background')}</b>
+          <small className="mt-1 block font-mono text-[0.72rem] leading-snug text-bone-faint">{tr('Some phones (Xiaomi, Oppo, Samsung, Huawei) stop apps in the background to save battery, which cuts off music and holds back reminders. Allow Hank62 to run freely.')}</small>
+          <button type="button" onClick={() => void askBattery()} className="mt-3 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">
+            {tr('Allow')}
+          </button>
+        </section>
+      )}
       <section>
         <h3 className="px-1 pb-1.5 font-mono text-[0.66rem] tracking-[0.14em] text-bone-faint uppercase">{tr('Tell me about')}</h3>
         <ul className="flex flex-col">

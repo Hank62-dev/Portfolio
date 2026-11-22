@@ -1,4 +1,5 @@
-import { tr } from '../../core/i18n/lang';
+import { getLang, tr } from '../../core/i18n/lang';
+import { pushWidget, todayWidget } from '../android/widget';
 import { useEffect, useRef } from 'react';
 import { useUpdate } from '../../../shared/lib/appUpdate';
 import { calendarBetween } from '../../core/api/owner';
@@ -60,8 +61,9 @@ export function useNotifications({ guest, connected, agents, onTab }) {
         notes: notes.loaded ? notes.notes : null,
       };
       for (const item of reminders({ ...data, now: new Date() })) notify(item);
-      // the Android app also sets the next two days' reminders as alarms, so they come with the app closed
+      // the Android app also sets the next two days' reminders as alarms, so they come with the app closed, and feeds its widget
       if (isNativeApp() && !guest) {
+        void pushWidget(todayWidget({ ...data, now: new Date(), lang: getLang() }));
         const { prefs, seen } = center.get();
         // when the server can send them (FCM), it is the one switch: the phone's own alarms stand down so nothing comes twice
         const list = prefs.push && !pushState.get().available ? ahead({ ...data, now: new Date() }).filter((item) => prefs.kinds[item.kind] && !seen[item.key]) : [];
