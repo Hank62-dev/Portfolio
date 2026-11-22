@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, ExternalLink, Repeat, Trash2 } from 'lucide-react';
-import { Button, DatePicker, Dialog, Input, Select, Textarea, pushToast } from '../../../shared/ui';
+import { Button, DatePicker, Dialog, Input, pushToast, Select, Textarea, TimePicker } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import { tr } from '../../core/i18n/lang';
 import { draftOf, draftReady, inputOf } from './model';
@@ -73,8 +73,8 @@ export default function EventSheet({ event, day, calendars, onClose }) {
           <DatePicker aria-label={tr('Ends on')} value={draft.endDate} onChange={(endDate) => set({ endDate: endDate < draft.date ? draft.date : endDate })} compact clearable={false} className="w-full" disabled={locked || (series && repeating)} />
           {!draft.allDay && (
             <>
-              <Input type="time" aria-label={tr('Starts at')} value={draft.startTime} onChange={(e) => set({ startTime: e.target.value })} compact disabled={locked || (series && repeating)} />
-              <Input type="time" aria-label={tr('Ends at')} value={draft.endTime} onChange={(e) => set({ endTime: e.target.value })} compact disabled={locked || (series && repeating)} />
+              <TimePicker aria-label={tr('Starts at')} value={draft.startTime} onChange={(startTime) => set({ startTime })} compact disabled={locked || (series && repeating)} />
+              <TimePicker aria-label={tr('Ends at')} value={draft.endTime} onChange={(endTime) => set({ endTime })} compact disabled={locked || (series && repeating)} />
             </>
           )}
         </div>

@@ -1,59 +1,116 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Copy, Link2, MousePointerClick, Plus, Trash2, UserRound, Wallet } from 'lucide-react';
-import { Button, Dialog, Input, pushToast } from '../../../shared/ui';
-import { clsx } from '../../../shared/lib/format';
+import { Check, Copy, Link2, Plus, Trash2, Wallet } from 'lucide-react';
+import { Button, Input, Textarea, pushToast } from '../../../shared/ui';
 import { useStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
 import { newIncome, vnd } from './model';
 import { loadShop, saveShop, shop, siteOrigin } from './shopStore';
 import { income } from './store';
 import { clicksSeries } from './studio';
-import { Chip, EmptyNote, Label, Panel, Row, Spark, Stat, copyText } from './ui';
+import { EmptyNote, Spark, copyText } from './ui';
 import { PublicDoors } from './StorePanel';
+import { DataTable, Drawer, Field, FormSection, ImageDrop, ListHead, MoneyInput, Pill, SearchBox, Switch, AsyncButton, useConfirm } from './admin';
 
-const num = (v) => Math.max(0, Math.round(Number(String(v).replace(/[^\d]/g, '')) || 0));
+const urlOk = (url) => /^https?:\/\/\S+\.\S+/.test(url);
 
-/** Writing down a commission an affiliate link earned: it goes into Money, under Affiliate, tied to the link. */
-function Commission({ link, onClose }) {
-  const [amount, setAmount] = useState('');
+/** One link in a drawer: its title and address, whether it is affiliate and shown, its short address, and its commissions. */
+function LinkDrawer({ link, earned, onClose, onSave, onDelete, askDelete }) {
+  const [l, setL] = useState(link);
+  const [amount, setAmount] = useState(0);
+  const set = (patch) => setL((x) => ({ ...x, ...patch }));
+  const isNew = !link.id;
+  const valid = l.title.trim() && urlOk(l.url);
   return (
-    <Dialog open onOpenChange={(next) => !next && onClose()} eyebrow={tr('AFFILIATE')} title={link.title} description={tr('Write down a commission this link earned. It goes into Money, under Affiliate.')}>
-      <form
-        className="flex flex-col gap-4"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          if (!num(amount)) return;
-          await income.create(newIncome({ amount: num(amount), source: 'affiliate', note: link.title, linkId: link.id }));
-          pushToast(tr('Commission logged'), { tone: 'success' });
-          onClose();
-        }}
-      >
-        <Input aria-label={tr('Amount (₫)')} inputMode="numeric" placeholder={tr('e.g. 85000')} value={amount} onChange={(e) => setAmount(e.target.value)} autoFocus />
-        <Button type="submit" disabled={!num(amount)} className="w-full justify-center">
-          <Check size={15} aria-hidden="true" /> {tr('Log it')}
-        </Button>
-      </form>
-    </Dialog>
+    <Drawer
+      open
+      onClose={onClose}
+      title={isNew ? tr('New link') : l.title}
+      subtitle={tr('A button on your link-in-bio page. Every tap goes through its short address and is counted.')}
+      footer={
+        <>
+          {!isNew && (
+            <AsyncButton variant="ghost" size="sm" ask={askDelete} onClick={onDelete}>
+              <Trash2 size={13} aria-hidden="true" /> {tr('Delete')}
+            </AsyncButton>
+          )}
+          <span className="flex-1" />
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            {tr('Cancel')}
+          </Button>
+          <AsyncButton size="sm" disabled={!valid} onClick={async () => (await onSave(l)) && onClose()}>
+            <Check size={13} aria-hidden="true" /> {tr('Save')}
+          </AsyncButton>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <Field label={tr('Title')} hint={tr('The words on the button.')}>
+          <Input value={l.title} onChange={(e) => set({ title: e.target.value })} maxLength={70} placeholder={tr('e.g. My latest video')} autoFocus={isNew} />
+        </Field>
+        <Field label={tr('Address')} error={l.url && !urlOk(l.url) ? tr('A full address that starts with https://') : ''}>
+          <Input value={l.url} onChange={(e) => set({ url: e.target.value.trim() })} placeholder="https://" />
+        </Field>
+        <Switch on={l.kind === 'affiliate'} onChange={(on) => set({ kind: on ? 'affiliate' : 'link' })} label={tr('Affiliate link')} hint={tr('Shopee, TikTok Shop, Lazada… The page tells visitors you may earn a commission.')} />
+        <Switch on={l.active !== false} onChange={(on) => set({ active: on })} label={tr('Shown on the page')} />
+        {!isNew && (
+          <div className="rounded-xl border border-line bg-ink-2 p-3.5">
+            <p className="text-[0.8rem] font-medium text-bone">{tr('Short address')}</p>
+            <div className="mt-1.5 flex items-center justify-between gap-2">
+              <code className="truncate font-mono text-[0.8rem] text-bone-dim">
+                {siteOrigin()}/go/{link.id}
+              </code>
+              <Button variant="ghost" size="sm" onClick={() => copyText(`${siteOrigin()}/go/${link.id}`, tr('Short link copied'))}>
+                <Copy size={13} aria-hidden="true" /> {tr('Copy')}
+              </Button>
+            </div>
+            <small className="mt-1 block text-[0.74rem] text-bone-faint">{tr('Use this one when you share the link, so its taps are counted.')}</small>
+          </div>
+        )}
+        {!isNew && l.kind === 'affiliate' && (
+          <div className="rounded-xl border border-line p-3.5">
+            <p className="text-[0.8rem] font-medium text-bone">
+              {tr('Commissions')} · <span className="text-ok">{vnd(earned)}</span>
+            </p>
+            <div className="mt-2 flex gap-2">
+              <MoneyInput value={amount} onChange={setAmount} aria-label={tr('Amount')} />
+              <AsyncButton
+                size="sm"
+                disabled={!amount}
+                onClick={async () => {
+                  await income.create(newIncome({ amount, source: 'affiliate', note: link.title, linkId: link.id }));
+                  setAmount(0);
+                  pushToast(tr('Commission logged'), { tone: 'success' });
+                }}
+              >
+                <Wallet size={13} aria-hidden="true" /> {tr('Log commission')}
+              </AsyncButton>
+            </div>
+          </div>
+        )}
+      </div>
+    </Drawer>
   );
 }
 
 /**
- * The link-in-bio page (/me) and its links: who you are, then every link with its short address (/go/…), how often it was
- * tapped in the last two weeks, and for affiliate links what they earned. The page lives on the portfolio.
+ * The link-in-bio page (/me): who you are (with a portrait dropped in), and the links in a table: how often each was tapped in
+ * the last two weeks and what affiliate ones earned, each edited in a drawer.
  */
 export default function LinksPanel() {
   const state = useStore(shop);
   const { items: entries } = useStore(income.store);
-  const [draft, setDraft] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [logging, setLogging] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [query, setQuery] = useState('');
+  const [confirm, confirmDialog] = useConfirm();
 
   useEffect(() => {
     void loadShop();
     void income.load();
   }, []);
   useEffect(() => {
-    if (state.config) setDraft(state.config);
+    if (state.config) setProfile(state.config.profile);
   }, [state.config]);
 
   const earnedBy = useMemo(() => {
@@ -61,12 +118,9 @@ export default function LinksPanel() {
     for (const e of entries) if (e.linkId) out[e.linkId] = (out[e.linkId] ?? 0) + e.amount;
     return out;
   }, [entries]);
-  const totalTaps = Object.values(state.clicks ?? {}).reduce((n, c) => n + (c.total ?? 0), 0);
-  const weekTaps = Object.values(state.clicks ?? {}).reduce((n, c) => n + clicksSeries(c, 7).reduce((a, d) => a + d.n, 0), 0);
-  const affiliateEarned = Object.values(earnedBy).reduce((a, b) => a + b, 0);
 
   if (!state.loaded) return <p className="font-mono text-fine text-bone-dim">{tr('Opening the shop…')}</p>;
-  if (!draft) {
+  if (!state.config || !profile) {
     return (
       <EmptyNote icon={Link2} title={tr('The shop could not be reached')}>
         {state.error}
@@ -74,103 +128,132 @@ export default function LinksPanel() {
     );
   }
 
-  const dirty = JSON.stringify(draft) !== JSON.stringify(state.config);
-  const setLinks = (links) => setDraft({ ...draft, links });
-  const save = async () => {
-    setSaving(true);
+  const links = state.config.links;
+  const save = async (patch) => {
     try {
-      await saveShop(draft);
-      pushToast(tr('Links saved'), { tone: 'success' });
+      await saveShop({ ...state.config, ...patch });
+      pushToast(tr('Saved'), { tone: 'success' });
+      return true;
     } catch (e) {
       pushToast(e.message, { tone: 'error' });
-    } finally {
-      setSaving(false);
+      return false;
     }
   };
-  // the most tapped first, so what works is on top
-  const ranked = [...draft.links].map((l, i) => ({ l, i })).sort((a, b) => (state.clicks?.[b.l.id]?.total ?? 0) - (state.clicks?.[a.l.id]?.total ?? 0));
+  const weekTaps = Object.values(state.clicks ?? {}).reduce((n, c) => n + clicksSeries(c, 7).reduce((a, d) => a + d.n, 0), 0);
+  const totalTaps = Object.values(state.clicks ?? {}).reduce((n, c) => n + (c.total ?? 0), 0);
+  const affiliate = Object.values(earnedBy).reduce((a, b) => a + b, 0);
+  const rows = links.map((l, i) => ({ ...l, index: i })).filter((l) => !query || `${l.title} ${l.url}`.toLowerCase().includes(query.toLowerCase()));
+  const current = editing === 'new' ? { id: '', title: '', url: '', kind: 'link', active: true } : editing !== null ? links[editing] : null;
+  const dirty = JSON.stringify(profile) !== JSON.stringify(state.config.profile);
 
   return (
     <div className="flex flex-col gap-4" data-links>
-      <div className="grid grid-cols-3 gap-2.5">
-        <Stat value={weekTaps} label={tr('Taps this week')} icon={MousePointerClick} />
-        <Stat value={totalTaps} label={tr('Taps in all')} />
-        <Stat value={vnd(affiliateEarned)} label={tr('From affiliate links')} tone={affiliateEarned ? 'text-ok' : 'text-bone'} />
-      </div>
-
-      <Panel title={tr('Your page')} icon={UserRound} hue={305} aside={<PublicDoors pages={[['/me', tr('Link in bio')]]} />}>
-        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-          <Row label={tr('Name')}>
-            <Input aria-label={tr('Name')} value={draft.profile.name} onChange={(e) => setDraft({ ...draft, profile: { ...draft.profile, name: e.target.value } })} maxLength={60} compact />
-          </Row>
-          <Row label={tr('One line about you')}>
-            <Input aria-label={tr('One line about you')} value={draft.profile.bio} onChange={(e) => setDraft({ ...draft, profile: { ...draft.profile, bio: e.target.value } })} maxLength={200} compact />
-          </Row>
+      <section className="adm-card">
+        <div className="adm-kpis">
+          <div>
+            <small>{tr('Taps this week')}</small>
+            <b>{weekTaps}</b>
+          </div>
+          <div>
+            <small>{tr('Taps in all')}</small>
+            <b>{totalTaps}</b>
+          </div>
+          <div>
+            <small>{tr('From affiliate links')}</small>
+            <b className={affiliate ? 'text-ok' : ''}>{vnd(affiliate)}</b>
+          </div>
+          <div>
+            <small>{tr('Your page')}</small>
+            <PublicDoors pages={[['/me', '/me']]} />
+          </div>
         </div>
-        <div className="mt-3">
-          <Row label={tr('Picture (link, optional)')}>
-            <Input aria-label={tr('Picture (link, optional)')} placeholder="https://…" value={draft.profile.avatar} onChange={(e) => setDraft({ ...draft, profile: { ...draft.profile, avatar: e.target.value } })} compact />
-          </Row>
-        </div>
-      </Panel>
+      </section>
 
-      <Panel title={tr('Links')} icon={Link2} hue={205}>
-        {draft.links.length === 0 && <p className="mb-3 text-fine text-bone-faint">{tr('Your channels, your latest video, a product you recommend with an affiliate link… Each one gets a short address that counts its taps.')}</p>}
-        <ul className="flex flex-col gap-2.5">
-          {ranked.map(({ l, i }) => {
-            const series = clicksSeries(state.clicks?.[l.id], 14);
-            const patch = (p) => setLinks(draft.links.map((x, j) => (j === i ? { ...x, ...p } : x)));
-            return (
-              <li key={l.id || `new${i}`} className={clsx('cl-card flex flex-col gap-2.5 rounded-2xl border border-line p-3.5', l.active === false && 'opacity-60')}>
-                <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-                  <Input aria-label={tr('Title')} placeholder={tr('Title')} value={l.title} onChange={(e) => patch({ title: e.target.value })} maxLength={70} compact />
-                  <Input aria-label={tr('Address')} placeholder="https://…" value={l.url} onChange={(e) => patch({ url: e.target.value })} compact />
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Chip on={l.kind === 'affiliate'} onClick={() => patch({ kind: l.kind === 'affiliate' ? 'link' : 'affiliate' })}>
-                    {tr('Affiliate')}
-                  </Chip>
-                  <Chip on={l.active !== false} onClick={() => patch({ active: l.active === false })}>
-                    {l.active === false ? tr('Hidden') : tr('Shown')}
-                  </Chip>
-                  {l.id && (
-                    <button type="button" onClick={() => copyText(`${siteOrigin()}/go/${l.id}`, tr('Short link copied'))} className="inline-flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 font-mono text-[0.68rem] text-bone-dim hover:text-bone">
-                      <Copy size={11} aria-hidden="true" /> /go/{l.id}
-                    </button>
-                  )}
-                  <span className="flex-1" />
-                  <span className="flex items-center gap-2" title={tr('Taps in the last two weeks')}>
-                    <Spark values={series.map((d) => d.n)} className="h-6 w-20" />
-                    <b className="font-mono text-[0.78rem] tabular-nums text-bone">{state.clicks?.[l.id]?.total ?? 0}</b>
-                  </span>
-                  {l.kind === 'affiliate' && l.id && (
-                    <Button size="sm" variant="ghost" onClick={() => setLogging(l)}>
-                      <Wallet size={13} aria-hidden="true" /> {earnedBy[l.id] ? vnd(earnedBy[l.id]) : tr('Log commission')}
-                    </Button>
-                  )}
-                  <button type="button" onClick={() => setLinks(draft.links.filter((_, j) => j !== i))} className="rounded-full p-1.5 text-bone-faint hover:text-danger" aria-label={tr('Remove')}>
-                    <Trash2 size={14} aria-hidden="true" />
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setLinks([...draft.links, { id: '', title: '', url: '', kind: 'link', active: true }])}>
-            <Plus size={14} aria-hidden="true" /> {tr('Add a link')}
+      <FormSection
+        title={tr('Your page')}
+        description={tr('The top of /me: your portrait, your name and one line. Put the page’s address in your TikTok and Instagram bio.')}
+        dirty={dirty}
+        saving={saving}
+        onReset={() => setProfile(state.config.profile)}
+        onSave={async () => {
+          setSaving(true);
+          await save({ profile });
+          setSaving(false);
+        }}
+      >
+        <div className="grid gap-5 sm:grid-cols-[9rem_minmax(0,1fr)]">
+          <ImageDrop round value={profile.avatar} onChange={(avatar) => setProfile({ ...profile, avatar })} hint={tr('Empty: the portfolio’s portrait.')} />
+          <div className="flex flex-col gap-4">
+            <Field label={tr('Name')}>
+              <Input value={profile.name} onChange={(e) => setProfile({ ...profile, name: e.target.value })} maxLength={60} placeholder="Võ Gia Huy" />
+            </Field>
+            <Field label={tr('One line about you')} hint={`${profile.bio.length} / 200`}>
+              <Textarea rows={2} value={profile.bio} onChange={(e) => setProfile({ ...profile, bio: e.target.value })} maxLength={200} />
+            </Field>
+          </div>
+        </div>
+      </FormSection>
+
+      <section className="adm-card">
+        <ListHead title={tr('Links')} count={links.length}>
+          <SearchBox value={query} onChange={setQuery} placeholder={tr('Search links')} />
+          <Button size="sm" onClick={() => setEditing('new')} disabled={links.length >= 60}>
+            <Plus size={14} aria-hidden="true" /> {tr('New link')}
           </Button>
-          <Label>{tr('Shopee, TikTok Shop and Lazada links can be marked Affiliate: the page says so to visitors.')}</Label>
-        </div>
-      </Panel>
+        </ListHead>
+        <DataTable
+          rows={rows}
+          rowKey={(l) => l.id || `i${l.index}`}
+          onOpen={(l) => setEditing(l.index)}
+          empty={
+            <EmptyNote icon={Link2} title={tr('No links yet')}>
+              {tr('Your channels, your latest video, a product you recommend with an affiliate link… Each one gets a short address that counts its taps.')}
+            </EmptyNote>
+          }
+          columns={[
+            {
+              key: 'link',
+              label: tr('Link'),
+              width: 'minmax(0,2.4fr)',
+              render: (l) => (
+                <span className="min-w-0">
+                  <b className="block truncate font-medium text-bone">{l.title}</b>
+                  <small className="block truncate font-mono text-[0.7rem] text-bone-faint">{l.url}</small>
+                </span>
+              ),
+            },
+            { key: 'kind', label: tr('Type'), width: '7rem', render: (l) => <Pill tone={l.kind === 'affiliate' ? 'signal' : 'default'}>{l.kind === 'affiliate' ? tr('Affiliate') : tr('Link')}</Pill> },
+            {
+              key: 'taps',
+              label: tr('Taps, 14 days'),
+              width: '9rem',
+              render: (l) => (
+                <span className="flex items-center gap-2">
+                  <Spark values={clicksSeries(state.clicks?.[l.id], 14).map((d) => d.n)} className="h-5 w-16" />
+                  <b className="font-mono text-[0.78rem] font-normal tabular-nums text-bone">{state.clicks?.[l.id]?.total ?? 0}</b>
+                </span>
+              ),
+            },
+            { key: 'earned', label: tr('Earned'), width: '7rem', className: 'text-right', render: (l) => <span className="font-mono tabular-nums text-bone-dim">{l.kind === 'affiliate' ? vnd(earnedBy[l.id] ?? 0) : '—'}</span> },
+            { key: 'state', label: tr('Status'), width: '6.5rem', render: (l) => <Pill tone={l.active === false ? 'default' : 'ok'}>{l.active === false ? tr('Hidden') : tr('Shown')}</Pill> },
+          ]}
+        />
+      </section>
 
-      <div className="sticky bottom-24 z-20 flex justify-end md:bottom-4">
-        <Button onClick={save} disabled={!dirty || saving} className={clsx('shadow-[0_14px_30px_-12px_rgb(0_0_0/0.6)]', !dirty && 'opacity-60')} data-save-links>
-          <Check size={15} aria-hidden="true" /> {saving ? tr('Saving…') : dirty ? tr('Save the links') : tr('Saved')}
-        </Button>
-      </div>
-
-      {logging && <Commission link={logging} onClose={() => setLogging(null)} />}
+      {current && (
+        <LinkDrawer
+          key={editing}
+          link={current}
+          earned={earnedBy[current.id] ?? 0}
+          onClose={() => setEditing(null)}
+          onSave={(l) => save({ links: editing === 'new' ? [...links, l] : links.map((x, i) => (i === editing ? l : x)) })}
+          askDelete={() => confirm({ title: tr('Delete the link “{0}”?', links[editing].title), body: tr('Its button leaves /me, and its short address stops working wherever you shared it. To keep it for later, switch “Shown on the page” off instead.') })}
+          onDelete={async () => {
+            if (await save({ links: links.filter((_, i) => i !== editing) })) setEditing(null);
+          }}
+        />
+      )}
+      {confirmDialog}
     </div>
   );
 }

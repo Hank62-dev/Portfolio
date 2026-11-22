@@ -10,6 +10,7 @@ import { PLATFORMS, STAGES, byStage, dueToPost, hashtagLine, moveStage, newPiece
 import { content } from './store';
 import { Chip, CopyButton, Label, PlatformTag, Row, STAGE_HUE } from './ui';
 import Repurpose from './Repurpose';
+import { AsyncButton, useConfirm } from './admin';
 
 const platformLabel = (id) => PLATFORMS.find((p) => p.id === id)?.label ?? id;
 const dayInput = (at) => {
@@ -28,7 +29,7 @@ function PieceSheet({ piece, onClose, onMoved, onRepurpose }) {
   const [notes, setNotes] = useState(piece.notes ?? '');
   const [results, setResults] = useState(piece.results ?? { views: 0, likes: 0, revenue: 0 });
   const [discord, setDiscord] = useState(false);
-  const [sure, setSure] = useState(false);
+  const [confirm, confirmDialog] = useConfirm();
   const pack = piece.pack;
 
   const save = async (extra = {}) => {
@@ -113,24 +114,18 @@ function PieceSheet({ piece, onClose, onMoved, onRepurpose }) {
         >
           <Check size={15} aria-hidden="true" /> {tr('Save')}
         </Button>
-        {sure ? (
-          <Button
-            variant="danger"
-            className="w-full justify-center"
-            onClick={async () => {
-              await content.remove(piece.id);
-              onClose();
-            }}
-            onBlur={() => setSure(false)}
-            autoFocus
-          >
-            <Trash2 size={15} aria-hidden="true" /> {tr('Tap again to delete')}
-          </Button>
-        ) : (
-          <Button variant="ghost" className="w-full justify-center" onClick={() => setSure(true)}>
-            <Trash2 size={15} aria-hidden="true" /> {tr('Delete')}
-          </Button>
-        )}
+        <AsyncButton
+          variant="ghost"
+          className="w-full justify-center"
+          ask={() => confirm({ title: tr('Delete “{0}”?', piece.title), body: tr('The script, the captions and the results go with it.') })}
+          onClick={async () => {
+            await content.remove(piece.id);
+            onClose();
+          }}
+        >
+          <Trash2 size={15} aria-hidden="true" /> {tr('Delete')}
+        </AsyncButton>
+        {confirmDialog}
       </div>
     </Dialog>
   );
@@ -227,9 +222,9 @@ export default function PipelinePanel({ openId = null }) {
         </Button>
       </div>
 
-      <div className="no-scrollbar -mx-5 flex scroll-px-5 snap-x snap-mandatory items-start gap-3 overflow-x-auto px-5 pb-3 md:mx-0 md:scroll-px-0 md:px-0" data-board>
+      <div className="cl-board" data-board>
         {STAGES.map((stage, stageIndex) => (
-          <section key={stage.id} aria-label={stage.label} data-stage={stage.id} className="cl-film cl-surface relative flex w-[16.5rem] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-[1.75rem] border border-line p-3 max-md:w-[78vw]">
+          <section key={stage.id} aria-label={stage.label} data-stage={stage.id} className="cl-film cl-surface relative flex min-w-0 flex-col gap-2.5 overflow-hidden rounded-[1.4rem] border border-line p-3">
             <i className="pointer-events-none absolute inset-x-6 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62% / 0.8), transparent)` }} aria-hidden="true" />
             <header className="flex items-center justify-between px-1.5 pt-1">
               <h4 className="flex items-center gap-2 font-mono text-[0.7rem] tracking-[0.12em] text-bone-dim uppercase">

@@ -102,6 +102,12 @@ export const repurposeContent = (input) => (owner(), call('/api/ai/repurpose', {
 export const storeAdmin = () => (owner(), call('/api/store/admin'));
 export const saveStoreConfig = (config) => (owner(), call('/api/store/config', { method: 'POST', body: config }));
 export const createInvoice = (input) => (owner(), call('/api/store/invoice', { method: 'POST', body: input }));
+/** Uploads a picture for the shop; returns the address anyone can load it from. */
+export const uploadStoreImage = async (blob) => {
+  owner();
+  const { id } = await call('/api/store/image', { method: 'POST', body: blob, raw: blob.type || 'image/jpeg' });
+  return `${realtimeApiUrl}/api/store/image?id=${id}`;
+};
 export const markOrder = (id, status) => (owner(), call('/api/store/mark', { method: 'POST', body: { id, status } }));
 export const removeOrder = (id) => (owner(), call('/api/store/remove', { method: 'POST', body: { id } }));
 export const discordChannels = () => (owner(), call('/api/discord/channels'));

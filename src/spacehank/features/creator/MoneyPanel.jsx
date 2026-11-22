@@ -8,6 +8,7 @@ import { useStore } from '../../core/store';
 import { SOURCES, bySource, earningsByPiece, goalProgress, insights, monthKeyOf, monthTotal, newIncome, sourceLabel, trend, vnd, vndShort } from './model';
 import { content, creatorSettings, income, setSetting } from './store';
 import { EmptyNote, IconBubble, Label, Panel, Row, Stat } from './ui';
+import { useConfirm } from './admin';
 
 const TONE = { good: 'border-ok/30 bg-ok/[0.07] text-bone', warn: 'border-warn/30 bg-warn/[0.07] text-bone', info: 'border-line bg-wash/[0.03] text-bone-dim' };
 const TONE_ICON = { good: [CheckCircle2, 'text-ok'], warn: [AlertTriangle, 'text-warn'], info: [Info, 'text-bone-faint'] };
@@ -71,6 +72,7 @@ export default function MoneyPanel() {
   const { items: pieces } = useStore(content.store);
   const settings = useStore(creatorSettings);
   const [adding, setAdding] = useState(false);
+  const [confirm, confirmDialog] = useConfirm();
   const [goalText, setGoalText] = useState(settings.goal ? String(settings.goal) : '');
   useFab({ label: tr('Log income'), icon: Plus, onPress: () => setAdding(true) });
   useEffect(() => {
@@ -248,7 +250,7 @@ export default function MoneyPanel() {
                     </small>
                   </span>
                   <b className="font-mono text-[0.86rem] text-bone tabular-nums">+{vnd(e.amount)}</b>
-                  <button type="button" aria-label={tr('Delete {0} {1}', sourceLabel(e.source), vnd(e.amount))} onClick={() => income.remove(e.id)} className="p-1.5 text-bone-faint transition-opacity hover:text-danger md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100">
+                  <button type="button" aria-label={tr('Delete {0} {1}', sourceLabel(e.source), vnd(e.amount))} onClick={async () => (await confirm({ title: tr('Delete {0} {1}', sourceLabel(e.source), vnd(e.amount)), body: tr('It comes off this month’s total and the goal.') })) && income.remove(e.id)} className="p-1.5 text-bone-faint transition-opacity hover:text-danger md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100">
                     <Trash2 size={14} aria-hidden="true" />
                   </button>
                 </li>
@@ -259,6 +261,7 @@ export default function MoneyPanel() {
       </Panel>
 
       {adding && <AddIncome pieces={pieces} onClose={() => setAdding(false)} />}
+      {confirmDialog}
     </div>
   );
 }

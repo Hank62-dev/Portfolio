@@ -1,8 +1,9 @@
+import { MAX_IMAGE_BYTES } from '../services/storefront.mjs';
 // The storefront (see services/storefront.mjs). Visitors read what is on offer, order, follow short links and write from the media
 // kit; SePay tells of incoming transfers; the owner sets it all up, sends invoices and marks orders.
 export const STORE_WEBHOOKS = new Set(['/api/store/sepay']); // called by a payment service, not by a browser: no Origin to check
 
-export const storeRoutes = ({ config, json, readJson, requireAuth, query, who, store }) => ({
+export const storeRoutes = ({ config, json, bytes, readJson, readBytes, requireAuth, query, who, store }) => ({
   'GET /api/store/public': async (req, res) => json(res, 200, await store.publicConfig()),
 
   'GET /api/store/slots': async (req, res) => json(res, 200, { slots: await store.slots() }),
@@ -16,6 +17,17 @@ export const storeRoutes = ({ config, json, readJson, requireAuth, query, who, s
   'POST /api/store/lead': async (req, res) => json(res, 201, await store.lead(who(req), await readJson(req, 8 * 1024))),
 
   'POST /api/store/sepay': async (req, res) => json(res, 200, await store.sepay(req.headers.authorization, await readJson(req, 16 * 1024))),
+
+  // pictures for the shop (product covers, the portrait on /me): the owner uploads, anyone may look
+  'POST /api/store/image': async (req, res) => {
+    requireAuth(req);
+    json(res, 201, await store.putImage(await readBytes(req, MAX_IMAGE_BYTES + 1024)));
+  },
+
+  'GET /api/store/image': async (req, res) => {
+    const found = await store.image(query(req).get('id'));
+    bytes(res, 200, found.bytes, found.mime);
+  },
 
   'GET /api/store/admin': async (req, res) => {
     requireAuth(req);

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BookOpenText, CalendarDays, CircleDollarSign, Handshake, KanbanSquare, Lightbulb, Link2, Megaphone, MessageCircle, ShoppingBag } from 'lucide-react';
-import { PageHead, Segmented } from '../../ui/Page';
+import { PageHead } from '../../ui/Page';
+import LabNav from './LabNav';
 import { useStore } from '../../core/store';
 import CalendarPanel from './CalendarPanel';
 import DealsPanel from './DealsPanel';
@@ -16,21 +17,42 @@ import { loadShop, shop } from './shopStore';
 import StorePanel from './StorePanel';
 import { content, creatorSettings, deals, income, loadSettings } from './store';
 import StudioDesk from './StudioDesk';
-import { isReportTime, moneyMove, salesSummary, weekKey } from './studio';
+import { isReportTime, moneyMove, orderState, salesSummary, weekKey } from './studio';
 import WeekReport from './WeekReport';
 import { tr } from '../../core/i18n/lang';
 
-const SECTIONS = [
-  { id: 'ideas', label: tr('Ideas'), icon: Lightbulb },
-  { id: 'pipeline', label: tr('Pipeline'), icon: KanbanSquare },
-  { id: 'calendar', label: tr('Calendar'), icon: CalendarDays },
-  { id: 'store', label: tr('Shop'), icon: ShoppingBag },
-  { id: 'links', label: tr('Links'), icon: Link2 },
-  { id: 'kit', label: tr('Media kit'), icon: Megaphone },
-  { id: 'money', label: tr('Money'), icon: CircleDollarSign },
-  { id: 'deals', label: tr('Deals'), icon: Handshake },
-  { id: 'discord', label: tr('Discord'), icon: MessageCircle },
-  { id: 'playbook', label: tr('Playbook'), icon: BookOpenText },
+// the places of the Creator Lab, by what they are for; `counts` says what waits in each
+const groupsOf = (counts) => [
+  {
+    label: tr('Make'),
+    items: [
+      { id: 'ideas', label: tr('Ideas'), icon: Lightbulb },
+      { id: 'pipeline', label: tr('Pipeline'), icon: KanbanSquare, count: counts.post, hot: true },
+      { id: 'calendar', label: tr('Calendar'), icon: CalendarDays },
+    ],
+  },
+  {
+    label: tr('Sell'),
+    items: [
+      { id: 'store', label: tr('Shop'), icon: ShoppingBag, count: counts.orders, hot: true },
+      { id: 'links', label: tr('Links'), icon: Link2 },
+      { id: 'kit', label: tr('Media kit'), icon: Megaphone, count: counts.leads, hot: true },
+    ],
+  },
+  {
+    label: tr('Business'),
+    items: [
+      { id: 'money', label: tr('Money'), icon: CircleDollarSign },
+      { id: 'deals', label: tr('Deals'), icon: Handshake, count: counts.follow, hot: true },
+    ],
+  },
+  {
+    label: tr('Community'),
+    items: [
+      { id: 'discord', label: tr('Discord'), icon: MessageCircle },
+      { id: 'playbook', label: tr('Playbook'), icon: BookOpenText },
+    ],
+  },
 ];
 
 const REPORT_KEY = 'hank62.creator.report';
@@ -102,14 +124,17 @@ export default function CreatorView() {
 
       <StudioDesk entries={tape} total={total} previous={months.at(-2)?.total ?? 0} goal={settings.goal} g={g} move={move} counts={{ post, follow, soldToday: sales.today }} onGo={go} onGoal={() => setSection('money')} onReport={() => setReport(true)} />
 
-      <Segmented scroll large round value={section}
-        onChange={(next) => {
-          setOpenPiece(null);
-          setSection(next);
-        }}
-        options={SECTIONS} label={tr('Creator Lab')} />
+      <div className="lab-layout">
+        <LabNav
+          groups={groupsOf({ post, follow, orders: orders.filter((o) => o.kind !== 'lead' && ['pending', 'overdue'].includes(orderState(o))).length, leads: sales.leads.length })}
+          value={section}
+          onChange={(next) => {
+            setOpenPiece(null);
+            setSection(next);
+          }}
+        />
 
-      <div key={section} className="cl-rise">
+      <div key={section} className="cl-rise min-w-0">
         {section === 'ideas' && <IdeasPanel onSaved={() => setSection('pipeline')} />}
         {section === 'pipeline' && <PipelinePanel key={openPiece ?? 'board'} openId={openPiece} />}
         {section === 'calendar' && <CalendarPanel onOpen={(id) => go('pipeline', id)} />}
@@ -120,6 +145,7 @@ export default function CreatorView() {
         {section === 'deals' && <DealsPanel />}
         {section === 'discord' && <DiscordPanel />}
         {section === 'playbook' && <Playbook onGo={setSection} />}
+      </div>
       </div>
 
       {report && <WeekReport entries={entries} pieces={pieces} deals={dealList} orders={orders} onClose={() => setReport(false)} />}

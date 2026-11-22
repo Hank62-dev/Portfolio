@@ -11,6 +11,7 @@ import { CHANNELS, DEAL_KINDS, DEAL_STAGES, dueFollowUps, forgotten, newDeal, pa
 import { creatorSettings, deals, setSetting } from './store';
 import { CopyButton, Label, Panel, Row, STAGE_HUE, Stat, copyText } from './ui';
 import { sendInvoice, siteOrigin } from './shopStore';
+import { AsyncButton, useConfirm } from './admin';
 import { payLink } from './studio';
 import Funnel from './Funnel';
 
@@ -39,7 +40,7 @@ function DealSheet({ deal, onClose }) {
   const [draft, setDraft] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [sure, setSure] = useState(false);
+  const [confirm, confirmDialog] = useConfirm();
 
   const save = async (e) => {
     e.preventDefault();
@@ -132,26 +133,21 @@ function DealSheet({ deal, onClose }) {
         <Button type="submit" disabled={!name.trim()} className="w-full justify-center">
           <Check size={15} aria-hidden="true" /> {editing ? tr('Save') : tr('Add')}
         </Button>
-        {editing &&
-          (sure ? (
-            <Button
-              type="button"
-              variant="danger"
-              className="w-full justify-center"
-              onClick={async () => {
-                await deals.remove(deal.id);
-                onClose();
-              }}
-              onBlur={() => setSure(false)}
-              autoFocus
-            >
-              <Trash2 size={15} aria-hidden="true" /> {tr('Tap again to delete')}
-            </Button>
-          ) : (
-            <Button type="button" variant="ghost" className="w-full justify-center" onClick={() => setSure(true)}>
-              <Trash2 size={15} aria-hidden="true" /> {tr('Delete')}
-            </Button>
-          ))}
+        {editing && (
+          <AsyncButton
+            type="button"
+            variant="ghost"
+            className="w-full justify-center"
+            ask={() => confirm({ title: tr('Delete the deal with {0}?', deal.name), body: tr('Its notes and follow-up go with it. Money already logged stays in Money.') })}
+            onClick={async () => {
+              await deals.remove(deal.id);
+              onClose();
+            }}
+          >
+            <Trash2 size={15} aria-hidden="true" /> {tr('Delete')}
+          </AsyncButton>
+        )}
+        {confirmDialog}
       </form>
     </Dialog>
   );
@@ -247,8 +243,8 @@ function QuoteSheet({ onClose }) {
           <Row label={tr('Pay by')}>
             <DatePicker aria-label={tr('Pay by')} value={due} onChange={setDue} compact className="w-full" />
           </Row>
-          <Button variant="ghost" onClick={invoice} disabled={!totals.total || sending} className="w-full justify-center" data-send-invoice>
-            <QrCode size={15} aria-hidden="true" /> {sending ? tr('Sending…') : tr('Send as an invoice with a QR to pay')}
+          <Button variant="ghost" onClick={invoice} loading={sending} disabled={!totals.total} className="w-full justify-center" data-send-invoice>
+            <QrCode size={15} aria-hidden="true" /> {tr('Send as an invoice with a QR to pay')}
           </Button>
           <p className="text-[0.74rem] text-bone-faint">{tr('The client gets a page with the invoice and a VietQR code. When it is paid it shows in the Shop and in Money.')}</p>
         </div>
@@ -373,11 +369,11 @@ export default function DealsPanel() {
           </Button>
         </>
       ) : (
-        <div className="no-scrollbar -mx-5 flex scroll-px-5 snap-x snap-mandatory items-start gap-3 overflow-x-auto px-5 pb-3 md:mx-0 md:scroll-px-0 md:px-0" data-board>
+        <div className="cl-board" data-board>
           {DEAL_STAGES.map((stage) => {
             const list = items.filter((d) => d.stage === stage.id);
             return (
-              <section key={stage.id} aria-label={stage.label} data-deal-stage={stage.id} className="cl-surface relative flex w-[16.5rem] shrink-0 snap-start flex-col gap-2.5 overflow-hidden rounded-[1.75rem] border border-line p-3 max-md:w-[78vw]">
+              <section key={stage.id} aria-label={stage.label} data-deal-stage={stage.id} className="cl-surface relative flex min-w-0 flex-col gap-2.5 overflow-hidden rounded-[1.4rem] border border-line p-3">
                 <i className="pointer-events-none absolute inset-x-6 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, hsl(${STAGE_HUE[stage.id] ?? 220} 80% 62% / 0.8), transparent)` }} aria-hidden="true" />
                 <header className="flex items-center justify-between px-1.5 pt-1">
                   <h4 className="flex items-center gap-2 font-mono text-[0.7rem] tracking-[0.12em] text-bone-dim uppercase">

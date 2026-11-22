@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { cleanConfig, codesIn, createStorefront, freeSlots, makeCode, publicView, zoneOffset } from './services/storefront.mjs';
+import { cleanConfig, codesIn, createStorefront, freeSlots, imageType, makeCode, publicView, zoneOffset } from './services/storefront.mjs';
 
 const HOUR = 3600 * 1000;
 // a counter that stands in for crypto's random bytes, so ids and codes are known
@@ -150,5 +150,24 @@ describe('ordering and paying', () => {
     for (let i = 0; i < 3; i += 1) await store.lead('x', body);
     await expect(store.lead('x', body)).rejects.toMatchObject({ status: 429 });
     expect((await store.admin()).orders.filter((o) => o.kind === 'lead')).toHaveLength(3);
+  });
+});
+
+describe('pictures', () => {
+  const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(40)]);
+
+  it('knows a picture by its first bytes, not by its name', () => {
+    expect(imageType(png)).toBe('image/png');
+    expect(imageType(Buffer.from('<svg onload=alert(1)></svg>....'))).toBe(null);
+  });
+
+  it('keeps an uploaded picture and gives it back', async () => {
+    const { store } = make();
+    const { id } = await store.putImage(png);
+    const back = await store.image(id);
+    expect(back.mime).toBe('image/png');
+    expect(back.bytes.equals(png)).toBe(true);
+    await expect(store.putImage(Buffer.from('not a picture at all'))).rejects.toMatchObject({ status: 415 });
+    await expect(store.image('../../etc')).rejects.toMatchObject({ status: 404 });
   });
 });

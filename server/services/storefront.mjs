@@ -478,6 +478,25 @@ export const createStorefront = ({ db = null, calendar = null, zone = 'Asia/Ho_C
     for (const o of all.filter((x) => !alive(x) && x.kind !== 'lead').slice(-(all.length - MAX_ORDERS))) await drop(`order:${o.id}`);
   };
 
+  // ---------------------------------------------------------------- pictures (product covers, the link-in-bio portrait)
+
+  /** Keeps an uploaded picture: only a real JPEG, PNG, WebP or GIF (told by its first bytes, not by what it claims), at most MAX_IMAGE_BYTES. */
+  const putImage = async (bytes) => {
+    const mime = imageType(bytes);
+    if (!mime) throw new HttpError(415, 'That is not a picture (JPEG, PNG, WebP or GIF).');
+    if (bytes.length > MAX_IMAGE_BYTES) throw new HttpError(413, 'That picture is too large.');
+    const id = random(12).toString('hex');
+    await put(`img:${id}`, { mime, data: bytes.toString('base64'), at: now() });
+    return { id };
+  };
+
+  const image = async (id) => {
+    if (!/^[a-f0-9]{24}$/.test(String(id ?? ''))) throw new HttpError(404, 'No such picture.');
+    const found = await get(`img:${id}`);
+    if (!found) throw new HttpError(404, 'No such picture.');
+    return { mime: found.mime, bytes: Buffer.from(found.data, 'base64') };
+  };
+
   let timer = null;
   const start = () => {
     if (timer || !discordBot?.token) return;
@@ -489,7 +508,19 @@ export const createStorefront = ({ db = null, calendar = null, zone = 'Asia/Ho_C
     timer = null;
   };
 
-  return { config, publicConfig: async () => publicView(await config(), { autoPay: Boolean(sepayKey) }), slots, order, view, lead, follow, sepay, admin, setConfig, invoice, mark, remove, sweep, start, stop };
+  return { putImage, image, config, publicConfig: async () => publicView(await config(), { autoPay: Boolean(sepayKey) }), slots, order, view, lead, follow, sepay, admin, setConfig, invoice, mark, remove, sweep, start, stop };
+};
+
+export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
+/** What kind of picture some bytes are, from their signature; null when they are not one. Pure. */
+export const imageType = (b) => {
+  if (!b || b.length < 12) return null;
+  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return 'image/jpeg';
+  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return 'image/png';
+  if (b.toString('ascii', 0, 4) === 'RIFF' && b.toString('ascii', 8, 12) === 'WEBP') return 'image/webp';
+  if (b.toString('ascii', 0, 4) === 'GIF8') return 'image/gif';
+  return null;
 };
 
 const timingSafe = (a, b) => {

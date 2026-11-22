@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
-import { BarChart3, Check, Handshake, Inbox, Megaphone, Plus, Sparkles, Trash2 } from 'lucide-react';
-import { Badge, Button, Input, Textarea, pushToast } from '../../../shared/ui';
-import { clsx } from '../../../shared/lib/format';
+import { Check, Handshake, Inbox, Plus, Sparkles, Trash2 } from 'lucide-react';
+import { Button, Input, Textarea, pushToast } from '../../../shared/ui';
 import { useStore } from '../../core/store';
 import { locale, tr } from '../../core/i18n/lang';
 import { newDeal, sponsorRate, vnd } from './model';
 import { loadShop, saveShop, setOrder, shop } from './shopStore';
 import { creatorSettings, deals } from './store';
 import { dealFromLead, orderState } from './studio';
-import { EmptyNote, Label, Panel, Row } from './ui';
+import { EmptyNote } from './ui';
 import { PublicDoors } from './StorePanel';
+import { DataTable, Drawer, Field, FormSection, ListHead, MoneyInput, Pill, AsyncButton, useConfirm } from './admin';
 
 const num = (v) => Math.max(0, Math.round(Number(String(v).replace(/[^\d]/g, '')) || 0));
 
-/** The rates a media kit could start from, worked out from the average views and the CPM you assume (in Money's settings). Pure. */
+/** The rates a media kit could start from, worked out from the average views and the CPM you assume (in Deals' pricing). Pure. */
 export const suggestRates = (stats, cpm) => {
   const views = stats.reduce((best, s) => Math.max(best, s.avgViews || 0), 0);
   if (!views || !cpm) return [];
@@ -26,86 +26,69 @@ export const suggestRates = (stats, cpm) => {
   ];
 };
 
-/** One enquiry that came in from the media kit: who, what, and the way into Deals. */
-function Lead({ lead }) {
-  const [busy, setBusy] = useState(false);
-  const state = orderState(lead);
+/** One enquiry in a drawer: who wrote, about what, and the way into Deals. */
+function LeadDrawer({ lead, onClose }) {
+  const fresh = orderState(lead) === 'new';
   return (
-    <li className={clsx('cl-card flex flex-col gap-2 rounded-2xl border p-3.5', state === 'new' ? 'border-warn/40' : 'border-line opacity-75')} data-lead>
-      <div className="flex flex-wrap items-center gap-2">
-        <b className="text-fine font-medium text-bone">{lead.title}</b>
-        {state === 'new' && <Badge tone="warn">{tr('New')}</Badge>}
-        {lead.amount > 0 && <Badge>{vnd(lead.amount)}</Badge>}
-        {lead.ref && <Badge>{lead.ref}</Badge>}
-        <span className="flex-1" />
-        <small className="font-mono text-[0.66rem] text-bone-faint">{new Date(lead.createdAt).toLocaleDateString(locale(), { day: 'numeric', month: 'short' })}</small>
-      </div>
-      <p className="text-[0.8rem] text-bone-dim">{[lead.buyer?.name, lead.buyer?.contact].filter(Boolean).join(' · ')}</p>
-      <p className="text-[0.85rem] whitespace-pre-line text-bone">{lead.buyer?.note}</p>
-      {state === 'new' && (
-        <div className="flex flex-wrap gap-2">
-          <Button
-            size="sm"
-            disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
+    <Drawer
+      open
+      onClose={onClose}
+      title={lead.title}
+      subtitle={new Date(lead.createdAt).toLocaleString(locale(), { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' })}
+      footer={
+        fresh && (
+          <>
+            <span className="flex-1" />
+            <AsyncButton variant="ghost" size="sm" onClick={async () => (await setOrder(lead.id, 'done'), onClose())}>
+              <Check size={13} aria-hidden="true" /> {tr('Answered')}
+            </AsyncButton>
+            <AsyncButton
+              size="sm"
+              onClick={async () => {
                 await deals.create({ ...newDeal(dealFromLead(lead)), followUpAt: Date.now() });
                 await setOrder(lead.id, 'done');
                 pushToast(tr('Added to Deals, with a follow-up today'), { tone: 'success' });
-              } catch (e) {
-                pushToast(e.message, { tone: 'error' });
-                setBusy(false);
-              }
-            }}
-          >
-            <Handshake size={13} aria-hidden="true" /> {tr('Add to Deals')}
-          </Button>
-          <Button size="sm" variant="ghost" disabled={busy} onClick={() => setOrder(lead.id, 'done')}>
-            <Check size={13} aria-hidden="true" /> {tr('Answered')}
-          </Button>
-        </div>
-      )}
-    </li>
+                onClose();
+              }}
+            >
+              <Handshake size={13} aria-hidden="true" /> {tr('Add to Deals')}
+            </AsyncButton>
+          </>
+        )
+      }
+    >
+      <dl className="adm-dl">
+        {[
+          [tr('Name'), lead.buyer?.name],
+          [tr('Contact'), lead.buyer?.contact],
+          [tr('Brand or company'), lead.buyer?.company],
+          [tr('Budget'), lead.amount ? vnd(lead.amount) : ''],
+          [tr('Package'), lead.ref],
+        ]
+          .filter(([, v]) => v)
+          .map(([k, v]) => (
+            <div key={k}>
+              <dt>{k}</dt>
+              <dd>{v}</dd>
+            </div>
+          ))}
+      </dl>
+      <p className="mt-5 mb-1.5 text-[0.8rem] font-medium text-bone">{tr('Message')}</p>
+      <p className="rounded-xl border border-line bg-ink-2 p-3.5 text-fine whitespace-pre-line text-bone">{lead.buyer?.note}</p>
+    </Drawer>
   );
 }
 
-/**
- * The media kit for brands (/kit on the portfolio): reach by platform, the audience, the rates, who you worked with; and the
- * enquiries it brings in, each one a tap away from Deals.
- */
-export default function KitPanel() {
-  const state = useStore(shop);
-  const settings = useStore(creatorSettings);
-  const [draft, setDraft] = useState(null);
+/** A part of the kit as a draft that is saved on its own. */
+const useKitDraft = () => {
+  const { config } = useStore(shop);
+  const [kit, setKit] = useState(config?.kit);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    void loadShop();
-    void deals.load();
-  }, []);
-  useEffect(() => {
-    if (state.config) setDraft(state.config);
-  }, [state.config]);
-
-  if (!state.loaded) return <p className="font-mono text-fine text-bone-dim">{tr('Opening the shop…')}</p>;
-  if (!draft) {
-    return (
-      <EmptyNote icon={Megaphone} title={tr('The shop could not be reached')}>
-        {state.error}
-      </EmptyNote>
-    );
-  }
-
-  const kit = draft.kit;
-  const setKit = (patch) => setDraft({ ...draft, kit: { ...kit, ...patch } });
-  const leads = state.orders.filter((o) => o.kind === 'lead');
-  const dirty = JSON.stringify(draft) !== JSON.stringify(state.config);
-  const suggestions = suggestRates(kit.stats, settings.cpm);
+  useEffect(() => setKit(config?.kit), [config]);
   const save = async () => {
     setSaving(true);
     try {
-      await saveShop(draft);
+      await saveShop({ ...shop.get().config, kit });
       pushToast(tr('Media kit saved'), { tone: 'success' });
     } catch (e) {
       pushToast(e.message, { tone: 'error' });
@@ -113,91 +96,162 @@ export default function KitPanel() {
       setSaving(false);
     }
   };
+  const dirtyOf = (...keys) => keys.some((k) => JSON.stringify(kit?.[k]) !== JSON.stringify(config?.kit?.[k]));
+  const resetOf = (...keys) => () => setKit((x) => ({ ...x, ...Object.fromEntries(keys.map((k) => [k, config.kit[k]])) }));
+  return { kit, setKit, saving, save, dirtyOf, resetOf };
+};
+
+/**
+ * The media kit for brands (/kit on the portfolio): the enquiries it brought in, in a table; who you are and who watches; your
+ * numbers by platform; and the rates, which can start from your own numbers.
+ */
+export default function KitPanel() {
+  const state = useStore(shop);
+  const settings = useStore(creatorSettings);
+  const { kit, setKit, saving, save, dirtyOf, resetOf } = useKitDraft();
+  const [open, setOpen] = useState(null);
+  const [confirm, confirmDialog] = useConfirm();
+
+  useEffect(() => {
+    void loadShop();
+    void deals.load();
+  }, []);
+
+  if (!state.loaded) return <p className="font-mono text-fine text-bone-dim">{tr('Opening the shop…')}</p>;
+  if (!state.config || !kit) {
+    return (
+      <EmptyNote icon={Inbox} title={tr('The shop could not be reached')}>
+        {state.error}
+      </EmptyNote>
+    );
+  }
+  const set = (patch) => setKit({ ...kit, ...patch });
+  const leads = state.orders.filter((o) => o.kind === 'lead');
+  const current = leads.find((l) => l.id === open);
+  const suggestions = suggestRates(kit.stats, settings.cpm);
+  const reach = kit.stats.reduce((n, s) => n + s.followers, 0);
 
   return (
     <div className="flex flex-col gap-4" data-kit>
-      <Panel title={tr('Enquiries')} icon={Inbox} hue={22} aside={<PublicDoors pages={[['/kit', tr('Media kit')]]} />}>
-        {leads.length === 0 ? (
-          <EmptyNote icon={Inbox} title={tr('No enquiries yet')}>
-            {tr('Put the media kit’s address in your bio and in your pitches: brands write from its form, and it lands here.')}
-          </EmptyNote>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {leads.map((l) => (
-              <Lead key={l.id} lead={l} />
-            ))}
-          </ul>
-        )}
-      </Panel>
+      <section className="adm-card">
+        <ListHead title={tr('Enquiries')} count={leads.length}>
+          <PublicDoors pages={[['/kit', tr('Media kit')]]} />
+        </ListHead>
+        <DataTable
+          rows={leads}
+          onOpen={(l) => setOpen(l.id)}
+          empty={
+            <EmptyNote icon={Inbox} title={tr('No enquiries yet')}>
+              {tr('Put the media kit’s address in your bio and in your pitches: brands write from its form, and it lands here.')}
+            </EmptyNote>
+          }
+          columns={[
+            {
+              key: 'who',
+              label: tr('From'),
+              width: 'minmax(0,1.4fr)',
+              render: (l) => (
+                <span className="min-w-0">
+                  <b className="block truncate font-medium text-bone">{l.title}</b>
+                  <small className="block truncate text-[0.72rem] text-bone-faint">{l.buyer?.contact}</small>
+                </span>
+              ),
+            },
+            { key: 'msg', label: tr('Message'), width: 'minmax(0,2fr)', render: (l) => <span className="truncate text-bone-dim">{l.buyer?.note}</span> },
+            { key: 'budget', label: tr('Budget'), width: '7.5rem', className: 'text-right', render: (l) => <span className="font-mono tabular-nums text-bone-dim">{l.amount ? vnd(l.amount) : '—'}</span> },
+            { key: 'state', label: tr('Status'), width: '7rem', render: (l) => <Pill tone={orderState(l) === 'new' ? 'warn' : 'default'}>{orderState(l) === 'new' ? tr('New') : tr('Answered')}</Pill> },
+          ]}
+        />
+      </section>
 
-      <Panel title={tr('Your numbers')} icon={BarChart3} hue={205}>
-        <Row label={tr('Headline')}>
-          <Input aria-label={tr('Headline')} placeholder={tr('e.g. Developer tips for Vietnamese students, every day')} value={kit.headline} onChange={(e) => setKit({ headline: e.target.value })} maxLength={120} compact />
-        </Row>
-        <ul className="mt-4 flex flex-col gap-2">
-          {kit.stats.map((s, i) => {
-            const patch = (p) => setKit({ stats: kit.stats.map((x, j) => (j === i ? { ...x, ...p } : x)) });
-            return (
-              <li key={i} className="grid grid-cols-2 gap-2 md:grid-cols-[1fr_1fr_1fr_1fr_auto]">
-                <Input aria-label={tr('Platform')} placeholder={tr('Platform')} value={s.platform} onChange={(e) => patch({ platform: e.target.value })} compact />
-                <Input aria-label={tr('Handle')} placeholder="@hank62" value={s.handle} onChange={(e) => patch({ handle: e.target.value })} compact />
-                <Input aria-label={tr('Followers')} placeholder={tr('Followers')} inputMode="numeric" value={s.followers || ''} onChange={(e) => patch({ followers: num(e.target.value) })} compact />
-                <Input aria-label={tr('Average views')} placeholder={tr('Average views')} inputMode="numeric" value={s.avgViews || ''} onChange={(e) => patch({ avgViews: num(e.target.value) })} compact />
-                <button type="button" onClick={() => setKit({ stats: kit.stats.filter((_, j) => j !== i) })} className="rounded-full p-2 text-bone-faint hover:text-danger" aria-label={tr('Remove')}>
-                  <Trash2 size={14} aria-hidden="true" />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <Button variant="ghost" size="sm" className="mt-2" onClick={() => setKit({ stats: [...kit.stats, { platform: '', handle: '', followers: 0, avgViews: 0 }] })}>
-          <Plus size={14} aria-hidden="true" /> {tr('Add a platform')}
-        </Button>
-        <div className="mt-4 grid gap-3 md:grid-cols-2">
-          <Textarea aria-label={tr('About you')} rows={4} placeholder={tr('About you and what you make')} value={kit.about} onChange={(e) => setKit({ about: e.target.value })} />
-          <Textarea aria-label={tr('Audience')} rows={4} placeholder={tr('Who watches: age, where, what they care about')} value={kit.audience} onChange={(e) => setKit({ audience: e.target.value })} />
+      <FormSection title={tr('About you')} description={tr('The top of the kit: one line that says what you make, then who you are and who watches.')} dirty={dirtyOf('headline', 'about', 'audience', 'brands')} saving={saving} onSave={save} onReset={resetOf('headline', 'about', 'audience', 'brands')}>
+        <Field label={tr('Headline')} hint={`${kit.headline.length} / 120`}>
+          <Input value={kit.headline} onChange={(e) => set({ headline: e.target.value })} maxLength={120} placeholder={tr('e.g. Developer tips for Vietnamese students, every day')} />
+        </Field>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label={tr('About you')} hint={`${kit.about.length} / 800`}>
+            <Textarea rows={5} value={kit.about} onChange={(e) => set({ about: e.target.value })} maxLength={800} placeholder={tr('About you and what you make')} />
+          </Field>
+          <Field label={tr('Audience')} hint={`${kit.audience.length} / 400`}>
+            <Textarea rows={5} value={kit.audience} onChange={(e) => set({ audience: e.target.value })} maxLength={400} placeholder={tr('Who watches: age, where, what they care about')} />
+          </Field>
         </div>
-      </Panel>
+        <Field label={tr('Worked with')} hint={tr('Brands or clients, separated by commas')}>
+          <Input value={kit.brands} onChange={(e) => set({ brands: e.target.value })} maxLength={200} />
+        </Field>
+      </FormSection>
 
-      <Panel title={tr('Rates')} icon={Megaphone} hue={46}>
-        <ul className="flex flex-col gap-2">
-          {kit.rates.map((r, i) => {
-            const patch = (p) => setKit({ rates: kit.rates.map((x, j) => (j === i ? { ...x, ...p } : x)) });
-            return (
-              <li key={i} className="cl-card grid gap-2 rounded-2xl border border-line p-3 md:grid-cols-[minmax(0,1fr)_9rem_minmax(0,1.4fr)_auto]">
-                <Input aria-label={tr('Package')} placeholder={tr('Package')} value={r.title} onChange={(e) => patch({ title: e.target.value })} compact />
-                <Input aria-label={tr('From (₫)')} placeholder={tr('From (₫)')} inputMode="numeric" value={r.price || ''} onChange={(e) => patch({ price: num(e.target.value) })} compact />
-                <Input aria-label={tr('What is in it')} placeholder={tr('What is in it')} value={r.detail} onChange={(e) => patch({ detail: e.target.value })} compact />
-                <button type="button" onClick={() => setKit({ rates: kit.rates.filter((_, j) => j !== i) })} className="rounded-full p-2 text-bone-faint hover:text-danger" aria-label={tr('Remove')}>
-                  <Trash2 size={14} aria-hidden="true" />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="mt-2 flex flex-wrap gap-2">
-          <Button variant="ghost" size="sm" onClick={() => setKit({ rates: [...kit.rates, { title: '', price: 0, detail: '' }] })}>
+      <FormSection title={tr('Your numbers')} description={tr('Followers and average views from each platform’s analytics: the average of your last ten videos is fair.')} dirty={dirtyOf('stats')} saving={saving} onSave={save} onReset={resetOf('stats')}>
+        {kit.stats.length > 0 && (
+          <div className="adm-rows">
+            <div className="adm-rows-head">
+              <span>{tr('Platform')}</span>
+              <span>{tr('Handle')}</span>
+              <span>{tr('Followers')}</span>
+              <span>{tr('Average views')}</span>
+              <span />
+            </div>
+            {kit.stats.map((s, i) => {
+              const patch = (p) => set({ stats: kit.stats.map((x, j) => (j === i ? { ...x, ...p } : x)) });
+              return (
+                <div key={i} className="adm-rows-row">
+                  <Input aria-label={tr('Platform')} value={s.platform} onChange={(e) => patch({ platform: e.target.value })} placeholder="TikTok" compact />
+                  <Input aria-label={tr('Handle')} value={s.handle} onChange={(e) => patch({ handle: e.target.value })} placeholder="@hank62" compact />
+                  <Input aria-label={tr('Followers')} inputMode="numeric" value={s.followers ? s.followers.toLocaleString('vi-VN') : ''} onChange={(e) => patch({ followers: num(e.target.value) })} compact />
+                  <Input aria-label={tr('Average views')} inputMode="numeric" value={s.avgViews ? s.avgViews.toLocaleString('vi-VN') : ''} onChange={(e) => patch({ avgViews: num(e.target.value) })} compact />
+                  <button type="button" onClick={async () => (await confirm({ title: tr('Remove {0}?', s.platform || tr('this platform')), body: tr('It leaves the list now; it is gone from the kit once you save.'), action: tr('Remove') })) && set({ stats: kit.stats.filter((_, j) => j !== i) })} className="grid size-9 place-items-center rounded-full text-bone-faint hover:text-danger" aria-label={tr('Remove')}>
+                    <Trash2 size={14} aria-hidden="true" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => set({ stats: [...kit.stats, { platform: '', handle: '', followers: 0, avgViews: 0 }] })} disabled={kit.stats.length >= 8}>
+            <Plus size={14} aria-hidden="true" /> {tr('Add a platform')}
+          </Button>
+          {reach > 0 && <small className="text-[0.8rem] text-bone-dim">{tr('Total reach: {0}', reach.toLocaleString(locale()))}</small>}
+        </div>
+      </FormSection>
+
+      <FormSection title={tr('Rates')} description={tr('Packages a brand can ask for, each with a starting price. “From” prices leave room to talk.')} dirty={dirtyOf('rates')} saving={saving} onSave={save} onReset={resetOf('rates')}>
+        {kit.rates.map((r, i) => {
+          const patch = (p) => set({ rates: kit.rates.map((x, j) => (j === i ? { ...x, ...p } : x)) });
+          return (
+            <div key={i} className="adm-rate">
+              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_11rem]">
+                <Field label={tr('Package')}>
+                  <Input value={r.title} onChange={(e) => patch({ title: e.target.value })} maxLength={70} />
+                </Field>
+                <Field label={tr('From')}>
+                  <MoneyInput value={r.price} onChange={(price) => patch({ price })} aria-label={tr('From')} />
+                </Field>
+              </div>
+              <Field label={tr('What is in it')}>
+                <Input value={r.detail} onChange={(e) => patch({ detail: e.target.value })} maxLength={200} />
+              </Field>
+              <button type="button" onClick={async () => (await confirm({ title: tr('Remove {0}?', r.title || tr('this package')), body: tr('It leaves the list now; it is gone from the kit once you save.'), action: tr('Remove') })) && set({ rates: kit.rates.filter((_, j) => j !== i) })} className="adm-rate-remove" aria-label={tr('Remove')}>
+                <Trash2 size={14} aria-hidden="true" />
+              </button>
+            </div>
+          );
+        })}
+        <div className="flex flex-wrap gap-2">
+          <Button variant="ghost" size="sm" onClick={() => set({ rates: [...kit.rates, { title: '', price: 0, detail: '' }] })} disabled={kit.rates.length >= 8}>
             <Plus size={14} aria-hidden="true" /> {tr('Add a package')}
           </Button>
           {suggestions.length > 0 && (
-            <Button variant="ghost" size="sm" onClick={() => setKit({ rates: [...kit.rates, ...suggestions].slice(0, 8) })}>
+            <Button variant="ghost" size="sm" onClick={() => set({ rates: [...kit.rates, ...suggestions].slice(0, 8) })}>
               <Sparkles size={14} aria-hidden="true" /> {tr('Suggest from my numbers')}
             </Button>
           )}
         </div>
-        <Label className="mt-3">{tr('Suggestions use your best average views and the CPM you set in Money ({0} for a thousand views). They are a start, not a price list.', vnd(settings.cpm))}</Label>
-        <div className="mt-4">
-          <Row label={tr('Worked with')}>
-            <Input aria-label={tr('Worked with')} placeholder={tr('Brands or clients, separated by commas')} value={kit.brands} onChange={(e) => setKit({ brands: e.target.value })} compact />
-          </Row>
-        </div>
-      </Panel>
+        <small className="text-[0.76rem] text-bone-faint">{tr('Suggestions use your best average views and the CPM you set in Money ({0} for a thousand views). They are a start, not a price list.', vnd(settings.cpm))}</small>
+      </FormSection>
 
-      <div className="sticky bottom-24 z-20 flex justify-end md:bottom-4">
-        <Button onClick={save} disabled={!dirty || saving} className={clsx('shadow-[0_14px_30px_-12px_rgb(0_0_0/0.6)]', !dirty && 'opacity-60')} data-save-kit>
-          <Check size={15} aria-hidden="true" /> {saving ? tr('Saving…') : dirty ? tr('Save the media kit') : tr('Saved')}
-        </Button>
-      </div>
+      {current && <LeadDrawer key={current.id} lead={current} onClose={() => setOpen(null)} />}
+      {confirmDialog}
     </div>
   );
 }

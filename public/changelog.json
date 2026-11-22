@@ -1,5 +1,12 @@
 [
   {
+    "id": "creator-lab-admin",
+    "version": "1.44.0",
+    "date": "2026-11-22",
+    "vi": "Creator Lab làm lại phần quản lý: thanh điều hướng theo nhóm, bảng có tìm kiếm và phân trang, ngăn kéo chỉnh sửa, tải ảnh từ máy, hỏi lại trước khi xoá, nút báo đang xử lý, ô chọn giờ mới.",
+    "en": "Creator Lab's management side rebuilt: grouped navigation, tables with search and pages, edit drawers, pictures uploaded from your device, a question before anything is deleted, buttons that show they are working, a new time picker."
+  },
+  {
     "id": "creator-studio-shop",
     "version": "1.43.0",
     "date": "2026-11-22",

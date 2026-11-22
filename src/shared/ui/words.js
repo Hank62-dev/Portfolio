@@ -15,6 +15,10 @@ const vi = {
   'Something went wrong': 'Đã có lỗi xảy ra',
   'Private workspace': 'Không gian riêng',
   Undo: 'Hoàn tác',
+  'Pick a time': 'Chọn giờ',
+  Hour: 'Giờ',
+  Minute: 'Phút',
+  Done: 'Xong',
 };
 
 // the "shared" namespace of the app's one i18next; English is the text itself
