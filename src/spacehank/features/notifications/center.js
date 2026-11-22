@@ -2,7 +2,9 @@ import { tr } from '../../core/i18n/lang';
 import { pushToast } from '../../../shared/ui';
 import { isDemo } from '../../core/demo/mode';
 import { createStore } from '../../core/store';
+import { isNativeApp } from '../../../shared/lib/platform';
 import { KIND_IDS, kindOf } from './kinds';
+import { askNative, nativeState, showNative } from './native';
 
 // The notification centre: everything the app wants to tell you, kept as a list you can read later (the bell's panel), and
 // shown at once where it helps: a toast while the app is in front, the phone's own notification while it is in the background.
@@ -45,10 +47,18 @@ const change = (patch) => {
 // ---- the phone's own notification -----------------------------------------------------------------------------------
 
 /** 'granted', 'denied', 'default' (not asked yet) or 'unsupported'. */
-export const permission = () => (typeof Notification === 'undefined' ? 'unsupported' : Notification.permission);
+export const permission = () => {
+  // inside the Android app the system's own permission is the one that counts (the WebView has no Notification API)
+  if (isNativeApp()) return { granted: 'granted', denied: 'denied' }[nativeState.get().display] ?? 'default';
+  return typeof Notification === 'undefined' ? 'unsupported' : Notification.permission;
+};
 
 const showSystem = async (item) => {
   if (permission() !== 'granted' || !center.get().prefs.push) return;
+  if (isNativeApp()) {
+    await showNative(item).catch(() => {});
+    return;
+  }
   const options = { body: item.body, tag: item.key || item.id, icon: '/icons/logo-192.png', badge: '/icons/badge-96.png', data: { tab: item.tab || kindOf(item.kind).tab } };
   try {
     const registration = await navigator.serviceWorker?.ready;
@@ -100,7 +110,7 @@ export const setKind = (id, on) => change((s) => ({ prefs: { ...s.prefs, kinds: 
 
 /** Turns the phone's own notifications on or off; turning on asks the browser when it has not been asked yet. */
 export const setPush = async (on) => {
-  if (on && permission() === 'default') await Notification.requestPermission();
+  if (on && permission() === 'default') await (isNativeApp() ? askNative() : Notification.requestPermission());
   change((s) => ({ prefs: { ...s.prefs, push: on } }));
 };
 

@@ -9,8 +9,10 @@ import { missions } from '../missions/store';
 import { loadNotes, notesStore } from '../notes/library';
 import { flashcards } from '../study/store';
 import { budgets, entries } from '../wallet/store';
-import { notify } from './center';
-import { reminders } from './rules';
+import { isNativeApp } from '../../../shared/lib/platform';
+import { center, notify } from './center';
+import { onNativeTap, planNative, refreshNative } from './native';
+import { ahead, reminders } from './rules';
 
 const EVERY = 30 * 1000; // how often the reminders are looked at
 const CALENDAR_EVERY = 10 * 60 * 1000;
@@ -36,7 +38,7 @@ export function useNotifications({ guest, connected, agents, onTab }) {
       const start = new Date();
       start.setHours(0, 0, 0, 0);
       const end = new Date(start);
-      end.setDate(end.getDate() + 1);
+      end.setDate(end.getDate() + 3); // two days ahead, for the reminders the Android app schedules
       calendarBetween(start, end)
         .then((data) => {
           if (!stopped) calendar = data.events ?? [];
@@ -46,9 +48,8 @@ export function useNotifications({ guest, connected, agents, onTab }) {
 
     const tick = () => {
       const notes = notesStore.get();
-      for (const item of reminders({
+      const data = {
         t: tr,
-        now: new Date(),
         events: calendar,
         cards: flashcards.store.get().items,
         tasks: missions.store.get().items,
@@ -56,12 +57,18 @@ export function useNotifications({ guest, connected, agents, onTab }) {
         entries: entries.store.get().items,
         budgets: budgets.store.get().items,
         notes: notes.loaded ? notes.notes : null,
-      })) {
-        notify(item);
+      };
+      for (const item of reminders({ ...data, now: new Date() })) notify(item);
+      // the Android app also sets the next two days' reminders as alarms, so they come with the app closed
+      if (isNativeApp() && !guest) {
+        const { prefs, seen } = center.get();
+        const list = prefs.push ? ahead({ ...data, now: new Date() }).filter((item) => prefs.kinds[item.kind] && !seen[item.key]) : [];
+        void planNative(list).catch(() => {});
       }
     };
 
     fetchCalendar();
+    void refreshNative();
     const first = window.setTimeout(tick, 4000); // after the stores have had a moment to load
     const loop = window.setInterval(tick, EVERY);
     const refetch = window.setInterval(fetchCalendar, CALENDAR_EVERY);
@@ -131,6 +138,11 @@ export function useNotifications({ guest, connected, agents, onTab }) {
       }
     };
     navigator.serviceWorker?.addEventListener('message', onMessage);
-    return () => navigator.serviceWorker?.removeEventListener('message', onMessage);
+    // in the Android app, a tapped notification (even one that started the app) says where to go
+    const stopTaps = onNativeTap(onTab);
+    return () => {
+      navigator.serviceWorker?.removeEventListener('message', onMessage);
+      stopTaps();
+    };
   }, [onTab]);
 }

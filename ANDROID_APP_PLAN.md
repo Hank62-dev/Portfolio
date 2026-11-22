@@ -1,6 +1,6 @@
 # Kế hoạch làm app Android (APK) cho Hank62 / SpaceHank
 
-> Trạng thái: **Giai đoạn 1 (vỏ cơ bản) đã dựng**, chờ cài thử trên máy thật. Đã có: `capacitor.config.json` (mở `https://hank62dev.vercel.app/spacehank`), thư mục `android/`, vỏ nhỏ `app-shell/` (trang báo mất mạng), icon/splash từ `assets/`, cookie bên thứ ba bật trong `MainActivity.java`, `src/shared/lib/platform.js`, workflow `.github/workflows/android.yml` build APK.
+> Trạng thái: **GĐ 1 (vỏ cơ bản) xong và đã cài thử. GĐ 2 (nhắc việc đúng giờ) đã làm**, chờ thử trên máy: plugin `@capacitor/local-notifications`; `rules.js` `ahead()` tính trước lời nhắc 48 giờ tới; `notifications/native.js` hẹn chúng thành báo thức, hiện thông báo, mở đúng tab khi bấm; plugin tự đặt lại sau khi khởi động lại máy. Vỏ: `capacitor.config.json`, `android/`, `app-shell/`, `assets/`, `.github/workflows/android.yml`.
 > Phạm vi: Android, cài trực tiếp bằng file APK (không CH Play, không App Store). iPhone nằm ngoài kế hoạch (xem mục 9).
 
 ---

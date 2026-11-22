@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-reminders",
+    "version": "1.51.0",
+    "date": "2026-11-23",
+    "vi": "App Android nhắc việc đúng giờ: lịch, việc đến hạn, thói quen, ví, nhật ký của 2 ngày tới được hẹn sẵn trên máy, kêu cả khi tắt app hay mất mạng; bấm vào mở đúng tab.",
+    "en": "The Android app reminds you on time: events, due tasks, habits, the wallet and the diary for the next two days are set on the phone and arrive with the app closed or offline; tapping opens the right tab."
+  },
+  {
     "id": "android-app-shell",
     "version": "1.50.0",
     "date": "2026-11-22",

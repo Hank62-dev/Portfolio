@@ -89,3 +89,37 @@ export const reminders = ({ now = new Date(), zone, t = plainT, events = [], car
 
   return out;
 };
+
+/** The moments ahead when `reminders` can change its answer: a quarter of an hour before each timed event, and every
+ * morning, evening and night hour within the window. In this device's own time zone. */
+export const moments = (now, events = [], hours = 48) => {
+  const end = now.getTime() + hours * 3600 * 1000;
+  const out = new Set();
+  for (const event of events) {
+    if (!event.allDay) out.add(new Date(event.start).getTime() - SOON * 60000);
+  }
+  const day = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  for (let d = 0; d <= Math.ceil(hours / 24); d += 1) {
+    for (const hour of [MORNING, EVENING, NIGHT]) out.add(new Date(day.getFullYear(), day.getMonth(), day.getDate() + d, hour).getTime());
+  }
+  return [...out].filter((at) => at > now.getTime() && at <= end).sort((a, b) => a - b);
+};
+
+/**
+ * The reminders that will come due in the next `hours`, each with the moment it falls (`at`), for a phone to schedule
+ * ahead so they arrive on time with the app closed. Worked out by asking `reminders` at each moment it could change its
+ * answer, assuming the data stays as it is now; the app schedules them again whenever it does change. What already
+ * applies now is left to the live check, and an occasion appears once, at its first moment.
+ */
+export const ahead = ({ now = new Date(), hours = 48, ...data } = {}) => {
+  const taken = new Set(reminders({ ...data, now }).map((item) => item.key));
+  const out = [];
+  for (const at of moments(now, data.events, hours)) {
+    for (const item of reminders({ ...data, now: new Date(at) })) {
+      if (taken.has(item.key)) continue;
+      taken.add(item.key);
+      out.push({ ...item, at });
+    }
+  }
+  return out;
+};

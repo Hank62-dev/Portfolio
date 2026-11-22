@@ -10,6 +10,8 @@ import { tabAccent, tabHue } from '../../core/navigation';
 import { useStore } from '../../core/store';
 import { ago, center, clearAll, groupByDay, markAllRead, markRead, permission, remove, setKind, setPush, unreadCount } from './center';
 import { KINDS, kindOf } from './kinds';
+import { isNativeApp } from '../../../shared/lib/platform';
+import { askExact, nativeState, refreshNative } from './native';
 import { disablePush, enablePush, pushState, refreshPush, syncPushKinds, testNotification } from './push';
 
 function Switch({ checked, onChange, label }) {
@@ -43,17 +45,25 @@ function Row({ item, onOpen }) {
 }
 
 function Settings({ prefs }) {
+  const native = isNativeApp();
+  const phone = useStore(nativeState); // read so the panel follows Android's permissions as they change
   const state = permission();
   const server = useStore(pushState);
   useEffect(() => {
     void refreshPush();
+    void refreshNative();
   }, []);
 
   // with the server set up, "on this device" means a real push subscription (it works with the app closed)
   const on = server.available ? server.subscribed : prefs.push && state === 'granted';
   const toggle = (next) => (server.available ? (next ? void enablePush() : void disablePush()) : void setPush(next));
-  const system =
-    state === 'unsupported'
+  const system = native
+    ? state === 'denied'
+      ? tr('Notifications are off for Hank62. Turn them on in Android’s settings for the app.')
+      : on
+        ? tr('Reminders for the next two days are set on the phone: they arrive on time even when the app is closed or offline.')
+        : tr('Turn on to get reminders on time, even when the app is closed.')
+    : state === 'unsupported'
       ? tr('This browser cannot show notifications outside the app. On iPhone, add the app to the Home Screen first.')
       : state === 'denied'
         ? tr('Blocked for this site. Allow notifications in the browser’s site settings.')
@@ -77,6 +87,14 @@ function Settings({ prefs }) {
           <p className="mt-2 font-mono text-[0.72rem] leading-snug text-danger" role="alert">
             {server.error}
           </p>
+        )}
+        {native && on && phone.exact !== 'granted' && (
+          <div className="mt-3 rounded-xl bg-wash/6 p-2.5">
+            <p className="font-mono text-[0.72rem] leading-snug text-bone-faint">{tr('Android may hold reminders back by a few minutes. Allow alarms & reminders for Hank62 to get them at the exact minute.')}</p>
+            <button type="button" onClick={() => void askExact()} className="mt-2 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">
+              {tr('Allow exact reminders')}
+            </button>
+          </div>
         )}
         {on && (
           <button type="button" disabled={server.busy} onClick={() => void testNotification()} className="mt-3 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone disabled:opacity-50">

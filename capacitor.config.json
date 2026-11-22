@@ -27,6 +27,10 @@
       "style": "DARK",
       "backgroundColor": "#0b0c0e",
       "overlaysWebView": false
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_hank62",
+      "iconColor": "#0b0c0e"
     }
   }
 }
