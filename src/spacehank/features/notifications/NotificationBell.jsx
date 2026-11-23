@@ -12,6 +12,7 @@ import { ago, center, clearAll, groupByDay, markAllRead, markRead, permission, r
 import { KINDS, kindOf } from './kinds';
 import { isNativeApp } from '../../../shared/lib/platform';
 import { appInfo, askBattery } from '../android/bridge';
+import { startUpdate } from '../android/updater';
 import { apkUpdate } from '../android/useAndroid';
 import { askExact, nativeState, refreshNative } from './native';
 import { disablePush, enablePush, pushState, refreshPush, syncPushKinds, testNotification } from './push';
@@ -111,10 +112,10 @@ function Settings({ prefs }) {
       {native && latest && (
         <section className="rounded-2xl border border-signal/40 bg-signal/8 p-3.5">
           <b className="block text-fine font-medium text-bone">{tr('A new version of the Android app is out')}</b>
-          <small className="mt-1 block font-mono text-[0.72rem] leading-snug text-bone-faint">{tr('Download the APK and open it: it installs over this one and keeps you signed in.')}</small>
-          <a href={latest.url} target="_blank" rel="noreferrer" className="mt-3 inline-block rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">
-            {tr('Download')}
-          </a>
+          <small className="mt-1 block font-mono text-[0.72rem] leading-snug text-bone-faint">{tr('It downloads here and Android asks once to install it over this one; your data and sign-in stay.')}</small>
+          <button type="button" onClick={() => void startUpdate()} className="mt-3 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">
+            {tr('Update')}
+          </button>
         </section>
       )}
       {native && install.checked && !install.battery && (

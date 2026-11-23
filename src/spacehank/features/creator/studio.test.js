@@ -9,7 +9,7 @@ const posted = (daysAgo, extra = {}) => ({ id: `p${daysAgo}`, title: `Post ${day
 
 describe('orders', () => {
   it('knows where each one stands', () => {
-    expect(orderState(order())).toBe('pending');
+    expect(orderState(order(), now)).toBe('pending');
     expect(orderState(order({ createdAt: now - 3 * DAY }), now)).toBe('expired');
     expect(orderState(order({ kind: 'booking', createdAt: now - 40 * 60 * 1000 }), now)).toBe('expired');
     expect(orderState(order({ kind: 'invoice', dueAt: now - DAY, createdAt: now - 9 * DAY }), now)).toBe('overdue');

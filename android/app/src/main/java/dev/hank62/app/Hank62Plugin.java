@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.PowerManager;
@@ -16,8 +17,14 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import androidx.core.content.FileProvider;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
@@ -32,7 +39,7 @@ import org.json.JSONArray;
 public class Hank62Plugin extends Plugin {
 
     /** Counts up whenever the native shell changes; public/android.json names the newest, and the page compares. */
-    public static final int SHELL = 2;
+    public static final int SHELL = 3;
 
     private static final int MAX_FILE = 8 * 1024 * 1024;
     private static final int MAX_FILES = 6;
@@ -227,5 +234,145 @@ public class Hank62Plugin extends Plugin {
         data.put("action", action);
         data.put("seekTime", seekTime);
         instance.notifyListeners("mediaAction", data);
+    }
+
+    // ---- updating the app itself -------------------------------------------------------------------------------------
+    // A newer APK is downloaded here, checked (it must be this app, and newer), and handed to Android's installer, which
+    // asks the person once. Android never lets an app replace itself silently outside a store; this is the shortest way.
+
+    private File updateFile() {
+        File dir = new File(getContext().getCacheDir(), "updates");
+        //noinspection ResultOfMethodCallIgnored
+        dir.mkdirs();
+        return new File(dir, "hank62-update.apk");
+    }
+
+    @SuppressWarnings("deprecation")
+    private static long versionCodeOf(PackageInfo info) {
+        return Build.VERSION.SDK_INT >= 28 ? info.getLongVersionCode() : info.versionCode;
+    }
+
+    /** May this app hand an APK to the installer? Android 8+ asks once per app ("Install unknown apps"). */
+    @PluginMethod
+    public void canInstall(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("allowed", Build.VERSION.SDK_INT < 26 || getContext().getPackageManager().canRequestPackageInstalls());
+        call.resolve(ret);
+    }
+
+    /** Opens the "Install unknown apps" switch for Hank62. */
+    @PluginMethod
+    public void askInstall(PluginCall call) {
+        Context context = getContext();
+        try {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + context.getPackageName()));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("No such setting on this phone");
+        }
+    }
+
+    /**
+     * Downloads the APK at `url` (https only), telling the page how far it is ("updateProgress": received, total bytes).
+     * Rejects with NOT_NEWER when the file is not newer than this install (the build may still be on its way), and
+     * BAD_APK when it is not this app.
+     */
+    @PluginMethod
+    public void downloadUpdate(PluginCall call) {
+        String address = call.getString("url");
+        if (address == null || !address.startsWith("https://")) {
+            call.reject("Not an https address", "BAD_URL");
+            return;
+        }
+        new Thread(() -> {
+            Context context = getContext();
+            File done = updateFile();
+            File part = new File(done.getParentFile(), "hank62-update.part");
+            HttpURLConnection connection = null;
+            try {
+                connection = (HttpURLConnection) new URL(address).openConnection();
+                connection.setInstanceFollowRedirects(true); // GitHub hands the file over from another host
+                connection.setConnectTimeout(15000);
+                connection.setReadTimeout(30000);
+                connection.setRequestProperty("Accept", "application/octet-stream");
+                int status = connection.getResponseCode();
+                if (status != 200) throw new Exception("HTTP " + status);
+                long total = connection.getContentLengthLong();
+                long received = 0;
+                long told = 0;
+                try (InputStream in = connection.getInputStream(); OutputStream out = new FileOutputStream(part)) {
+                    byte[] buffer = new byte[64 * 1024];
+                    int read;
+                    while ((read = in.read(buffer)) != -1) {
+                        out.write(buffer, 0, read);
+                        received += read;
+                        long now = System.currentTimeMillis();
+                        if (now - told > 150) {
+                            told = now;
+                            progress(received, total);
+                        }
+                    }
+                }
+                progress(received, total);
+                //noinspection ResultOfMethodCallIgnored
+                done.delete();
+                if (!part.renameTo(done)) throw new Exception("Could not keep the file");
+
+                PackageManager pm = context.getPackageManager();
+                PackageInfo update = pm.getPackageArchiveInfo(done.getPath(), 0);
+                PackageInfo self = pm.getPackageInfo(context.getPackageName(), 0);
+                if (update == null || !context.getPackageName().equals(update.packageName)) {
+                    //noinspection ResultOfMethodCallIgnored
+                    done.delete();
+                    call.reject("That file is not Hank62", "BAD_APK");
+                    return;
+                }
+                if (versionCodeOf(update) <= versionCodeOf(self)) {
+                    //noinspection ResultOfMethodCallIgnored
+                    done.delete();
+                    call.reject("Not newer than this one", "NOT_NEWER");
+                    return;
+                }
+                JSObject ret = new JSObject();
+                ret.put("version", update.versionName);
+                call.resolve(ret);
+            } catch (Exception e) {
+                //noinspection ResultOfMethodCallIgnored
+                part.delete();
+                call.reject("The download failed: " + e.getMessage(), "DOWNLOAD_FAILED");
+            } finally {
+                if (connection != null) connection.disconnect();
+            }
+        }).start();
+    }
+
+    private void progress(long received, long total) {
+        JSObject data = new JSObject();
+        data.put("received", received);
+        data.put("total", total);
+        notifyListeners("updateProgress", data);
+    }
+
+    /** Hands the downloaded APK to Android's installer, which asks the person to confirm. */
+    @PluginMethod
+    public void installUpdate(PluginCall call) {
+        Context context = getContext();
+        File file = updateFile();
+        if (!file.exists()) {
+            call.reject("Nothing downloaded", "NO_FILE");
+            return;
+        }
+        try {
+            Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".fileprovider", file);
+            Intent intent = new Intent(Intent.ACTION_VIEW)
+                .setDataAndType(uri, "application/vnd.android.package-archive")
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("The installer did not open: " + e.getMessage(), "INSTALL_FAILED");
+        }
     }
 }

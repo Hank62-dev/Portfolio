@@ -1,3 +1,4 @@
+import ApkUpdate from '../features/android/ApkUpdate';
 import { useAndroid } from '../features/android/useAndroid';
 import { tr } from '../core/i18n/lang';
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -474,6 +475,7 @@ export default function Workspace({
             </footer>
           </div>
           {sharing && <ShareSheet onDone={doneSharing} onNotify={onNotify} />}
+          <ApkUpdate />
           <CaptureSheet onNotify={onNotify} onTab={onTab} />
           {stickyCount > 0 && (
             <Suspense fallback={null}>

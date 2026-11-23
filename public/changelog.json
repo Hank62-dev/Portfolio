@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-self-update",
+    "version": "1.54.0",
+    "date": "2026-11-23",
+    "vi": "App Android tự cập nhật: có bản mới thì hiện nút Cập nhật, bấm vào app tự tải trong nền có thanh tiến độ, xong Android hỏi một lần để cài đè; dữ liệu và đăng nhập vẫn giữ.",
+    "en": "The Android app updates itself: an Update pill appears when a new version is out, the APK downloads in the background with its progress shown, and Android asks once to install it; data and sign-in stay."
+  },
+  {
     "id": "android-media-widget-share",
     "version": "1.53.0",
     "date": "2026-11-23",

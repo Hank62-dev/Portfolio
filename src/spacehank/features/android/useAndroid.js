@@ -24,7 +24,7 @@ const checkUpdate = async () => {
     const latest = await response.json();
     if (!newerShell(latest, appInfo.get())) return;
     apkUpdate.set({ latest: { shell: latest.shell, url: latest.url || RELEASES } });
-    notify({ key: `apk:${latest.shell}`, kind: 'system', title: tr('A new version of the Android app is out'), body: tr('Download it from the bell’s settings and install it over this one.'), tone: 'info' });
+    notify({ key: `apk:${latest.shell}`, kind: 'system', title: tr('A new version of the Android app is out'), body: tr('Tap Update at the top of the screen: it downloads and installs over this one.'), tone: 'info' });
   } catch {
     /* offline: asked again next start */
   }
