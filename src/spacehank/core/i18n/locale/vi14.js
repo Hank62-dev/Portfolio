@@ -36,4 +36,9 @@ export const vi14 = {
   'Use your fingerprint, face or screen lock': 'Dùng vân tay, khuôn mặt hoặc mã khoá màn hình',
   'Update the Android app (the Update button at the top) to lock the diary with your fingerprint.': 'Cập nhật app Android (nút Cập nhật ở đầu màn hình) để khoá nhật ký bằng vân tay.',
   'Set up a screen lock or a fingerprint in Android’s settings first.': 'Hãy cài khoá màn hình hoặc vân tay trong cài đặt Android trước.',
+  'Remove the download ({0})': 'Xoá bản đã tải ({0})',
+  'Download for offline': 'Tải về nghe offline',
+  'Download failed: try again': 'Tải không được, thử lại',
+  'Downloaded: plays with no network': 'Đã tải về: nghe được khi không có mạng',
+  'Downloaded': 'Đã tải về',
 };

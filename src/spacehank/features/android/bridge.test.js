@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { makerFamily } from './bridge';
+import { calendarReturn } from './useAndroid';
 
 describe('the maker of the phone', () => {
   it('is grouped with the makers that share its way of stopping apps', () => {
@@ -16,5 +17,18 @@ describe('the maker of the phone', () => {
     expect(makerFamily('Google')).toBeNull();
     expect(makerFamily('')).toBeNull();
     expect(makerFamily()).toBeNull();
+  });
+});
+
+describe('the link that brings Google’s sign-in back to the app', () => {
+  it('says how the sign-in went', () => {
+    expect(calendarReturn('hank62://calendar?google=connected')).toBe('connected');
+    expect(calendarReturn('hank62://calendar/?google=denied')).toBe('denied');
+  });
+
+  it('is nothing for another link, or an answer it does not know', () => {
+    expect(calendarReturn('hank62://calendar?google=<script>')).toBeNull();
+    expect(calendarReturn('https://example.com/?google=connected')).toBeNull();
+    expect(calendarReturn(undefined)).toBeNull();
   });
 });

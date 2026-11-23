@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { calendarConnect, calendarDisconnect, calendarEvents, calendarSelect, calendarStatus, createEvent, deleteEvent, updateEvent } from '../../core/api/owner';
 import { createStore, useStore } from '../../core/store';
+import { isNativeApp } from '../../../shared/lib/platform';
 
 // What the Calendar knows about Google, in memory: whether the owner is connected, which calendars are shown, and the events
 // of the range on screen. Events are asked for again when the range changes, after any change, and on request.
@@ -54,8 +55,22 @@ export const loadEvents = async (range, { force = false } = {}) => {
 
 const reload = () => (wanted ? loadEvents(wanted, { force: true }) : Promise.resolve());
 
-/** Sends the owner to Google to allow access. The page leaves; Google sends the owner back to the Calendar. */
+/**
+ * Sends the owner to Google to allow access. The page leaves; Google sends the owner back to the Calendar. In the Android
+ * app Google refuses a sign-in inside the app's WebView, so it opens in a browser tab over the app (signed in to Google as
+ * the phone's browser is), and the server sends that tab back to the app (useAndroid's appUrlOpen).
+ */
 export const connectGoogle = async () => {
+  if (isNativeApp()) {
+    const { url } = await calendarConnect({ app: true });
+    try {
+      const { Browser } = await import('@capacitor/browser');
+      await Browser.open({ url, toolbarColor: '#0b0c0e' });
+    } catch {
+      window.open(url, '_blank', 'noopener'); // an APK from before the browser tab: the phone's browser
+    }
+    return;
+  }
   const { url } = await calendarConnect();
   window.location.assign(url);
 };

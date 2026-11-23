@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, LoaderCircle, Pause, Play, RotateCcw, Undo2, X } from 'lucide-react';
+import { Check, ChevronDown, CircleCheck, Download, LoaderCircle, Pause, Play, RotateCcw, Trash2, Undo2, X } from 'lucide-react';
 import { Button, Skeleton } from '../../../shared/ui';
 import { clsx } from '../../../shared/lib/format';
 import { Cover, PlayButton, RateButton, Seek, SkipButton, SleepButton } from './Controls';
 import { close, playEpisode, podcast, setHeard, toggle } from './player';
 import { clock, fraction, lengthWords, publishedLabel } from './model';
 import { shows } from './store';
+import { canKeep, forget, keep, offline, sizeLabel, stopKeeping } from './offline';
+import { listenId } from './model';
 import { openShow, podcastUi } from './ui';
 import { useStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
@@ -103,8 +105,37 @@ export function NowPlaying() {
 }
 
 /** One episode: play it, see how far you got, read its notes, mark it heard. `cover` shows the show too (the library's rows). */
+/** Keep an episode on the phone for listening offline, see how far it is, stop it, or take it off again (the Android app). */
+function KeepButton({ show, episode }) {
+  const key = listenId(show.id, episode.guid);
+  const kept = useStore(offline, (s) => s.items[key] ?? null);
+  const progress = useStore(offline, (s) => s.progress[key]);
+  const failed = useStore(offline, (s) => s.error[key]);
+  if (!canKeep()) return null;
+  if (progress !== undefined) {
+    return (
+      <Button variant="ghost" size="sm" onClick={() => stopKeeping(show.id, episode.guid)}>
+        <LoaderCircle size={14} className="animate-spin" aria-hidden="true" /> {progress > 0 ? tr('Downloading… {0}%', Math.round(progress * 100)) : tr('Downloading…')} · {tr('Cancel')}
+      </Button>
+    );
+  }
+  if (kept) {
+    return (
+      <Button variant="ghost" size="sm" onClick={() => void forget(show.id, episode.guid)}>
+        <Trash2 size={14} aria-hidden="true" /> {tr('Remove the download ({0})', sizeLabel(kept.size))}
+      </Button>
+    );
+  }
+  return (
+    <Button variant="secondary" size="sm" onClick={() => void keep(show, episode)} title={failed || undefined}>
+      <Download size={14} aria-hidden="true" /> {failed ? tr('Download failed: try again') : tr('Download for offline')}
+    </Button>
+  );
+}
+
 export function Episode({ show, episode, record, cover = false }) {
   const state = usePlayState(show.id, episode.guid);
+  const kept = useStore(offline, (s) => Boolean(s.items[listenId(show.id, episode.guid)]));
   const [open, setOpen] = useState(false);
   const share = fraction(record);
   const done = Boolean(record?.done);
@@ -130,9 +161,14 @@ export function Episode({ show, episode, record, cover = false }) {
               </span>
             )}
             {left > 60 && <span className="text-signal">· {tr('{0} left', lengthWords(left))}</span>}
+            {kept && (
+              <span className="inline-flex items-center gap-1 text-signal" title={tr('Downloaded: plays with no network')}>
+                · <CircleCheck size={11} aria-hidden="true" /> {tr('Downloaded')}
+              </span>
+            )}
           </small>
         </div>
-        {(episode.description || !cover) && (
+        {(episode.description || !cover || canKeep()) && (
           <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} aria-label={open ? tr('Hide the details') : tr('Show the details')} title={open ? tr('Hide the details') : tr('Show the details')} className="grid size-9 shrink-0 place-items-center rounded-full text-bone-faint hover:bg-wash/10 hover:text-bone">
             <ChevronDown size={17} className={clsx('transition-transform duration-200', open && 'rotate-180')} aria-hidden="true" />
           </button>
@@ -146,6 +182,7 @@ export function Episode({ show, episode, record, cover = false }) {
             <Button variant="secondary" size="sm" onClick={() => setHeard(show, episode, !done)}>
               {done ? <Undo2 size={14} aria-hidden="true" /> : <Check size={14} aria-hidden="true" />} {done ? tr('Mark as not heard') : tr('Mark as heard')}
             </Button>
+            <KeepButton show={show} episode={episode} />
             {(share > 0 || done) && (
               <Button variant="ghost" size="sm" onClick={fromStart}>
                 <RotateCcw size={14} aria-hidden="true" /> {tr('Play from the start')}

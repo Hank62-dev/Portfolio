@@ -36,14 +36,14 @@ import org.json.JSONArray;
 /**
  * What the web page asks of the phone itself, beyond Capacitor's own plugins: the media card for music and podcasts
  * (MediaService), the home-screen widget (TodayWidget), things shared to the app from other apps, opening a tab from a
- * widget, the battery and auto-start settings, the fingerprint for the diary, and which shell this is (so the page can say when a newer APK is out).
+ * widget, the battery and auto-start settings, the fingerprint for the diary, podcasts kept for offline, and which shell this is (so the page can say when a newer APK is out).
  * The page side is src/spacehank/features/android/.
  */
 @CapacitorPlugin(name = "Hank62")
 public class Hank62Plugin extends Plugin {
 
     /** Counts up whenever the native shell changes; public/android.json names the newest, and the page compares. */
-    public static final int SHELL = 5;
+    public static final int SHELL = 6;
 
     private static final int MAX_FILE = 8 * 1024 * 1024;
     private static final int MAX_FILES = 6;
@@ -479,5 +479,73 @@ public class Hank62Plugin extends Plugin {
                 call.reject("The prompt did not open: " + e.getMessage(), "FAILED");
             }
         });
+    }
+
+    // ---- podcast episodes kept for listening offline (Episodes) -------------------------------------------------------
+
+    /** Downloads an episode ({ id, url }), telling the page how far it is ("episodeProgress": id, received, total). Resolves { id, size }. */
+    @PluginMethod
+    public void downloadEpisode(PluginCall call) {
+        String id = call.getString("id");
+        String url = call.getString("url");
+        if (!Episodes.validId(id) || url == null || !url.startsWith("https://")) {
+            call.reject("Not an episode that can be kept", "BAD_URL");
+            return;
+        }
+        Context context = getContext();
+        new Thread(() -> {
+            try {
+                long size = Episodes.download(context, id, url, (received, total) -> {
+                    JSObject data = new JSObject();
+                    data.put("id", id);
+                    data.put("received", received);
+                    data.put("total", total);
+                    notifyListeners("episodeProgress", data);
+                });
+                JSObject ret = new JSObject();
+                ret.put("id", id);
+                ret.put("size", size);
+                call.resolve(ret);
+            } catch (InterruptedException e) {
+                call.reject("Cancelled", "CANCELED");
+            } catch (Exception e) {
+                call.reject("The download failed: " + e.getMessage(), "DOWNLOAD_FAILED");
+            }
+        }).start();
+    }
+
+    /** Stops a download that is under way; it rejects with CANCELED and leaves nothing behind. */
+    @PluginMethod
+    public void cancelEpisode(PluginCall call) {
+        String id = call.getString("id");
+        if (Episodes.validId(id)) Episodes.cancelled.add(id);
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void deleteEpisode(PluginCall call) {
+        String id = call.getString("id");
+        if (Episodes.validId(id)) Episodes.delete(getContext(), id);
+        call.resolve();
+    }
+
+    /** The episodes on the phone: { items: [{ id, size }] }. */
+    @PluginMethod
+    public void listEpisodes(PluginCall call) {
+        JSArray items = new JSArray();
+        File[] files = Episodes.dir(getContext()).listFiles();
+        if (files != null) {
+            for (File file : files) {
+                String name = file.getName();
+                if (!name.endsWith(".audio")) continue;
+                JSObject item = new JSObject();
+                item.put("id", name.substring(0, name.length() - ".audio".length()));
+                item.put("size", file.length());
+                items.put(item);
+            }
+        }
+        JSObject ret = new JSObject();
+        ret.put("items", items);
+        call.resolve(ret);
     }
 }

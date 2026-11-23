@@ -136,6 +136,17 @@ describe('connecting', () => {
     await expect(google.connect({ code: 'c', state: late })).rejects.toThrow('expired');
   });
 
+  it('knows a sign-in started in the Android app, from the signed state alone', async () => {
+    const app = new URL(google.authUrl({ app: true })).searchParams.get('state');
+    const web = new URL(google.authUrl()).searchParams.get('state');
+    expect(google.returnsToApp(app)).toBe(true);
+    expect(google.returnsToApp(web)).toBe(false);
+    expect(google.returnsToApp(app.replace('.a.', '.w.'))).toBe(false); // the flag is signed too
+    expect(google.returnsToApp(null)).toBe(false);
+    await google.connect({ code: 'c', state: app });
+    expect(google.connected).toBe(true);
+  });
+
   it('says so when Google gives no refresh token', async () => {
     answers['POST /token'] = { access_token: 'a', expires_in: 3600 };
     await expect(signIn()).rejects.toThrow('lasting access');

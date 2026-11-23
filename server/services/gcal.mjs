@@ -141,14 +141,17 @@ export const createGoogleCalendar = ({ db, settings = {}, fetchImpl = fetch, now
   const sign = (text) => b64(crypto.createHmac('sha256', key).update(`state:${text}`).digest());
 
   // ---- signing in
-  /** The address that sends the owner to Google's consent screen. */
-  const authUrl = () => {
+  /**
+   * The address that sends the owner to Google's consent screen. `app`: the sign-in was started in the Android app, which
+   * opened it in a browser tab, so the way back goes to the app (see returnsToApp) instead of the web page.
+   */
+  const authUrl = ({ app = false } = {}) => {
     if (!enabled) throw new HttpError(503, 'Google Calendar is not set up on the server.');
     const nonce = b64(crypto.randomBytes(16));
     const until = now() + STATE_TTL;
     for (const [n, t] of pending) if (t < now()) pending.delete(n);
     pending.set(nonce, until);
-    const state = `${until}.${nonce}`;
+    const state = `${until}.${nonce}.${app ? 'a' : 'w'}`;
     const query = new URLSearchParams({
       client_id: clientId,
       redirect_uri: redirectUri,
@@ -178,12 +181,21 @@ export const createGoogleCalendar = ({ db, settings = {}, fetchImpl = fetch, now
   };
 
   /** The page Google sent the owner back to: checks the state, trades the code for tokens and keeps the refresh token. */
+  /** The parts of a state this server signed ({ until, nonce, where }), or null for one it did not. */
+  const readState = (state) => {
+    const [until, nonce, where, signature] = String(state ?? '').split('.');
+    const expected = sign(`${until}.${nonce}.${where}`);
+    const same = typeof signature === 'string' && signature.length === expected.length && crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
+    return same ? { until, nonce, where } : null;
+  };
+
+  /** Whether the sign-in this state belongs to was started in the Android app (also when Google says it was refused). */
+  const returnsToApp = (state) => readState(state)?.where === 'a';
+
   const connect = async ({ code, state }) => {
     if (!enabled) throw new HttpError(503, 'Google Calendar is not set up on the server.');
-    const [until, nonce, signature] = String(state ?? '').split('.');
-    const expected = sign(`${until}.${nonce}`);
-    const same = typeof signature === 'string' && signature.length === expected.length && crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
-    if (!same || !pending.has(nonce) || Number(until) < now()) throw new HttpError(400, 'This sign-in link has expired. Start again.');
+    const { until, nonce } = readState(state) ?? {};
+    if (!nonce || !pending.has(nonce) || Number(until) < now()) throw new HttpError(400, 'This sign-in link has expired. Start again.');
     pending.delete(nonce);
     if (!code) throw new HttpError(400, 'Google did not send a code');
 
@@ -445,6 +457,7 @@ export const createGoogleCalendar = ({ db, settings = {}, fetchImpl = fetch, now
     },
     isConnected: async () => Boolean(await load().catch(() => null)),
     authUrl,
+    returnsToApp,
     connect,
     status,
     select,

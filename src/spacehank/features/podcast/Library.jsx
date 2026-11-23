@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Check, Headphones, LoaderCircle, Play, Plus, Search, Sparkles } from 'lucide-react';
+import { Check, Download, Headphones, LoaderCircle, Play, Plus, Search, Sparkles } from 'lucide-react';
 import { Button, Skeleton } from '../../../shared/ui';
 import { Cover } from './Controls';
 import { knownFeed, loadFeed } from './feeds';
@@ -10,6 +10,7 @@ import { openShow } from './ui';
 import { useStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
 import { Eyebrow, Episode, EpisodeSkeletons } from './parts';
+import { canKeep, keptList, offline, reconcile } from './offline';
 
 // The podcasts followed, with their newest episodes (the Library page of the Podcasts tab).
 
@@ -52,6 +53,8 @@ export function Library({ onFind }) {
   const loadedGuid = useStore(podcast, (s) => (s.episode ? `${s.show?.id}:${s.episode.guid}` : ''));
   const resume = unfinished(heard).filter((entry) => `${entry.show}:${entry.guid}` !== loadedGuid);
   const { feeds, loading } = useFollowedFeeds(followed);
+  const kept = keptList(useStore(offline, (s) => s.items));
+  useEffect(() => void reconcile(), []);
   const latest = latestAcross(
     followed.filter((item) => feeds[item.id]).map((item) => ({ show: { id: item.id, feedUrl: item.feedUrl, title: item.title, image: item.image }, episodes: feeds[item.id].episodes })),
     heard
@@ -89,6 +92,21 @@ export function Library({ onFind }) {
                 </li>
               );
             })}
+          </ul>
+        </section>
+      )}
+
+      {canKeep() && kept.length > 0 && (
+        <section aria-label={tr('Downloaded')}>
+          <Eyebrow>
+            <span className="inline-flex items-center gap-1.5">
+              <Download size={12} aria-hidden="true" /> {tr('Downloaded')}
+            </span>
+          </Eyebrow>
+          <ul className="flex flex-col gap-2.5">
+            {kept.map((item) => (
+              <Episode key={item.key} show={item.show} episode={item.episode} record={progressOf(heard, item.show.id, item.episode.guid)} cover />
+            ))}
           </ul>
         </section>
       )}

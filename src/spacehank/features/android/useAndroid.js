@@ -12,7 +12,15 @@ import { appInfo, Hank62, refreshInfo } from './bridge';
 /** A newer shell than this one: { shell, url } once known, else null. */
 export const apkUpdate = createStore({ latest: null });
 
+const LAUNCH_SEEN = 'hank62.launchSeen';
 const RELEASES = 'https://github.com/Hank62-dev/Portfolio/releases/latest';
+
+/** What Google's sign-in came back with, from the link that opened the app (hank62://calendar?google=connected), or null. Pure. */
+export const calendarReturn = (url) => {
+  const match = /^hank62:\/\/calendar\/?\?(.*)$/.exec(String(url ?? ''));
+  const result = match ? new URLSearchParams(match[1]).get('google') : null;
+  return ['connected', 'denied', 'failed'].includes(result) ? result : null;
+};
 
 /** Is the published shell (public/android.json) newer than this install's? */
 export const newerShell = (latest, info) => Boolean(latest?.shell && info?.shell && latest.shell > info.shell);
@@ -67,6 +75,25 @@ export function useAndroid({ guest, onTab, onShare }) {
       }
     };
 
+    // hank62://calendar?google=…: the browser tab of Google's sign-in, sent back by the server (also when it started the app)
+    const openUrl = (url) => {
+      const result = calendarReturn(url);
+      if (result && !stopped) window.location.assign(`/spacehank?tab=calendar&google=${encodeURIComponent(result)}`);
+    };
+    const links = import('@capacitor/app')
+      .then(({ App }) => {
+        // the link that started the app is still the launch link after the reload it causes: once is enough
+        void App.getLaunchUrl()
+          .then((launch) => {
+            if (!launch?.url || sessionStorage.getItem(LAUNCH_SEEN) === launch.url) return;
+            sessionStorage.setItem(LAUNCH_SEEN, launch.url);
+            openUrl(launch.url);
+          })
+          .catch(() => {});
+        return App.addListener('appUrlOpen', ({ url }) => openUrl(url));
+      })
+      .catch(() => null);
+
     void refreshInfo().then(() => !stopped && checkUpdate());
     void takePending();
     const listener = Hank62.addListener('pending', () => void takePending()).catch(() => null);
@@ -76,6 +103,7 @@ export function useAndroid({ guest, onTab, onShare }) {
     return () => {
       stopped = true;
       void listener.then((handle) => handle?.remove());
+      void links.then((handle) => handle?.remove());
       document.removeEventListener('visibilitychange', back);
     };
   }, [guest, onTab, onShare]);

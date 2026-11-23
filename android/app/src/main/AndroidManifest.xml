@@ -19,6 +19,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- hank62://calendar: the browser tab of Google's sign-in comes back here (server/routes/calendar.routes.mjs) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="hank62" android:host="calendar" />
+            </intent-filter>
+
             <!-- "Share" in another app lists Hank62: text, links and pictures (Hank62Plugin.takeShare hands them to the page) -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />

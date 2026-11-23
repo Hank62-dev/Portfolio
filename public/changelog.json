@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-google-offline-podcasts",
+    "version": "1.57.0",
+    "date": "2026-11-23",
+    "vi": "App Android: kết nối Google Calendar mở trong một tab trình duyệt ngay trên app rồi tự quay về; podcast tải về được để nghe khi không có mạng, có mục Đã tải về trong Thư viện, vẫn tua và nghe tiếp được.",
+    "en": "Android app: connecting Google Calendar opens in a browser tab over the app and comes back by itself; podcast episodes download to play with no network, listed under Downloaded in the Library, seeking and resuming as usual."
+  },
+  {
     "id": "android-diary-fingerprint",
     "version": "1.56.0",
     "date": "2026-11-23",

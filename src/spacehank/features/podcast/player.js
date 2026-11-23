@@ -3,6 +3,7 @@ import { createStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
 import { RATES, listenId, listenRecord, startAt } from './model';
 import { listens } from './store';
+import { sourceOf } from './offline';
 
 // The podcast player: one audio element for the whole app, so an episode keeps playing when you go to another tab. It is
 // separate from the music player on purpose (its own queue-less, resume-where-you-left-off, speed-changing way of
@@ -151,7 +152,7 @@ export const playEpisode = async (show, episode) => {
   startFrom = startAt(entry);
   lastSaved = startFrom;
   podcast.set({ show: { id: show.id, title: show.title, image: show.image, feedUrl: show.feedUrl || '' }, episode: { guid: episode.guid, title: episode.title, audio: episode.audio, image: episode.image || '', duration: episode.duration || 0 }, playing: false, loading: true, time: startFrom, duration: episode.duration || 0, error: '' });
-  el.src = episode.audio;
+  el.src = sourceOf(show.id, episode); // the copy kept on the phone when there is one
   el.playbackRate = podcast.get().rate;
   claimKeys();
   try {

@@ -51,8 +51,8 @@ const needSignIn = () => {
 const iso = (date) => encodeURIComponent(date.toISOString());
 /** { enabled, connected, lost, email, calendars: [{ id, name, color, primary, writable, selected }] } */
 export const calendarStatus = () => (needSignIn(), call('/api/calendar/status'));
-/** The address of Google's consent screen: { url }. */
-export const calendarConnect = () => (needSignIn(), call('/api/calendar/google/connect', { method: 'POST', body: {} }));
+/** The address of Google's consent screen: { url }. `app`: started in the Android app, so Google's answer goes back to it. */
+export const calendarConnect = ({ app = false } = {}) => (needSignIn(), call('/api/calendar/google/connect', { method: 'POST', body: app ? { app: true } : {} }));
 export const calendarDisconnect = () => (needSignIn(), call('/api/calendar/google/disconnect', { method: 'POST', body: {} }));
 /** Which calendars are shown: { calendars }. */
 export const calendarSelect = (ids) => (needSignIn(), call('/api/calendar/google/select', { method: 'POST', body: { ids } }));
