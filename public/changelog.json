@@ -1,5 +1,12 @@
 [
   {
+    "id": "offline-open",
+    "version": "1.55.1",
+    "date": "2026-11-23",
+    "vi": "Mở app khi không có mạng: máy đã đăng nhập thì vào thẳng không gian làm việc bằng dữ liệu đã lưu trên máy, thay vì chờ server mãi rồi về màn hình đăng nhập; có mạng lại thì tự kết nối và đồng bộ.",
+    "en": "Opening with no network: a device that was signed in goes straight into the workspace on the data saved on it, instead of waiting for the server and falling back to sign-in; it connects and syncs once the network is back."
+  },
+  {
     "id": "android-autostart",
     "version": "1.55.0",
     "date": "2026-11-23",

@@ -18,6 +18,29 @@ const reducer = (state, message) => {
 /** How long to wait before the next try after `attempt` failures in a row: 1 s, 2 s, 4 s… up to 20 s, never in lockstep. Pure. */
 export const backoffMs = (attempt, random = Math.random) => Math.min(20000, 1000 * 2 ** Math.min(attempt, 5)) + Math.floor(random() * 400);
 
+// This device was signed in the last time the server could be asked. The owner's data lives on the device (IndexedDB),
+// so with no network the workspace opens on it instead of waiting for a server it cannot reach; the server is asked
+// again as soon as the network is back, and a session that ended there signs the device out.
+const SIGNED_IN_KEY = 'hank62.signedIn';
+export const rememberSignedIn = (yes) => {
+  try {
+    if (yes) localStorage.setItem(SIGNED_IN_KEY, '1');
+    else localStorage.removeItem(SIGNED_IN_KEY);
+  } catch {
+    /* private mode: the device simply waits for the server */
+  }
+};
+export const wasSignedIn = () => {
+  try {
+    return localStorage.getItem(SIGNED_IN_KEY) === '1';
+  } catch {
+    return false;
+  }
+};
+
+/** A failed session check that means "no network" (not a server still waking up, which answers with an error status). Pure. */
+export const isNoNetwork = (error, online = typeof navigator === 'undefined' ? true : navigator.onLine) => !online || error instanceof TypeError;
+
 const AWAY_MS = 20 * 1000; // after this long out of sight a phone may have dropped the socket without saying so
 
 /**
@@ -51,13 +74,20 @@ export function useRealtime() {
     const ask = async () => {
       try {
         const value = await fetchSession();
+        rememberSignedIn(value);
         if (!stopped) {
           setWaking(false);
           setUnreachable(false);
           setAuthenticated(value);
         }
-      } catch {
+      } catch (error) {
         if (stopped) return;
+        if (isNoNetwork(error) && wasSignedIn()) {
+          // offline: open on the data already on this device; the socket below keeps asking the server
+          setWaking(false);
+          setAuthenticated(true);
+          return;
+        }
         if (Date.now() - startedAt > 150000) {
           // two and a half minutes of nothing: show the sign-in form rather than a spinner for ever
           setWaking(false);
@@ -114,6 +144,7 @@ export function useRealtime() {
         const still = await fetchSession();
         if (stopped) return;
         if (!still) {
+          rememberSignedIn(false);
           setAuthenticated(false);
           setLink('offline');
           return;
@@ -185,11 +216,13 @@ export function useRealtime() {
 
   const login = useCallback(async (password) => {
     await apiLogin(password);
+    rememberSignedIn(true);
     setAuthenticated(true);
   }, []);
 
   const logout = useCallback(async () => {
     await apiLogout();
+    rememberSignedIn(false);
     setAuthenticated(false);
     setLink('offline');
   }, []);
