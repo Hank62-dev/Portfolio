@@ -41,7 +41,11 @@ const refreshApp = async () => {
     // tokens can change (a reinstall, Google rotating them): hand the server the current one at each start
     if (app && token) {
       const fresh = await registerApp();
-      if (fresh !== token) await pushSubscribe({ fcm: fresh, kinds: kinds(), lang: getLang() });
+      if (fresh !== token) {
+        // the old token goes, or the server would count this phone twice and tell it everything twice
+        await pushUnsubscribe(token).catch(() => {});
+        await pushSubscribe({ fcm: fresh, kinds: kinds(), lang: getLang() });
+      }
     }
   } catch {
     pushState.set({ checked: true, available: false, subscribed: false });

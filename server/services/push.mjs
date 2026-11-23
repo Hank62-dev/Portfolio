@@ -149,9 +149,10 @@ export const createPush = ({ db, sync, calendar, vapid, fcm, zone = 'Asia/Ho_Chi
     await init();
     const subs = await subscriptions();
     let sent = 0;
+    const key = `test:${now()}`; // one occasion for every device and language, so a device told twice still shows it once
     for (const lang of new Set(subs.map((s) => s.lang))) {
       const t = translator(lang);
-      sent += await sendTo(subs.filter((s) => s.lang === lang), { title: t('This is a test'), body: t('Push is working, even with the app closed.'), tab: 'hank', kind: 'system', tone: 'success', key: `test:${now()}` });
+      sent += await sendTo(subs.filter((s) => s.lang === lang), { title: t('This is a test'), body: t('Push is working, even with the app closed.'), tab: 'hank', kind: 'system', tone: 'success', key });
     }
     return { sent };
   };

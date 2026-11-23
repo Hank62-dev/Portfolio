@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-push-once",
+    "version": "1.54.1",
+    "date": "2026-11-23",
+    "vi": "Thông báo thử từ server không còn hiện hai lần trên app Android; khi Firebase cấp token mới, token cũ được xoá để server không gửi trùng.",
+    "en": "A test from the server no longer shows twice in the Android app; when Firebase hands out a new token the old one is dropped, so the server does not send everything twice."
+  },
+  {
     "id": "android-self-update",
     "version": "1.54.0",
     "date": "2026-11-23",
