@@ -1,5 +1,13 @@
 [
   {
+    "id": "readme-rewrite",
+    "version": "1.54.2",
+    "internal": true,
+    "date": "2026-11-23",
+    "vi": "README viết lại: huy hiệu, tổng quan các phần, tính năng, công nghệ, sơ đồ kiến trúc, cách chạy, app Android, test và CI, triển khai, danh mục tài liệu.",
+    "en": "The README is rewritten: badges, an overview of every part, features, the stack, an architecture diagram, getting started, the Android app, tests and CI, deployment and a documents index."
+  },
+  {
     "id": "android-push-once",
     "version": "1.54.1",
     "date": "2026-11-23",
