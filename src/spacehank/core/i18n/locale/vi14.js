@@ -32,4 +32,8 @@ export const vi14 = {
   'vivo stops an app swiped away from recents. Allow Hank62 to start in the background, and lock it in recents.': 'vivo tắt hẳn app khi bị vuốt khỏi đa nhiệm. Cho phép Hank62 khởi động nền và khoá app trong đa nhiệm.',
   'Huawei and Honor stop an app swiped away from recents. In App launch, set Hank62 to Manage manually with every switch on.': 'Huawei và Honor tắt hẳn app khi bị vuốt khỏi đa nhiệm. Trong "Khởi chạy ứng dụng", chỉnh Hank62 sang "Quản lý thủ công" và bật hết các công tắc.',
   'Samsung may put Hank62 to sleep. In the app’s Battery, choose Unrestricted, and make sure it is not under Sleeping apps.': 'Samsung có thể cho Hank62 "ngủ". Trong mục Pin của app, chọn "Không hạn chế", và xem app không nằm trong "Ứng dụng ngủ".',
+  'Unlock the diary': 'Mở khoá nhật ký',
+  'Use your fingerprint, face or screen lock': 'Dùng vân tay, khuôn mặt hoặc mã khoá màn hình',
+  'Update the Android app (the Update button at the top) to lock the diary with your fingerprint.': 'Cập nhật app Android (nút Cập nhật ở đầu màn hình) để khoá nhật ký bằng vân tay.',
+  'Set up a screen lock or a fingerprint in Android’s settings first.': 'Hãy cài khoá màn hình hoặc vân tay trong cài đặt Android trước.',
 };

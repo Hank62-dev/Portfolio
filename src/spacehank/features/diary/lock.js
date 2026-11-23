@@ -1,12 +1,17 @@
 import { isDemo } from '../../core/demo/mode';
 import { createStore } from '../../core/store';
 import { tr } from '../../core/i18n/lang';
+import { isNativeApp } from '../../../shared/lib/platform';
+import { Hank62 } from '../android/bridge';
 
 // The diary lock. The browser's own sign-in (WebAuthn) asks the phone for a fingerprint, a face, or the screen lock when the
 // phone has none of those, and tells the page it passed. The page then shows the diary.
 //
 // What it is and is not: it keeps whoever picks up the phone from reading the diary, on the diary tab and in Second Brain.
 // It is a gate in the page, not encryption: the pages are still stored as they were, on this device.
+//
+// In the Android app the WebView has no WebAuthn, so the same question goes to Android's own prompt (Hank62Plugin.verify),
+// and the saved lock says so ({ native: true }).
 
 const KEY = () => (isDemo() ? 'hank62.demo.diary.lock' : 'hank62.diary.lock');
 export const AWAY_MS = 60 * 1000; // leave the app for a minute and the diary locks itself
@@ -60,9 +65,19 @@ export const describeLockError = (error) => {
   }
 };
 
+/** Android's prompt; its refusals become the same errors as the browser's, so the messages above fit both. */
+const askPhone = async () => {
+  try {
+    await Hank62.verify({ title: tr('Unlock the diary'), subtitle: tr('Use your fingerprint, face or screen lock') });
+  } catch (error) {
+    throw new DOMException(error?.message ?? '', error?.code === 'CANCELED' ? 'NotAllowedError' : error?.code === 'UNIMPLEMENTED' ? 'NotSupportedError' : 'UnknownError');
+  }
+};
+
 /** Whether this browser can ask for a fingerprint at all (it needs https or localhost, and a screen lock on the phone). */
 export const canUseFingerprint = async () => {
   try {
+    if (isNativeApp()) return Boolean((await Hank62.canVerify())?.available); // an older APK has no such call: false
     if (typeof window === 'undefined' || !window.isSecureContext || !('PublicKeyCredential' in window) || !navigator.credentials) return false;
     return Boolean(await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
   } catch {
@@ -82,6 +97,12 @@ const ask = async (work) => {
 /** Sets the lock up: the phone makes a key that only opens with the person's fingerprint. Throws if they say no. */
 export const enableLock = () =>
   ask(async () => {
+    if (isNativeApp()) {
+      await askPhone();
+      write({ id: 'android', native: true, at: Date.now() });
+      diaryLock.set({ enabled: true, unlocked: true });
+      return;
+    }
     const credential = await navigator.credentials.create({
       publicKey: {
         rp: { name: 'Hank62', id: window.location.hostname },
@@ -107,6 +128,11 @@ export const unlockDiary = () =>
     const saved = read();
     if (!saved) {
       diaryLock.set({ enabled: false, unlocked: true });
+      return;
+    }
+    if (saved.native) {
+      await askPhone();
+      diaryLock.set({ unlocked: true, quiet: false });
       return;
     }
     const proof = await navigator.credentials.get({

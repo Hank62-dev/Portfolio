@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-diary-fingerprint",
+    "version": "1.56.0",
+    "date": "2026-11-23",
+    "vi": "App Android: khoá nhật ký bằng vân tay chạy được trong app, dùng hộp thoại vân tay, khuôn mặt hay mã khoá màn hình của chính Android; bản app cũ được nhắc cập nhật.",
+    "en": "Android app: the diary lock works in the app, through Android's own prompt for a fingerprint, a face or the screen lock; an older app is asked to update first."
+  },
+  {
     "id": "offline-open",
     "version": "1.55.1",
     "date": "2026-11-23",

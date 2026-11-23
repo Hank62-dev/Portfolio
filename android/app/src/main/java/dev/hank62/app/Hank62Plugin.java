@@ -17,7 +17,11 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.fragment.app.FragmentActivity;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -32,14 +36,14 @@ import org.json.JSONArray;
 /**
  * What the web page asks of the phone itself, beyond Capacitor's own plugins: the media card for music and podcasts
  * (MediaService), the home-screen widget (TodayWidget), things shared to the app from other apps, opening a tab from a
- * widget, the battery and auto-start settings, and which shell this is (so the page can say when a newer APK is out).
+ * widget, the battery and auto-start settings, the fingerprint for the diary, and which shell this is (so the page can say when a newer APK is out).
  * The page side is src/spacehank/features/android/.
  */
 @CapacitorPlugin(name = "Hank62")
 public class Hank62Plugin extends Plugin {
 
     /** Counts up whenever the native shell changes; public/android.json names the newest, and the page compares. */
-    public static final int SHELL = 4;
+    public static final int SHELL = 5;
 
     private static final int MAX_FILE = 8 * 1024 * 1024;
     private static final int MAX_FILES = 6;
@@ -425,5 +429,55 @@ public class Hank62Plugin extends Plugin {
         } catch (Exception e) {
             call.reject("The installer did not open: " + e.getMessage(), "INSTALL_FAILED");
         }
+    }
+
+    // ---- the fingerprint for the diary --------------------------------------------------------------------------------
+    // The WebView has no WebAuthn of its own, so the diary's lock asks Android's own prompt: a fingerprint, a face, or the
+    // screen lock when the phone has none of those. Like the web's lock it is a gate in the page, not encryption.
+
+    private static final int AUTHENTICATORS = BiometricManager.Authenticators.BIOMETRIC_WEAK | BiometricManager.Authenticators.DEVICE_CREDENTIAL;
+
+    /** Whether the phone can ask: { available, code } (code is BiometricManager's answer when it cannot). */
+    @PluginMethod
+    public void canVerify(PluginCall call) {
+        int answer = BiometricManager.from(getContext()).canAuthenticate(AUTHENTICATORS);
+        JSObject ret = new JSObject();
+        ret.put("available", answer == BiometricManager.BIOMETRIC_SUCCESS);
+        ret.put("code", answer);
+        call.resolve(ret);
+    }
+
+    /** Shows Android's prompt. Resolves when it passes; rejects with CANCELED (closed, or timed out) or FAILED (locked out, no hardware). */
+    @PluginMethod
+    public void verify(PluginCall call) {
+        if (!(getActivity() instanceof FragmentActivity)) {
+            call.reject("No screen to ask on", "FAILED");
+            return;
+        }
+        FragmentActivity activity = (FragmentActivity) getActivity();
+        String title = call.getString("title", "Hank62");
+        String subtitle = call.getString("subtitle", "");
+        activity.runOnUiThread(() -> {
+            try {
+                BiometricPrompt prompt = new BiometricPrompt(activity, ContextCompat.getMainExecutor(activity), new BiometricPrompt.AuthenticationCallback() {
+                    @Override
+                    public void onAuthenticationSucceeded(BiometricPrompt.AuthenticationResult result) {
+                        call.resolve();
+                    }
+
+                    @Override
+                    public void onAuthenticationError(int code, CharSequence message) {
+                        boolean closed = code == BiometricPrompt.ERROR_USER_CANCELED || code == BiometricPrompt.ERROR_NEGATIVE_BUTTON || code == BiometricPrompt.ERROR_CANCELED || code == BiometricPrompt.ERROR_TIMEOUT;
+                        call.reject(String.valueOf(message), closed ? "CANCELED" : "FAILED");
+                    }
+                    // onAuthenticationFailed: one finger that did not match; the prompt itself asks again
+                });
+                BiometricPrompt.PromptInfo.Builder info = new BiometricPrompt.PromptInfo.Builder().setTitle(title).setAllowedAuthenticators(AUTHENTICATORS);
+                if (!subtitle.isEmpty()) info.setSubtitle(subtitle);
+                prompt.authenticate(info.build());
+            } catch (Exception e) {
+                call.reject("The prompt did not open: " + e.getMessage(), "FAILED");
+            }
+        });
     }
 }

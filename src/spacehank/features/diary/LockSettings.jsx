@@ -4,6 +4,8 @@ import { canUseFingerprint, describeLockError, diaryLock, disableLock, enableLoc
 import { useStore } from '../../core/store';
 import { PaperSheet, SheetClose, SoftButton } from './ui';
 import { tr } from '../../core/i18n/lang';
+import { isNativeApp } from '../../../shared/lib/platform';
+import { appInfo } from '../android/bridge';
 
 /** Turning the lock on and off. */
 export default function LockSettings({ onClose, onNotify }) {
@@ -60,7 +62,11 @@ export default function LockSettings({ onClose, onNotify }) {
         {supported === null && <p className="font-body text-[0.85rem] text-[color:var(--dz-text-3)]">{tr('Đang hỏi điện thoại…')}</p>}
         {supported === false && !enabled && (
           <p className="rounded-2xl bg-[color:var(--dz-soft)] p-3 font-body text-[0.85rem] leading-relaxed text-[color:var(--dz-on-soft)]" role="status">
-            {tr('Trình duyệt này chưa dùng được vân tay. Khoá cần trang https (hoặc localhost) và điện thoại đã cài khoá màn hình hay vân tay.')}
+            {!isNativeApp()
+              ? tr('Trình duyệt này chưa dùng được vân tay. Khoá cần trang https (hoặc localhost) và điện thoại đã cài khoá màn hình hay vân tay.')
+              : appInfo.get().shell < 5
+                ? tr('Update the Android app (the Update button at the top) to lock the diary with your fingerprint.')
+                : tr('Set up a screen lock or a fingerprint in Android’s settings first.')}
           </p>
         )}
 
