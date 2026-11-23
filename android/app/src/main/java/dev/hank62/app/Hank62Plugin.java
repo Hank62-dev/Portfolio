@@ -32,14 +32,14 @@ import org.json.JSONArray;
 /**
  * What the web page asks of the phone itself, beyond Capacitor's own plugins: the media card for music and podcasts
  * (MediaService), the home-screen widget (TodayWidget), things shared to the app from other apps, opening a tab from a
- * widget, the battery setting, and which shell this is (so the page can say when a newer APK is out).
+ * widget, the battery and auto-start settings, and which shell this is (so the page can say when a newer APK is out).
  * The page side is src/spacehank/features/android/.
  */
 @CapacitorPlugin(name = "Hank62")
 public class Hank62Plugin extends Plugin {
 
     /** Counts up whenever the native shell changes; public/android.json names the newest, and the page compares. */
-    public static final int SHELL = 3;
+    public static final int SHELL = 4;
 
     private static final int MAX_FILE = 8 * 1024 * 1024;
     private static final int MAX_FILES = 6;
@@ -159,7 +159,58 @@ public class Hank62Plugin extends Plugin {
         ret.put("firebase", context.getResources().getIdentifier("google_app_id", "string", context.getPackageName()) != 0);
         PowerManager power = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
         ret.put("battery", power != null && power.isIgnoringBatteryOptimizations(context.getPackageName()));
+        ret.put("maker", Build.MANUFACTURER == null ? "" : Build.MANUFACTURER.toLowerCase(java.util.Locale.ROOT));
         call.resolve(ret);
+    }
+
+    // Where each maker keeps its own "may this app start by itself" switch. Without it, ColorOS, MIUI, Funtouch and EMUI
+    // kill an app swiped away from recents for good, and Firebase's messages wait until it is opened again. These pages
+    // are not public API and move between versions, so each is tried in turn and the app's own settings come last.
+    private static final String[][] AUTOSTART = {
+        {"com.coloros.safecenter", "com.coloros.safecenter.permission.startup.StartupAppListActivity"},
+        {"com.coloros.safecenter", "com.coloros.safecenter.startupapp.StartupAppListActivity"},
+        {"com.oppo.safe", "com.oppo.safe.permission.startup.StartupAppListActivity"},
+        {"com.miui.securitycenter", "com.miui.permcenter.autostart.AutoStartManagementActivity"},
+        {"com.vivo.permissionmanager", "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"},
+        {"com.iqoo.secure", "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"},
+        {"com.huawei.systemmanager", "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"},
+        {"com.huawei.systemmanager", "com.huawei.systemmanager.optimize.process.ProtectActivity"},
+    };
+
+    /**
+     * Opens the maker's auto-start page when the phone has one, else this app's settings (where Samsung and newer ColorOS
+     * keep "Battery: Unrestricted" and "Allow auto launch"). Resolves { opened: "autostart" | "details" }.
+     */
+    @PluginMethod
+    public void openAutostart(PluginCall call) {
+        Context context = getContext();
+        String maker = Build.MANUFACTURER == null ? "" : Build.MANUFACTURER.toLowerCase(java.util.Locale.ROOT);
+        boolean samsung = maker.contains("samsung"); // One UI has no such page: its switch is under the app's Battery
+        if (!samsung) {
+            for (String[] page : AUTOSTART) {
+                try {
+                    Intent intent = new Intent().setComponent(new android.content.ComponentName(page[0], page[1]));
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
+                    JSObject ret = new JSObject();
+                    ret.put("opened", "autostart");
+                    call.resolve(ret);
+                    return;
+                } catch (Exception ignored) {
+                    // not on this phone, or not open to other apps: the next one
+                }
+            }
+        }
+        try {
+            Intent details = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:" + context.getPackageName()));
+            details.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(details);
+            JSObject ret = new JSObject();
+            ret.put("opened", "details");
+            call.resolve(ret);
+        } catch (Exception e) {
+            call.reject("No settings page on this phone");
+        }
     }
 
     /** Asks Android to let the app run in the background without the battery saver stopping it (music, reminders). */

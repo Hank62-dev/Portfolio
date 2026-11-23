@@ -1,5 +1,12 @@
 [
   {
+    "id": "android-autostart",
+    "version": "1.55.0",
+    "date": "2026-11-23",
+    "vi": "App Android: gõ được trên bàn phím Samsung (trước bị đơ ở màn hình đăng nhập); phần Thông báo có nút mở trang Tự khởi chạy của Oppo, Xiaomi, vivo, Huawei hay mục Pin của Samsung để nhận thông báo khi đã tắt app.",
+    "en": "Android app: typing works with the Samsung keyboard (sign-in was stuck); Notifications gains a button to auto-launch on Oppo, Xiaomi, vivo and Huawei, or Battery on Samsung, so reminders come with the app swiped away."
+  },
+  {
     "id": "readme-rewrite",
     "version": "1.54.2",
     "internal": true,

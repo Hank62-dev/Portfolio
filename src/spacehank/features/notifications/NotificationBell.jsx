@@ -11,7 +11,7 @@ import { useStore } from '../../core/store';
 import { ago, center, clearAll, groupByDay, markAllRead, markRead, permission, remove, setKind, setPush, unreadCount } from './center';
 import { KINDS, kindOf } from './kinds';
 import { isNativeApp } from '../../../shared/lib/platform';
-import { appInfo, askBattery } from '../android/bridge';
+import { appInfo, askBattery, makerFamily, openAutostart } from '../android/bridge';
 import { startUpdate } from '../android/updater';
 import { apkUpdate } from '../android/useAndroid';
 import { askExact, nativeState, refreshNative } from './native';
@@ -46,6 +46,15 @@ function Row({ item, onOpen }) {
     </li>
   );
 }
+
+// what to switch on, maker by maker, so a phone does not stop Hank62 for good when it is swiped away from recents
+const AUTOSTART_HINT = {
+  oppo: () => tr('Oppo, realme and OnePlus stop an app swiped away from recents. Turn on Auto launch for Hank62 (in the app’s Battery usage on newer phones), and lock it in recents.'),
+  xiaomi: () => tr('Xiaomi stops an app swiped away from recents. Turn on Autostart for Hank62, set its battery saver to No restrictions, and lock it in recents.'),
+  vivo: () => tr('vivo stops an app swiped away from recents. Allow Hank62 to start in the background, and lock it in recents.'),
+  huawei: () => tr('Huawei and Honor stop an app swiped away from recents. In App launch, set Hank62 to Manage manually with every switch on.'),
+  samsung: () => tr('Samsung may put Hank62 to sleep. In the app’s Battery, choose Unrestricted, and make sure it is not under Sleeping apps.'),
+};
 
 function Settings({ prefs }) {
   const native = isNativeApp();
@@ -124,6 +133,15 @@ function Settings({ prefs }) {
           <small className="mt-1 block font-mono text-[0.72rem] leading-snug text-bone-faint">{tr('Some phones (Xiaomi, Oppo, Samsung, Huawei) stop apps in the background to save battery, which cuts off music and holds back reminders. Allow Hank62 to run freely.')}</small>
           <button type="button" onClick={() => void askBattery()} className="mt-3 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">
             {tr('Allow')}
+          </button>
+        </section>
+      )}
+      {native && on && install.shell >= 4 && makerFamily(install.maker) && (
+        <section className="rounded-2xl border border-line bg-ink-2/60 p-3.5">
+          <b className="block text-fine font-medium text-bone">{tr('Notifications with the app closed')}</b>
+          <small className="mt-1 block font-mono text-[0.72rem] leading-snug text-bone-faint">{AUTOSTART_HINT[makerFamily(install.maker)]()}</small>
+          <button type="button" onClick={() => void openAutostart()} className="mt-3 rounded-full border border-line-strong px-3 py-1 font-mono text-[0.72rem] text-bone-dim transition-colors hover:text-bone">
+            {tr('Open settings')}
           </button>
         </section>
       )}

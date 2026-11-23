@@ -25,4 +25,11 @@ export const vi14 = {
   'The download failed. Check the connection and try again.': 'Tải không được. Kiểm tra mạng rồi thử lại.',
   'Open again': 'Mở lại',
   'Update': 'Cập nhật',
+  'Notifications with the app closed': 'Nhận thông báo khi đã tắt app',
+  'Open settings': 'Mở cài đặt',
+  'Oppo, realme and OnePlus stop an app swiped away from recents. Turn on Auto launch for Hank62 (in the app’s Battery usage on newer phones), and lock it in recents.': 'Oppo, realme và OnePlus tắt hẳn app khi bị vuốt khỏi đa nhiệm. Bật "Tự khởi chạy" cho Hank62 (máy mới nằm trong mục Sử dụng pin của app) và khoá app trong đa nhiệm.',
+  'Xiaomi stops an app swiped away from recents. Turn on Autostart for Hank62, set its battery saver to No restrictions, and lock it in recents.': 'Xiaomi tắt hẳn app khi bị vuốt khỏi đa nhiệm. Bật "Tự khởi động" cho Hank62, chỉnh tiết kiệm pin sang "Không giới hạn" và khoá app trong đa nhiệm.',
+  'vivo stops an app swiped away from recents. Allow Hank62 to start in the background, and lock it in recents.': 'vivo tắt hẳn app khi bị vuốt khỏi đa nhiệm. Cho phép Hank62 khởi động nền và khoá app trong đa nhiệm.',
+  'Huawei and Honor stop an app swiped away from recents. In App launch, set Hank62 to Manage manually with every switch on.': 'Huawei và Honor tắt hẳn app khi bị vuốt khỏi đa nhiệm. Trong "Khởi chạy ứng dụng", chỉnh Hank62 sang "Quản lý thủ công" và bật hết các công tắc.',
+  'Samsung may put Hank62 to sleep. In the app’s Battery, choose Unrestricted, and make sure it is not under Sleeping apps.': 'Samsung có thể cho Hank62 "ngủ". Trong mục Pin của app, chọn "Không hạn chế", và xem app không nằm trong "Ứng dụng ngủ".',
 };
